@@ -208,4 +208,8 @@ function initLangSwitcher() {
 }
 
 // Run after DOM is ready
-document.addEventListener('DOMContentLoaded', initLangSwitcher);
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initLangSwitcher);
+} else {
+  initLangSwitcher();
+}
