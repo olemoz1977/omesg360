@@ -75,47 +75,8 @@ section h2 { font-size: 22px; margin: 8px 0 16px; }
 @media (max-width: 920px) { .hero { grid-template-columns: 1fr; } .cards { grid-template-columns: 1fr 1fr; } .footer-grid { grid-template-columns: 1fr 1fr; } }
 @media (max-width: 600px) { .nav-toggle { display: inline-block; } .site-nav { display: none; position: absolute; top: 60px; right: 16px; background: #0f141d; border: 1px solid #202636; border-radius: 12px; padding: 8px; flex-direction: column; } .site-nav.open { display: flex; } .cards { grid-template-columns: 1fr; } .footer-grid { grid-template-columns: 1fr; } }
 
-/* ── Language Switcher ───────────────────────────────────── */
-.lang-switcher {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  margin-left: 12px;
-  flex-shrink: 0;
-}
-.lang-btn {
-  background: transparent;
-  border: 1px solid #2e3a50;
-  color: var(--muted);
-  border-radius: 6px;
-  padding: 3px 9px;
-  font-size: 0.78rem;
-  font-weight: 600;
-  cursor: pointer;
-  letter-spacing: 0.04em;
-  transition: border-color 0.15s, color 0.15s;
-}
-.lang-btn:hover { border-color: var(--secondary); color: var(--secondary); }
-.lang-btn.active { border-color: var(--secondary); color: var(--secondary); background: rgba(92,132,255,0.08); }
 /* Language Switcher */
-.lang-switcher {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  margin-left: 12px;
-  flex-shrink: 0;
-}
-.lang-btn {
-  background: transparent;
-  border: 1px solid #2e3a50;
-  color: var(--muted);
-  border-radius: 6px;
-  padding: 3px 9px;
-  font-size: 0.78rem;
-  font-weight: 600;
-  cursor: pointer;
-  letter-spacing: 0.04em;
-  transition: border-color 0.15s, color 0.15s;
-}
+.lang-switcher { display: flex; align-items: center; gap: 4px; margin-left: 12px; flex-shrink: 0; }
+.lang-btn { background: transparent; border: 1px solid #2e3a50; color: var(--muted); border-radius: 6px; padding: 3px 9px; font-size: 0.78rem; font-weight: 600; cursor: pointer; letter-spacing: 0.04em; transition: border-color 0.15s, color 0.15s; }
 .lang-btn:hover { border-color: var(--secondary); color: var(--secondary); }
 .lang-btn.active { border-color: var(--secondary); color: var(--secondary); background: rgba(92,132,255,0.08); }
