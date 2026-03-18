@@ -128,7 +128,7 @@ const translations = {
   "reviews.p":         { lt: "Autentiškos mūsų klientų ir partnerių patirtys.", en: "Authentic experiences from our clients and partners." },
   "reviews.h2":        { lt: "Ką sako klientai", en: "What Clients Say" },
   "reviews.c1.h3":     { lt: "Neužilgo", en: "Coming soon" },
-  "reviews.c1.p":      { lt: "„...."", en: "\"...\"" },
+  "reviews.c1.p":      { lt: ".....", en: "....." },
   "reviews.cta.h2":    { lt: "Norite sužinoti daugiau?", en: "Want to Find Out More?" },
   "reviews.cta.p":     { lt: "Susisiekite ir trumpai aptarsime jūsų situaciją. Pateiksiu aiškų veiksmų planą su KPI ir greitais laimėjimais.", en: "Get in touch and we'll briefly discuss your situation. I'll provide a clear action plan with KPIs and quick wins." },
   "reviews.cta.btn":   { lt: "Rezervuoti pokalbį", en: "Book a Call" },
@@ -207,7 +207,7 @@ function initLangSwitcher() {
   });
 }
 
-// Run after DOM is ready
+// Run after DOM is ready — works whether script loads before or after DOM
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', initLangSwitcher);
 } else {
