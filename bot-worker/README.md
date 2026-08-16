@@ -33,7 +33,7 @@ From `bot-worker/`:
 
 ```bash
 npm install
-npx wrangler check
+npx wrangler deploy --dry-run
 npx wrangler deploy
 ```
 
