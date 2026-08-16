@@ -13,19 +13,15 @@ export class ReminderHub extends CoreReminderHub {
 
 const UI = {
   lt: {
-    intro: "OMESG360Bot padeda užfiksuoti pažadą ir terminą. Primenu vieną kartą, be spaudimo.\n\nPasirink veiksmą apačioje.",
-    newPrompt: "Ką nori užfiksuoti?\n\nParašyk vienoje žinutėje:\nrytoj 18:00 | Paruošti pasiūlymą\n\nKomandos /new rašyti nereikia.",
+    intro: "OMESG360Bot yra papildomas tavo plano sluoksnis. Planas lieka kalendoriuje, o čia gausi vieną neįkyrų priminimą ir galėsi trumpai užfiksuoti progresą.\n\nPlanas į botą bus perduodamas tuo pačiu srautu, kuriuo jį eksportuoji į kalendorių.",
     menu: "Pasirink veiksmą:",
-    newButton: "➕ Naujas pažadas",
-    listButton: "📋 Mano pažadai",
+    listButton: "📋 Aktyvūs priminimai",
     languageButton: "🌐 English"
   },
   en: {
-    intro: "OMESG360Bot keeps track of a commitment and its deadline. I remind you once, without nagging.\n\nChoose an action below.",
-    newPrompt: "What do you want to keep track of?\n\nSend one message like:\ntomorrow 18:00 | Prepare the proposal\n\nYou do not need to type /new.",
+    intro: "OMESG360Bot is an additional layer on top of your plan. The plan stays in your calendar; here you get one gentle reminder and can quickly record progress.\n\nThe plan will reach the bot through the same flow used to export it to your calendar.",
     menu: "Choose an action:",
-    newButton: "➕ New commitment",
-    listButton: "📋 My commitments",
+    listButton: "📋 Active reminders",
     languageButton: "🌐 Lietuvių"
   }
 };
@@ -50,7 +46,7 @@ function keyboard(lang) {
   const ui = UI[lang];
   return {
     keyboard: [
-      [{ text: ui.newButton }, { text: ui.listButton }],
+      [{ text: ui.listButton }],
       [{ text: ui.languageButton }]
     ],
     resize_keyboard: true,
@@ -131,17 +127,7 @@ export default {
       return new Response("ok", { status: 200 });
     }
 
-    if (originalText === UI.lt.newButton || originalText === UI.en.newButton) {
-      const lang = originalText === UI.lt.newButton ? "lt" : "en";
-      await sendUi(env, chatId, UI[lang].newPrompt, lang);
-      return new Response("ok", { status: 200 });
-    }
-
-    let transformedText = commandForButton(originalText) || originalText;
-
-    if (!transformedText.startsWith("/") && transformedText.includes("|")) {
-      transformedText = `/new ${transformedText}`;
-    }
+    const transformedText = commandForButton(originalText) || originalText;
 
     let forwardedRequest = request;
     if (transformedText !== originalText) {
