@@ -1,4 +1,4 @@
-import worker, { ReminderHub } from "./index.js";
+import worker, { ReminderHub } from "./ux.js";
 
 export { ReminderHub };
 
