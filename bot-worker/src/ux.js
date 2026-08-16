@@ -1,6 +1,15 @@
-import core, { ReminderHub } from "./index.js";
+import core, { ReminderHub as CoreReminderHub } from "./index.js";
 
-export { ReminderHub };
+export class ReminderHub extends CoreReminderHub {
+  async fetch(request) {
+    const url = new URL(request.url);
+    if (request.method === "GET" && url.pathname === "/ui-language") {
+      const state = await this.ctx.storage.get("state");
+      return Response.json({ lang: state?.lang === "lt" ? "lt" : "en" });
+    }
+    return super.fetch(request);
+  }
+}
 
 const UI = {
   lt: {
@@ -23,6 +32,18 @@ const UI = {
 
 function languageFromUpdate(update) {
   return String(update?.message?.from?.language_code || "").toLowerCase().startsWith("lt") ? "lt" : "en";
+}
+
+async function savedLanguage(env, chatId, fallback) {
+  try {
+    const stub = env.REMINDERS.getByName(String(chatId));
+    const response = await stub.fetch(new Request("https://reminder.internal/ui-language"));
+    if (!response.ok) return fallback;
+    const data = await response.json();
+    return data?.lang === "lt" ? "lt" : "en";
+  } catch {
+    return fallback;
+  }
 }
 
 function keyboard(lang) {
@@ -103,9 +124,10 @@ export default {
     }
 
     const detectedLang = languageFromUpdate(update);
+    const currentLang = await savedLanguage(env, chatId, detectedLang);
 
     if (originalText.toLowerCase().split("@")[0] === "/start") {
-      await sendUi(env, chatId, UI[detectedLang].intro, detectedLang);
+      await sendUi(env, chatId, UI[currentLang].intro, currentLang);
       return new Response("ok", { status: 200 });
     }
 
@@ -136,7 +158,7 @@ export default {
 
     const normalized = transformedText.toLowerCase();
     if (normalized === "/lang lt" || normalized === "/lang en") {
-      const lang = languageAfterCommand(transformedText, detectedLang);
+      const lang = languageAfterCommand(transformedText, currentLang);
       await sendUi(env, chatId, UI[lang].menu, lang);
     }
 
