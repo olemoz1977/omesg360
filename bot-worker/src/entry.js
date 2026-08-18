@@ -1,4 +1,4 @@
-import worker, { ReminderHub } from "./ux.js";
+import worker, { ReminderHub } from "./plan-sync.js";
 
 export { ReminderHub };
 
@@ -8,7 +8,7 @@ export default {
       return await worker.fetch(request, env, ctx);
     } catch (error) {
       const url = new URL(request.url);
-      if (url.pathname.startsWith("/admin/")) {
+      if (url.pathname.startsWith("/admin/") || url.pathname.startsWith("/plan/")) {
         return Response.json(
           {
             ok: false,
