@@ -13,13 +13,13 @@ export class ReminderHub extends CoreReminderHub {
 
 const UI = {
   lt: {
-    intro: "OMESG360Bot yra papildomas tavo plano sluoksnis. Planas lieka kalendoriuje, o čia gausi vieną neįkyrų priminimą ir galėsi trumpai užfiksuoti progresą.\n\nPlanas į botą bus perduodamas tuo pačiu srautu, kuriuo jį eksportuoji į kalendorių.",
+    intro: "OMESG360Bot yra papildomas tavo plano sluoksnis. Kalendoriuje gali likti visas 90 dienų planas, o čia gali sekti tik 1–3 svarbiausius pažadus ir trumpai fiksuoti progresą.\n\nLeadership 360° plane pažymėk norimus veiksmus ir spausk „Perduoti į Telegram“.",
     menu: "Pasirink veiksmą:",
     listButton: "📋 Aktyvūs priminimai",
     languageButton: "🌐 English"
   },
   en: {
-    intro: "OMESG360Bot is an additional layer on top of your plan. The plan stays in your calendar; here you get one gentle reminder and can quickly record progress.\n\nThe plan will reach the bot through the same flow used to export it to your calendar.",
+    intro: "OMESG360Bot is an additional layer on top of your plan. Your full 90-day plan can stay in the calendar, while here you can track only 1–3 key commitments and quickly record progress.\n\nIn the Leadership 360° plan, select the actions you want and tap “Send to Telegram”.",
     menu: "Choose an action:",
     listButton: "📋 Active reminders",
     languageButton: "🌐 Lietuvių"
