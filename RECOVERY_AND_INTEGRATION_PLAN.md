@@ -19,6 +19,19 @@ The current GitHub repository therefore must not be treated as a verified mirror
 5. Do not modify the active Wave1 or Calibration satellites during the OMESG360 homepage / Leadership 360 integration work.
 6. Do not copy secrets, server credentials, `.env` values or private configuration into public Git history.
 
+## Current coordination checkpoint — 2026-08-22 22:19 Europe/Vilnius
+
+- The site owner is cleaning the recovered Hostinger `public_html` manually.
+- GitHub recovery/cleanup is handled separately in `recovery/v02-clean-baseline`.
+- Do not use GitHub writes as a shortcut to modify Hostinger during recovery.
+- `main` and `agent/leadership-360-home` remain untouched by cleanup work.
+- The current Hostinger image asset set intentionally kept is:
+  - `assets/img/favicon.svg`
+  - `assets/img/logo.svg`
+  - `assets/img/og-cover.png`
+  - `assets/img/og-cover.svg`
+- There is no intended `public/assets` layer; the working site structure uses root `assets/`.
+
 ## Production baseline supplied from Hostinger
 
 The recovered Hostinger `public_html` snapshot is the working visual / production baseline for V02.
@@ -31,6 +44,8 @@ Known active V02 surface:
 - Calibration satellite
 
 The recovered repository also contains older root HTML files and an earlier Leadership 360 page that appear to belong to a previous / alternate site architecture. These must be reviewed and archived or removed from the clean branch rather than assumed active.
+
+The older `assets/css/styles.css`, `assets/js/main.js`, and `assets/js/translations.js` belong to the previous/mixed multi-page architecture unless dependency review proves they are needed by the clean V02/native product build.
 
 ## Satellites that must remain intact
 
@@ -56,12 +71,15 @@ The frozen product repository is the source of truth for:
 
 The OMESG360 integration must not reopen or redesign this frozen product logic unless a real integration defect requires it.
 
+Detailed future Leadership 360 product work is tracked in `olemoz1977/gla360-personal-full/FUTURE_ROADMAP.md` and should not be silently implemented during the OMESG360 integration.
+
 ## Product positioning
 
 - `2rasi.com` remains the discovery / hook layer.
 - `omesg360.eu` becomes the professional home of Leadership 360.
 - The intended public path is `https://omesg360.eu/leadership-360/`.
 - The technical GitHub Pages URL should eventually stop being the primary public entry point.
+- After the native OMESG360 page is live and tested, the 2rasi Leadership 360 primary Start link should be changed to the OMESG360 native path.
 
 ## V02 homepage integration direction
 
@@ -77,15 +95,18 @@ Preferred placement on the homepage:
 
 The homepage should contain one focused Leadership 360 product card / entry point using the existing OMESG360 visual language. The full product explanation and entry flow belongs on `/leadership-360/`.
 
+Preferred framing while only one full professional product exists: `LEADERSHIP DEVELOPMENT`, not a generic multi-product catalogue section.
+
 ## Recovery sequence
 
 1. Inventory the recovered Hostinger snapshot and classify all root files as KEEP / ARCHIVE / REVIEW.
 2. Rebuild `recovery/v02-clean-baseline` so it represents the recovered V02 structure rather than the mixed Git state.
 3. Preserve Wave1 and Calibration without modification.
-4. Add a native Leadership 360 homepage entry card to the clean V02 homepage.
-5. Build a new `/leadership-360/` product page using OMESG360 visual language while preserving the frozen Leadership 360 contracts and backend.
-6. Smoke-test navigation, LT/EN behavior, privacy links, product entry, Wave1 and Calibration.
-7. Only after verification decide how the clean branch is promoted to `main` and how Hostinger deployment will be re-enabled safely.
+4. Preserve the four agreed `assets/img` files.
+5. Add a native Leadership 360 homepage entry card to the clean V02 homepage.
+6. Build a new `/leadership-360/` product page using OMESG360 visual language while preserving the frozen Leadership 360 contracts and backend.
+7. Smoke-test navigation, LT/EN behavior, privacy links, product entry, Wave1 and Calibration.
+8. Only after verification decide how the clean branch is promoted to `main` and how Hostinger deployment will be re-enabled safely.
 
 ## Deferred until after clean integration
 
@@ -94,6 +115,11 @@ The homepage should contain one focused Leadership 360 product card / entry poin
 - changing the frozen Leadership 360 backend architecture
 - changing Wave1 or Calibration
 - broader OMESG360 site expansion
+- 2Pair feature expansion before validation data
+
+## Durable project handover
+
+See `PROJECT_ROADMAP.md` in this branch for the cross-project continuation state, deferred ideas, deployment gate and next-session starting point.
 
 ## Continuity rule
 
