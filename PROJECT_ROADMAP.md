@@ -1,7 +1,7 @@
 # OMESG360 / 2rasi project roadmap and handover
 
 Status: ACTIVE CONTINUITY DOCUMENT
-Last updated: 2026-08-22 23:26 Europe/Vilnius
+Last updated: 2026-08-22 23:29 Europe/Vilnius
 Working branch: `recovery/v02-clean-baseline`
 
 This file exists so project-critical plans do not live only in chat history. Accepted but not-yet-implemented ideas and decisions must be written here before a work session ends.
@@ -214,9 +214,9 @@ The site owner manually tested both public satellites through the 2rasi.com entr
 - Wave1 public entry/core flow: **PASS** — opens successfully.
 - Calibration public entry/core flow: **PASS** — opens successfully.
 - Wave1 admin surface: **PASS** — screenshot at 23:26 Europe/Vilnius confirms the live `ConflictLab — Human Wave 1` read-only admin and explicitly identifies `wave1-v0.4`.
-- Calibration admin surface: **NOT YET CHECKED**.
+- Calibration admin surface: **PASS** — screenshot at 23:29 Europe/Vilnius confirms the live `ConflictLab · calibration-v0.1` admin, `6000 ms timing gate`, `SERVER MODE: CALIBRATION`, and rendered admin statistics. The displayed `0 / 20 calibration eligible clean primary` is an empty calibration data state, not an admin failure.
 
-This confirms that the current Hostinger public satellite deployments are live and reachable and that the Wave1 v0.4 admin surface is also live. The remaining satellite blocker is therefore **not Wave1 live availability**; it is exact GitHub mirroring/provenance required for a safe future GitHub -> Hostinger operating model. Do not weaken the GitHub mirror validation gate based only on the live PASS.
+This confirms that the current Hostinger deployments for both research satellites are live on their public and admin surfaces. The remaining satellite blockers are therefore **not live availability**; they are exact GitHub mirroring/provenance required for a safe future GitHub -> Hostinger operating model. Do not weaken the GitHub mirror validation gate based only on the live PASS.
 
 ## Smoke gate before production promotion
 
@@ -230,7 +230,7 @@ Before recovery branch can become production source, verify at minimum:
 - Wave1 LT/EN URL and core flow — user-verified public PASS on 2026-08-22,
 - Wave1 admin surface — user-verified PASS on 2026-08-22; screenshot confirms `wave1-v0.4`,
 - Calibration URL and core flow — user-verified public PASS on 2026-08-22,
-- Calibration admin surface — still pending,
+- Calibration admin surface — user-verified PASS on 2026-08-22; screenshot confirms `calibration-v0.1` in CALIBRATION server mode,
 - SEO/robots/sitemap routes,
 - no broken references to old root HTML pages,
 - no secrets exposed in public Git history.
@@ -261,16 +261,15 @@ Do **not** restart V02 reconstruction or Leadership 360 integration. Those GitHu
 Continue in this order:
 1. Read this file and `RECOVERY_AND_INTEGRATION_PLAN.md`.
 2. Work only on `recovery/v02-clean-baseline`.
-3. Treat Wave1 public + admin and Calibration public live availability as already user-verified PASS; do not spend time re-proving those surfaces unless something changes.
+3. Treat Wave1 public + admin and Calibration public + admin live availability as already user-verified PASS; do not spend time re-proving those surfaces unless something changes.
 4. Recover/transfer the exact frozen `wave1/` mirror, including all 12 binary stimulus assets; verify known v0.4 hashes/sizes where available.
-5. Check Calibration admin separately when practical; this is a live maintenance/admin smoke item, not a substitute for GitHub mirror verification.
-6. Recover the authoritative complete `conflictlab/releases/calibration-v0.1/` runtime inventory and mirror it without redesign.
-7. Run `scripts/validate-v02.sh`; do not proceed while it is red.
-8. Once validation is green, configure the GitHub `production` Environment variables/secrets without committing credentials.
-9. Run `Deploy OMESG360 to Hostinger` with `dry_run=true` only and inspect the itemized rsync plan. It must list only the managed V02/Leadership paths and must leave Wave1, Calibration, runtime config and DB paths untouched.
-10. After dry-run review, perform the first controlled production deploy with backup + post-deploy smoke + human visual/mobile check.
-11. Only after a clean production PASS consider making GitHub-driven deployment the normal operating model.
-12. Then update the 2rasi Leadership 360 primary entry to the native OMESG360 URL.
+5. Recover the authoritative complete `conflictlab/releases/calibration-v0.1/` runtime inventory and mirror it without redesign.
+6. Run `scripts/validate-v02.sh`; do not proceed while it is red.
+7. Once validation is green, configure the GitHub `production` Environment variables/secrets without committing credentials.
+8. Run `Deploy OMESG360 to Hostinger` with `dry_run=true` only and inspect the itemized rsync plan. It must list only the managed V02/Leadership paths and must leave Wave1, Calibration, runtime config and DB paths untouched.
+9. After dry-run review, perform the first controlled production deploy with backup + post-deploy smoke + human visual/mobile check.
+10. Only after a clean production PASS consider making GitHub-driven deployment the normal operating model.
+11. Then update the 2rasi Leadership 360 primary entry to the native OMESG360 URL.
 
 ## Continuity rule
 
