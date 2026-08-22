@@ -1,10 +1,13 @@
-name: Deploy OMESG360 to Hostinger
+name: Deploy OMESG360 frontend to Hostinger
 
 on:
+  pull_request:
+    branches:
+      - main
   workflow_dispatch:
     inputs:
       dry_run:
-        description: Preview rsync changes without modifying Hostinger
+        description: Preview frontend changes without modifying Hostinger
         required: true
         default: true
         type: boolean
@@ -13,74 +16,37 @@ permissions:
   contents: read
 
 concurrency:
-  group: omesg360-production
+  group: omesg360-frontend-production
   cancel-in-progress: false
 
-jobs:
-  validate:
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Recovery gate
-        run: bash scripts/validate-v02.sh
+env:
+  FTP_HOST: ${{ secrets.HOSTINGER_FTP_HOST }}
+  FTP_USER: ${{ secrets.HOSTINGER_FTP_USER }}
+  FTP_PASSWORD: ${{ secrets.HOSTINGER_FTP_PASSWORD }}
 
-  deploy:
-    needs: validate
+jobs:
+  validate-and-preview:
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    environment:
-      name: production
-      url: https://omesg360.eu/
-    env:
-      REMOTE_HOST: ${{ vars.HOSTINGER_HOST }}
-      REMOTE_USER: ${{ vars.HOSTINGER_USER }}
-      REMOTE_PORT: ${{ vars.HOSTINGER_PORT }}
-      REMOTE_ROOT: ${{ vars.HOSTINGER_PUBLIC_PATH }}
-      BACKUP_ROOT: ${{ vars.HOSTINGER_BACKUP_PATH }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Verify deployment configuration
+      - name: Validate frontend release
+        run: bash scripts/validate-v02.sh
+
+      - name: Verify FTP secrets
         shell: bash
         run: |
           set -euo pipefail
-          for name in REMOTE_HOST REMOTE_USER REMOTE_PORT REMOTE_ROOT BACKUP_ROOT; do
-            [[ -n "${!name:-}" ]] || { echo "Missing production environment variable: $name" >&2; exit 1; }
-          done
-          [[ "$REMOTE_PORT" =~ ^[0-9]+$ ]] || { echo "HOSTINGER_PORT must be numeric" >&2; exit 1; }
-          [[ "$REMOTE_ROOT" = /* ]] || { echo "HOSTINGER_PUBLIC_PATH must be an absolute path" >&2; exit 1; }
-          [[ "$BACKUP_ROOT" = /* ]] || { echo "HOSTINGER_BACKUP_PATH must be an absolute path" >&2; exit 1; }
-          [[ "$BACKUP_ROOT" != "$REMOTE_ROOT"* ]] || { echo "Backup path must be outside public_html" >&2; exit 1; }
-          [[ -n "${{ secrets.HOSTINGER_SSH_PRIVATE_KEY }}" ]] || { echo "Missing HOSTINGER_SSH_PRIVATE_KEY" >&2; exit 1; }
-          [[ -n "${{ secrets.HOSTINGER_KNOWN_HOSTS }}" ]] || { echo "Missing HOSTINGER_KNOWN_HOSTS" >&2; exit 1; }
+          [[ -n "${FTP_HOST:-}" ]] || { echo 'Missing HOSTINGER_FTP_HOST repository secret' >&2; exit 1; }
+          [[ -n "${FTP_USER:-}" ]] || { echo 'Missing HOSTINGER_FTP_USER repository secret' >&2; exit 1; }
+          [[ -n "${FTP_PASSWORD:-}" ]] || { echo 'Missing HOSTINGER_FTP_PASSWORD repository secret' >&2; exit 1; }
 
-      - name: Configure pinned SSH access
-        shell: bash
-        run: |
-          set -euo pipefail
-          install -d -m 700 ~/.ssh
-          printf '%s\n' "${{ secrets.HOSTINGER_SSH_PRIVATE_KEY }}" > ~/.ssh/id_hostinger
-          chmod 600 ~/.ssh/id_hostinger
-          printf '%s\n' "${{ secrets.HOSTINGER_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
-          chmod 600 ~/.ssh/known_hosts
-          cat > ~/.ssh/config <<EOF
-          Host omesg360-hostinger
-            HostName ${REMOTE_HOST}
-            User ${REMOTE_USER}
-            Port ${REMOTE_PORT}
-            IdentityFile ~/.ssh/id_hostinger
-            IdentitiesOnly yes
-            StrictHostKeyChecking yes
-            UserKnownHostsFile ~/.ssh/known_hosts
-            BatchMode yes
-          EOF
-          chmod 600 ~/.ssh/config
-          ssh omesg360-hostinger 'printf "SSH_OK\\n"'
+      - name: Install FTPS client
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq lftp
 
-      - name: Build managed V02 package
+      - name: Build frontend-only package
         shell: bash
         run: |
           set -euo pipefail
@@ -91,86 +57,112 @@ jobs:
           cp leadership-360/index.html .deploy-package/leadership-360/index.html
           [[ -f BingSiteAuth.xml ]] && cp BingSiteAuth.xml .deploy-package/
           [[ -f 9dc780a3ecce49a5897128d85c5d362f.txt ]] && cp 9dc780a3ecce49a5897128d85c5d362f.txt .deploy-package/
-          echo "Managed package:"
+          echo 'Frontend-only package:'
           find .deploy-package -type f -print | sort
 
-      - name: Preview managed changes
+      - name: Detect safe Hostinger web root
         shell: bash
         run: |
           set -euo pipefail
-          echo '--- root files ---'
-          rsync -avzn --itemize-changes -e ssh \
-            .deploy-package/index.html \
-            .deploy-package/privacy.html \
-            .deploy-package/robots.txt \
-            .deploy-package/sitemap.xml \
-            .deploy-package/sitemap_location.xml \
-            "omesg360-hostinger:${REMOTE_ROOT}/"
-          if [[ -f .deploy-package/BingSiteAuth.xml ]]; then
-            rsync -avzn --itemize-changes -e ssh .deploy-package/BingSiteAuth.xml "omesg360-hostinger:${REMOTE_ROOT}/"
-          fi
-          if [[ -f .deploy-package/9dc780a3ecce49a5897128d85c5d362f.txt ]]; then
-            rsync -avzn --itemize-changes -e ssh .deploy-package/9dc780a3ecce49a5897128d85c5d362f.txt "omesg360-hostinger:${REMOTE_ROOT}/"
-          fi
-          echo '--- assets/img (managed directory only) ---'
-          rsync -avzn --delete --itemize-changes -e ssh .deploy-package/assets/img/ "omesg360-hostinger:${REMOTE_ROOT}/assets/img/"
-          echo '--- leadership-360 (managed directory only) ---'
-          rsync -avzn --delete --itemize-changes -e ssh .deploy-package/leadership-360/ "omesg360-hostinger:${REMOTE_ROOT}/leadership-360/"
-          echo 'UNTOUCHED: wave1/, conflictlab/releases/calibration-v0.1/, runtime config.php files, databases and all other server paths.'
-
-      - name: Stop after dry run
-        if: ${{ inputs.dry_run }}
-        run: echo 'Dry run complete. No Hostinger files were modified.'
-
-      - name: Create rollback snapshot
-        if: ${{ !inputs.dry_run }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          stamp="$(date -u +%Y%m%dT%H%M%SZ)-${GITHUB_SHA::12}"
-          echo "BACKUP_ID=$stamp" >> "$GITHUB_ENV"
-          ssh omesg360-hostinger bash -s -- "$REMOTE_ROOT" "$BACKUP_ROOT" "$stamp" <<'REMOTE'
-          set -euo pipefail
-          root="$1"; backup_root="$2"; stamp="$3"
-          [[ -d "$root" ]] || { echo "Remote root does not exist: $root" >&2; exit 1; }
-          mkdir -p "$backup_root/$stamp"
-          cd "$root"
-          managed=(index.html privacy.html robots.txt sitemap.xml sitemap_location.xml BingSiteAuth.xml 9dc780a3ecce49a5897128d85c5d362f.txt assets/img leadership-360)
-          existing=()
-          for p in "${managed[@]}"; do [[ -e "$p" ]] && existing+=("$p"); done
-          printf '%s\n' "${existing[@]}" > "$backup_root/$stamp/manifest.txt"
-          if ((${#existing[@]})); then
-            tar -czf "$backup_root/$stamp/managed-before.tgz" -- "${existing[@]}"
+          common='set ssl:verify-certificate yes; set ftp:ssl-force true; set ftp:ssl-protect-data true; set net:max-retries 2; set net:timeout 20;'
+          if lftp -c "$common open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; cls -1 /public_html/index.html" >/dev/null 2>&1; then
+            base='/public_html'
+          elif lftp -c "$common open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; cls -1 /index.html" >/dev/null 2>&1; then
+            base=''
           else
-            tar -czf "$backup_root/$stamp/managed-before.tgz" --files-from /dev/null
+            echo 'FTP account does not expose the expected OMESG360 web root.' >&2
+            exit 1
           fi
-          printf '%s\n' "$stamp" > "$backup_root/LAST_BACKUP"
-          REMOTE
-          echo "Rollback snapshot: $stamp"
 
-      - name: Deploy managed V02 files
-        if: ${{ !inputs.dry_run }}
+          # Fail closed unless both live research satellites are visible in the same web root.
+          lftp -c "$common open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; cls -ld \"${base}/wave1\"; cls -ld \"${base}/conflictlab/releases/calibration-v0.1\"" >/dev/null
+          echo "REMOTE_BASE=$base" >> "$GITHUB_ENV"
+          echo 'Hostinger web root verified. Wave1 and Calibration detected and protected.'
+
+      - name: Preview frontend changes
         shell: bash
         run: |
           set -euo pipefail
-          rsync -avz -e ssh \
-            .deploy-package/index.html \
-            .deploy-package/privacy.html \
-            .deploy-package/robots.txt \
-            .deploy-package/sitemap.xml \
-            .deploy-package/sitemap_location.xml \
-            "omesg360-hostinger:${REMOTE_ROOT}/"
-          if [[ -f .deploy-package/BingSiteAuth.xml ]]; then
-            rsync -avz -e ssh .deploy-package/BingSiteAuth.xml "omesg360-hostinger:${REMOTE_ROOT}/"
+          common='set ssl:verify-certificate yes; set ftp:ssl-force true; set ftp:ssl-protect-data true; set net:max-retries 2; set net:timeout 20;'
+          lftp -c "$common open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; mirror --reverse --dry-run --verbose --no-perms --parallel=2 .deploy-package \"${REMOTE_BASE}/\""
+          echo 'DRY-RUN ONLY: no remote file was modified.'
+          echo 'PROTECTED: wave1/, conflictlab/releases/calibration-v0.1/, PHP runtime/config files, databases and every file outside the frontend package.'
+
+  deploy:
+    needs: validate-and-preview
+    if: ${{ github.event_name == 'workflow_dispatch' && !inputs.dry_run }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install FTPS client
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq lftp
+
+      - name: Build frontend-only package
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf .deploy-package
+          mkdir -p .deploy-package/assets/img .deploy-package/leadership-360
+          cp index.html privacy.html robots.txt sitemap.xml sitemap_location.xml .deploy-package/
+          cp assets/img/favicon.svg assets/img/logo.svg assets/img/og-cover.png assets/img/og-cover.svg .deploy-package/assets/img/
+          cp leadership-360/index.html .deploy-package/leadership-360/index.html
+          [[ -f BingSiteAuth.xml ]] && cp BingSiteAuth.xml .deploy-package/
+          [[ -f 9dc780a3ecce49a5897128d85c5d362f.txt ]] && cp 9dc780a3ecce49a5897128d85c5d362f.txt .deploy-package/
+
+      - name: Detect safe Hostinger web root again
+        shell: bash
+        run: |
+          set -euo pipefail
+          common='set ssl:verify-certificate yes; set ftp:ssl-force true; set ftp:ssl-protect-data true; set net:max-retries 2; set net:timeout 20;'
+          if lftp -c "$common open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; cls -1 /public_html/index.html" >/dev/null 2>&1; then
+            base='/public_html'
+          elif lftp -c "$common open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; cls -1 /index.html" >/dev/null 2>&1; then
+            base=''
+          else
+            echo 'FTP account does not expose the expected OMESG360 web root.' >&2
+            exit 1
           fi
-          if [[ -f .deploy-package/9dc780a3ecce49a5897128d85c5d362f.txt ]]; then
-            rsync -avz -e ssh .deploy-package/9dc780a3ecce49a5897128d85c5d362f.txt "omesg360-hostinger:${REMOTE_ROOT}/"
+          lftp -c "$common open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; cls -ld \"${base}/wave1\"; cls -ld \"${base}/conflictlab/releases/calibration-v0.1\"" >/dev/null
+          echo "REMOTE_BASE=$base" >> "$GITHUB_ENV"
+
+      - name: Backup managed frontend files to runner
+        shell: bash
+        run: |
+          set -euo pipefail
+          common='set ssl:verify-certificate yes; set ftp:ssl-force true; set ftp:ssl-protect-data true; set net:max-retries 2; set net:timeout 20;'
+          rm -rf .rollback
+          mkdir -p .rollback/root .rollback/assets/img .rollback/leadership-360
+
+          for f in index.html privacy.html robots.txt sitemap.xml sitemap_location.xml BingSiteAuth.xml 9dc780a3ecce49a5897128d85c5d362f.txt; do
+            if lftp -c "$common open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; cls -1 \"${REMOTE_BASE}/$f\"" >/dev/null 2>&1; then
+              lftp -c "$common open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; get \"${REMOTE_BASE}/$f\" -o \".rollback/root/$f\""
+            fi
+          done
+
+          if lftp -c "$common open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; cls -ld \"${REMOTE_BASE}/assets/img\"" >/dev/null 2>&1; then
+            lftp -c "$common open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; mirror --verbose \"${REMOTE_BASE}/assets/img\" .rollback/assets/img"
           fi
-          rsync -avz --delete -e ssh .deploy-package/assets/img/ "omesg360-hostinger:${REMOTE_ROOT}/assets/img/"
-          rsync -avz --delete -e ssh .deploy-package/leadership-360/ "omesg360-hostinger:${REMOTE_ROOT}/leadership-360/"
+
+          if lftp -c "$common open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; cls -ld \"${REMOTE_BASE}/leadership-360\"" >/dev/null 2>&1; then
+            echo 'LEADERSHIP_EXISTED=1' >> "$GITHUB_ENV"
+            lftp -c "$common open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; mirror --verbose \"${REMOTE_BASE}/leadership-360\" .rollback/leadership-360"
+          else
+            echo 'LEADERSHIP_EXISTED=0' >> "$GITHUB_ENV"
+          fi
+          echo 'BACKUP_READY=1' >> "$GITHUB_ENV"
+
+      - name: Upload frontend package
+        shell: bash
+        run: |
+          set -euo pipefail
+          common='set ssl:verify-certificate yes; set ftp:ssl-force true; set ftp:ssl-protect-data true; set net:max-retries 2; set net:timeout 20;'
+          lftp -c "$common open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; mirror --reverse --verbose --no-perms --parallel=2 .deploy-package \"${REMOTE_BASE}/\""
+          echo 'Frontend upload completed. No remote delete operation was used.'
 
       - name: Post-deploy HTTP smoke
-        if: ${{ !inputs.dry_run }}
         shell: bash
         run: |
           set -euo pipefail
@@ -179,9 +171,8 @@ jobs:
             body="$(curl -fsS --retry 3 --retry-delay 2 "$url")"
             grep -Fq "$needle" <<<"$body" || { echo "Smoke content mismatch: $url" >&2; exit 1; }
           }
-          assert_ok() {
-            curl -fsS --retry 3 --retry-delay 2 -o /dev/null "$1"
-          }
+          assert_ok() { curl -fsS --retry 3 --retry-delay 2 -o /dev/null "$1"; }
+
           assert_contains 'https://omesg360.eu/?lang=lt' 'Stabilizuoti.'
           assert_contains 'https://omesg360.eu/?lang=en' 'Stabilize.'
           assert_contains 'https://omesg360.eu/privacy.html?lang=lt' 'Privatumo centras'
@@ -195,26 +186,25 @@ jobs:
           assert_contains 'https://omesg360.eu/sitemap.xml' 'https://omesg360.eu/leadership-360/'
           echo 'Production smoke PASS'
 
-      - name: Roll back managed files if deploy or smoke failed
-        if: ${{ !inputs.dry_run && failure() && env.BACKUP_ID != '' }}
+      - name: Restore previous frontend if upload or smoke fails
+        if: ${{ failure() && env.BACKUP_READY == '1' }}
         shell: bash
         run: |
           set -euo pipefail
-          echo "Deploy/smoke failure: restoring managed paths from ${BACKUP_ID}"
-          ssh omesg360-hostinger bash -s -- "$REMOTE_ROOT" "$BACKUP_ROOT" "$BACKUP_ID" <<'REMOTE'
-          set -euo pipefail
-          root="$1"; backup_root="$2"; stamp="$3"
-          archive="$backup_root/$stamp/managed-before.tgz"
-          [[ -f "$archive" ]] || { echo "Rollback archive missing" >&2; exit 1; }
-          cd "$root"
-          rm -f index.html privacy.html robots.txt sitemap.xml sitemap_location.xml BingSiteAuth.xml 9dc780a3ecce49a5897128d85c5d362f.txt
-          rm -rf assets/img leadership-360
-          tar -xzf "$archive" -C "$root"
-          echo "Rollback restored managed paths from $stamp"
-          REMOTE
+          common='set ssl:verify-certificate yes; set ftp:ssl-force true; set ftp:ssl-protect-data true; set net:max-retries 2; set net:timeout 20;'
 
-      - name: Record deploy result
-        if: ${{ !inputs.dry_run && success() }}
-        run: |
-          echo "Deployed commit ${GITHUB_SHA}"
-          echo "Rollback backup ${BACKUP_ID}"
+          for f in .rollback/root/*; do
+            [[ -f "$f" ]] || continue
+            lftp -c "$common open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; put -O \"${REMOTE_BASE}/\" \"$f\""
+          done
+
+          if find .rollback/assets/img -type f | grep -q .; then
+            lftp -c "$common open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; mirror --reverse --verbose --no-perms .rollback/assets/img \"${REMOTE_BASE}/assets/img\""
+          fi
+
+          if [[ "${LEADERSHIP_EXISTED:-0}" == '1' ]]; then
+            lftp -c "$common open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; mirror --reverse --verbose --no-perms .rollback/leadership-360 \"${REMOTE_BASE}/leadership-360\""
+          else
+            lftp -c "$common open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; rm -f \"${REMOTE_BASE}/leadership-360/index.html\"" || true
+          fi
+          echo 'Previous managed frontend restored. Protected satellites were never touched.'
