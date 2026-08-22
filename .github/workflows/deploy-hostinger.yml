@@ -84,8 +84,8 @@ jobs:
           }
 
           check_remote 'OMESG360 root index' 'cls -1' "${REMOTE_BASE}/index.html"
-          check_remote 'Wave1 protected directory' 'cls -ld' "${REMOTE_BASE}/wave1"
-          check_remote 'Calibration protected directory' 'cls -ld' "${REMOTE_BASE}/conflictlab/releases/calibration-v0.1"
+          check_remote 'Wave1 protected entry' 'cls -1' "${REMOTE_BASE}/wave1/index.html"
+          check_remote 'Calibration protected entry' 'cls -1' "${REMOTE_BASE}/conflictlab/releases/calibration-v0.1/index.html"
           echo 'OMESG360 public_html verified. Wave1 and Calibration detected and protected.'
 
       - name: Preview frontend changes
@@ -145,8 +145,8 @@ jobs:
           }
 
           check_remote 'OMESG360 root index' 'cls -1' "${REMOTE_BASE}/index.html"
-          check_remote 'Wave1 protected directory' 'cls -ld' "${REMOTE_BASE}/wave1"
-          check_remote 'Calibration protected directory' 'cls -ld' "${REMOTE_BASE}/conflictlab/releases/calibration-v0.1"
+          check_remote 'Wave1 protected entry' 'cls -1' "${REMOTE_BASE}/wave1/index.html"
+          check_remote 'Calibration protected entry' 'cls -1' "${REMOTE_BASE}/conflictlab/releases/calibration-v0.1/index.html"
 
       - name: Backup managed frontend files to runner
         shell: bash
