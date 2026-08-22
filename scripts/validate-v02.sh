@@ -77,11 +77,31 @@ if [[ ! -d conflictlab/releases/calibration-v0.1 ]]; then
   exit 21
 fi
 
-[[ -f wave1/index.html ]] || fail "wave1/index.html missing"
-[[ -f wave1/api.php ]] || fail "wave1/api.php missing"
-[[ -f wave1/admin.php ]] || fail "wave1/admin.php missing"
-grep -q 'wave1-v0.4' wave1/api.php || fail "Wave 1 API is not frozen v0.4"
-info "Wave 1 mirror present"
+# Wave 1 v0.4 code plus the unchanged frozen v0.3 stimulus set must all be present.
+wave1_required=(
+  wave1/index.html
+  wave1/api.php
+  wave1/admin.php
+  wave1/assets/more-reveal.webp
+  wave1/assets/less-reveal.jpg
+  wave1/assets/more-evidence.png
+  wave1/assets/less-evidence.png
+  wave1/assets/more-reference.png
+  wave1/assets/less-reference.png
+  wave1/assets/no-predefined-zones.png
+  wave1/assets/predefined-zones.png
+  wave1/assets/fixed-slots.png
+  wave1/assets/continuous-capacity.png
+  wave1/assets/partitioned-space.png
+  wave1/assets/open-space.png
+)
+for path in "${wave1_required[@]}"; do
+  [[ -f "$path" ]] || fail "Wave 1 frozen mirror incomplete: missing $path"
+done
+grep -q "PROTOCOL_VER = 'wave1-v0.4'" wave1/index.html || fail "Wave 1 UI is not frozen v0.4"
+grep -q "'wave1-v0.4'" wave1/api.php || fail "Wave 1 API is not frozen v0.4"
+grep -q "'wave1-v0.4'" wave1/admin.php || fail "Wave 1 admin is not v0.4-aware"
+info "Wave 1 v0.4 code and 12 frozen stimulus assets present"
 
 # Calibration filenames are intentionally validated minimally until the exact live package is reconciled.
 [[ -f conflictlab/releases/calibration-v0.1/admin.php ]] || fail "Calibration admin.php missing"
