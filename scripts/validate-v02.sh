@@ -23,14 +23,12 @@ for path in "${required[@]}"; do
 done
 info "required V02 files present"
 
-# The recovered V02 must stay a single-page professional shell, not return to the old multi-page site.
 legacy_pattern='services\.html|approach\.html|esg\.html|about\.html|contact\.html|blog\.html|atsiliepimai\.html|/omesg360/'
 if grep -EIRn --exclude-dir=.git --exclude='PROJECT_ROADMAP.md' --exclude='RECOVERY_AND_INTEGRATION_PLAN.md' --exclude='validate-v02.sh' "$legacy_pattern" index.html privacy.html leadership-360 sitemap.xml sitemap_location.xml; then
   fail "legacy OMESG360 URL/reference detected in active V02 surface"
 fi
 info "no legacy root-page references in active surface"
 
-# Leadership 360 belongs after methodology and before About, and must route into the frozen V2 flow.
 grep -q 'id="leadership"' index.html || fail "homepage Leadership 360 section missing"
 grep -q '/leadership-360/?lang=' index.html || fail "homepage Leadership 360 language-aware route missing"
 grep -q 'gla360-personal-full/setup-v2.html?lang=lt' leadership-360/index.html || fail "LT Leadership start CTA does not target frozen setup-v2"
@@ -45,7 +43,6 @@ if min(positions.values()) < 0 or not (positions['methods.quote'] < positions['i
 print('OK: Leadership section placement')
 PY
 
-# Only the four roadmap-approved shared image assets may live in assets/img.
 mapfile -t actual_assets < <(find assets/img -maxdepth 1 -type f -printf '%f\n' | sort)
 expected_assets=(favicon.svg logo.svg og-cover.png og-cover.svg)
 mapfile -t expected_sorted < <(printf '%s\n' "${expected_assets[@]}" | sort)
@@ -55,21 +52,17 @@ mapfile -t expected_sorted < <(printf '%s\n' "${expected_assets[@]}" | sort)
 }
 info "assets/img allowlist matches roadmap"
 
-# SEO surface must not advertise removed pages.
 grep -q '<loc>https://omesg360.eu/</loc>' sitemap.xml || fail "homepage missing from sitemap"
 grep -q '<loc>https://omesg360.eu/leadership-360/</loc>' sitemap.xml || fail "Leadership 360 missing from sitemap"
 grep -q '<loc>https://omesg360.eu/privacy.html</loc>' sitemap.xml || fail "privacy page missing from sitemap"
 info "SEO surface aligned"
 
-# Source-controlled secrets are forbidden. Runtime config.php files stay unmanaged on Hostinger.
 if find . -type f \( -name 'config.php' -o -name '.env' -o -name '*.pem' -o -name '*.key' \) -not -path './.git/*' | grep -q .; then
   find . -type f \( -name 'config.php' -o -name '.env' -o -name '*.pem' -o -name '*.key' \) -not -path './.git/*' >&2
   fail "secret/runtime configuration file present in repository"
 fi
 info "no forbidden runtime secret files"
 
-# Deployment boundary is the recovery safety contract.
-# This release uses FTP/FTPS only for a generated frontend allowlist package.
 python3 - <<'PY'
 from pathlib import Path
 w = Path('.github/workflows/deploy-hostinger.yml').read_text(encoding='utf-8')
@@ -77,7 +70,7 @@ required = [
     'workflow_dispatch:',
     'pull_request:',
     'dry_run:',
-    'HOSTINGER_FTP_HOST',
+    'FTP_HOST: 46.202.142.134',
     'HOSTINGER_FTP_USER',
     'HOSTINGER_FTP_PASSWORD',
     'Build frontend-only package',
@@ -94,17 +87,14 @@ for needle in required:
     if needle not in w:
         raise SystemExit(f'ERROR: deploy safety contract missing: {needle}')
 
-# Recovery deploy must not use broad SSH/rsync or any delete-mirroring behavior.
 for forbidden in ['rsync ', 'StrictHostKeyChecking', '--delete', 'rm -rf wave1', 'rm -rf conflictlab']:
     if forbidden in w:
         raise SystemExit(f'ERROR: forbidden deployment operation detected: {forbidden}')
 
-# Protected satellites must never enter the generated frontend package.
 for bad in ['.deploy-package/wave1', '.deploy-package/conflictlab', 'cp wave1', 'cp conflictlab']:
     if bad in w:
         raise SystemExit(f'ERROR: protected satellite path appears in frontend package: {bad}')
 
-# Actual writes are manual-only; PR execution is preview-only.
 if "github.event_name == 'workflow_dispatch' && !inputs.dry_run" not in w:
     raise SystemExit('ERROR: real deploy is not constrained to explicit manual non-dry-run dispatch')
 
