@@ -2,42 +2,17 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://omesg360.eu/</loc>
-    <lastmod>2025-12-07</lastmod>
+    <lastmod>2026-08-22</lastmod>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://omesg360.eu/services.html</loc>
-    <lastmod>2025-12-07</lastmod>
-    <priority>0.8</priority>
+    <loc>https://omesg360.eu/leadership-360/</loc>
+    <lastmod>2026-08-22</lastmod>
+    <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://omesg360.eu/approach.html</loc>
-    <lastmod>2025-12-07</lastmod>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://omesg360.eu/esg.html</loc>
-    <lastmod>2025-12-07</lastmod>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://omesg360.eu/about.html</loc>
-    <lastmod>2025-12-07</lastmod>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://omesg360.eu/contact.html</loc>
-    <lastmod>2025-12-07</lastmod>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://omesg360.eu/blog.html</loc>
-    <lastmod>2025-12-07</lastmod>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://omesg360.eu/atsiliepimai.html</loc>
-    <lastmod>2025-12-07</lastmod>
-    <priority>0.6</priority>
+    <loc>https://omesg360.eu/privacy.html</loc>
+    <lastmod>2026-08-22</lastmod>
+    <priority>0.4</priority>
   </url>
 </urlset>
