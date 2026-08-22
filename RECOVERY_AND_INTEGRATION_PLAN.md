@@ -1,145 +1,181 @@
 # OMESG360 recovery and Leadership 360 integration plan
 
-Status: active recovery work
+Status: ACTIVE — V02 / Leadership release preparation
 Date: 2026-08-22
 Working branch: `recovery/v02-clean-baseline`
 
+## Source of truth
+
+This file and `PROJECT_ROADMAP.md` are the source of truth for OMESG360 recovery. Work only on `recovery/v02-clean-baseline`. Do not resume `agent/leadership-360-home` and do not use current `main` as a production source.
+
 ## Incident context
 
-On 2026-08-22 an automated Git -> Hostinger deployment was connected to the OMESG360 repository using the `agent/leadership-360-home` branch. The deployment overwrote the production `omesg360.eu` file tree. Hostinger recovery work restored the production file structure to the 2026-08-20 07:12 progress state.
+On 2026-08-22 Git -> Hostinger automation was pointed at `agent/leadership-360-home` and an unverified repository tree was deployed as if it represented the whole production `public_html`. Production was overwritten and then manually recovered by the site owner.
 
-The current GitHub repository therefore must not be treated as a verified mirror of production until reconciliation is complete.
+The incident did not invalidate the automation objective. It established the required safety model: one verified source branch, a narrow managed deployment surface, protected server paths, dry-run, backup, post-deploy smoke and rollback.
 
-Important clarification: the incident did **not** invalidate the automation goal. The automation was being built specifically so future OMESG360 development could be handled through GitHub and deployed to Hostinger independently, without routine manual file maintenance by the site owner. The failure was in the safety model/source branch/deploy boundary, not in the objective itself.
+## Accepted Hostinger baseline — 2026-08-22 23:29 Europe/Vilnius
+
+The recovered Hostinger state is accepted as the current healthy production baseline for the purposes of V02 / Leadership release preparation.
+
+User-verified live smoke:
+- OMESG360 recovered V02 homepage: accepted production baseline.
+- Wave1 public/core flow: PASS.
+- Wave1 admin: PASS; screenshot confirms `ConflictLab — Human Wave 1`, read-only admin and `wave1-v0.4`.
+- Calibration public/core flow: PASS.
+- Calibration admin: PASS; screenshot confirms `calibration-v0.1`, `6000 ms timing gate`, `SERVER MODE: CALIBRATION` and rendered admin statistics. `0 / 20 calibration eligible clean primary` is an empty data state, not an admin failure.
+
+Do not make further routine manual Hostinger edits during this recovery. GitHub is now the work surface; Hostinger is the protected live baseline until controlled deployment.
+
+## Protected satellite decision
+
+`wave1/` and `conflictlab/releases/calibration-v0.1/` remain active 2Pair research satellites and are outside the OMESG360 V02 / Leadership managed deployment surface.
+
+For the first recovered V02 / Leadership deployment:
+- the deployment workflow MUST NOT copy, delete, rename or replace either satellite;
+- runtime `config.php`, databases, private/server support and unrelated paths are also protected;
+- no root-level `rsync --delete` is allowed;
+- `--delete` may be used only inside explicitly managed directories such as `assets/img/` and `leadership-360/`.
+
+Exact Wave1 and Calibration GitHub mirrors remain a separate recovery task. They are required before satellite deployment itself is automated, but they no longer block a narrowly allowlisted V02 / Leadership deployment that cannot touch those paths.
 
 ## Safety rules
 
-1. Do not deploy `agent/leadership-360-home` to Hostinger.
-2. Do not use the current `main` branch as a Hostinger deployment source until the recovered V02 baseline has been reconciled and verified.
-3. Preserve the pre-recovery GitHub state in `archive/pre-recovery-2026-08-22`.
-4. Perform cleanup and reconstruction only in `recovery/v02-clean-baseline` until smoke testing is complete.
-5. Do not modify the active Wave1 or Calibration satellites during the OMESG360 homepage / Leadership 360 integration work.
-6. Do not copy secrets, server credentials, `.env` values or private configuration into public Git history.
-7. Re-enable automation only after the production source branch, deploy root, exclusions/protected paths, smoke checks and rollback path are verified.
+1. Never deploy `agent/leadership-360-home`.
+2. Do not use current `main` as the production source during recovery.
+3. Preserve `archive/pre-recovery-2026-08-22` as the historical checkpoint.
+4. Work only on `recovery/v02-clean-baseline` until the recovered release passes.
+5. Do not commit secrets, server credentials, `.env`, private keys or live `config.php` files.
+6. Deployment must be allowlist-based; unrelated Hostinger content is not inferred from the GitHub tree.
+7. Dry-run must be reviewed before the first real deploy.
+8. Real deploy must create a managed-path backup and run post-deploy smoke checks.
+9. If deploy/smoke fails, restore only the managed paths from the backup.
+10. Satellite automation may be designed later only after exact satellite mirrors and their own validation contract exist.
 
-## Current coordination checkpoint — 2026-08-22 22:24 Europe/Vilnius
+## V02 recovered GitHub state
 
-- The site owner completed the Hostinger cleanup/recovery manually after the incident.
-- GitHub recovery/cleanup is handled separately in `recovery/v02-clean-baseline`.
-- During recovery, do not use GitHub writes as a shortcut to modify Hostinger.
-- `main` and `agent/leadership-360-home` remain untouched by cleanup work.
-- The current Hostinger image asset set intentionally kept is:
-  - `assets/img/favicon.svg`
-  - `assets/img/logo.svg`
-  - `assets/img/og-cover.png`
-  - `assets/img/og-cover.svg`
-- There is no intended `public/assets` layer; the working site structure uses root `assets/`.
-- After clean integration is proven, the intended operating model returns to GitHub-driven automatic Hostinger deployment so future work can be done independently and safely.
+Implemented in `recovery/v02-clean-baseline`:
+- recovered V02 `index.html`, based on the restored Hostinger design rather than the old multi-page architecture;
+- recovered V02 `privacy.html`;
+- root `/assets/img/` with exactly:
+  - `favicon.svg`
+  - `logo.svg`
+  - `og-cover.png`
+  - `og-cover.svg`
+- reconciled `robots.txt`, `sitemap.xml`, `sitemap_location.xml` and verification files;
+- no dependency on legacy `assets/css/styles.css`, `assets/js/main.js` or `assets/js/translations.js`;
+- old root multi-page routes are not part of the active V02 surface.
 
-## Production baseline supplied from Hostinger
+## Leadership 360 integration
 
-The recovered Hostinger `public_html` snapshot is the working visual / production baseline for V02.
+Leadership 360 product logic is FROZEN after the clean C1 E2E PASS in `olemoz1977/gla360-personal-full`.
 
-Known active V02 surface:
-- `index.html`
+OMESG360 integration owns only presentation and routing. It must not redesign scoring, Collector, Guardian, invitations, pseudonymous boundaries, C1/C2 logic or the 90-day-plan contracts.
+
+Implemented in GitHub:
+- homepage `LEADERSHIP DEVELOPMENT` / `Leadership 360°` entry after methodology/principle and before About;
+- native `/leadership-360/` OMESG360 page;
+- LT/EN behavior;
+- product explanation covering C1 -> report -> 90-day plan -> C2, 75 statements / 15 competencies, Guardian/process boundaries and privacy positioning;
+- Start CTA into the frozen flow:
+  - LT: `https://olemoz1977.github.io/gla360-personal-full/setup-v2.html?lang=lt`
+  - EN: `https://olemoz1977.github.io/gla360-personal-full/setup-v2.html?lang=en`.
+
+The live `omesg360.eu` does not yet show the Leadership entry because these GitHub changes have not yet been deployed.
+
+## Deployment implementation
+
+Workflow: `.github/workflows/deploy-hostinger.yml`.
+
+Managed surface only:
+- root `index.html`
 - `privacy.html`
-- required logo / favicon / SEO verification assets
-- Wave1 satellite
-- Calibration satellite
+- `robots.txt`
+- `sitemap.xml`
+- `sitemap_location.xml`
+- supported verification files if present
+- `assets/img/`
+- `leadership-360/`
 
-The recovered repository also contains older root HTML files and an earlier Leadership 360 page that appear to belong to a previous / alternate site architecture. These must be reviewed and archived or removed from the clean branch rather than assumed active.
-
-The older `assets/css/styles.css`, `assets/js/main.js`, and `assets/js/translations.js` belong to the previous/mixed multi-page architecture unless dependency review proves they are needed by the clean V02/native product build.
-
-## Satellites that must remain intact
-
+Protected/unmanaged:
 - `wave1/`
 - `conflictlab/releases/calibration-v0.1/`
-- their required server / private support files
+- runtime `config.php`
+- databases
+- private/server support
+- all unrelated Hostinger paths
 
-Wave1 and Calibration are 2Pair research satellites. They are not part of the Leadership 360 migration and must not be refactored as part of this task.
+Workflow safety:
+- manual `workflow_dispatch` during recovery;
+- `dry_run=true` by default;
+- validation before deploy;
+- GitHub `production` Environment;
+- pinned SSH known-host verification;
+- no overlapping production deploys;
+- rollback snapshot before writes;
+- post-deploy HTTP smoke;
+- managed-path rollback on failure.
 
-## Leadership 360 source of truth
+## Validation contract
 
-Leadership 360 product development is frozen after a clean C1 end-to-end PASS in `olemoz1977/gla360-personal-full`.
+`scripts/validate-v02.sh` must verify:
+- required V02 files;
+- no legacy multi-page references in active surfaces;
+- Leadership section placement and frozen-flow links;
+- exact four-file shared image allowlist;
+- active SEO surface;
+- no forbidden secret/runtime config files;
+- deployment workflow remains allowlist-scoped;
+- no root-level destructive sync;
+- Wave1 and Calibration remain protected/unmanaged by this deployment.
 
-The frozen product repository is the source of truth for:
-- product flow and contracts
-- LT/EN behavior
-- Guardian role boundaries
-- pseudonymous identity / response separation
-- Collector backend
-- Resend invitation flow
-- 90-day plan and companion handoff
-- C1 / C2 cycle logic
+Exact satellite mirrors are tracked separately and must not be faked merely to make CI green.
 
-The OMESG360 integration must not reopen or redesign this frozen product logic unless a real integration defect requires it.
+## Required GitHub production Environment before dry-run
 
-Detailed future Leadership 360 product work is tracked in `olemoz1977/gla360-personal-full/FUTURE_ROADMAP.md` and should not be silently implemented during the OMESG360 integration.
+Variables:
+- `HOSTINGER_HOST`
+- `HOSTINGER_USER`
+- `HOSTINGER_PORT`
+- `HOSTINGER_PUBLIC_PATH`
+- `HOSTINGER_BACKUP_PATH`
 
-## Product positioning
+Secrets:
+- `HOSTINGER_SSH_PRIVATE_KEY`
+- `HOSTINGER_KNOWN_HOSTS`
 
-- `2rasi.com` remains the discovery / hook layer.
-- `omesg360.eu` becomes the professional home of Leadership 360.
-- The intended public path is `https://omesg360.eu/leadership-360/`.
-- The technical GitHub Pages URL should eventually stop being the primary public entry point.
-- After the native OMESG360 page is live and tested, the 2rasi Leadership 360 primary Start link should be changed to the OMESG360 native path.
+Never commit these values into repository files.
 
-## V02 homepage integration direction
+## Release sequence from this checkpoint
 
-The current OMESG360 V02 narrative is:
+1. Keep Hostinger unchanged as the accepted live baseline.
+2. Make the V02 validator pass under the protected-satellite deployment contract.
+3. Configure/verify the GitHub `production` Environment.
+4. Run `Deploy OMESG360 to Hostinger` with `dry_run=true` only.
+5. Review the itemized rsync plan. It must include only managed V02 / Leadership paths and must not touch Wave1, Calibration, runtime config or DB paths.
+6. If dry-run is clean, run the first controlled real deployment with backup and post-deploy smoke.
+7. Human-check desktop/mobile, LT/EN, privacy, Leadership homepage entry, `/leadership-360/`, frozen Leadership Start flow, Wave1 public/admin and Calibration public/admin.
+8. If all pass, treat `recovery/v02-clean-baseline` as the verified recovered release candidate and decide the production branch promotion model.
+9. Then update the 2rasi Leadership 360 primary Start link to `https://omesg360.eu/leadership-360/`.
+10. Separately recover exact Wave1 and Calibration mirrors before any future satellite deployment automation.
 
-`Stabilize -> Standardize -> Improve`
+## Final automation objective
 
-Leadership 360 must not be presented as a fourth process-improvement stage.
+The intended steady state remains:
 
-Preferred placement on the homepage:
-- after the principle / methodology section
-- before the About section
+GitHub work -> validation gate -> controlled automatic Hostinger deployment -> post-deploy smoke -> rollback/recovery if needed.
 
-The homepage should contain one focused Leadership 360 product card / entry point using the existing OMESG360 visual language. The full product explanation and entry flow belongs on `/leadership-360/`.
+The site owner should not need routine manual Hostinger file operations. Manual involvement should be limited to exceptional hosting/account actions or explicit approvals that cannot be performed through available tooling.
 
-Preferred framing while only one full professional product exists: `LEADERSHIP DEVELOPMENT`, not a generic multi-product catalogue section.
+## Deferred / do not expand scope now
 
-## Recovery sequence
-
-1. Inventory the recovered Hostinger snapshot and classify all root files as KEEP / ARCHIVE / REVIEW.
-2. Rebuild `recovery/v02-clean-baseline` so it represents the recovered V02 structure rather than the mixed Git state.
-3. Preserve Wave1 and Calibration without modification.
-4. Preserve the four agreed `assets/img` files.
-5. Add a native Leadership 360 homepage entry card to the clean V02 homepage.
-6. Build a new `/leadership-360/` product page using OMESG360 visual language while preserving the frozen Leadership 360 contracts and backend.
-7. Smoke-test navigation, LT/EN behavior, privacy links, product entry, Wave1 and Calibration.
-8. Promote one verified production source branch only after the clean integration passes.
-9. Rebuild GitHub -> Hostinger automation with explicit deployment boundaries, protected/excluded paths, pre/post-deploy checks and rollback/recovery.
-10. Prove that automatic deployment is safe, then use it as the normal future OMESG360 operating model.
-
-## Automation target — temporarily deferred, not abandoned
-
-Automatic Hostinger deployment is deferred only during recovery and integration verification.
-
-Final target:
-- changes are implemented in GitHub,
-- a defined validation/smoke gate runs before promotion/deploy,
-- one verified source branch deploys to the correct Hostinger target,
-- Wave1, Calibration, private/server support and unrelated directories cannot be erased by a site deploy,
-- a post-deploy smoke check confirms the site state,
-- rollback/recovery is available if a deployment fails,
-- routine future OMESG360 programming/deployment does not require the site owner to manually upload or edit production files.
-
-## Deferred until after clean integration
-
-- re-enabling automatic Hostinger deployment before the safety model above is proven
-- deletion of archived pre-V02 content
-- changing the frozen Leadership 360 backend architecture
-- changing Wave1 or Calibration
-- broader OMESG360 site expansion
-- 2Pair feature expansion before validation data
-
-## Durable project handover
-
-See `PROJECT_ROADMAP.md` in this branch for the cross-project continuation state, deferred ideas, deployment gate and next-session starting point.
+- broader OMESG360 multi-page expansion;
+- frozen Leadership 360 backend redesign;
+- Organization Campaign / SaaS expansion;
+- Wave1/Calibration redesign;
+- 2Pair feature expansion before validation data;
+- cosmetic work unrelated to recovery/safe deployment.
 
 ## Continuity rule
 
-Any accepted but not-yet-implemented OMESG360 idea or integration decision must be written into the repository before the conversation moves on. Do not leave project-critical plans only in chat history.
+Any accepted but not-yet-implemented OMESG360 idea or recovery decision must be written into this file or `PROJECT_ROADMAP.md`. Do not leave project-critical decisions only in chat history.
