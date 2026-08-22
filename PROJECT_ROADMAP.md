@@ -1,7 +1,7 @@
 # OMESG360 / 2rasi project roadmap and handover
 
 Status: ACTIVE CONTINUITY DOCUMENT
-Last updated: 2026-08-22 23:34 Europe/Vilnius
+Last updated: 2026-08-22 23:40 Europe/Vilnius
 Working branch: `recovery/v02-clean-baseline`
 
 This file is the durable cross-session handover for OMESG360 / 2rasi work. `RECOVERY_AND_INTEGRATION_PLAN.md` contains the detailed recovery rules. Do not resume old incident-era work from chat memory alone.
@@ -39,6 +39,8 @@ Branches:
 - `omesg360bot-worker` — unrelated Telegram worker branch.
 - `archive/pre-recovery-2026-08-22` — pre-recovery checkpoint.
 - `recovery/v02-clean-baseline` — only active recovery / integration / deployment-safety branch.
+
+Draft PR #2 `Recovery V02 + Leadership 360 release candidate` is open from `recovery/v02-clean-baseline` to `main` only for CI/review. It must stay draft and must not be merged until the deployment gates below pass.
 
 ## Hostinger live smoke — accepted baseline
 
@@ -112,9 +114,9 @@ Rules:
 - post-deploy HTTP smoke;
 - rollback only managed paths on failure.
 
-## Validator
+## Validator — PASS
 
-`scripts/validate-v02.sh` now validates the managed V02 / Leadership release contract rather than pretending satellite mirrors are complete.
+`scripts/validate-v02.sh` validates the managed V02 / Leadership release contract.
 
 It checks:
 - required V02 files;
@@ -127,7 +129,39 @@ It checks:
 - no root-level destructive sync;
 - Wave1 and Calibration remain protected/unmanaged.
 
-Current validator hardening commit: `4997745c5f792464ccf746294b5f143a9bbba349`.
+Validator hardening commit: `4997745c5f792464ccf746294b5f143a9bbba349`.
+
+GitHub Actions validation was executed through draft PR #2:
+- workflow: `Validate OMESG360 V02`
+- run id: `32597286998`
+- job `validate`: **SUCCESS**
+- checkout: PASS
+- `Validate recovered V02 surface`: PASS
+
+PR diff audit also confirms that neither `wave1/` nor `conflictlab/releases/calibration-v0.1/` is changed by the recovery PR. The branch is ahead of `main` and not behind it.
+
+## Current external gate — GitHub `production` Environment
+
+The GitHub connector available in this workspace can modify repository files and inspect CI, but it does not expose GitHub Environment / Actions secrets or variables creation APIs. No installable Hostinger/hPanel deployment plugin is available.
+
+Therefore one one-time account-level setup remains outside the assistant's direct tooling before the first dry-run.
+
+Environment name: `production`.
+
+Variables:
+- `HOSTINGER_HOST`
+- `HOSTINGER_USER`
+- `HOSTINGER_PORT`
+- `HOSTINGER_PUBLIC_PATH`
+- `HOSTINGER_BACKUP_PATH`
+
+Secrets:
+- `HOSTINGER_SSH_PRIVATE_KEY`
+- `HOSTINGER_KNOWN_HOSTS`
+
+Never commit these values and do not paste private credentials into roadmap/source files.
+
+Once those values exist in GitHub, the next action is the `Deploy OMESG360 to Hostinger` workflow with `dry_run=true` only.
 
 ## Satellite mirror backlog — no longer blocking V02 / Leadership release
 
@@ -146,35 +180,20 @@ The live `calibration-v0.1` public/admin surfaces are verified, but the authorit
 
 Do not fabricate either satellite mirror. Recover them separately before automating satellite deployment.
 
-## Required GitHub `production` Environment before dry-run
+## Immediate starting point
 
-Variables:
-- `HOSTINGER_HOST`
-- `HOSTINGER_USER`
-- `HOSTINGER_PORT`
-- `HOSTINGER_PUBLIC_PATH`
-- `HOSTINGER_BACKUP_PATH`
-
-Secrets:
-- `HOSTINGER_SSH_PRIVATE_KEY`
-- `HOSTINGER_KNOWN_HOSTS`
-
-Never commit these values.
-
-## Next-session / immediate starting point
-
-Do **not** restart V02 reconstruction, Leadership page design, or satellite live testing. Those are already resolved for this release.
+Do **not** restart V02 reconstruction, Leadership page design, validator work, or satellite live testing. Those are already resolved for this release.
 
 Continue in this order:
 1. Read this file and `RECOVERY_AND_INTEGRATION_PLAN.md`.
 2. Work only on `recovery/v02-clean-baseline`.
-3. Confirm the updated V02 validator passes.
-4. Configure/verify the GitHub `production` Environment values and secrets.
+3. Keep draft PR #2 unmerged.
+4. Complete the one-time GitHub `production` Environment variables/secrets setup.
 5. Run `Deploy OMESG360 to Hostinger` with `dry_run=true` only.
 6. Inspect the itemized rsync plan. It must contain only managed V02 / Leadership paths and must leave Wave1, Calibration, runtime config and DB paths untouched.
 7. If dry-run is clean, execute the first controlled real deploy with backup and post-deploy smoke.
 8. Human-check desktop/mobile, LT/EN, privacy, homepage Leadership entry, `/leadership-360/`, frozen Leadership Start flow, Wave1 public/admin and Calibration public/admin.
-9. If all pass, decide promotion of the recovered release to the normal production source model.
+9. If all pass, decide promotion of the recovered release to the normal production source model and only then finish/merge the release PR as appropriate.
 10. Update 2rasi Leadership Start to the native OMESG360 path.
 11. Separately finish exact Wave1 and Calibration GitHub mirrors before any satellite deployment automation.
 
