@@ -71,6 +71,7 @@ required = [
     'pull_request:',
     'dry_run:',
     'FTP_HOST: 46.202.142.134',
+    'REMOTE_BASE: /domains/omesg360.eu/public_html',
     'HOSTINGER_FTP_USER',
     'HOSTINGER_FTP_PASSWORD',
     'Build frontend-only package',
@@ -98,7 +99,7 @@ for bad in ['.deploy-package/wave1', '.deploy-package/conflictlab', 'cp wave1', 
 if "github.event_name == 'workflow_dispatch' && !inputs.dry_run" not in w:
     raise SystemExit('ERROR: real deploy is not constrained to explicit manual non-dry-run dispatch')
 
-print('OK: frontend-only FTPS deployment contract; satellites remain protected/unmanaged')
+print('OK: frontend-only FTP deployment contract; satellites remain protected/unmanaged')
 PY
 
 info "satellite live surfaces are protected from this deployment; exact mirrors remain a separate backlog item"
