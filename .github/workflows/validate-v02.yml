@@ -1,0 +1,26 @@
+name: Validate OMESG360 V02
+
+on:
+  push:
+    branches:
+      - recovery/v02-clean-baseline
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: validate-v02-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate recovered V02 surface
+        run: bash scripts/validate-v02.sh
