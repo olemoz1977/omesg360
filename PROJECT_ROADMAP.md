@@ -1,276 +1,200 @@
 # OMESG360 / 2rasi project roadmap and handover
 
 Status: ACTIVE CONTINUITY DOCUMENT
-Last updated: 2026-08-22 23:29 Europe/Vilnius
+Last updated: 2026-08-22 23:34 Europe/Vilnius
 Working branch: `recovery/v02-clean-baseline`
 
-This file exists so project-critical plans do not live only in chat history. Accepted but not-yet-implemented ideas and decisions must be written here before a work session ends.
+This file is the durable cross-session handover for OMESG360 / 2rasi work. `RECOVERY_AND_INTEGRATION_PLAN.md` contains the detailed recovery rules. Do not resume old incident-era work from chat memory alone.
 
 ## Current source-of-truth boundaries
 
 ### OMESG360 production
-- Current visual/production baseline is the recovered `omesg360.eu` V02 state restored after the 2026-08-22 Git -> Hostinger overwrite incident.
-- Hostinger V02 was cleaned up manually by the site owner after the incident.
-- GitHub recovery/reconstruction is performed only in `olemoz1977/omesg360` on `recovery/v02-clean-baseline`.
-- Do not treat `main` or `agent/leadership-360-home` as a verified production mirror.
-- `agent/leadership-360-home` is historical incident-era work and must not be resumed for this recovery.
-
-### Automation objective
-- The 2026-08-22 incident does **not** cancel the GitHub -> Hostinger automation objective.
-- Final desired operating model remains: GitHub work -> validation gate -> controlled deployment -> post-deploy smoke -> rollback/recovery if needed.
-- Production deployment remains intentionally blocked until the active Wave1 and Calibration satellites have exact frozen GitHub mirrors and the recovery validator passes.
-- No Hostinger deployment has been performed from the current recovery work.
+- The recovered Hostinger V02 state is accepted as the healthy live baseline for the current release work.
+- Do not make routine manual Hostinger edits during recovery.
+- GitHub work happens only in `olemoz1977/omesg360` on `recovery/v02-clean-baseline`.
+- Current `main` is not yet the verified production source.
+- `agent/leadership-360-home` is historical incident-era work and must never be used as the Hostinger source.
 
 ### Leadership 360
-- Product is FROZEN after a clean C1 E2E PASS on 2026-08-22.
-- Product source of truth: `olemoz1977/gla360-personal-full`.
-- Detailed future product backlog lives there in `FUTURE_ROADMAP.md`; do not duplicate or silently reopen it here.
-- OMESG360 owns presentation/routing only. Frozen scoring, Collector, Guardian, invitation, privacy, C1/C2 and 90-day-plan contracts remain unchanged unless a real integration defect is found.
+- Product logic is FROZEN after the clean C1 E2E PASS in `olemoz1977/gla360-personal-full`.
+- OMESG360 owns presentation/routing only.
+- Frozen scoring, Collector, Guardian, invitation, privacy, C1/C2 and 90-day-plan contracts remain unchanged unless a genuine integration defect is found.
+- Future product backlog remains in `gla360-personal-full/FUTURE_ROADMAP.md`.
 
 ### 2rasi
 - `2rasi.com` remains the discovery / hook layer.
-- After the native OMESG360 Leadership page is production-live and tested, update the 2rasi primary Leadership 360 Start link to `https://omesg360.eu/leadership-360/`.
+- After native OMESG360 Leadership is live and tested, change the primary 2rasi Leadership Start link to `https://omesg360.eu/leadership-360/`.
 
 ### 2Pair satellites
-- `wave1/` and `conflictlab/releases/calibration-v0.1/` are research satellite surfaces and are outside Leadership 360 product logic.
-- Do not refactor or redesign them during OMESG360 recovery.
-- Their exact live/frozen files must nevertheless be mirrored in GitHub before the recovery branch can become the verified production source.
+- Wave1 and Calibration are active research satellites, not part of Leadership 360 product logic.
+- Live state is user-verified PASS on public and admin surfaces.
+- They are protected/unmanaged by the first recovered V02 / Leadership deploy.
+- Exact GitHub mirrors remain a separate recovery task required before satellite deployment itself is automated.
 
 ## GitHub safety state
 
 Branches:
-- `main` — untouched during recovery; mixed/pre-recovery state.
-- `agent/leadership-360-home` — historical/incident work; NEVER use as Hostinger deployment source.
-- `omesg360bot-worker` — Telegram bot worker branch; unrelated to site recovery.
-- `archive/pre-recovery-2026-08-22` — checkpoint of pre-recovery GitHub state.
-- `recovery/v02-clean-baseline` — only branch for current cleanup, integration and deployment-safety work.
+- `main` — mixed/pre-recovery state; not production source yet.
+- `agent/leadership-360-home` — historical/incident work; never deploy.
+- `omesg360bot-worker` — unrelated Telegram worker branch.
+- `archive/pre-recovery-2026-08-22` — pre-recovery checkpoint.
+- `recovery/v02-clean-baseline` — only active recovery / integration / deployment-safety branch.
 
-Do not enable production Hostinger writes until the recovery validator passes and a dry-run deployment has been reviewed.
+## Hostinger live smoke — accepted baseline
 
-## Implemented in `recovery/v02-clean-baseline` on 2026-08-22
+User-verified on 2026-08-22:
+- recovered OMESG360 V02 homepage: accepted baseline;
+- Wave1 public/core flow: PASS;
+- Wave1 admin: PASS, screenshot confirms read-only `wave1-v0.4`;
+- Calibration public/core flow: PASS;
+- Calibration admin: PASS, screenshot confirms `calibration-v0.1`, `6000 ms timing gate`, `SERVER MODE: CALIBRATION` and rendered admin stats.
 
-### V02 baseline recovered
-- `index.html` rebuilt from the recovered V02 source, not from the old mixed multi-page branch.
-- Commit: `4b9fe9858d8f510f41e849d15ad44097da57ab11`.
-- V02 keeps inline CSS/JS, LT/EN switching, root `/assets/img/...`, and the narrative `Stabilize. Standardize. Improve.`.
+Calibration `0 / 20 calibration eligible clean primary` is an empty research-data state, not an admin failure.
 
-### Privacy centre recovered
-- `privacy.html` restored to the current V02 privacy centre.
-- Stale `/#lab` reference was removed.
-- Commit: `fa5f62988686c60ef742b94501a28963a68f188d`.
+## Implemented in `recovery/v02-clean-baseline`
 
-### Native Leadership 360 integration completed in GitHub
-- New native page: `/leadership-360/index.html`.
-- Commit: `387ba362d0d04292d0e5310cc56ffd86eb029ee7`.
-- Homepage Leadership 360 entry was added after methodology/principle and before About, never as a fourth process-improvement stage.
-- Homepage integration commit: `d0b581c3677de475ef3bd097601d6eeccfef23b3`.
-- Native page is bilingual and routes into the frozen product entry:
-  - LT: `https://olemoz1977.github.io/gla360-personal-full/setup-v2.html?lang=lt`
-  - EN: `https://olemoz1977.github.io/gla360-personal-full/setup-v2.html?lang=en`
-- Privacy CTA routes to frozen `PRIVACY-v2.html`.
-- Product copy preserves Guardian/process-only boundaries, Identity DB vs Response DB separation, pseudonymisation limits, and the rule that raw 360 answers/evaluator identities do not go to OMESG360Bot.
+### Recovered V02 surface
+- `index.html` rebuilt from the recovered V02 source, not the old mixed multi-page architecture.
+- V02 keeps inline CSS/JS, LT/EN switching, root `/assets/img/...`, and `Stabilize. Standardize. Improve.` positioning.
+- `privacy.html` restored to the V02 privacy centre.
+- `robots.txt`, `sitemap.xml`, `sitemap_location.xml` reconciled to active routes.
+- Old root multi-page pages are not part of the active V02 surface.
+- V02 does not depend on old `assets/css/styles.css`, `assets/js/main.js`, or `assets/js/translations.js`.
 
-### SEO surface reconciled
-- `sitemap.xml` and `sitemap_location.xml` now advertise only active V02 public surfaces:
-  - `/`
-  - `/leadership-360/`
-  - `/privacy.html`
-- Old `services.html`, `approach.html`, `about.html`, `esg.html`, etc. are no longer advertised.
-- `robots.txt` remains valid and points to the sitemap.
-
-### Root dependency review completed
-- Old root multi-page HTML files are no longer part of the recovery branch active surface.
-- V02 does not depend on old root `assets/css/styles.css`, `assets/js/main.js`, or `assets/js/translations.js`.
-- `contact.php` contains no repository secret but is not used by current V02; it is excluded from the managed deployment package.
-- `.private/config.json` contains only non-secret/public Hostinger endpoint values; runtime credentials remain outside Git.
-
-## Approved V02 shared image assets
-
-Keep exactly:
+Approved shared images, exactly:
 - `assets/img/favicon.svg`
 - `assets/img/logo.svg`
 - `assets/img/og-cover.png`
 - `assets/img/og-cover.svg`
 
-Do not invent a `public/assets` layer; the site uses root `assets/`.
+### Leadership 360 native integration
+- Homepage entry is already present in GitHub under `LEADERSHIP DEVELOPMENT` / `Leadership 360°`.
+- Placement: after methodology/principle, before About; never a fourth `Stabilize -> Standardize -> Improve` stage.
+- Homepage CTA routes to `/leadership-360/?lang=lt|en`.
+- Native `/leadership-360/index.html` is implemented in OMESG360 visual language.
+- Native page routes Start into the frozen flow:
+  - LT `https://olemoz1977.github.io/gla360-personal-full/setup-v2.html?lang=lt`
+  - EN `https://olemoz1977.github.io/gla360-personal-full/setup-v2.html?lang=en`
+- The live `omesg360.eu` does **not yet** show this card/page because no recovered GitHub deployment has been executed yet.
 
-## Validation gate implemented
+Historical implementation commits include:
+- V02 homepage baseline `4b9fe9858d8f510f41e849d15ad44097da57ab11`
+- privacy baseline `fa5f62988686c60ef742b94501a28963a68f188d`
+- native Leadership page `387ba362d0d04292d0e5310cc56ffd86eb029ee7`
+- homepage Leadership integration `d0b581c3677de475ef3bd097601d6eeccfef23b3`
 
-Current validator: `scripts/validate-v02.sh`.
-Current validator commit: `977928690c627d1d7b3f09d83a56b8312863ee6b`.
-
-It checks at minimum:
-- required V02 files,
-- no legacy root-page references in active V02 surfaces,
-- correct Leadership placement and frozen flow links,
-- exact four-file shared image allowlist,
-- current sitemap surface,
-- no `.env`, `config.php`, private key or PEM material in Git,
-- complete frozen Wave1 mirror,
-- Calibration mirror presence/release identity.
-
-The validator is intentionally **red/fail-closed** today because the two satellite mirrors are not yet complete in this repository. Do not weaken this gate merely to get a green CI result.
-
-GitHub Actions validation workflow:
-- `.github/workflows/validate-v02.yml`
-- commit `ba64f002b59bff2ad72f5d21af8fd394238c04cf`.
-
-## GitHub -> Hostinger deployment workflow implemented but intentionally gated
+## Deployment safety model
 
 Workflow: `.github/workflows/deploy-hostinger.yml`.
-Current hardened workflow commit: `8880345a7b2780e1ce8e54e8ae73d621573365c2`.
 
-Current safety model:
-- manual `workflow_dispatch` only during recovery,
-- `dry_run=true` by default,
-- validation job must pass first,
-- production GitHub Environment is required,
-- SSH private key is runner-only,
-- pinned `known_hosts` + strict host-key checking,
-- deployment concurrency prevents overlapping production deploys,
-- backup snapshot is created before real writes,
-- post-deploy HTTP smoke runs,
-- managed V02 paths roll back automatically if deploy/smoke fails.
+Managed paths only:
+- root `index.html`, `privacy.html`, `robots.txt`, sitemap and supported verification files;
+- `assets/img/`;
+- `leadership-360/`.
 
-Managed deploy surface is deliberately narrow:
-- root `index.html`, `privacy.html`, `robots.txt`, sitemap files and verification files,
-- exact `assets/img/`,
-- exact `leadership-360/`.
+Protected/unmanaged paths:
+- `wave1/`;
+- `conflictlab/releases/calibration-v0.1/`;
+- runtime `config.php`;
+- databases;
+- private/server support;
+- every unrelated Hostinger path.
 
-Explicitly untouched by this workflow:
-- `wave1/`,
-- `conflictlab/releases/calibration-v0.1/`,
-- runtime `config.php`,
-- databases,
-- all unrelated server paths.
+Rules:
+- no root-level `rsync --delete`;
+- `--delete` only inside explicitly managed directories;
+- manual `workflow_dispatch` during recovery;
+- `dry_run=true` by default;
+- GitHub `production` Environment;
+- pinned SSH known-host check;
+- no parallel production deploys;
+- backup managed paths before a real write;
+- post-deploy HTTP smoke;
+- rollback only managed paths on failure.
 
-This narrow allowlist is intentional during recovery. Satellite deployment may be automated later only under a separate exact-mirror contract and its own validation rules.
+## Validator
 
-### Required GitHub `production` Environment configuration before first dry run
+`scripts/validate-v02.sh` now validates the managed V02 / Leadership release contract rather than pretending satellite mirrors are complete.
 
-Environment variables:
+It checks:
+- required V02 files;
+- no legacy route references;
+- Leadership placement and frozen-flow routing;
+- exact four-file image allowlist;
+- SEO surface;
+- no forbidden runtime secrets/config files;
+- deploy workflow safety contract;
+- no root-level destructive sync;
+- Wave1 and Calibration remain protected/unmanaged.
+
+Current validator hardening commit: `4997745c5f792464ccf746294b5f143a9bbba349`.
+
+## Satellite mirror backlog — no longer blocking V02 / Leadership release
+
+### Wave1
+Known real v0.4 package provenance:
+- `index.html` 18,823 bytes, SHA256 `66aa836730d0e866e64a2301d211dac0c55d9d9284a9fc4ef1f7316a7d9e0730`
+- `api.php` 5,362 bytes, SHA256 `ef886f21e6cf2059693e47fe398a6c57a44a4c56d924126742cf3edac6d7ff00`
+- `admin.php` 15,532 bytes, SHA256 `21dc5c3dcb879b6a8fd83e63d5c567f15be66c19b61a65b5738c32a44c44af0e`
+- `migrate_v04_language.sql` 532 bytes, SHA256 `d8a22dec773236f2b1c7081c87d0391b718238eb14a8bc223f1a55e1d9bb57ae`
+- `README_DEPLOY.txt` 1,778 bytes, SHA256 `8869e2c5c38444f4773871a77ce9e3a0d360c0721c947265f82effde220781e1`
+
+Wave1 v0.4 reuses the same 12 frozen v0.3 stimulus assets. Exact mirror work remains pending because current connector transfer is not reliable for the binary set.
+
+### Calibration
+The live `calibration-v0.1` public/admin surfaces are verified, but the authoritative complete runtime source inventory has not yet been mirrored into this repository.
+
+Do not fabricate either satellite mirror. Recover them separately before automating satellite deployment.
+
+## Required GitHub `production` Environment before dry-run
+
+Variables:
 - `HOSTINGER_HOST`
 - `HOSTINGER_USER`
 - `HOSTINGER_PORT`
 - `HOSTINGER_PUBLIC_PATH`
 - `HOSTINGER_BACKUP_PATH`
 
-Environment secrets:
+Secrets:
 - `HOSTINGER_SSH_PRIVATE_KEY`
 - `HOSTINGER_KNOWN_HOSTS`
 
-Do not put these credentials into repository files.
+Never commit these values.
 
-## Remaining recovery blocker 1 — exact Wave1 frozen mirror
+## Next-session / immediate starting point
 
-Target public satellite: `/wave1/`, frozen protocol `wave1-v0.4`.
-
-Exact v0.4 upload package from 2026-08-13 is known from File Library:
-- `index.html` — 18,823 bytes — SHA256 `66aa836730d0e866e64a2301d211dac0c55d9d9284a9fc4ef1f7316a7d9e0730`
-- `api.php` — 5,362 bytes — SHA256 `ef886f21e6cf2059693e47fe398a6c57a44a4c56d924126742cf3edac6d7ff00`
-- `admin.php` — 15,532 bytes — SHA256 `21dc5c3dcb879b6a8fd83e63d5c567f15be66c19b61a65b5738c32a44c44af0e`
-- `migrate_v04_language.sql` — 532 bytes — SHA256 `d8a22dec773236f2b1c7081c87d0391b718238eb14a8bc223f1a55e1d9bb57ae`
-- `README_DEPLOY.txt` — 1,778 bytes — SHA256 `8869e2c5c38444f4773871a77ce9e3a0d360c0721c947265f82effde220781e1`
-
-Historical provenance:
-- ConflictLab commit `6094ba6aef1458e10f1aff90ed6cceeef50a3dbc` contains `deploy/wave1-hostinger/index.html` at exactly 18,823 bytes and `api.php` at exactly 5,362 bytes, matching the real v0.4 upload package sizes.
-- The current `deploy/wave1-hostinger-v04-candidate/` is **not** a verified live mirror and must not be copied blindly; its file sizes differ from the known uploaded package.
-
-Wave1 v0.4 deliberately reuses the same 12 frozen stimulus assets as v0.3:
-- `more-reveal.webp`
-- `less-reveal.jpg`
-- `more-evidence.png`
-- `less-evidence.png`
-- `more-reference.png`
-- `less-reference.png`
-- `no-predefined-zones.png`
-- `predefined-zones.png`
-- `fixed-slots.png`
-- `continuous-capacity.png`
-- `partitioned-space.png`
-- `open-space.png`
-
-Asset provenance in ConflictLab history is known, including commit `691defcd40c361c067b448ce67191363d53d8cc2` for ten of the stimulus assets; the CS-PR pair was added separately.
-
-Tooling limitation discovered during recovery:
-- Git object SHAs cannot be referenced across repositories; GitHub rejected a cross-repo tree entry with HTTP 422.
-- Binary file retrieval as base64 is truncated by the current connector response limit, so copying large binary assets byte-for-byte through the available GitHub text/file actions is not currently reliable.
-- This is a tooling-transfer blocker, not a reason to fabricate or re-encode the frozen assets.
-
-Do not mark Wave1 recovery complete until the exact v0.4 runtime files and all 12 unchanged binary stimuli exist in `omesg360/wave1/` and pass validation.
-
-## Remaining recovery blocker 2 — exact Calibration release mirror
-
-Required target path:
-`conflictlab/releases/calibration-v0.1/`
-
-Known source evidence includes a Calibration admin surface with `calibration-v0.1`, `6000 ms timing gate`, TECHNICAL/CALIBRATION modes and a `retention_cleanup.php` using the private DB layer.
-
-However, the complete frozen runtime release inventory has not yet been recovered from an authoritative source. Do not invent missing runtime files and do not substitute a partial package merely to satisfy the validator.
-
-## Live satellite smoke status — user-verified 2026-08-22
-
-The site owner manually tested both public satellites through the 2rasi.com entry points shortly before this checkpoint:
-- Wave1 public entry/core flow: **PASS** — opens successfully.
-- Calibration public entry/core flow: **PASS** — opens successfully.
-- Wave1 admin surface: **PASS** — screenshot at 23:26 Europe/Vilnius confirms the live `ConflictLab — Human Wave 1` read-only admin and explicitly identifies `wave1-v0.4`.
-- Calibration admin surface: **PASS** — screenshot at 23:29 Europe/Vilnius confirms the live `ConflictLab · calibration-v0.1` admin, `6000 ms timing gate`, `SERVER MODE: CALIBRATION`, and rendered admin statistics. The displayed `0 / 20 calibration eligible clean primary` is an empty calibration data state, not an admin failure.
-
-This confirms that the current Hostinger deployments for both research satellites are live on their public and admin surfaces. The remaining satellite blockers are therefore **not live availability**; they are exact GitHub mirroring/provenance required for a safe future GitHub -> Hostinger operating model. Do not weaken the GitHub mirror validation gate based only on the live PASS.
-
-## Smoke gate before production promotion
-
-Before recovery branch can become production source, verify at minimum:
-- OMESG360 homepage desktop/mobile,
-- LT/EN behavior,
-- privacy page and links,
-- Leadership 360 homepage entry,
-- `/leadership-360/` page,
-- frozen Leadership 360 entry flow,
-- Wave1 LT/EN URL and core flow — user-verified public PASS on 2026-08-22,
-- Wave1 admin surface — user-verified PASS on 2026-08-22; screenshot confirms `wave1-v0.4`,
-- Calibration URL and core flow — user-verified public PASS on 2026-08-22,
-- Calibration admin surface — user-verified PASS on 2026-08-22; screenshot confirms `calibration-v0.1` in CALIBRATION server mode,
-- SEO/robots/sitemap routes,
-- no broken references to old root HTML pages,
-- no secrets exposed in public Git history.
-
-The deployment workflow adds post-deploy HTTP checks, but the first production promotion should also receive a human visual/mobile review.
-
-## After native Leadership 360 is production-live
-
-Pending follow-up:
-- update 2rasi Leadership 360 primary `Start` link to `https://omesg360.eu/leadership-360/`,
-- stop presenting the raw GitHub Pages URL as the primary public product destination,
-- verify final canonical/OG metadata on the live OMESG360 product page,
-- decide later whether the GitHub Pages frontend remains a technical fallback/testing surface.
-
-## Deferred / do not expand scope now
-
-- broader OMESG360 multi-page expansion,
-- frozen Leadership 360 backend redesign,
-- Organization Campaign / SaaS expansion,
-- Wave1/Calibration redesign,
-- 2Pair feature expansion before validation data,
-- cosmetic work unrelated to recovery/safe deployment.
-
-## Next-session starting point — updated 2026-08-22
-
-Do **not** restart V02 reconstruction or Leadership 360 integration. Those GitHub pieces are already implemented.
+Do **not** restart V02 reconstruction, Leadership page design, or satellite live testing. Those are already resolved for this release.
 
 Continue in this order:
 1. Read this file and `RECOVERY_AND_INTEGRATION_PLAN.md`.
 2. Work only on `recovery/v02-clean-baseline`.
-3. Treat Wave1 public + admin and Calibration public + admin live availability as already user-verified PASS; do not spend time re-proving those surfaces unless something changes.
-4. Recover/transfer the exact frozen `wave1/` mirror, including all 12 binary stimulus assets; verify known v0.4 hashes/sizes where available.
-5. Recover the authoritative complete `conflictlab/releases/calibration-v0.1/` runtime inventory and mirror it without redesign.
-6. Run `scripts/validate-v02.sh`; do not proceed while it is red.
-7. Once validation is green, configure the GitHub `production` Environment variables/secrets without committing credentials.
-8. Run `Deploy OMESG360 to Hostinger` with `dry_run=true` only and inspect the itemized rsync plan. It must list only the managed V02/Leadership paths and must leave Wave1, Calibration, runtime config and DB paths untouched.
-9. After dry-run review, perform the first controlled production deploy with backup + post-deploy smoke + human visual/mobile check.
-10. Only after a clean production PASS consider making GitHub-driven deployment the normal operating model.
-11. Then update the 2rasi Leadership 360 primary entry to the native OMESG360 URL.
+3. Confirm the updated V02 validator passes.
+4. Configure/verify the GitHub `production` Environment values and secrets.
+5. Run `Deploy OMESG360 to Hostinger` with `dry_run=true` only.
+6. Inspect the itemized rsync plan. It must contain only managed V02 / Leadership paths and must leave Wave1, Calibration, runtime config and DB paths untouched.
+7. If dry-run is clean, execute the first controlled real deploy with backup and post-deploy smoke.
+8. Human-check desktop/mobile, LT/EN, privacy, homepage Leadership entry, `/leadership-360/`, frozen Leadership Start flow, Wave1 public/admin and Calibration public/admin.
+9. If all pass, decide promotion of the recovered release to the normal production source model.
+10. Update 2rasi Leadership Start to the native OMESG360 path.
+11. Separately finish exact Wave1 and Calibration GitHub mirrors before any satellite deployment automation.
+
+## Final operating model
+
+Target steady state:
+
+GitHub work -> validation gate -> controlled Hostinger deployment -> post-deploy smoke -> rollback/recovery if needed.
+
+Routine OMESG360 site changes should not require manual Hostinger file uploads.
+
+## Deferred / do not expand scope now
+
+- broader OMESG360 multi-page expansion;
+- frozen Leadership 360 backend redesign;
+- Organization Campaign / SaaS expansion;
+- Wave1/Calibration redesign;
+- 2Pair feature expansion before validation data;
+- cosmetic work unrelated to recovery/safe deployment.
 
 ## Continuity rule
 
-When a new idea is explicitly accepted as `later`, `after integration`, `backlog`, or `not now`, append it to the appropriate repository roadmap before ending the session. When implemented, mark it completed or move it to an implementation record rather than deleting the history.
+When a new idea is explicitly accepted as later/backlog/not-now, record it in the appropriate repository roadmap before ending the session. When implemented, mark it complete or move it to an implementation record rather than erasing the history.
