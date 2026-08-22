@@ -98,25 +98,24 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          SSH_RSYNC='ssh omesg360-hostinger'
           echo '--- root files ---'
-          rsync -avzn --itemize-changes -e "$SSH_RSYNC" \
+          rsync -avzn --itemize-changes -e ssh \
             .deploy-package/index.html \
             .deploy-package/privacy.html \
             .deploy-package/robots.txt \
             .deploy-package/sitemap.xml \
             .deploy-package/sitemap_location.xml \
-            "${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_ROOT}/"
+            "omesg360-hostinger:${REMOTE_ROOT}/"
           if [[ -f .deploy-package/BingSiteAuth.xml ]]; then
-            rsync -avzn --itemize-changes -e "$SSH_RSYNC" .deploy-package/BingSiteAuth.xml "${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_ROOT}/"
+            rsync -avzn --itemize-changes -e ssh .deploy-package/BingSiteAuth.xml "omesg360-hostinger:${REMOTE_ROOT}/"
           fi
           if [[ -f .deploy-package/9dc780a3ecce49a5897128d85c5d362f.txt ]]; then
-            rsync -avzn --itemize-changes -e "$SSH_RSYNC" .deploy-package/9dc780a3ecce49a5897128d85c5d362f.txt "${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_ROOT}/"
+            rsync -avzn --itemize-changes -e ssh .deploy-package/9dc780a3ecce49a5897128d85c5d362f.txt "omesg360-hostinger:${REMOTE_ROOT}/"
           fi
           echo '--- assets/img (managed directory only) ---'
-          rsync -avzn --delete --itemize-changes -e "$SSH_RSYNC" .deploy-package/assets/img/ "${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_ROOT}/assets/img/"
+          rsync -avzn --delete --itemize-changes -e ssh .deploy-package/assets/img/ "omesg360-hostinger:${REMOTE_ROOT}/assets/img/"
           echo '--- leadership-360 (managed directory only) ---'
-          rsync -avzn --delete --itemize-changes -e "$SSH_RSYNC" .deploy-package/leadership-360/ "${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_ROOT}/leadership-360/"
+          rsync -avzn --delete --itemize-changes -e ssh .deploy-package/leadership-360/ "omesg360-hostinger:${REMOTE_ROOT}/leadership-360/"
           echo 'UNTOUCHED: wave1/, conflictlab/releases/calibration-v0.1/, runtime config.php files, databases and all other server paths.'
 
       - name: Stop after dry run
@@ -154,46 +153,54 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          SSH_RSYNC='ssh omesg360-hostinger'
-          rsync -avz -e "$SSH_RSYNC" \
+          rsync -avz -e ssh \
             .deploy-package/index.html \
             .deploy-package/privacy.html \
             .deploy-package/robots.txt \
             .deploy-package/sitemap.xml \
             .deploy-package/sitemap_location.xml \
-            "${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_ROOT}/"
+            "omesg360-hostinger:${REMOTE_ROOT}/"
           if [[ -f .deploy-package/BingSiteAuth.xml ]]; then
-            rsync -avz -e "$SSH_RSYNC" .deploy-package/BingSiteAuth.xml "${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_ROOT}/"
+            rsync -avz -e ssh .deploy-package/BingSiteAuth.xml "omesg360-hostinger:${REMOTE_ROOT}/"
           fi
           if [[ -f .deploy-package/9dc780a3ecce49a5897128d85c5d362f.txt ]]; then
-            rsync -avz -e "$SSH_RSYNC" .deploy-package/9dc780a3ecce49a5897128d85c5d362f.txt "${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_ROOT}/"
+            rsync -avz -e ssh .deploy-package/9dc780a3ecce49a5897128d85c5d362f.txt "omesg360-hostinger:${REMOTE_ROOT}/"
           fi
-          rsync -avz --delete -e "$SSH_RSYNC" .deploy-package/assets/img/ "${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_ROOT}/assets/img/"
-          rsync -avz --delete -e "$SSH_RSYNC" .deploy-package/leadership-360/ "${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_ROOT}/leadership-360/"
+          rsync -avz --delete -e ssh .deploy-package/assets/img/ "omesg360-hostinger:${REMOTE_ROOT}/assets/img/"
+          rsync -avz --delete -e ssh .deploy-package/leadership-360/ "omesg360-hostinger:${REMOTE_ROOT}/leadership-360/"
 
       - name: Post-deploy HTTP smoke
         if: ${{ !inputs.dry_run }}
-        id: smoke
         shell: bash
         run: |
           set -euo pipefail
-          curl -fsS --retry 3 --retry-delay 2 'https://omesg360.eu/?lang=lt' | grep -q 'Stabilizuoti\.'
-          curl -fsS --retry 3 --retry-delay 2 'https://omesg360.eu/?lang=en' | grep -q 'Stabilize\.'
-          curl -fsS --retry 3 --retry-delay 2 'https://omesg360.eu/privacy.html?lang=lt' | grep -q 'Privatumo centras'
-          curl -fsS --retry 3 --retry-delay 2 'https://omesg360.eu/leadership-360/?lang=lt' | grep -q 'Leadership 360'
-          curl -fsS --retry 3 --retry-delay 2 'https://omesg360.eu/leadership-360/?lang=en' | grep -q 'From feedback to action'
-          curl -fsS --retry 3 --retry-delay 2 'https://omesg360.eu/wave1/?lang=lt' >/dev/null
-          curl -fsS --retry 3 --retry-delay 2 'https://omesg360.eu/wave1/?lang=en' >/dev/null
-          curl -fsS --retry 3 --retry-delay 2 'https://omesg360.eu/robots.txt' | grep -q 'https://omesg360.eu/sitemap.xml'
-          curl -fsS --retry 3 --retry-delay 2 'https://omesg360.eu/sitemap.xml' | grep -q 'https://omesg360.eu/leadership-360/'
+          assert_contains() {
+            local url="$1" needle="$2" body
+            body="$(curl -fsS --retry 3 --retry-delay 2 "$url")"
+            grep -Fq "$needle" <<<"$body" || { echo "Smoke content mismatch: $url" >&2; exit 1; }
+          }
+          assert_ok() {
+            curl -fsS --retry 3 --retry-delay 2 -o /dev/null "$1"
+          }
+          assert_contains 'https://omesg360.eu/?lang=lt' 'Stabilizuoti.'
+          assert_contains 'https://omesg360.eu/?lang=en' 'Stabilize.'
+          assert_contains 'https://omesg360.eu/privacy.html?lang=lt' 'Privatumo centras'
+          assert_contains 'https://omesg360.eu/leadership-360/?lang=lt' 'Leadership 360°'
+          assert_contains 'https://omesg360.eu/leadership-360/?lang=en' 'From feedback to action.'
+          assert_ok 'https://olemoz1977.github.io/gla360-personal-full/setup-v2.html?lang=lt'
+          assert_ok 'https://omesg360.eu/wave1/?lang=lt'
+          assert_ok 'https://omesg360.eu/wave1/?lang=en'
+          assert_ok 'https://omesg360.eu/conflictlab/releases/calibration-v0.1/'
+          assert_contains 'https://omesg360.eu/robots.txt' 'https://omesg360.eu/sitemap.xml'
+          assert_contains 'https://omesg360.eu/sitemap.xml' 'https://omesg360.eu/leadership-360/'
           echo 'Production smoke PASS'
 
-      - name: Roll back managed files if smoke failed
+      - name: Roll back managed files if deploy or smoke failed
         if: ${{ !inputs.dry_run && failure() && env.BACKUP_ID != '' }}
         shell: bash
         run: |
           set -euo pipefail
-          echo "Smoke/deploy failure: restoring managed paths from ${BACKUP_ID}"
+          echo "Deploy/smoke failure: restoring managed paths from ${BACKUP_ID}"
           ssh omesg360-hostinger bash -s -- "$REMOTE_ROOT" "$BACKUP_ROOT" "$BACKUP_ID" <<'REMOTE'
           set -euo pipefail
           root="$1"; backup_root="$2"; stamp="$3"
