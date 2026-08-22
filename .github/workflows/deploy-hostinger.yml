@@ -73,7 +73,7 @@ jobs:
         run: |
           set -euo pipefail
           common='set ftp:ssl-allow no; set net:max-retries 2; set net:timeout 20;'
-          lftp -c "$common open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; mirror --reverse --dry-run --verbose --no-perms --parallel=2 .deploy-package \"${REMOTE_BASE}/\""
+          lftp -c "$common open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; lcd .deploy-package; mirror --reverse --dry-run --verbose --no-perms --parallel=2 . \"${REMOTE_BASE}/\""
           echo 'DRY-RUN ONLY: no remote file was modified.'
           echo 'PROTECTED: wave1/, conflictlab/releases/calibration-v0.1/, PHP runtime/config files, databases and every file outside the frontend package.'
 
@@ -123,12 +123,12 @@ jobs:
           done
 
           if lftp -c "$common open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; cls -ld \"${REMOTE_BASE}/assets/img\"" >/dev/null 2>&1; then
-            lftp -c "$common open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; mirror --verbose \"${REMOTE_BASE}/assets/img\" .rollback/assets/img"
+            lftp -c "$common open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; lcd .rollback/assets/img; mirror --verbose \"${REMOTE_BASE}/assets/img\" ."
           fi
 
           if lftp -c "$common open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; cls -ld \"${REMOTE_BASE}/leadership-360\"" >/dev/null 2>&1; then
             echo 'LEADERSHIP_EXISTED=1' >> "$GITHUB_ENV"
-            lftp -c "$common open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; mirror --verbose \"${REMOTE_BASE}/leadership-360\" .rollback/leadership-360"
+            lftp -c "$common open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; lcd .rollback/leadership-360; mirror --verbose \"${REMOTE_BASE}/leadership-360\" ."
           else
             echo 'LEADERSHIP_EXISTED=0' >> "$GITHUB_ENV"
           fi
@@ -139,7 +139,7 @@ jobs:
         run: |
           set -euo pipefail
           common='set ftp:ssl-allow no; set net:max-retries 2; set net:timeout 20;'
-          lftp -c "$common open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; mirror --reverse --verbose --no-perms --parallel=2 .deploy-package \"${REMOTE_BASE}/\""
+          lftp -c "$common open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; lcd .deploy-package; mirror --reverse --verbose --no-perms --parallel=2 . \"${REMOTE_BASE}/\""
           echo 'Frontend upload completed. No remote delete operation was used.'
 
       - name: Post-deploy HTTP smoke
@@ -179,11 +179,11 @@ jobs:
           done
 
           if find .rollback/assets/img -type f | grep -q .; then
-            lftp -c "$common open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; mirror --reverse --verbose --no-perms .rollback/assets/img \"${REMOTE_BASE}/assets/img\""
+            lftp -c "$common open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; lcd .rollback/assets/img; mirror --reverse --verbose --no-perms . \"${REMOTE_BASE}/assets/img\""
           fi
 
           if [[ "${LEADERSHIP_EXISTED:-0}" == '1' ]]; then
-            lftp -c "$common open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; mirror --reverse --verbose --no-perms .rollback/leadership-360 \"${REMOTE_BASE}/leadership-360\""
+            lftp -c "$common open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; lcd .rollback/leadership-360; mirror --reverse --verbose --no-perms . \"${REMOTE_BASE}/leadership-360\""
           else
             lftp -c "$common open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; rm -f \"${REMOTE_BASE}/leadership-360/index.html\"" || true
           fi
