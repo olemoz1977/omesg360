@@ -1,0 +1,24 @@
+name: Deploy OMESG360 frontend to Hostinger
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Preview frontend changes without modifying Hostinger
+        required: true
+        default: true
+        type: boolean
+
+permissions:
+  contents: read
+
+jobs:
+  default-branch-guard:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Prevent deployment from legacy main
+        run: |
+          echo 'This default-branch workflow is a dispatcher bootstrap only.'
+          echo 'Do not deploy the legacy main branch.'
+          echo 'Use Run workflow -> Branch: recovery/v02-clean-baseline.'
+          exit 1
