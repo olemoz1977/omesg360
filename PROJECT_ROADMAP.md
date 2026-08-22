@@ -1,7 +1,7 @@
 # OMESG360 / 2rasi project roadmap and handover
 
 Status: ACTIVE CONTINUITY DOCUMENT
-Last updated: 2026-08-23 00:46 Europe/Vilnius
+Last updated: 2026-08-23 00:47 Europe/Vilnius
 Working branch: `recovery/v02-clean-baseline`
 
 This file is the durable cross-session handover for OMESG360 / 2rasi work. `RECOVERY_AND_INTEGRATION_PLAN.md` contains the detailed recovery rules. Do not resume old incident-era work from chat memory alone.
@@ -145,9 +145,11 @@ It checks:
 
 Current validator commit: `e55baab10dc35b38bd580cda82a283b369943e19`.
 
-Latest GitHub Actions validation:
+Latest verified GitHub Actions state for the new model:
 - `Validate OMESG360 V02` run `32600511455`: **SUCCESS**.
-- `Deploy OMESG360 frontend to Hostinger` run `32600511468`: release validation PASS, then expected FAIL at `Verify FTP secrets`; deploy job skipped; no Hostinger connection/write occurred.
+- `Deploy OMESG360 frontend to Hostinger` run `32600511468`: release validation PASS, expected FAIL at `Verify FTP secrets`, deploy job skipped, **no Hostinger connection/write occurred**.
+
+Later documentation-only commits do not change the validated workflow/validator logic; CI will continue to run on PR updates.
 
 ## Only remaining one-time account setup
 
