@@ -214,8 +214,9 @@ The site owner manually tested both public satellites through the 2rasi.com entr
 - Wave1 public entry/core flow: **PASS** — opens successfully.
 - Calibration public entry/core flow: **PASS** — opens successfully.
 - Wave1 admin surface: **NOT YET CHECKED**.
+- Calibration admin surface: **NOT YET CHECKED**.
 
-This confirms that the current Hostinger satellite deployments are live and reachable. The remaining satellite blocker is therefore **not live availability**; it is exact GitHub mirroring/provenance required for a safe future GitHub -> Hostinger operating model. Do not weaken the GitHub mirror validation gate based only on the live PASS.
+This confirms that the current Hostinger public satellite deployments are live and reachable. It does **not** confirm either admin surface. The remaining satellite blocker is therefore **not public live availability**; it is exact GitHub mirroring/provenance required for a safe future GitHub -> Hostinger operating model. Do not weaken the GitHub mirror validation gate based only on the public PASS.
 
 ## Smoke gate before production promotion
 
@@ -229,6 +230,7 @@ Before recovery branch can become production source, verify at minimum:
 - Wave1 LT/EN URL and core flow — user-verified public PASS on 2026-08-22,
 - Wave1 admin surface — still pending,
 - Calibration URL and core flow — user-verified public PASS on 2026-08-22,
+- Calibration admin surface — still pending,
 - SEO/robots/sitemap routes,
 - no broken references to old root HTML pages,
 - no secrets exposed in public Git history.
@@ -261,7 +263,7 @@ Continue in this order:
 2. Work only on `recovery/v02-clean-baseline`.
 3. Treat Wave1 and Calibration public live availability as already user-verified PASS; do not spend time re-proving basic reachability unless something changes.
 4. Recover/transfer the exact frozen `wave1/` mirror, including all 12 binary stimulus assets; verify known v0.4 hashes/sizes where available.
-5. Check the Wave1 admin surface separately when practical; this is a live maintenance/admin smoke item, not a substitute for GitHub mirror verification.
+5. Check both Wave1 admin and Calibration admin surfaces separately when practical; these are live maintenance/admin smoke items, not substitutes for GitHub mirror verification.
 6. Recover the authoritative complete `conflictlab/releases/calibration-v0.1/` runtime inventory and mirror it without redesign.
 7. Run `scripts/validate-v02.sh`; do not proceed while it is red.
 8. Once validation is green, configure the GitHub `production` Environment variables/secrets without committing credentials.
