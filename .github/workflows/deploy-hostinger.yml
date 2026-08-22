@@ -64,29 +64,15 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          common='set ftp:ssl-allow no; set net:max-retries 1; set net:timeout 20; set cmd:fail-exit yes;'
+          common='set ftp:ssl-allow no; set net:max-retries 2; set net:timeout 20; set cmd:fail-exit yes;'
+          lftp -c "$common open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; cls -1 \"${REMOTE_BASE}/index.html\"" >/dev/null
+          echo 'PASS: OMESG360 FTP root index'
 
-          check_remote() {
-            local label="$1"
-            local command="$2"
-            local path="$3"
-            local attempt
-            for attempt in 1 2 3; do
-              if lftp -c "$common open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; $command \"$path\"" >/dev/null 2>&1; then
-                echo "PASS: $label"
-                return 0
-              fi
-              echo "WARN: $label check failed (attempt $attempt/3)" >&2
-              [[ "$attempt" -lt 3 ]] && sleep $((attempt * 3))
-            done
-            echo "ERROR: $label is not reachable at $path" >&2
-            return 1
-          }
-
-          check_remote 'OMESG360 root index' 'cls -1' "${REMOTE_BASE}/index.html"
-          check_remote 'Wave1 protected entry' 'cls -1' "${REMOTE_BASE}/wave1/index.html"
-          check_remote 'Calibration protected entry' 'cls -1' "${REMOTE_BASE}/conflictlab/releases/calibration-v0.1/index.html"
-          echo 'OMESG360 public_html verified. Wave1 and Calibration detected and protected.'
+          curl -fsS --retry 3 --retry-delay 2 -o /dev/null 'https://omesg360.eu/wave1/?lang=lt'
+          echo 'PASS: Wave1 protected live surface'
+          curl -fsS --retry 3 --retry-delay 2 -o /dev/null 'https://omesg360.eu/conflictlab/releases/calibration-v0.1/'
+          echo 'PASS: Calibration protected live surface'
+          echo 'OMESG360 public_html verified. Protected satellites are live and remain outside the deployment package.'
 
       - name: Preview frontend changes
         shell: bash
@@ -125,28 +111,11 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          common='set ftp:ssl-allow no; set net:max-retries 1; set net:timeout 20; set cmd:fail-exit yes;'
-
-          check_remote() {
-            local label="$1"
-            local command="$2"
-            local path="$3"
-            local attempt
-            for attempt in 1 2 3; do
-              if lftp -c "$common open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; $command \"$path\"" >/dev/null 2>&1; then
-                echo "PASS: $label"
-                return 0
-              fi
-              echo "WARN: $label check failed (attempt $attempt/3)" >&2
-              [[ "$attempt" -lt 3 ]] && sleep $((attempt * 3))
-            done
-            echo "ERROR: $label is not reachable at $path" >&2
-            return 1
-          }
-
-          check_remote 'OMESG360 root index' 'cls -1' "${REMOTE_BASE}/index.html"
-          check_remote 'Wave1 protected entry' 'cls -1' "${REMOTE_BASE}/wave1/index.html"
-          check_remote 'Calibration protected entry' 'cls -1' "${REMOTE_BASE}/conflictlab/releases/calibration-v0.1/index.html"
+          common='set ftp:ssl-allow no; set net:max-retries 2; set net:timeout 20; set cmd:fail-exit yes;'
+          lftp -c "$common open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; cls -1 \"${REMOTE_BASE}/index.html\"" >/dev/null
+          curl -fsS --retry 3 --retry-delay 2 -o /dev/null 'https://omesg360.eu/wave1/?lang=lt'
+          curl -fsS --retry 3 --retry-delay 2 -o /dev/null 'https://omesg360.eu/conflictlab/releases/calibration-v0.1/'
+          echo 'PASS: target root verified; protected satellites live'
 
       - name: Backup managed frontend files to runner
         shell: bash
