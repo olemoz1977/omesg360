@@ -147,8 +147,7 @@ Current validator commit: `e55baab10dc35b38bd580cda82a283b369943e19`.
 
 Latest GitHub Actions validation:
 - `Validate OMESG360 V02` run `32600511455`: **SUCCESS**.
-
-The deployment preview workflow also started on PR #2 and validated the release successfully, then stopped exactly at the expected external gate: `Verify FTP secrets`, because the three repository secrets have not yet been configured. No Hostinger connection/write occurred.
+- `Deploy OMESG360 frontend to Hostinger` run `32600511468`: release validation PASS, then expected FAIL at `Verify FTP secrets`; deploy job skipped; no Hostinger connection/write occurred.
 
 ## Only remaining one-time account setup
 
