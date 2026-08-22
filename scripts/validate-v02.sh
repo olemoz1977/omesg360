@@ -15,6 +15,7 @@ required=(
   assets/img/logo.svg
   assets/img/og-cover.png
   assets/img/og-cover.svg
+  .github/workflows/deploy-hostinger.yml
 )
 
 for path in "${required[@]}"; do
@@ -67,46 +68,49 @@ if find . -type f \( -name 'config.php' -o -name '.env' -o -name '*.pem' -o -nam
 fi
 info "no forbidden runtime secret files"
 
-# Recovery blocker: frozen satellites must be mirrored before production deployment is enabled.
-if [[ ! -d wave1 ]]; then
-  echo "BLOCKER: wave1/ frozen live mirror is not yet present in GitHub" >&2
-  exit 20
-fi
-if [[ ! -d conflictlab/releases/calibration-v0.1 ]]; then
-  echo "BLOCKER: conflictlab/releases/calibration-v0.1/ frozen live mirror is not yet present in GitHub" >&2
-  exit 21
-fi
+# Deployment boundary is the recovery safety contract.
+# Wave1 and Calibration are verified live on Hostinger but remain protected/unmanaged in this V02 deploy.
+python3 - <<'PY'
+from pathlib import Path
+import re
+w = Path('.github/workflows/deploy-hostinger.yml').read_text(encoding='utf-8')
+required = [
+    'workflow_dispatch:',
+    'dry_run:',
+    'environment:',
+    'name: production',
+    'StrictHostKeyChecking yes',
+    'Create rollback snapshot',
+    '.deploy-package/assets/img/',
+    '${REMOTE_ROOT}/assets/img/',
+    '.deploy-package/leadership-360/',
+    '${REMOTE_ROOT}/leadership-360/',
+    'UNTOUCHED: wave1/, conflictlab/releases/calibration-v0.1/',
+]
+for needle in required:
+    if needle not in w:
+        raise SystemExit(f'ERROR: deploy safety contract missing: {needle}')
 
-# Wave 1 v0.4 code plus the unchanged frozen v0.3 stimulus set must all be present.
-wave1_required=(
-  wave1/index.html
-  wave1/api.php
-  wave1/admin.php
-  wave1/assets/more-reveal.webp
-  wave1/assets/less-reveal.jpg
-  wave1/assets/more-evidence.png
-  wave1/assets/less-evidence.png
-  wave1/assets/more-reference.png
-  wave1/assets/less-reference.png
-  wave1/assets/no-predefined-zones.png
-  wave1/assets/predefined-zones.png
-  wave1/assets/fixed-slots.png
-  wave1/assets/continuous-capacity.png
-  wave1/assets/partitioned-space.png
-  wave1/assets/open-space.png
-)
-for path in "${wave1_required[@]}"; do
-  [[ -f "$path" ]] || fail "Wave 1 frozen mirror incomplete: missing $path"
-done
-grep -q "PROTOCOL_VER = 'wave1-v0.4'" wave1/index.html || fail "Wave 1 UI is not frozen v0.4"
-grep -q "'wave1-v0.4'" wave1/api.php || fail "Wave 1 API is not frozen v0.4"
-grep -q "'wave1-v0.4'" wave1/admin.php || fail "Wave 1 admin is not v0.4-aware"
-info "Wave 1 v0.4 code and 12 frozen stimulus assets present"
+# Never sync a package root into public_html with --delete.
+root_delete = re.compile(r'rsync[\s\S]{0,350}?--delete[\s\S]{0,350}?"omesg360-hostinger:\$\{REMOTE_ROOT\}/"')
+if root_delete.search(w):
+    raise SystemExit('ERROR: dangerous root-level rsync --delete detected')
 
-# Calibration filenames are intentionally validated minimally until the exact live package is reconciled.
-[[ -f conflictlab/releases/calibration-v0.1/admin.php ]] || fail "Calibration admin.php missing"
-[[ -f conflictlab/releases/calibration-v0.1/retention_cleanup.php ]] || fail "Calibration retention_cleanup.php missing"
-grep -q 'calibration-v0.1' conflictlab/releases/calibration-v0.1/admin.php || fail "Calibration release identity missing"
-info "Calibration mirror present"
+# Protected satellites and runtime DB/config paths must never be deletion targets.
+for bad in [
+    'rm -rf wave1',
+    'rm -rf conflictlab',
+    '.deploy-package/wave1',
+    '.deploy-package/conflictlab',
+]:
+    if bad in w:
+        raise SystemExit(f'ERROR: protected satellite path appears in managed deploy operation: {bad}')
 
-echo "PASS: OMESG360 V02 recovery validation gate"
+print('OK: deployment is allowlist-scoped; Wave1 and Calibration remain protected/unmanaged')
+PY
+
+# The V02/Leadership package is allowed to proceed without pretending satellite mirroring is complete.
+# Exact Wave1 and Calibration mirrors remain a separate recovery task before satellite deployment is ever automated.
+info "satellite live surfaces are protected from this deployment; exact mirrors deferred to separate satellite recovery"
+
+echo "PASS: OMESG360 V02 + Leadership recovery validation gate"
