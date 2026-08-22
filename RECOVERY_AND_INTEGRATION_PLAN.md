@@ -133,7 +133,7 @@ Workflow behavior:
 Current validation commit: `e55baab10dc35b38bd580cda82a283b369943e19`.
 Latest validation run `32600511455`: **SUCCESS**.
 
-The PR deployment-preview workflow also ran and passed the release validator, then stopped at `Verify FTP secrets`, which is expected because the three secrets are not configured yet. No Hostinger connection/write occurred.
+The PR deployment-preview workflow run `32600511468` also passed the release validator, then stopped at `Verify FTP secrets`, which is expected because the three secrets are not configured yet. Deploy job was skipped and no Hostinger connection/write occurred.
 
 ## Required one-time GitHub setup
 
