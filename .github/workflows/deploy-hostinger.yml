@@ -1,0 +1,213 @@
+name: Deploy OMESG360 to Hostinger
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Preview rsync changes without modifying Hostinger
+        required: true
+        default: true
+        type: boolean
+
+permissions:
+  contents: read
+
+concurrency:
+  group: omesg360-production
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Recovery gate
+        run: bash scripts/validate-v02.sh
+
+  deploy:
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: production
+      url: https://omesg360.eu/
+    env:
+      REMOTE_HOST: ${{ vars.HOSTINGER_HOST }}
+      REMOTE_USER: ${{ vars.HOSTINGER_USER }}
+      REMOTE_PORT: ${{ vars.HOSTINGER_PORT }}
+      REMOTE_ROOT: ${{ vars.HOSTINGER_PUBLIC_PATH }}
+      BACKUP_ROOT: ${{ vars.HOSTINGER_BACKUP_PATH }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Verify deployment configuration
+        shell: bash
+        run: |
+          set -euo pipefail
+          for name in REMOTE_HOST REMOTE_USER REMOTE_PORT REMOTE_ROOT BACKUP_ROOT; do
+            [[ -n "${!name:-}" ]] || { echo "Missing production environment variable: $name" >&2; exit 1; }
+          done
+          [[ "$REMOTE_PORT" =~ ^[0-9]+$ ]] || { echo "HOSTINGER_PORT must be numeric" >&2; exit 1; }
+          [[ "$REMOTE_ROOT" = /* ]] || { echo "HOSTINGER_PUBLIC_PATH must be an absolute path" >&2; exit 1; }
+          [[ "$BACKUP_ROOT" = /* ]] || { echo "HOSTINGER_BACKUP_PATH must be an absolute path" >&2; exit 1; }
+          [[ "$BACKUP_ROOT" != "$REMOTE_ROOT"* ]] || { echo "Backup path must be outside public_html" >&2; exit 1; }
+          [[ -n "${{ secrets.HOSTINGER_SSH_PRIVATE_KEY }}" ]] || { echo "Missing HOSTINGER_SSH_PRIVATE_KEY" >&2; exit 1; }
+          [[ -n "${{ secrets.HOSTINGER_KNOWN_HOSTS }}" ]] || { echo "Missing HOSTINGER_KNOWN_HOSTS" >&2; exit 1; }
+
+      - name: Configure pinned SSH access
+        shell: bash
+        run: |
+          set -euo pipefail
+          install -d -m 700 ~/.ssh
+          printf '%s\n' "${{ secrets.HOSTINGER_SSH_PRIVATE_KEY }}" > ~/.ssh/id_hostinger
+          chmod 600 ~/.ssh/id_hostinger
+          printf '%s\n' "${{ secrets.HOSTINGER_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
+          cat > ~/.ssh/config <<EOF
+          Host omesg360-hostinger
+            HostName ${REMOTE_HOST}
+            User ${REMOTE_USER}
+            Port ${REMOTE_PORT}
+            IdentityFile ~/.ssh/id_hostinger
+            IdentitiesOnly yes
+            StrictHostKeyChecking yes
+            UserKnownHostsFile ~/.ssh/known_hosts
+            BatchMode yes
+          EOF
+          chmod 600 ~/.ssh/config
+          ssh omesg360-hostinger 'printf "SSH_OK\\n"'
+
+      - name: Build managed V02 package
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf .deploy-package
+          mkdir -p .deploy-package/assets/img .deploy-package/leadership-360
+          cp index.html privacy.html robots.txt sitemap.xml sitemap_location.xml .deploy-package/
+          cp assets/img/favicon.svg assets/img/logo.svg assets/img/og-cover.png assets/img/og-cover.svg .deploy-package/assets/img/
+          cp leadership-360/index.html .deploy-package/leadership-360/index.html
+          [[ -f BingSiteAuth.xml ]] && cp BingSiteAuth.xml .deploy-package/
+          [[ -f 9dc780a3ecce49a5897128d85c5d362f.txt ]] && cp 9dc780a3ecce49a5897128d85c5d362f.txt .deploy-package/
+          echo "Managed package:"
+          find .deploy-package -type f -print | sort
+
+      - name: Preview managed changes
+        shell: bash
+        run: |
+          set -euo pipefail
+          SSH_RSYNC='ssh omesg360-hostinger'
+          echo '--- root files ---'
+          rsync -avzn --itemize-changes -e "$SSH_RSYNC" \
+            .deploy-package/index.html \
+            .deploy-package/privacy.html \
+            .deploy-package/robots.txt \
+            .deploy-package/sitemap.xml \
+            .deploy-package/sitemap_location.xml \
+            "${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_ROOT}/"
+          if [[ -f .deploy-package/BingSiteAuth.xml ]]; then
+            rsync -avzn --itemize-changes -e "$SSH_RSYNC" .deploy-package/BingSiteAuth.xml "${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_ROOT}/"
+          fi
+          if [[ -f .deploy-package/9dc780a3ecce49a5897128d85c5d362f.txt ]]; then
+            rsync -avzn --itemize-changes -e "$SSH_RSYNC" .deploy-package/9dc780a3ecce49a5897128d85c5d362f.txt "${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_ROOT}/"
+          fi
+          echo '--- assets/img (managed directory only) ---'
+          rsync -avzn --delete --itemize-changes -e "$SSH_RSYNC" .deploy-package/assets/img/ "${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_ROOT}/assets/img/"
+          echo '--- leadership-360 (managed directory only) ---'
+          rsync -avzn --delete --itemize-changes -e "$SSH_RSYNC" .deploy-package/leadership-360/ "${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_ROOT}/leadership-360/"
+          echo 'UNTOUCHED: wave1/, conflictlab/releases/calibration-v0.1/, runtime config.php files, databases and all other server paths.'
+
+      - name: Stop after dry run
+        if: ${{ inputs.dry_run }}
+        run: echo 'Dry run complete. No Hostinger files were modified.'
+
+      - name: Create rollback snapshot
+        if: ${{ !inputs.dry_run }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          stamp="$(date -u +%Y%m%dT%H%M%SZ)-${GITHUB_SHA::12}"
+          echo "BACKUP_ID=$stamp" >> "$GITHUB_ENV"
+          ssh omesg360-hostinger bash -s -- "$REMOTE_ROOT" "$BACKUP_ROOT" "$stamp" <<'REMOTE'
+          set -euo pipefail
+          root="$1"; backup_root="$2"; stamp="$3"
+          [[ -d "$root" ]] || { echo "Remote root does not exist: $root" >&2; exit 1; }
+          mkdir -p "$backup_root/$stamp"
+          cd "$root"
+          managed=(index.html privacy.html robots.txt sitemap.xml sitemap_location.xml BingSiteAuth.xml 9dc780a3ecce49a5897128d85c5d362f.txt assets/img leadership-360)
+          existing=()
+          for p in "${managed[@]}"; do [[ -e "$p" ]] && existing+=("$p"); done
+          printf '%s\n' "${existing[@]}" > "$backup_root/$stamp/manifest.txt"
+          if ((${#existing[@]})); then
+            tar -czf "$backup_root/$stamp/managed-before.tgz" -- "${existing[@]}"
+          else
+            tar -czf "$backup_root/$stamp/managed-before.tgz" --files-from /dev/null
+          fi
+          printf '%s\n' "$stamp" > "$backup_root/LAST_BACKUP"
+          REMOTE
+          echo "Rollback snapshot: $stamp"
+
+      - name: Deploy managed V02 files
+        if: ${{ !inputs.dry_run }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          SSH_RSYNC='ssh omesg360-hostinger'
+          rsync -avz -e "$SSH_RSYNC" \
+            .deploy-package/index.html \
+            .deploy-package/privacy.html \
+            .deploy-package/robots.txt \
+            .deploy-package/sitemap.xml \
+            .deploy-package/sitemap_location.xml \
+            "${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_ROOT}/"
+          if [[ -f .deploy-package/BingSiteAuth.xml ]]; then
+            rsync -avz -e "$SSH_RSYNC" .deploy-package/BingSiteAuth.xml "${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_ROOT}/"
+          fi
+          if [[ -f .deploy-package/9dc780a3ecce49a5897128d85c5d362f.txt ]]; then
+            rsync -avz -e "$SSH_RSYNC" .deploy-package/9dc780a3ecce49a5897128d85c5d362f.txt "${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_ROOT}/"
+          fi
+          rsync -avz --delete -e "$SSH_RSYNC" .deploy-package/assets/img/ "${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_ROOT}/assets/img/"
+          rsync -avz --delete -e "$SSH_RSYNC" .deploy-package/leadership-360/ "${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_ROOT}/leadership-360/"
+
+      - name: Post-deploy HTTP smoke
+        if: ${{ !inputs.dry_run }}
+        id: smoke
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsS --retry 3 --retry-delay 2 'https://omesg360.eu/?lang=lt' | grep -q 'Stabilizuoti\.'
+          curl -fsS --retry 3 --retry-delay 2 'https://omesg360.eu/?lang=en' | grep -q 'Stabilize\.'
+          curl -fsS --retry 3 --retry-delay 2 'https://omesg360.eu/privacy.html?lang=lt' | grep -q 'Privatumo centras'
+          curl -fsS --retry 3 --retry-delay 2 'https://omesg360.eu/leadership-360/?lang=lt' | grep -q 'Leadership 360'
+          curl -fsS --retry 3 --retry-delay 2 'https://omesg360.eu/leadership-360/?lang=en' | grep -q 'From feedback to action'
+          curl -fsS --retry 3 --retry-delay 2 'https://omesg360.eu/wave1/?lang=lt' >/dev/null
+          curl -fsS --retry 3 --retry-delay 2 'https://omesg360.eu/wave1/?lang=en' >/dev/null
+          curl -fsS --retry 3 --retry-delay 2 'https://omesg360.eu/robots.txt' | grep -q 'https://omesg360.eu/sitemap.xml'
+          curl -fsS --retry 3 --retry-delay 2 'https://omesg360.eu/sitemap.xml' | grep -q 'https://omesg360.eu/leadership-360/'
+          echo 'Production smoke PASS'
+
+      - name: Roll back managed files if smoke failed
+        if: ${{ !inputs.dry_run && failure() && env.BACKUP_ID != '' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "Smoke/deploy failure: restoring managed paths from ${BACKUP_ID}"
+          ssh omesg360-hostinger bash -s -- "$REMOTE_ROOT" "$BACKUP_ROOT" "$BACKUP_ID" <<'REMOTE'
+          set -euo pipefail
+          root="$1"; backup_root="$2"; stamp="$3"
+          archive="$backup_root/$stamp/managed-before.tgz"
+          [[ -f "$archive" ]] || { echo "Rollback archive missing" >&2; exit 1; }
+          cd "$root"
+          rm -f index.html privacy.html robots.txt sitemap.xml sitemap_location.xml BingSiteAuth.xml 9dc780a3ecce49a5897128d85c5d362f.txt
+          rm -rf assets/img leadership-360
+          tar -xzf "$archive" -C "$root"
+          echo "Rollback restored managed paths from $stamp"
+          REMOTE
+
+      - name: Record deploy result
+        if: ${{ !inputs.dry_run && success() }}
+        run: |
+          echo "Deployed commit ${GITHUB_SHA}"
+          echo "Rollback backup ${BACKUP_ID}"
