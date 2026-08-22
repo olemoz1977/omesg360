@@ -20,7 +20,7 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  FTP_HOST: ${{ secrets.HOSTINGER_FTP_HOST }}
+  FTP_HOST: 46.202.142.134
   FTP_USER: ${{ secrets.HOSTINGER_FTP_USER }}
   FTP_PASSWORD: ${{ secrets.HOSTINGER_FTP_PASSWORD }}
 
@@ -39,7 +39,6 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          [[ -n "${FTP_HOST:-}" ]] || { echo 'Missing HOSTINGER_FTP_HOST repository secret' >&2; exit 1; }
           [[ -n "${FTP_USER:-}" ]] || { echo 'Missing HOSTINGER_FTP_USER repository secret' >&2; exit 1; }
           [[ -n "${FTP_PASSWORD:-}" ]] || { echo 'Missing HOSTINGER_FTP_PASSWORD repository secret' >&2; exit 1; }
 
@@ -74,7 +73,6 @@ jobs:
             exit 1
           fi
 
-          # Fail closed unless both live research satellites are visible in the same web root.
           lftp -c "$common open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; cls -ld \"${base}/wave1\"; cls -ld \"${base}/conflictlab/releases/calibration-v0.1\"" >/dev/null
           echo "REMOTE_BASE=$base" >> "$GITHUB_ENV"
           echo 'Hostinger web root verified. Wave1 and Calibration detected and protected.'
