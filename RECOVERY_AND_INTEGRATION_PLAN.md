@@ -10,6 +10,8 @@ On 2026-08-22 an automated Git -> Hostinger deployment was connected to the OMES
 
 The current GitHub repository therefore must not be treated as a verified mirror of production until reconciliation is complete.
 
+Important clarification: the incident did **not** invalidate the automation goal. The automation was being built specifically so future OMESG360 development could be handled through GitHub and deployed to Hostinger independently, without routine manual file maintenance by the site owner. The failure was in the safety model/source branch/deploy boundary, not in the objective itself.
+
 ## Safety rules
 
 1. Do not deploy `agent/leadership-360-home` to Hostinger.
@@ -18,12 +20,13 @@ The current GitHub repository therefore must not be treated as a verified mirror
 4. Perform cleanup and reconstruction only in `recovery/v02-clean-baseline` until smoke testing is complete.
 5. Do not modify the active Wave1 or Calibration satellites during the OMESG360 homepage / Leadership 360 integration work.
 6. Do not copy secrets, server credentials, `.env` values or private configuration into public Git history.
+7. Re-enable automation only after the production source branch, deploy root, exclusions/protected paths, smoke checks and rollback path are verified.
 
-## Current coordination checkpoint — 2026-08-22 22:19 Europe/Vilnius
+## Current coordination checkpoint — 2026-08-22 22:24 Europe/Vilnius
 
-- The site owner is cleaning the recovered Hostinger `public_html` manually.
+- The site owner completed the Hostinger cleanup/recovery manually after the incident.
 - GitHub recovery/cleanup is handled separately in `recovery/v02-clean-baseline`.
-- Do not use GitHub writes as a shortcut to modify Hostinger during recovery.
+- During recovery, do not use GitHub writes as a shortcut to modify Hostinger.
 - `main` and `agent/leadership-360-home` remain untouched by cleanup work.
 - The current Hostinger image asset set intentionally kept is:
   - `assets/img/favicon.svg`
@@ -31,6 +34,7 @@ The current GitHub repository therefore must not be treated as a verified mirror
   - `assets/img/og-cover.png`
   - `assets/img/og-cover.svg`
 - There is no intended `public/assets` layer; the working site structure uses root `assets/`.
+- After clean integration is proven, the intended operating model returns to GitHub-driven automatic Hostinger deployment so future work can be done independently and safely.
 
 ## Production baseline supplied from Hostinger
 
@@ -106,11 +110,26 @@ Preferred framing while only one full professional product exists: `LEADERSHIP D
 5. Add a native Leadership 360 homepage entry card to the clean V02 homepage.
 6. Build a new `/leadership-360/` product page using OMESG360 visual language while preserving the frozen Leadership 360 contracts and backend.
 7. Smoke-test navigation, LT/EN behavior, privacy links, product entry, Wave1 and Calibration.
-8. Only after verification decide how the clean branch is promoted to `main` and how Hostinger deployment will be re-enabled safely.
+8. Promote one verified production source branch only after the clean integration passes.
+9. Rebuild GitHub -> Hostinger automation with explicit deployment boundaries, protected/excluded paths, pre/post-deploy checks and rollback/recovery.
+10. Prove that automatic deployment is safe, then use it as the normal future OMESG360 operating model.
+
+## Automation target — temporarily deferred, not abandoned
+
+Automatic Hostinger deployment is deferred only during recovery and integration verification.
+
+Final target:
+- changes are implemented in GitHub,
+- a defined validation/smoke gate runs before promotion/deploy,
+- one verified source branch deploys to the correct Hostinger target,
+- Wave1, Calibration, private/server support and unrelated directories cannot be erased by a site deploy,
+- a post-deploy smoke check confirms the site state,
+- rollback/recovery is available if a deployment fails,
+- routine future OMESG360 programming/deployment does not require the site owner to manually upload or edit production files.
 
 ## Deferred until after clean integration
 
-- automatic Hostinger deployment
+- re-enabling automatic Hostinger deployment before the safety model above is proven
 - deletion of archived pre-V02 content
 - changing the frozen Leadership 360 backend architecture
 - changing Wave1 or Calibration
