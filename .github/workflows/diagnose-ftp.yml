@@ -27,8 +27,12 @@ jobs:
           common='set ftp:ssl-allow no; set net:max-retries 1; set net:timeout 15; set cmd:fail-exit yes;'
           echo 'Testing FTP login (read-only)...'
           lftp -c "$common open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; pwd"
-          echo 'Testing expected root locations (read-only)...'
-          if lftp -c "$common open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; cls -1 /public_html/index.html"; then
+          echo 'Testing expected OMESG360 paths (read-only)...'
+          if lftp -c "$common open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; cls -1 /domains/omesg360.eu/public_html/index.html"; then
+            echo 'ROOT_MODE=/domains/omesg360.eu/public_html'
+          elif lftp -c "$common open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; cls -1 /home/u986950573/domains/omesg360.eu/public_html/index.html"; then
+            echo 'ROOT_MODE=/home/u986950573/domains/omesg360.eu/public_html'
+          elif lftp -c "$common open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; cls -1 /public_html/index.html"; then
             echo 'ROOT_MODE=/public_html'
           elif lftp -c "$common open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; cls -1 /index.html"; then
             echo 'ROOT_MODE=/'
