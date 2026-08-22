@@ -64,8 +64,28 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          common='set ftp:ssl-allow no; set net:max-retries 2; set net:timeout 20; set cmd:fail-exit yes;'
-          lftp -c "$common open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; cls -1 \"${REMOTE_BASE}/index.html\"; cls -ld \"${REMOTE_BASE}/wave1\"; cls -ld \"${REMOTE_BASE}/conflictlab/releases/calibration-v0.1\"" >/dev/null
+          common='set ftp:ssl-allow no; set net:max-retries 1; set net:timeout 20; set cmd:fail-exit yes;'
+
+          check_remote() {
+            local label="$1"
+            local command="$2"
+            local path="$3"
+            local attempt
+            for attempt in 1 2 3; do
+              if lftp -c "$common open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; $command \"$path\"" >/dev/null 2>&1; then
+                echo "PASS: $label"
+                return 0
+              fi
+              echo "WARN: $label check failed (attempt $attempt/3)" >&2
+              [[ "$attempt" -lt 3 ]] && sleep $((attempt * 3))
+            done
+            echo "ERROR: $label is not reachable at $path" >&2
+            return 1
+          }
+
+          check_remote 'OMESG360 root index' 'cls -1' "${REMOTE_BASE}/index.html"
+          check_remote 'Wave1 protected directory' 'cls -ld' "${REMOTE_BASE}/wave1"
+          check_remote 'Calibration protected directory' 'cls -ld' "${REMOTE_BASE}/conflictlab/releases/calibration-v0.1"
           echo 'OMESG360 public_html verified. Wave1 and Calibration detected and protected.'
 
       - name: Preview frontend changes
@@ -105,8 +125,28 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          common='set ftp:ssl-allow no; set net:max-retries 2; set net:timeout 20; set cmd:fail-exit yes;'
-          lftp -c "$common open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; cls -1 \"${REMOTE_BASE}/index.html\"; cls -ld \"${REMOTE_BASE}/wave1\"; cls -ld \"${REMOTE_BASE}/conflictlab/releases/calibration-v0.1\"" >/dev/null
+          common='set ftp:ssl-allow no; set net:max-retries 1; set net:timeout 20; set cmd:fail-exit yes;'
+
+          check_remote() {
+            local label="$1"
+            local command="$2"
+            local path="$3"
+            local attempt
+            for attempt in 1 2 3; do
+              if lftp -c "$common open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; $command \"$path\"" >/dev/null 2>&1; then
+                echo "PASS: $label"
+                return 0
+              fi
+              echo "WARN: $label check failed (attempt $attempt/3)" >&2
+              [[ "$attempt" -lt 3 ]] && sleep $((attempt * 3))
+            done
+            echo "ERROR: $label is not reachable at $path" >&2
+            return 1
+          }
+
+          check_remote 'OMESG360 root index' 'cls -1' "${REMOTE_BASE}/index.html"
+          check_remote 'Wave1 protected directory' 'cls -ld' "${REMOTE_BASE}/wave1"
+          check_remote 'Calibration protected directory' 'cls -ld' "${REMOTE_BASE}/conflictlab/releases/calibration-v0.1"
 
       - name: Backup managed frontend files to runner
         shell: bash
