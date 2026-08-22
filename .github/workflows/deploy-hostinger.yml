@@ -23,6 +23,7 @@ env:
   FTP_HOST: 46.202.142.134
   FTP_USER: ${{ secrets.HOSTINGER_FTP_USER }}
   FTP_PASSWORD: ${{ secrets.HOSTINGER_FTP_PASSWORD }}
+  REMOTE_BASE: /domains/omesg360.eu/public_html
 
 jobs:
   validate-and-preview:
@@ -59,23 +60,13 @@ jobs:
           echo 'Frontend-only package:'
           find .deploy-package -type f -print | sort
 
-      - name: Detect safe Hostinger web root
+      - name: Verify protected Hostinger root read-only
         shell: bash
         run: |
           set -euo pipefail
-          common='set ftp:ssl-allow no; set net:max-retries 2; set net:timeout 20;'
-          if lftp -c "$common open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; cls -1 /public_html/index.html" >/dev/null 2>&1; then
-            base='/public_html'
-          elif lftp -c "$common open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; cls -1 /index.html" >/dev/null 2>&1; then
-            base=''
-          else
-            echo 'FTP account does not expose the expected OMESG360 web root.' >&2
-            exit 1
-          fi
-
-          lftp -c "$common open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; cls -ld \"${base}/wave1\"; cls -ld \"${base}/conflictlab/releases/calibration-v0.1\"" >/dev/null
-          echo "REMOTE_BASE=$base" >> "$GITHUB_ENV"
-          echo 'Hostinger web root verified. Wave1 and Calibration detected and protected.'
+          common='set ftp:ssl-allow no; set net:max-retries 2; set net:timeout 20; set cmd:fail-exit yes;'
+          lftp -c "$common open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; cls -1 \"${REMOTE_BASE}/index.html\"; cls -ld \"${REMOTE_BASE}/wave1\"; cls -ld \"${REMOTE_BASE}/conflictlab/releases/calibration-v0.1\"" >/dev/null
+          echo 'OMESG360 public_html verified. Wave1 and Calibration detected and protected.'
 
       - name: Preview frontend changes
         shell: bash
@@ -110,21 +101,12 @@ jobs:
           [[ -f BingSiteAuth.xml ]] && cp BingSiteAuth.xml .deploy-package/
           [[ -f 9dc780a3ecce49a5897128d85c5d362f.txt ]] && cp 9dc780a3ecce49a5897128d85c5d362f.txt .deploy-package/
 
-      - name: Detect safe Hostinger web root again
+      - name: Verify protected Hostinger root again
         shell: bash
         run: |
           set -euo pipefail
-          common='set ftp:ssl-allow no; set net:max-retries 2; set net:timeout 20;'
-          if lftp -c "$common open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; cls -1 /public_html/index.html" >/dev/null 2>&1; then
-            base='/public_html'
-          elif lftp -c "$common open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; cls -1 /index.html" >/dev/null 2>&1; then
-            base=''
-          else
-            echo 'FTP account does not expose the expected OMESG360 web root.' >&2
-            exit 1
-          fi
-          lftp -c "$common open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; cls -ld \"${base}/wave1\"; cls -ld \"${base}/conflictlab/releases/calibration-v0.1\"" >/dev/null
-          echo "REMOTE_BASE=$base" >> "$GITHUB_ENV"
+          common='set ftp:ssl-allow no; set net:max-retries 2; set net:timeout 20; set cmd:fail-exit yes;'
+          lftp -c "$common open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; cls -1 \"${REMOTE_BASE}/index.html\"; cls -ld \"${REMOTE_BASE}/wave1\"; cls -ld \"${REMOTE_BASE}/conflictlab/releases/calibration-v0.1\"" >/dev/null
 
       - name: Backup managed frontend files to runner
         shell: bash
