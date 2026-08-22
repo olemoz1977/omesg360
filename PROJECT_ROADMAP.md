@@ -1,7 +1,7 @@
 # OMESG360 / 2rasi project roadmap and handover
 
 Status: ACTIVE CONTINUITY DOCUMENT
-Last updated: 2026-08-22 23:24 Europe/Vilnius
+Last updated: 2026-08-22 23:26 Europe/Vilnius
 Working branch: `recovery/v02-clean-baseline`
 
 This file exists so project-critical plans do not live only in chat history. Accepted but not-yet-implemented ideas and decisions must be written here before a work session ends.
@@ -213,10 +213,10 @@ However, the complete frozen runtime release inventory has not yet been recovere
 The site owner manually tested both public satellites through the 2rasi.com entry points shortly before this checkpoint:
 - Wave1 public entry/core flow: **PASS** — opens successfully.
 - Calibration public entry/core flow: **PASS** — opens successfully.
-- Wave1 admin surface: **NOT YET CHECKED**.
+- Wave1 admin surface: **PASS** — screenshot at 23:26 Europe/Vilnius confirms the live `ConflictLab — Human Wave 1` read-only admin and explicitly identifies `wave1-v0.4`.
 - Calibration admin surface: **NOT YET CHECKED**.
 
-This confirms that the current Hostinger public satellite deployments are live and reachable. It does **not** confirm either admin surface. The remaining satellite blocker is therefore **not public live availability**; it is exact GitHub mirroring/provenance required for a safe future GitHub -> Hostinger operating model. Do not weaken the GitHub mirror validation gate based only on the public PASS.
+This confirms that the current Hostinger public satellite deployments are live and reachable and that the Wave1 v0.4 admin surface is also live. The remaining satellite blocker is therefore **not Wave1 live availability**; it is exact GitHub mirroring/provenance required for a safe future GitHub -> Hostinger operating model. Do not weaken the GitHub mirror validation gate based only on the live PASS.
 
 ## Smoke gate before production promotion
 
@@ -228,7 +228,7 @@ Before recovery branch can become production source, verify at minimum:
 - `/leadership-360/` page,
 - frozen Leadership 360 entry flow,
 - Wave1 LT/EN URL and core flow — user-verified public PASS on 2026-08-22,
-- Wave1 admin surface — still pending,
+- Wave1 admin surface — user-verified PASS on 2026-08-22; screenshot confirms `wave1-v0.4`,
 - Calibration URL and core flow — user-verified public PASS on 2026-08-22,
 - Calibration admin surface — still pending,
 - SEO/robots/sitemap routes,
@@ -261,9 +261,9 @@ Do **not** restart V02 reconstruction or Leadership 360 integration. Those GitHu
 Continue in this order:
 1. Read this file and `RECOVERY_AND_INTEGRATION_PLAN.md`.
 2. Work only on `recovery/v02-clean-baseline`.
-3. Treat Wave1 and Calibration public live availability as already user-verified PASS; do not spend time re-proving basic reachability unless something changes.
+3. Treat Wave1 public + admin and Calibration public live availability as already user-verified PASS; do not spend time re-proving those surfaces unless something changes.
 4. Recover/transfer the exact frozen `wave1/` mirror, including all 12 binary stimulus assets; verify known v0.4 hashes/sizes where available.
-5. Check both Wave1 admin and Calibration admin surfaces separately when practical; these are live maintenance/admin smoke items, not substitutes for GitHub mirror verification.
+5. Check Calibration admin separately when practical; this is a live maintenance/admin smoke item, not a substitute for GitHub mirror verification.
 6. Recover the authoritative complete `conflictlab/releases/calibration-v0.1/` runtime inventory and mirror it without redesign.
 7. Run `scripts/validate-v02.sh`; do not proceed while it is red.
 8. Once validation is green, configure the GitHub `production` Environment variables/secrets without committing credentials.
