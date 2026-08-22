@@ -69,48 +69,47 @@ fi
 info "no forbidden runtime secret files"
 
 # Deployment boundary is the recovery safety contract.
-# Wave1 and Calibration are verified live on Hostinger but remain protected/unmanaged in this V02 deploy.
+# This release uses FTP/FTPS only for a generated frontend allowlist package.
 python3 - <<'PY'
 from pathlib import Path
-import re
 w = Path('.github/workflows/deploy-hostinger.yml').read_text(encoding='utf-8')
 required = [
     'workflow_dispatch:',
+    'pull_request:',
     'dry_run:',
-    'environment:',
-    'name: production',
-    'StrictHostKeyChecking yes',
-    'Create rollback snapshot',
-    '.deploy-package/assets/img/',
-    '${REMOTE_ROOT}/assets/img/',
-    '.deploy-package/leadership-360/',
-    '${REMOTE_ROOT}/leadership-360/',
-    'UNTOUCHED: wave1/, conflictlab/releases/calibration-v0.1/',
+    'HOSTINGER_FTP_HOST',
+    'HOSTINGER_FTP_USER',
+    'HOSTINGER_FTP_PASSWORD',
+    'Build frontend-only package',
+    'mirror --reverse --dry-run',
+    '.deploy-package/assets/img',
+    '.deploy-package/leadership-360',
+    'wave1',
+    'conflictlab/releases/calibration-v0.1',
+    'No remote delete operation was used',
+    'Post-deploy HTTP smoke',
+    'Restore previous frontend if upload or smoke fails',
 ]
 for needle in required:
     if needle not in w:
         raise SystemExit(f'ERROR: deploy safety contract missing: {needle}')
 
-# Never sync a package root into public_html with --delete.
-root_delete = re.compile(r'rsync[\s\S]{0,350}?--delete[\s\S]{0,350}?"omesg360-hostinger:\$\{REMOTE_ROOT\}/"')
-if root_delete.search(w):
-    raise SystemExit('ERROR: dangerous root-level rsync --delete detected')
+# Recovery deploy must not use broad SSH/rsync or any delete-mirroring behavior.
+for forbidden in ['rsync ', 'StrictHostKeyChecking', '--delete', 'rm -rf wave1', 'rm -rf conflictlab']:
+    if forbidden in w:
+        raise SystemExit(f'ERROR: forbidden deployment operation detected: {forbidden}')
 
-# Protected satellites and runtime DB/config paths must never be deletion targets.
-for bad in [
-    'rm -rf wave1',
-    'rm -rf conflictlab',
-    '.deploy-package/wave1',
-    '.deploy-package/conflictlab',
-]:
+# Protected satellites must never enter the generated frontend package.
+for bad in ['.deploy-package/wave1', '.deploy-package/conflictlab', 'cp wave1', 'cp conflictlab']:
     if bad in w:
-        raise SystemExit(f'ERROR: protected satellite path appears in managed deploy operation: {bad}')
+        raise SystemExit(f'ERROR: protected satellite path appears in frontend package: {bad}')
 
-print('OK: deployment is allowlist-scoped; Wave1 and Calibration remain protected/unmanaged')
+# Actual writes are manual-only; PR execution is preview-only.
+if "github.event_name == 'workflow_dispatch' && !inputs.dry_run" not in w:
+    raise SystemExit('ERROR: real deploy is not constrained to explicit manual non-dry-run dispatch')
+
+print('OK: frontend-only FTPS deployment contract; satellites remain protected/unmanaged')
 PY
 
-# The V02/Leadership package is allowed to proceed without pretending satellite mirroring is complete.
-# Exact Wave1 and Calibration mirrors remain a separate recovery task before satellite deployment is ever automated.
-info "satellite live surfaces are protected from this deployment; exact mirrors deferred to separate satellite recovery"
-
+info "satellite live surfaces are protected from this deployment; exact mirrors remain a separate backlog item"
 echo "PASS: OMESG360 V02 + Leadership recovery validation gate"
