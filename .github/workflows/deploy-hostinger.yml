@@ -42,7 +42,7 @@ jobs:
           [[ -n "${FTP_USER:-}" ]] || { echo 'Missing HOSTINGER_FTP_USER repository secret' >&2; exit 1; }
           [[ -n "${FTP_PASSWORD:-}" ]] || { echo 'Missing HOSTINGER_FTP_PASSWORD repository secret' >&2; exit 1; }
 
-      - name: Install FTPS client
+      - name: Install FTP client
         run: sudo apt-get update -qq && sudo apt-get install -y -qq lftp
 
       - name: Build frontend-only package
@@ -63,7 +63,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          common='set ssl:verify-certificate yes; set ftp:ssl-force true; set ftp:ssl-protect-data true; set net:max-retries 2; set net:timeout 20;'
+          common='set ftp:ssl-allow no; set net:max-retries 2; set net:timeout 20;'
           if lftp -c "$common open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; cls -1 /public_html/index.html" >/dev/null 2>&1; then
             base='/public_html'
           elif lftp -c "$common open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; cls -1 /index.html" >/dev/null 2>&1; then
@@ -81,7 +81,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          common='set ssl:verify-certificate yes; set ftp:ssl-force true; set ftp:ssl-protect-data true; set net:max-retries 2; set net:timeout 20;'
+          common='set ftp:ssl-allow no; set net:max-retries 2; set net:timeout 20;'
           lftp -c "$common open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; mirror --reverse --dry-run --verbose --no-perms --parallel=2 .deploy-package \"${REMOTE_BASE}/\""
           echo 'DRY-RUN ONLY: no remote file was modified.'
           echo 'PROTECTED: wave1/, conflictlab/releases/calibration-v0.1/, PHP runtime/config files, databases and every file outside the frontend package.'
@@ -95,7 +95,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install FTPS client
+      - name: Install FTP client
         run: sudo apt-get update -qq && sudo apt-get install -y -qq lftp
 
       - name: Build frontend-only package
@@ -114,7 +114,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          common='set ssl:verify-certificate yes; set ftp:ssl-force true; set ftp:ssl-protect-data true; set net:max-retries 2; set net:timeout 20;'
+          common='set ftp:ssl-allow no; set net:max-retries 2; set net:timeout 20;'
           if lftp -c "$common open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; cls -1 /public_html/index.html" >/dev/null 2>&1; then
             base='/public_html'
           elif lftp -c "$common open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; cls -1 /index.html" >/dev/null 2>&1; then
@@ -130,7 +130,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          common='set ssl:verify-certificate yes; set ftp:ssl-force true; set ftp:ssl-protect-data true; set net:max-retries 2; set net:timeout 20;'
+          common='set ftp:ssl-allow no; set net:max-retries 2; set net:timeout 20;'
           rm -rf .rollback
           mkdir -p .rollback/root .rollback/assets/img .rollback/leadership-360
 
@@ -156,7 +156,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          common='set ssl:verify-certificate yes; set ftp:ssl-force true; set ftp:ssl-protect-data true; set net:max-retries 2; set net:timeout 20;'
+          common='set ftp:ssl-allow no; set net:max-retries 2; set net:timeout 20;'
           lftp -c "$common open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; mirror --reverse --verbose --no-perms --parallel=2 .deploy-package \"${REMOTE_BASE}/\""
           echo 'Frontend upload completed. No remote delete operation was used.'
 
@@ -189,7 +189,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          common='set ssl:verify-certificate yes; set ftp:ssl-force true; set ftp:ssl-protect-data true; set net:max-retries 2; set net:timeout 20;'
+          common='set ftp:ssl-allow no; set net:max-retries 2; set net:timeout 20;'
 
           for f in .rollback/root/*; do
             [[ -f "$f" ]] || continue
