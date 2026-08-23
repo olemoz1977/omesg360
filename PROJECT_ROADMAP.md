@@ -1,7 +1,7 @@
 # OMESG360 / 2rasi project roadmap and handover
 
 Status: ACTIVE CONTINUITY DOCUMENT
-Last updated: 2026-08-23 05:10 Europe/Vilnius
+Last updated: 2026-08-23 05:25 Europe/Vilnius
 Primary OMESG360 branch: `main`
 Primary 2rasi branch: `hero-webgl`
 
@@ -63,20 +63,28 @@ Wave1 and Calibration are mirrored in GitHub for recovery/source integrity, but 
 - Satellite GitHub mirror: 83 files exactly; secret config paths absent from GitHub.
 - Temporary recovery/hotfix workflows: removed.
 
-## 2rasi Leadership routing integration
-Completed on `olemoz1977/2rasi-web`, branch `hero-webgl`, commit `76db8161cedb58cc3f3c53b15073fe6093187cbd`.
+## 2rasi Leadership integration — COMPLETE
+Routing integration completed on `olemoz1977/2rasi-web`, branch `hero-webgl`, commit `76db8161cedb58cc3f3c53b15073fe6093187cbd`.
 
-Routing now is:
-- 2rasi Leadership card `Start` -> `https://omesg360.eu/leadership-360/?lang=en` as HTML fallback;
-- `i18n.js` rewrites the card route to `?lang=en` or `?lang=lt` from the active 2rasi language/domain;
-- both CTAs on `tools/leadership-360/` -> `https://omesg360.eu/leadership-360/`;
-- no direct 2rasi Leadership CTA points to the frozen `gla360-personal-full` product anymore.
+Leadership About/positioning cleanup completed on the same branch, commit `fc65c33f5fdec2c5416a2b8bdf6447a489577162`.
 
-The frozen Leadership product remains unchanged and is entered only from the OMESG360 Leadership presentation page.
+Current routing:
+- `2rasi.com` Leadership Start -> `https://omesg360.eu/leadership-360/?lang=en`;
+- `2rasi.lt` Leadership Start -> `https://omesg360.eu/leadership-360/?lang=lt`;
+- 2rasi Leadership About is bilingual and links to the full professional overview on OMESG360;
+- OMESG360 Leadership presentation -> frozen `gla360-personal-full` setup/product;
+- no direct 2rasi Leadership CTA bypasses OMESG360.
+
+Human/live end-to-end validation completed on 2026-08-23:
+- EN path: PASS;
+- LT path: PASS.
+
+Leadership integration is now frozen. Reopen only for a new explicit product requirement or production defect.
 
 ## Current gate
-OMESG360 production baseline is healthy and recovered. Do not re-enable Hostinger Git auto-deployment.
+OMESG360 production baseline is healthy and recovered. Leadership integration is complete. Do not re-enable Hostinger Git auto-deployment.
 
-2rasi source routing integration is complete. Final human/live click validation on `2rasi.com` and `2rasi.lt` should confirm Pages propagation and the language-aware route.
+## Next product step
+Return to 2Pair core work. Wave1 and Calibration remain active research satellites; new product work should consolidate validated findings into the main 2Pair direction rather than reopening recovery or Leadership integration.
 
 `PROJECT_ROADMAP.md` + `RECOVERY_AND_INTEGRATION_PLAN.md` remain source of truth.
