@@ -1,147 +1,77 @@
 # OMESG360 / 2rasi project roadmap and handover
 
 Status: ACTIVE CONTINUITY DOCUMENT
-Last updated: 2026-08-23 03:08 Europe/Vilnius
+Last updated: 2026-08-23 03:09 Europe/Vilnius
 Working branch: `recovery/v02-clean-baseline`
 
 This file is the durable cross-session handover. `RECOVERY_AND_INTEGRATION_PLAN.md` is the detailed recovery contract. Do not resume incident-era work from chat memory alone.
 
-## Source-of-truth boundaries
+## Current production baseline
 
-### OMESG360 production
-- Hostinger recovered V02 is the accepted healthy live baseline until the first controlled recovery deploy.
-- GitHub recovery/integration work happens on `recovery/v02-clean-baseline` until `main` correction is complete.
-- `agent/leadership-360-home` is historical incident-era work and must never be deployed.
-- `archive/pre-recovery-2026-08-22` remains the historical checkpoint.
+- Hostinger `public_html` was manually restored from the known-good backup after the second overwrite.
+- Hostinger Git auto-deployment from `olemoz1977/omesg360` `main` to `public_html` is now disabled.
+- The restored backup is the server reference for V02 + Wave1 + Calibration runtime.
+- Runtime secrets remain Hostinger-only and must never be committed: `.private/`, `wave1/config.php`, `conflictlab/releases/calibration-v0.1/server/config.php`, databases and credentials.
 
-### 2026-08-23 recovery correction
-- Root cause of the second overwrite was identified: Hostinger Git auto-deployment was still enabled for `olemoz1977/omesg360` `main` with target `public_html`.
-- Merging the dispatcher bootstrap commit to `main` therefore caused Hostinger to redeploy the old mixed `main` tree into `public_html` even though the GitHub Actions FTP deploy itself had not written production.
-- User restored the known-good `public_html` backup manually.
-- Hostinger Git auto-deployment has now been disabled by the user.
-- The uploaded backup is accepted as the current server recovery reference, including live Wave1 and Calibration runtime trees. Runtime secrets (`.private/`, `wave1/config.php`, `conflictlab/releases/calibration-v0.1/server/config.php`) remain Hostinger-only and must never be committed.
-- With auto-deployment disabled, `main` can now be corrected without Hostinger redeploying automatically.
+## Root cause recorded
 
-### Leadership 360
-- Product logic is FROZEN in `olemoz1977/gla360-personal-full` after clean C1 E2E PASS.
-- OMESG360 owns presentation/routing only.
-- Recovery branch contains:
-  - homepage `LEADERSHIP DEVELOPMENT / Leadership 360°` entry after methodology and before About;
-  - native `/leadership-360/` page;
-  - LT/EN behavior;
-  - Start CTA to frozen `gla360-personal-full/setup-v2.html?lang=lt|en`.
-- Live `omesg360.eu` currently reflects the manually restored backup; the new Leadership entry is not yet deployed through the controlled frontend workflow.
+The second overwrite did not come from the new FTP workflow. Manual run #22 stopped before deploy and later PR runs were preview-only. The overwrite was caused by the still-enabled Hostinger Git auto-deployment reacting to the `main` bootstrap merge and redeploying the old mixed `main` tree into `public_html`.
 
-### 2rasi
-- `2rasi.com` remains discovery/hook layer.
-- After OMESG360 Leadership is production-live and tested, change 2rasi primary Leadership Start to `https://omesg360.eu/leadership-360/`.
+## GitHub target state
 
-### 2Pair satellites
-- Wave1 and Calibration are active research satellites outside the frontend package.
-- User-verified live PASS before the overwrite:
-  - Wave1 public/core PASS;
-  - Wave1 admin PASS, `wave1-v0.4`;
-  - Calibration public/core PASS;
-  - Calibration admin PASS, `calibration-v0.1`, `6000 ms timing gate`, `SERVER MODE: CALIBRATION`.
-- The restored backup now provides a concrete server snapshot for both satellite trees, but runtime secrets remain excluded from GitHub.
+- Clean line: `recovery/v02-clean-baseline`.
+- Historical incident line `agent/leadership-360-home` must never be deployed.
+- Old active root multi-page surface must not remain in corrected `main`.
+- Recovery contains V02, privacy, SEO files, native Leadership 360 entry/page, LT/EN behavior and controlled frontend-only deployment workflow.
+- Leadership product logic stays frozen in `olemoz1977/gla360-personal-full`.
 
-## Recovered V02 GitHub surface
+## Deployment model
 
-Implemented on `recovery/v02-clean-baseline`:
-- recovered V02 `index.html` and `privacy.html`;
-- active `robots.txt`, `sitemap.xml`, `sitemap_location.xml`;
-- old root multi-page architecture removed from active recovery surface;
-- approved shared images exactly:
-  - `assets/img/favicon.svg`
-  - `assets/img/logo.svg`
-  - `assets/img/og-cover.png`
-  - `assets/img/og-cover.svg`
+Final model: **frontend-only plain FTP allowlist**, never whole-server Git mirroring.
 
-Historical commits:
-- homepage baseline `4b9fe9858d8f510f41e849d15ad44097da57ab11`
-- privacy baseline `fa5f62988686c60ef742b94501a28963a68f188d`
-- native Leadership page `387ba362d0d04292d0e5310cc56ffd86eb029ee7`
-- homepage Leadership integration `d0b581c3677de475ef3bd097601d6eeccfef23b3`
-
-## Deployment model — FINALIZED
-
-Accepted model: **frontend-only plain FTP deployment**, never whole-server mirroring.
-
-Verified connection facts:
-- FTP host `46.202.142.134` is public and stored in workflow;
-- FTP port 21 / plain FTP;
-- only repository secrets required: `HOSTINGER_FTP_USER`, `HOSTINGER_FTP_PASSWORD`;
-- verified remote root: `/domains/omesg360.eu/public_html`.
-
-Managed package only:
+Managed frontend package:
 - `index.html`
 - `privacy.html`
 - `robots.txt`
 - `sitemap.xml`
 - `sitemap_location.xml`
 - verification files if present
-- four approved `assets/img` files
+- `assets/img/favicon.svg`
+- `assets/img/logo.svg`
+- `assets/img/og-cover.png`
+- `assets/img/og-cover.svg`
 - `leadership-360/index.html`
 
 Protected/unmanaged:
 - `wave1/`
 - `conflictlab/releases/calibration-v0.1/`
-- runtime/admin PHP outside package
+- PHP runtime outside package
 - `config.php`
 - databases
 - private/server support
-- every unrelated Hostinger path
 
-Safety contract:
-- PR execution is preview-only;
-- real writes require explicit manual `workflow_dispatch` with `dry_run=false`;
-- no `rsync`, no `--delete`, no broad remote sync;
-- exact OMESG360 FTP root is read-only verified before preview/write;
-- managed frontend is backed up before real write;
-- post-deploy HTTP smoke runs for managed frontend;
-- managed frontend rollback runs on upload/smoke failure;
-- Wave1 and Calibration remain outside the deployment package and are human-smoke-tested after frontend deployment.
+No `rsync`, no `--delete`, no whole-root sync.
 
-## Validation state
+## Current validation
 
-Structure validator run `32606996920` (#75): SUCCESS.
+- V02/Leadership structure validator: PASS after Hostinger restore.
+- Clean FTP preview previously passed in run `32606939263` (#29), no writes.
+- A later preview after backup restore hit a read-only FTP connectivity timeout (`max-retries exceeded`), no writes. Re-check FTP connectivity before the next intentional deploy.
 
-A subsequent FTP preview after the Hostinger backup restore reached package build but the read-only FTP root check timed out with `max-retries exceeded`. It performed no writes. This is a connectivity gate to re-check before the next intentional deployment, not a repository-content failure.
+## Immediate repository action
 
-Earlier clean preview run `32606939263` (#29): SUCCESS, no writes.
-
-## Main-branch correction gate
-
-Hostinger auto-deployment is now disabled. `main` correction is therefore a GitHub-only operation and must not alter live Hostinger.
-
-Current action:
+Because Hostinger auto-deployment is now OFF, correct `main` as a GitHub-only operation:
 1. fast-forward `main` to the clean recovery history;
-2. verify old active root pages are gone from `main`;
-3. keep live Hostinger on the restored backup;
-4. re-check FTP connectivity before the next controlled frontend deployment.
+2. verify old active root pages are absent;
+3. keep Hostinger unchanged on the restored backup;
+4. later re-check FTP and intentionally deploy only the managed frontend.
 
-## Satellite mirror backlog
+## Later
 
-The uploaded server backup now gives a concrete snapshot of Wave1 and Calibration source/runtime trees. Before any future satellite deployment automation:
-- create sanitized mirrors that exclude runtime secrets;
-- verify exact file hashes against the restored Hostinger backup;
-- keep satellite deployment separate from the OMESG360 frontend workflow.
-
-## Final operating model
-
-GitHub work -> validation -> frontend-only Hostinger deployment -> post-deploy smoke -> managed frontend rollback if needed.
-
-GitHub owns only the OMESG360 professional presentation layer, never the complete Hostinger server tree.
-
-## Deferred
-
-- satellite deploy automation until sanitized exact mirrors are verified;
-- broader OMESG360 multi-page expansion;
-- frozen Leadership backend redesign;
-- Organization Campaign / SaaS expansion;
-- 2Pair feature expansion before validation data;
-- cosmetic work unrelated to recovery/safe deployment.
+- Human-check Wave1 public/admin and Calibration public/admin after any frontend deployment.
+- Create sanitized exact satellite mirrors from the backup before automating satellite deployment.
+- After native OMESG360 Leadership is live/tested, change 2rasi Leadership Start to `https://omesg360.eu/leadership-360/`.
 
 ## Continuity rule
 
-Accepted later/backlog decisions must be recorded here or in the appropriate repository roadmap before ending a work session.
+This file and `RECOVERY_AND_INTEGRATION_PLAN.md` remain source of truth.
