@@ -1,0 +1,70 @@
+name: One-time responsive index hotfix
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/deploy-responsive-hotfix.yml
+
+permissions:
+  contents: read
+
+env:
+  FTP_HOST: 46.202.142.134
+  FTP_USER: ${{ secrets.HOSTINGER_FTP_USER }}
+  FTP_PASSWORD: ${{ secrets.HOSTINGER_FTP_PASSWORD }}
+  REMOTE_BASE: /domains/omesg360.eu/public_html
+
+jobs:
+  hotfix:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Validate repaired frontend
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash scripts/validate-v02.sh
+          grep -Fq '.hero-grid>*{min-width:0}' index.html
+          grep -Fq 'h1>span{display:block}' index.html
+          grep -Fq 'clamp(2.35rem,12.5vw,3.4rem)' index.html
+      - name: Install FTP client
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq lftp
+      - name: Verify FTP and backup current index
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ -n "${FTP_USER:-}" ]]
+          [[ -n "${FTP_PASSWORD:-}" ]]
+          common='set ftp:ssl-allow no; set net:max-retries 2; set net:timeout 20; set cmd:fail-exit yes;'
+          lftp -c "$common open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; get \"${REMOTE_BASE}/index.html\" -o /tmp/index-before-hotfix.html"
+          test -s /tmp/index-before-hotfix.html
+      - name: Upload repaired index only
+        shell: bash
+        run: |
+          set -euo pipefail
+          common='set ftp:ssl-allow no; set net:max-retries 2; set net:timeout 20; set cmd:fail-exit yes;'
+          lftp -c "$common open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; put -O \"${REMOTE_BASE}/\" index.html"
+      - name: Live smoke repaired layout source
+        shell: bash
+        run: |
+          set -euo pipefail
+          body="$(curl -fsS --retry 4 --retry-delay 2 'https://omesg360.eu/?lang=en')"
+          grep -Fq 'Stabilize.' <<<"$body"
+          grep -Fq '.hero-grid>*{min-width:0}' <<<"$body"
+          grep -Fq 'h1>span{display:block}' <<<"$body"
+          grep -Fq 'clamp(2.35rem,12.5vw,3.4rem)' <<<"$body"
+          echo 'PASS: repaired index is live.'
+      - name: Restore previous index on failure
+        if: ${{ failure() }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -s /tmp/index-before-hotfix.html ]]; then
+            common='set ftp:ssl-allow no; set net:max-retries 2; set net:timeout 20;'
+            lftp -c "$common open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; put -O \"${REMOTE_BASE}/\" /tmp/index-before-hotfix.html"
+            echo 'Previous index restored.'
+          fi
