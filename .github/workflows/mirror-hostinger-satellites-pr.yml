@@ -1,0 +1,79 @@
+name: Mirror recovered Hostinger satellites from PR
+
+on:
+  pull_request:
+    types: [opened]
+    branches: [main]
+
+permissions:
+  contents: write
+
+env:
+  FTP_HOST: 46.202.142.134
+  FTP_USER: ${{ secrets.HOSTINGER_FTP_USER }}
+  FTP_PASSWORD: ${{ secrets.HOSTINGER_FTP_PASSWORD }}
+  REMOTE_BASE: /domains/omesg360.eu/public_html
+
+jobs:
+  mirror-read-only:
+    if: github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'recovery/satellite-backup-mirror'
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout staging branch
+        uses: actions/checkout@v4
+        with:
+          ref: recovery/satellite-backup-mirror
+          fetch-depth: 1
+
+      - name: Verify inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ -n "${FTP_USER:-}" ]]
+          [[ -n "${FTP_PASSWORD:-}" ]]
+          test -f .github/mirror-satellites.sha256
+          [[ "$(wc -l < .github/mirror-satellites.sha256 | tr -d ' ')" == "83" ]]
+
+      - name: Install FTP client
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq lftp
+
+      - name: Download satellites from Hostinger read-only
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf .mirror
+          mkdir -p .mirror
+          common='set ftp:ssl-allow no; set ftp:passive-mode true; set ftp:list-options -a; set net:max-retries 3; set net:timeout 30; set net:reconnect-interval-base 2; set cmd:fail-exit yes;'
+          lftp -c "$common open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; lcd .mirror; mirror --verbose --parallel=1 \"${REMOTE_BASE}/wave1\" wave1; mirror --verbose --parallel=1 \"${REMOTE_BASE}/conflictlab/releases/calibration-v0.1\" conflictlab/releases/calibration-v0.1; bye"
+
+      - name: Strip secrets and verify against recovered ZIP
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -f .mirror/wave1/config.php
+          rm -f .mirror/conflictlab/releases/calibration-v0.1/server/config.php
+          test ! -e .mirror/wave1/config.php
+          test ! -e .mirror/conflictlab/releases/calibration-v0.1/server/config.php
+          actual_count=$(find .mirror/wave1 .mirror/conflictlab/releases/calibration-v0.1 -type f | wc -l | tr -d ' ')
+          [[ "$actual_count" == "83" ]] || { echo "Expected 83 non-secret files, got $actual_count" >&2; exit 1; }
+          cp .github/mirror-satellites.sha256 .mirror/expected.sha256
+          (cd .mirror && sha256sum -c expected.sha256)
+          echo 'PASS: all 83 files match the recovered ZIP exactly.'
+
+      - name: Commit verified mirror to staging branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf wave1 conflictlab/releases/calibration-v0.1
+          mkdir -p conflictlab/releases
+          cp -a .mirror/wave1 ./wave1
+          cp -a .mirror/conflictlab/releases/calibration-v0.1 ./conflictlab/releases/calibration-v0.1
+          test ! -e wave1/config.php
+          test ! -e conflictlab/releases/calibration-v0.1/server/config.php
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add wave1 conflictlab/releases/calibration-v0.1
+          staged_count=$(git diff --cached --name-only -- wave1 conflictlab/releases/calibration-v0.1 | wc -l | tr -d ' ')
+          [[ "$staged_count" == "83" ]] || { echo "Expected 83 staged files, got $staged_count" >&2; exit 1; }
+          git commit -m 'Mirror recovered Wave1 and Calibration non-secret runtime'
+          git push origin HEAD:recovery/satellite-backup-mirror
