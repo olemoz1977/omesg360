@@ -1,8 +1,9 @@
 # OMESG360 recovery and Leadership 360 integration plan
 
-Status: ACTIVE — production baseline healthy and recovered
+Status: ACTIVE — recovery complete; 2rasi Leadership routing integrated
 Date: 2026-08-23
-Primary branch: `main`
+Primary OMESG360 branch: `main`
+Primary 2rasi branch: `hero-webgl`
 
 ## Source of truth
 `PROJECT_ROADMAP.md` and this file are the source of truth. Never resume `agent/leadership-360-home`.
@@ -10,7 +11,7 @@ Primary branch: `main`
 ## Live baseline
 - Hostinger `public_html` restored from the known-good backup.
 - Hostinger Git auto-deployment from `main` to `public_html` is OFF.
-- Controlled GitHub Actions -> FTP is the active deployment path.
+- Controlled GitHub Actions -> FTP is the active OMESG360 deployment path.
 - OMESG360 V02 homepage is live.
 - Leadership 360 presentation/routing is live.
 - Responsive hero layout was corrected and user-verified on desktop and mobile.
@@ -58,8 +59,19 @@ No whole-root synchronization. No `--delete`.
 - Calibration public/admin manually verified fully working.
 - GitHub satellite mirror contains exactly 83 runtime files and no secret config files.
 
-## Current state
-Recovery phase is complete. Production baseline is healthy. Keep Hostinger Git auto-deployment OFF.
+## 2rasi Leadership integration
+Completed in `olemoz1977/2rasi-web` on `hero-webgl` as clean commit `76db8161cedb58cc3f3c53b15073fe6093187cbd`.
 
-## Next controlled step
-Proceed only with product-level integration work. The next planned change is the 2rasi Leadership Start route to `https://omesg360.eu/leadership-360/`, followed by end-to-end validation. Do not reopen recovery unless production evidence requires it.
+Changes:
+- homepage Leadership Start now routes through OMESG360 rather than directly into the frozen product;
+- 2rasi language logic rewrites that route to `https://omesg360.eu/leadership-360/?lang=en` or `?lang=lt`;
+- both CTAs on `tools/leadership-360/` route to `https://omesg360.eu/leadership-360/`;
+- the frozen `gla360-personal-full` repository/product is unchanged.
+
+Expected user path:
+2rasi -> OMESG360 Leadership presentation -> frozen Leadership setup/product.
+
+## Current state
+Recovery phase is complete. OMESG360 production baseline is healthy. Keep Hostinger Git auto-deployment OFF.
+
+2rasi source integration is complete. Remaining gate is a human/live click check on both `2rasi.com` and `2rasi.lt` after GitHub Pages propagation. Do not reopen recovery unless production evidence requires it.
