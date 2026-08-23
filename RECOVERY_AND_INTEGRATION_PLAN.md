@@ -1,6 +1,6 @@
 # OMESG360 recovery and Leadership 360 integration plan
 
-Status: ACTIVE — Hostinger restored, Git auto-deploy disabled, main correction in progress
+Status: ACTIVE — Hostinger restored, Git auto-deploy disabled, main correction ready
 Date: 2026-08-23
 Working branch: `recovery/v02-clean-baseline`
 
@@ -101,9 +101,9 @@ Safety behavior:
 
 ## Validation state
 
-Code/structure validator run `32606996920` (#75): SUCCESS.
+Code/structure validator passed after the restore.
 
-The immediately following FTP preview run reached package build but the read-only FTP root check timed out with `max-retries exceeded` after the Hostinger backup restore. It performed no writes. This is treated as a connectivity gate to re-check before the next intentional frontend deployment, not as a reason to block GitHub `main` cleanup.
+A subsequent FTP preview reached package build but the read-only FTP root check timed out with `max-retries exceeded` after the Hostinger backup restore. It performed no writes. This is a connectivity gate to re-check before the next intentional frontend deployment, not a reason to block GitHub `main` cleanup.
 
 Earlier clean preview run `32606939263` (#29) was SUCCESS and also performed no writes.
 
@@ -112,7 +112,7 @@ Earlier clean preview run `32606939263` (#29) was SUCCESS and also performed no 
 Hostinger Git auto-deployment is OFF. Therefore repository correction no longer causes an automatic production redeploy.
 
 Required now:
-1. promote the clean recovery branch into `main`;
+1. fast-forward the clean recovery history into `main`;
 2. remove the old/mixed active root architecture from `main`;
 3. retain runtime-secret ignore rules;
 4. keep live Hostinger unchanged on the restored backup;
