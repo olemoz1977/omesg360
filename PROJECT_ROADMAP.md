@@ -1,7 +1,7 @@
 # OMESG360 / 2rasi project roadmap and handover
 
 Status: ACTIVE CONTINUITY DOCUMENT
-Last updated: 2026-08-23 03:05 Europe/Vilnius
+Last updated: 2026-08-23 03:06 Europe/Vilnius
 Working branch: `recovery/v02-clean-baseline`
 
 This file is the durable cross-session handover. `RECOVERY_AND_INTEGRATION_PLAN.md` is the detailed recovery contract. Do not resume incident-era work from chat memory alone.
@@ -11,8 +11,6 @@ This file is the durable cross-session handover. `RECOVERY_AND_INTEGRATION_PLAN.
 ### OMESG360 production
 - Hostinger recovered V02 is the accepted healthy live baseline until the first controlled recovery deploy.
 - GitHub recovery/integration work happens on `recovery/v02-clean-baseline`.
-- `main` still contains the old/mixed site content and is NOT yet the production site source.
-- Exception: `main` now contains only one intentionally safe deployment-dispatcher stub under `.github/workflows/deploy-hostinger.yml`; this does not promote old `main` site content and cannot deploy `main`.
 - `agent/leadership-360-home` is historical incident-era work and must never be deployed.
 - `archive/pre-recovery-2026-08-22` remains the historical checkpoint.
 
@@ -36,16 +34,15 @@ This file is the durable cross-session handover. `RECOVERY_AND_INTEGRATION_PLAN.
 
 ### 2rasi
 - `2rasi.com` remains discovery/hook layer.
-- Its static web repo is operationally simpler than OMESG360.
 - After OMESG360 Leadership is production-live and tested, change 2rasi primary Leadership Start to `https://omesg360.eu/leadership-360/`.
 
 ### 2Pair satellites
 - Wave1 and Calibration are active research satellites outside the frontend package.
 - User-verified live PASS before the overwrite:
   - Wave1 public/core PASS;
-  - Wave1 admin PASS, screenshot confirms read-only `wave1-v0.4`;
+  - Wave1 admin PASS, `wave1-v0.4`;
   - Calibration public/core PASS;
-  - Calibration admin PASS, screenshot confirms `calibration-v0.1`, `6000 ms timing gate`, `SERVER MODE: CALIBRATION`.
+  - Calibration admin PASS, `calibration-v0.1`, `6000 ms timing gate`, `SERVER MODE: CALIBRATION`.
 - The restored backup now provides a concrete server snapshot for both satellite trees, but runtime secrets remain excluded from GitHub.
 
 ## Recovered V02 GitHub surface
@@ -105,31 +102,23 @@ Safety contract:
 - managed frontend rollback runs on upload/smoke failure;
 - Wave1 and Calibration remain outside the deployment package and are human-smoke-tested after frontend deployment because Hostinger/GitHub-runner access to those URLs produced false negatives.
 
-Functional workflow lineage includes `e82c800654f6a70df8003350a6eba9ce4d5d69e0`; current recovery workflow includes the later false-negative guard corrections through `25608d7195e8e99add41bae543fd602c6753d44f`.
-Validator lineage includes `6491f57c0e1b2a66721e777f396e52b03e01ff8d`.
-
 ## Dry-run gate — PASS
 
-Latest clean preview after guard correction:
+Latest clean preview after the Hostinger restore and guard correction:
 - workflow `Deploy OMESG360 frontend to Hostinger`
-- run `32605610315` (#26)
+- run `32606939263` (#29)
 - `validate-and-preview`: SUCCESS
-- real `deploy`: SKIPPED
+- exact Hostinger root verification: SUCCESS
+- preview: SUCCESS
 - Hostinger writes: NONE
 
-Proved:
-- validator PASS;
-- FTP credentials accepted;
-- exact remote root reachable;
-- targets are directly under real `public_html`, not `.deploy-package`;
-- preview contains only managed frontend files;
-- no protected/runtime paths appear.
+Validator run `32606939260` (#71): SUCCESS.
 
 ## Main-branch correction gate
 
 Hostinger auto-deployment is now disabled, so correcting `main` will no longer trigger an automatic Hostinger redeploy.
 
-Next repository action:
+Current repository action:
 1. promote the clean recovery line to `main`;
 2. keep `.private/`, `wave1/config.php`, and `conflictlab/releases/calibration-v0.1/server/config.php` out of GitHub;
 3. verify `main` no longer contains the old active root multi-page surface;
