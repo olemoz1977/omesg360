@@ -97,18 +97,15 @@ Safety behavior:
 9. Upload only generated package.
 10. Run managed-frontend HTTP smoke.
 11. Restore managed frontend on upload/smoke failure.
-12. Human-smoke Wave1 and Calibration after deployment; they are protected/unmanaged and GitHub runner checks produced false-negative 404s despite browser-accessible live surfaces.
+12. Human-smoke Wave1 and Calibration after deployment; they are protected/unmanaged.
 
-## Latest dry-run proof — PASS
+## Validation state
 
-Run `32605610315` (#26):
-- `validate-and-preview`: SUCCESS;
-- exact Hostinger root read-only verification: SUCCESS;
-- frontend preview: SUCCESS;
-- real `deploy`: SKIPPED;
-- Hostinger write: NONE.
+Code/structure validator run `32606996920` (#75): SUCCESS.
 
-The failed manual run #22 and subsequent diagnostic PR runs did not write Hostinger; they stopped in validation/guard stages.
+The immediately following FTP preview run reached package build but the read-only FTP root check timed out with `max-retries exceeded` after the Hostinger backup restore. It performed no writes. This is treated as a connectivity gate to re-check before the next intentional frontend deployment, not as a reason to block GitHub `main` cleanup.
+
+Earlier clean preview run `32606939263` (#29) was SUCCESS and also performed no writes.
 
 ## Main correction — CURRENT GATE
 
@@ -119,7 +116,7 @@ Required now:
 2. remove the old/mixed active root architecture from `main`;
 3. retain runtime-secret ignore rules;
 4. keep live Hostinger unchanged on the restored backup;
-5. only then intentionally run the controlled frontend-only deployment.
+5. re-check FTP connectivity before the next intentional frontend-only deployment.
 
 The uploaded backup is a server recovery reference, not permission to commit the entire server tree. Satellite source snapshots can be mirrored separately only after sanitization and hash verification.
 
