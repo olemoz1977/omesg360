@@ -1,81 +1,39 @@
 # OMESG360 recovery and Leadership 360 integration plan
 
-Status: ACTIVE — restored baseline protected; main correction authorized
+Status: ACTIVE — restored baseline protected; GitHub main correction ready
 Date: 2026-08-23
 
 ## Source of truth
+`PROJECT_ROADMAP.md` and this file are the source of truth. Never resume `agent/leadership-360-home`.
 
-This file and `PROJECT_ROADMAP.md` are the source of truth. Do not resume `agent/leadership-360-home`.
-
-## Current live state
-
-- Hostinger `public_html` was manually restored from the known-good backup after the second overwrite.
+## Live baseline
+- Hostinger `public_html` restored from known-good backup.
 - Hostinger Git auto-deployment from `main` to `public_html` is OFF.
-- Backup is the current server recovery reference for V02 + Wave1 + Calibration runtime.
-- Runtime secrets remain Hostinger-only: `.private/`, `wave1/config.php`, `conflictlab/releases/calibration-v0.1/server/config.php`, database credentials and other server configuration.
+- Backup is current server reference for V02 + Wave1 + Calibration runtime.
+- Runtime secrets remain Hostinger-only: `.private/`, `wave1/config.php`, `conflictlab/releases/calibration-v0.1/server/config.php`, databases and credentials.
 
 ## Root cause
+The second overwrite was caused by Hostinger Git auto-deployment still being enabled. A `main` bootstrap change triggered Hostinger to redeploy the old mixed `main` tree. GitHub Actions did not write that overwrite.
 
-The second overwrite was caused by Hostinger Git auto-deployment still being enabled. The bootstrap merge changed `main`, and Hostinger automatically redeployed the old mixed `main` tree. GitHub Actions manual run #22 stopped before deploy; preview runs did not write production.
+Rule: **GitHub never owns the complete Hostinger server tree.**
 
-Non-negotiable rule: **GitHub must never own or mirror the complete Hostinger server tree.**
-
-## Correct GitHub state
-
-The clean source line is `recovery/v02-clean-baseline`:
-- V02 `index.html` and `privacy.html`;
-- robots/sitemaps;
-- exactly four approved shared images;
-- old active root multi-page architecture removed;
-- Leadership 360 homepage entry and native `/leadership-360/` page;
-- LT/EN behavior;
-- frontend-only FTP deployment workflow;
-- runtime secret paths ignored.
-
-Leadership product logic remains frozen in `olemoz1977/gla360-personal-full`.
+## Clean source
+`recovery/v02-clean-baseline` contains recovered V02, privacy/SEO, Leadership 360 presentation/routing, LT/EN behavior and frontend-only FTP deployment.
 
 ## Deployment contract
+Managed only: root frontend/SEO/verification files, four approved images, `leadership-360/index.html`.
 
-Deployment is explicit frontend-only plain FTP.
+Protected/unmanaged: Wave1, Calibration, runtime/admin PHP outside package, configs, DB/private/server support.
 
-Managed package only:
-- `index.html`
-- `privacy.html`
-- `robots.txt`
-- `sitemap.xml`
-- `sitemap_location.xml`
-- verification files if present
-- four approved `assets/img` files
-- `leadership-360/index.html`
-
-Protected/unmanaged:
-- `wave1/`
-- `conflictlab/releases/calibration-v0.1/`
-- runtime/admin PHP outside package
-- `config.php`
-- databases
-- private/server support
-
-No `rsync`, no `--delete`, no broad tree sync.
+No whole-root synchronization, no `--delete`.
 
 ## Validation
-
-- V02/Leadership validator PASS after restore.
-- Clean preview run `32606939263` (#29) PASS, no writes.
-- A later read-only FTP root check after backup restore timed out with `max-retries exceeded`; no writes occurred. FTP connectivity must be re-checked before the next intentional deploy.
+- V02/Leadership structure validation PASS after restore.
+- Earlier clean preview #29 PASS with no writes.
+- Latest read-only FTP check timed out after restore; no writes. Re-check connectivity before the next intentional frontend deploy.
 
 ## Current action
+Hostinger auto-deployment is OFF, so fast-forward clean recovery history into `main` as a GitHub-only correction. Live Hostinger stays on restored backup.
 
-Because Hostinger Git auto-deployment is OFF, `main` may now be corrected without changing live production:
-1. fast-forward `main` to the clean recovery history;
-2. verify old active root pages are gone from `main`;
-3. leave Hostinger on restored backup;
-4. re-check FTP before controlled frontend deployment.
-
-## Satellite backlog
-
-The uploaded backup supplies a concrete Wave1 and Calibration server snapshot. Any GitHub satellite mirror must be sanitized, hash-verified and deployed separately from the frontend workflow.
-
-## Continuity rule
-
-Project-critical decisions must be recorded here or in `PROJECT_ROADMAP.md`.
+## Later
+Re-check FTP, then run controlled frontend-only deployment and human-check both satellites. Satellite mirrors remain a separate sanitized/hash-verified task.
