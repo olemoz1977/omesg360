@@ -1,7 +1,7 @@
 # OMESG360 / 2rasi project roadmap and handover
 
 Status: ACTIVE CONTINUITY DOCUMENT
-Last updated: 2026-08-23 03:06 Europe/Vilnius
+Last updated: 2026-08-23 03:08 Europe/Vilnius
 Working branch: `recovery/v02-clean-baseline`
 
 This file is the durable cross-session handover. `RECOVERY_AND_INTEGRATION_PLAN.md` is the detailed recovery contract. Do not resume incident-era work from chat memory alone.
@@ -10,7 +10,7 @@ This file is the durable cross-session handover. `RECOVERY_AND_INTEGRATION_PLAN.
 
 ### OMESG360 production
 - Hostinger recovered V02 is the accepted healthy live baseline until the first controlled recovery deploy.
-- GitHub recovery/integration work happens on `recovery/v02-clean-baseline`.
+- GitHub recovery/integration work happens on `recovery/v02-clean-baseline` until `main` correction is complete.
 - `agent/leadership-360-home` is historical incident-era work and must never be deployed.
 - `archive/pre-recovery-2026-08-22` remains the historical checkpoint.
 
@@ -100,29 +100,25 @@ Safety contract:
 - managed frontend is backed up before real write;
 - post-deploy HTTP smoke runs for managed frontend;
 - managed frontend rollback runs on upload/smoke failure;
-- Wave1 and Calibration remain outside the deployment package and are human-smoke-tested after frontend deployment because Hostinger/GitHub-runner access to those URLs produced false negatives.
+- Wave1 and Calibration remain outside the deployment package and are human-smoke-tested after frontend deployment.
 
-## Dry-run gate — PASS
+## Validation state
 
-Latest clean preview after the Hostinger restore and guard correction:
-- workflow `Deploy OMESG360 frontend to Hostinger`
-- run `32606939263` (#29)
-- `validate-and-preview`: SUCCESS
-- exact Hostinger root verification: SUCCESS
-- preview: SUCCESS
-- Hostinger writes: NONE
+Structure validator run `32606996920` (#75): SUCCESS.
 
-Validator run `32606939260` (#71): SUCCESS.
+A subsequent FTP preview after the Hostinger backup restore reached package build but the read-only FTP root check timed out with `max-retries exceeded`. It performed no writes. This is a connectivity gate to re-check before the next intentional deployment, not a repository-content failure.
+
+Earlier clean preview run `32606939263` (#29): SUCCESS, no writes.
 
 ## Main-branch correction gate
 
-Hostinger auto-deployment is now disabled, so correcting `main` will no longer trigger an automatic Hostinger redeploy.
+Hostinger auto-deployment is now disabled. `main` correction is therefore a GitHub-only operation and must not alter live Hostinger.
 
-Current repository action:
-1. promote the clean recovery line to `main`;
-2. keep `.private/`, `wave1/config.php`, and `conflictlab/releases/calibration-v0.1/server/config.php` out of GitHub;
-3. verify `main` no longer contains the old active root multi-page surface;
-4. keep Hostinger on the manually restored backup until the controlled frontend-only FTP deploy is intentionally run.
+Current action:
+1. fast-forward `main` to the clean recovery history;
+2. verify old active root pages are gone from `main`;
+3. keep live Hostinger on the restored backup;
+4. re-check FTP connectivity before the next controlled frontend deployment.
 
 ## Satellite mirror backlog
 
