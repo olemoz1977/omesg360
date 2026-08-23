@@ -1,13 +1,14 @@
 # OMESG360 / 2rasi project roadmap and handover
 
 Status: ACTIVE CONTINUITY DOCUMENT
-Last updated: 2026-08-23 05:04 Europe/Vilnius
-Primary GitHub branch: `main`
+Last updated: 2026-08-23 05:10 Europe/Vilnius
+Primary OMESG360 branch: `main`
+Primary 2rasi branch: `hero-webgl`
 
 ## Current production baseline
 - Hostinger `public_html` restored manually from the known-good backup supplied on 2026-08-23.
 - Hostinger Git auto-deployment from `main` to `public_html` is OFF and must stay OFF unless a new deployment contract is explicitly designed and tested.
-- Controlled GitHub Actions -> FTP deployment is the active deployment path.
+- Controlled GitHub Actions -> FTP deployment is the active OMESG360 deployment path.
 - OMESG360 V02 homepage is live.
 - Leadership 360 presentation/routing is live.
 - Responsive hero layout was corrected on desktop and mobile after production verification.
@@ -62,10 +63,20 @@ Wave1 and Calibration are mirrored in GitHub for recovery/source integrity, but 
 - Satellite GitHub mirror: 83 files exactly; secret config paths absent from GitHub.
 - Temporary recovery/hotfix workflows: removed.
 
+## 2rasi Leadership routing integration
+Completed on `olemoz1977/2rasi-web`, branch `hero-webgl`, commit `76db8161cedb58cc3f3c53b15073fe6093187cbd`.
+
+Routing now is:
+- 2rasi Leadership card `Start` -> `https://omesg360.eu/leadership-360/?lang=en` as HTML fallback;
+- `i18n.js` rewrites the card route to `?lang=en` or `?lang=lt` from the active 2rasi language/domain;
+- both CTAs on `tools/leadership-360/` -> `https://omesg360.eu/leadership-360/`;
+- no direct 2rasi Leadership CTA points to the frozen `gla360-personal-full` product anymore.
+
+The frozen Leadership product remains unchanged and is entered only from the OMESG360 Leadership presentation page.
+
 ## Current gate
 OMESG360 production baseline is healthy and recovered. Do not re-enable Hostinger Git auto-deployment.
 
-## Next product step
-After this stable baseline, the next planned integration is to change the 2rasi Leadership Start route to `https://omesg360.eu/leadership-360/` and validate that route end-to-end.
+2rasi source routing integration is complete. Final human/live click validation on `2rasi.com` and `2rasi.lt` should confirm Pages propagation and the language-aware route.
 
 `PROJECT_ROADMAP.md` + `RECOVERY_AND_INTEGRATION_PLAN.md` remain source of truth.
