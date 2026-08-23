@@ -1,0 +1,84 @@
+{
+  "schema": "conflictlab.rapid-presentation.v1",
+  "protocol_version": "future-rapid-v1",
+  "lifecycle": "DRAFT",
+  "f2_status": "PILOT_READY_CALIBRATION_REQUIRED",
+  "stimulus_set_version": "stimulus-set-v1",
+  "session_policy": {
+    "rapid_blocks_per_session": 1,
+    "pairs_per_block": 3,
+    "reflection_after_block": true
+  },
+  "timing": {
+    "block_budget_ms": 6000,
+    "budget_status": "PILOT_HYPOTHESIS_NOT_VALIDATED",
+    "timing_calibration_version": "timing-calibration-v1",
+    "calibration_decision_required": true,
+    "clock": "client_monotonic_performance_now",
+    "clock_starts": "when_first_pair_is_interactive_after_successful_preload",
+    "page_hidden_policy": "clock_continues"
+  },
+  "forms": [
+    {
+      "form_id": "F2-A",
+      "pair_ids": [
+        "CS-CA-01",
+        "CR-PZ-01",
+        "CR-PO-01"
+      ]
+    },
+    {
+      "form_id": "F2-B",
+      "pair_ids": [
+        "CS-PR-01",
+        "CS-RE-01",
+        "CR-FS-01"
+      ]
+    }
+  ],
+  "form_cycle_policy": {
+    "cycle_length_sessions": 2,
+    "first_session_form": "RANDOM_50_50",
+    "second_session_form": "COMPLEMENTARY_FORM",
+    "repeat_before_cycle_complete": false,
+    "new_cycle_after_two_sessions": true,
+    "timeout_does_not_change_future_form_assignment": true,
+    "state_scope": "LOCAL_DEVICE_ONLY",
+    "server_cross_session_linkage": false
+  },
+  "pair_order_policy": {
+    "primary_attempt": "UNIFORM_RANDOM_PERMUTATION_OF_FORM",
+    "retry": "REUSE_PRIMARY_ORDER",
+    "new_cycle": "RESHUFFLE"
+  },
+  "screen_position_policy": {
+    "layout": "VERTICAL_TOP_BOTTOM_ALL_VIEWPORTS",
+    "within_block_balance": "A_IS_TOP_FOR_EXACTLY_1_OR_2_OF_3_PAIRS",
+    "first_session_a_top_count": "RANDOM_1_OR_2",
+    "second_session_a_top_count": "COMPLEMENT_OF_FIRST_SESSION_COUNT",
+    "retry": "REUSE_PRIMARY_POSITIONS",
+    "new_cycle": "REBALANCE",
+    "meaning_boundary": "A_B_IDENTITY_AND_TOP_BOTTOM_POSITION_HAVE_NO_PSYCHOLOGICAL_DIRECTION"
+  },
+  "preload_policy": {
+    "required_before_block_start": true,
+    "assets": "ALL_SIX_ASSETS_FOR_SELECTED_THREE_PAIRS",
+    "required_state": "FETCHED_AND_DECODED_IN_MEMORY",
+    "start_control_enabled_before_ready": false,
+    "network_required_after_block_start": false,
+    "failure_before_block_start": "TECHNICAL_PRELOAD_FAILURE_NO_RESEARCH_ATTEMPT_NO_TIMEOUT_EVENT",
+    "retry_preload_allowed": true
+  },
+  "retry_policy": {
+    "max_total_attempts": 3,
+    "same_pair_order": true,
+    "same_asset_positions": true,
+    "retry_changes_no_stimulus_presentation_factor": true
+  },
+  "interpretation_boundary": {
+    "gate_d_mapping": "NONE_BY_THIS_PROTOCOL",
+    "gate_e_aggregation": "NONE_BY_THIS_PROTOCOL",
+    "reason_content": "NOT_AUTHORIZED_BY_F2",
+    "note": "This artifact defines presentation mechanics only. It does not assign meaning to pair IDs, A/B identities, positions, latency, timeout, or retry behavior."
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "schema": "conflictlab.gate-e.v1",
+  "aggregation_gate_version": "gate-e-v1",
+  "lifecycle": "DRAFT",
+  "released_at": null,
+  "description": "Domain-level aggregation validity. A domain-level interpretation is forbidden unless the domain status is VALID.",
+  "allowed_status": ["VALID", "PENDING", "NONE"],
+  "domains": {
+    "CS": {
+      "status": "NONE",
+      "validated_at": null,
+      "evidence_reference": null
+    },
+    "CR": {
+      "status": "NONE",
+      "validated_at": null,
+      "evidence_reference": null
+    }
+  }
+}

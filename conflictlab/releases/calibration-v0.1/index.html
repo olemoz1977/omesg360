@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="lt">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>ConflictLab · product-shaped pilot</title>
+<style>
+:root{color-scheme:dark;--bg:#0c0c0f;--card:#141417;--line:#29292f;--text:#e8e4dc;--muted:#918d86;--accent:#83a998}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,sans-serif}
+main{width:min(100%,640px);margin:auto;min-height:100dvh;padding:calc(18px + env(safe-area-inset-top)) 14px calc(48px + env(safe-area-inset-bottom))}
+.brand{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);margin-bottom:7px}.note{font-size:12px;color:var(--muted);line-height:1.45;margin-bottom:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px}.center{text-align:center}.status{color:var(--muted);line-height:1.5}
+body.rapid-mode{overflow:hidden}body.rapid-mode main{padding:calc(8px + env(safe-area-inset-top)) 10px calc(8px + env(safe-area-inset-bottom));min-height:100dvh}body.rapid-mode .brand,body.rapid-mode .note{display:none}
+button{font:inherit}.primary{border:0;border-radius:11px;background:var(--accent);color:#07100c;padding:13px 18px;font-weight:700;cursor:pointer}.primary:disabled{opacity:.35;cursor:not-allowed}.secondary{border:1px solid #34343c;border-radius:11px;background:#19191d;color:var(--text);padding:12px 16px;cursor:pointer}.secondary:disabled{opacity:.35;cursor:not-allowed}
+.intro h2,.retry h2,.done h2,.result h2{font-size:23px;font-weight:560;margin:0 0 8px}.intro p,.retry p,.done p,.result p{color:#bcb7ae;line-height:1.5}.intro .boundary,.result .boundary{font-size:12px;color:var(--muted)}
+.rapid-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:12px;color:var(--muted);font-size:12px}.rapid-head span:last-child{text-align:right}.rapid-stage{display:grid;gap:10px}.visual-choice{display:block;width:100%;padding:0;background:#111114;border:1px solid #2b2b31;border-radius:16px;overflow:hidden;cursor:pointer;touch-action:manipulation}.visual-choice:active{transform:scale(.995)}.visual-choice:disabled{cursor:default;opacity:.9}.visual-choice img{display:block;width:100%;aspect-ratio:1/1;object-fit:contain}
+.rapid-shell{height:calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 16px);display:flex;flex-direction:column;padding:12px;border-radius:16px}.rapid-shell .rapid-stage{flex:1;min-height:0;grid-template-rows:repeat(2,minmax(0,1fr));gap:10px}.rapid-shell .visual-choice{height:100%}.rapid-shell .visual-choice img{height:100%;width:100%;aspect-ratio:auto;object-fit:contain}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}.actions.centered{justify-content:center}.error{color:#e0a1a1;background:#241617;border:1px solid #583133;border-radius:12px;padding:12px}.warn{color:#e5c58f;font-size:13px}.ok{color:#9fcab5;font-size:13px}
+.language-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px}.language-grid button{min-height:56px}
+.consent-box{display:grid;gap:12px;margin:18px 0;text-align:left}.consent-row{display:flex;gap:10px;align-items:flex-start;padding:12px;border:1px solid #303038;border-radius:12px;background:#111114}.consent-row input{margin-top:4px}.consent-copy{color:#c7c2b9;line-height:1.45}.consent-copy a{color:#a9c9ba}.consent-meta{font-size:12px;color:var(--muted);line-height:1.45}
+.withdrawal-box{margin-top:14px;padding:13px;border:1px solid #3b4f46;border-radius:12px;background:#101813}.withdrawal-box code{display:block;word-break:break-all;margin:8px 0;padding:9px;border-radius:8px;background:#0a0e0c;color:#b9dec9;font-size:13px}.withdrawal-box button{margin-top:4px}
+.cl-reflection{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px}.cl-reflection__progress{font-size:12px;color:var(--accent)}.cl-reflection__title{font-size:24px;font-weight:550;margin:8px 0}.cl-reflection__prompt{color:#c7c2b9;line-height:1.45}.cl-reflection__image{display:block;width:min(100%,430px);aspect-ratio:1/1;object-fit:contain;margin:16px auto;border-radius:14px;background:#0b0b0d}.cl-reflection__options{border:0;padding:0;margin:0;display:grid;gap:10px}.cl-reflection__option{display:flex;gap:10px;align-items:flex-start;border:1px solid #303038;border-radius:12px;padding:12px;cursor:pointer}.cl-reflection__radio{margin-top:3px}.cl-reflection__other{margin-top:12px}.cl-reflection__local-note{font-size:12px;color:var(--muted)}.cl-reflection__textarea{width:100%;background:#0d0d10;color:var(--text);border:1px solid #303038;border-radius:10px;padding:10px;font:inherit}.cl-reflection__actions{display:flex;justify-content:space-between;gap:10px;margin-top:18px}.cl-reflection__actions button{border-radius:10px;padding:11px 16px;font:inherit}.cl-reflection__back{background:#19191d;color:#ddd8ce;border:1px solid #303038}.cl-reflection__next{background:var(--accent);color:#0b0b0d;border:0;font-weight:650}.cl-reflection__sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
+.cl-reflection__intensity{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:18px}.cl-reflection__intensity-button{min-height:52px;border:1px solid #34343c;border-radius:12px;background:#19191d;color:var(--text);font-size:18px;font-weight:700;cursor:pointer}.cl-reflection__intensity-button:active{transform:scale(.97)}.cl-reflection__intensity-labels{display:flex;justify-content:space-between;color:var(--muted);font-size:12px;margin-top:7px}
+.result-state{margin-top:14px;padding:12px;border:1px solid #34343c;border-radius:12px;background:#111114}.result-state strong{color:var(--accent)}
+</style>
+</head>
+<body>
+<main>
+  <div id="brand" class="brand">ConflictLab · eksperimentinis savirefleksijos įrankis</div>
+  <div id="note" class="note">Ankstyvas bandymas. Tai nėra asmenybės testas, diagnostika ar vertinimas. Nėra teisingų ar neteisingų pasirinkimų.</div>
+  <div id="app" class="card center"><p class="status">Ruošiami vaizdai… / Preparing images…</p></div>
+</main>
+<script type="module">
+import { createTwoSessionCycle, preloadPathsForSession } from './canonical/src/future_session/presentation_plan.mjs';
+import { createTrainingPlan, preloadPathsForTraining } from './canonical/src/future_session/training_plan.mjs';
+import { preloadAssetBundle } from './canonical/src/future_session/asset_preloader.mjs';
+import { FutureSessionOrchestrator } from './canonical/src/future_session/session_orchestrator.mjs';
+import { buildReflectionItems } from './canonical/src/future_session/reflection_model.mjs';
+import { mountProductReflectionUI } from './canonical/src/future_session/product_reflection_ui.mjs';
+import { deriveProductResultState } from './canonical/src/future_session/product_result_gate.mjs';
+
+const RELEASE_ID='calibration-v0.1';
+const CONSENT_VERSION='timing-research-consent-v0.1';
+const app=document.getElementById('app');
+const brand=document.getElementById('brand');
+const note=document.getElementById('note');
+const rootPrefix='./canonical/';
+const params=new URLSearchParams(location.search);
+const requestedForm=['F2-A','F2-B'].includes(params.get('form'))?params.get('form'):null;
+const uploadMessageId=crypto.randomUUID();
+const sessionId=crypto.randomUUID();
+const COPY={
+  lt:{brand:'ConflictLab · eksperimentinis savirefleksijos įrankis',note:'Ankstyvas bandymas. Tai nėra asmenybės testas, diagnostika ar vertinimas. Nėra teisingų ar neteisingų pasirinkimų.',languageTitle:'Pasirink kalbą',languageText:'Kalba bus naudojama visoje šio bandymo sesijoje.',trainingTitle:'Trumpa treniruotė',trainingText:'Pamatysi 3 vaizdų poras viena po kitos. Kiekvieną kartą pasirink vaizdą, kurį rinktumeisi pirmiau.',sharedTime:'Visoms trims poroms skirtas vienas bendras 6 sekundžių laikas.',trainingBoundary:'Tai tik praktika. Treniruotės pasirinkimai nėra siunčiami ir nepatenka į kalibravimo duomenis.',consentTitle:'Timing tyrimo pasirinkimas',consentIntro:'Gali tęsti su tyrimo duomenų įkėlimu arba be jo. Tyrimo tikslas – tik patikrinti sąsajos laiko mechaniką, ne vertinti tavo asmenybę.',ageConfirm:'Patvirtinu, kad man yra 18 metų arba daugiau.',researchConsent:'Savanoriškai sutinku, kad minimali pseudoniminė pagrindinio bloko timing telemetrija būtų naudojama ConflictLab timing / UX tyrimui.',privacyLink:'Privatumo informacija',consentPrimary:'Sutinku ir dalyvauju timing tyrime',localOnly:'Tęsti be tyrimo duomenų įkėlimo',consentHint:'Varnelės nepažymėtos iš anksto. Atsisakymas nėra vertinamas kaip psichologinis signalas. Po sėkmingo įkėlimo gausi atsitiktinį duomenų ištrynimo kodą.',measuredText:'Veiksmas bus toks pats. Kitas paspaudimas pradės pagrindinę sesiją. Rinkis natūraliai ir nebandyk specialiai „suspėti“.',measuredBoundary:'Serveriui išsaugoma tik techninė pagrindinio bloko laiko telemetrija. Refleksijos priežastys, intensyvumas ir jų laikai lieka lokaliai.',measuredBoundaryLocal:'Pasirinkai tęsti be research upload. Pagrindinio bloko timing telemetrija į tyrimo DB nebus siunčiama; refleksija liks lokaliai.',startMeasured:'Pradėti pagrindinę sesiją',trainingDone:'Treniruotė baigta',trainingTimeout:'Treniruotės laikas baigėsi',measuredTimeout:'Laikas baigėsi',trainingRetry:'Pakartok treniruotę. Tikslas tik priprasti prie sąveikos ir bendro laiko.',measuredRetry:'Pakartok tą patį trijų porų bloką. Porų tvarka ir vaizdų pozicijos nesikeičia.',restartTraining:'Pradėti treniruotę iš naujo',retryTraining:'Pakartoti treniruotę',retryMeasured:'Bandyti dar kartą',trainingAttempt:'Treniruotė',measuredAttempt:'Bandymas',topImage:'Pirmas vaizdas',bottomImage:'Antras vaizdas',saving:'Išsaugoma techninė sesijos informacija…',noAnchor:'Refleksijai neliko užbaigto pasirinkimo.',resultTitle:'Šios versijos rezultatas',resultUnavailable:'Kryptinis rezultatas sąmoningai dar nepateikiamas.',resultWhy:'Tas pats Calculation ir Evidence pipeline jau paleidžiamas lokaliai, tačiau Gate D ir Gate E dar nėra validuoti. Todėl sistema sustoja ties NOT_ESTIMABLE, o ne kuria psichologinę išvadą.',saved:'Techniniai timing duomenys išsaugoti.',notUploaded:'Tyrimo duomenų įkėlimas nebuvo pasirinktas.',saveFailed:'Techninių timing duomenų išsaugoti nepavyko. Jei galite, praneškite tyrimo autoriui.',localReflection:'Refleksijos priežastys, intensyvumas ir jų response-time duomenys į kalibravimo DB nesiunčiami.',withdrawalTitle:'Duomenų ištrynimo kodas',withdrawalHelp:'Išsisaugok šį kodą. Jei norėsi, parašyk info@omesg360.eu ir pateik kodą – jis leis rasti šią pseudoniminę sesiją neatskleidžiant tavo vardo.',copyCode:'Kopijuoti kodą',copied:'Nukopijuota',thanks:'Ačiū',error:'Techninė klaida'},
+  en:{brand:'ConflictLab · experimental self-reflection tool',note:'Early pilot. This is not a personality test, diagnosis, or evaluation. There are no right or wrong choices.',languageTitle:'Choose language',languageText:'The selected language will be used throughout this pilot session.',trainingTitle:'Quick practice',trainingText:'You will see 3 image pairs one after another. Each time, choose the image you would pick first.',sharedTime:'All three pairs share one 6-second time limit.',trainingBoundary:'This is practice only. Practice choices are not uploaded and never enter calibration data.',consentTitle:'Timing research choice',consentIntro:'You can continue with research upload or without it. The study tests only the timing mechanics of the interface; it does not assess your personality.',ageConfirm:'I confirm that I am 18 years old or older.',researchConsent:'I voluntarily consent to the minimum pseudonymous timing telemetry from the main block being used for ConflictLab timing / UX research.',privacyLink:'Privacy information',consentPrimary:'I consent and participate in timing research',localOnly:'Continue without research upload',consentHint:'Checkboxes are unticked by default. Refusal is not treated as a psychological signal. After a successful upload you will receive a random data-deletion code.',measuredText:'The interaction will be the same. The next tap starts the main session. Choose naturally and do not try to “beat” the timer.',measuredBoundary:'Only technical timing telemetry from the main block is stored on the server. Reflection reasons, intensity, and their response times stay local.',measuredBoundaryLocal:'You chose to continue without research upload. Main-block timing telemetry will not be sent to the research database; reflection stays local.',startMeasured:'Start main session',trainingDone:'Practice complete',trainingTimeout:'Practice time ended',measuredTimeout:'Time ended',trainingRetry:'Repeat the practice. The goal is only to get used to the interaction and shared time.',measuredRetry:'Repeat the same three-pair block. Pair order and image positions stay unchanged.',restartTraining:'Restart practice',retryTraining:'Repeat practice',retryMeasured:'Try again',trainingAttempt:'Practice',measuredAttempt:'Attempt',topImage:'First image',bottomImage:'Second image',saving:'Saving technical session information…',noAnchor:'No completed choice remained for reflection.',resultTitle:'Result in this version',resultUnavailable:'A directional result is intentionally not shown yet.',resultWhy:'The same Calculation and Evidence pipeline already runs locally, but Gate D and Gate E are not validated yet. The system therefore stops at NOT_ESTIMABLE instead of creating a psychological conclusion.',saved:'Technical timing data were saved.',notUploaded:'Research upload was not selected.',saveFailed:'Technical timing data could not be saved. If possible, please tell the research author.',localReflection:'Reflection reasons, intensity, and their response-time data are not sent to the calibration database.',withdrawalTitle:'Data deletion code',withdrawalHelp:'Save this code. If you later want deletion, email info@omesg360.eu and include the code. It allows this pseudonymous session to be located without providing your name.',copyCode:'Copy code',copied:'Copied',thanks:'Thank you',error:'Technical error'}
+};
+
+let locale=null,bundle=null,runner=null,trainingRunner=null,activeRunner=null,activeMode='BOOT';
+let stimulusSet,rapidProtocol,reasonMap,trainingSet,gateDConfig,gateEConfig,sessionPlan,trainingPlan;
+let deadlineTimer=null,attemptClockStart=null,reflectionStarted=false;
+let uploadState={status:'NOT_STARTED',error:null,response:null};
+let researchChoice={mode:'UNDECIDED',age18Confirmed:false,researchConsent:false,consentVersion:CONSENT_VERSION};
+let deletionToken=null;
+let localReflectionSnapshot=null,localResultState=null;
+
+function t(key){return COPY[locale||'lt'][key]}
+function uuid(){return crypto.randomUUID()}
+function setRapidMode(on){document.body.classList.toggle('rapid-mode',Boolean(on))}
+function clearDeadline(){if(deadlineTimer!==null)clearTimeout(deadlineTimer);deadlineTimer=null;attemptClockStart=null}
+function assetUrl(path){return bundle.get(path).objectUrl}
+function activeBudgetMs(){return activeMode==='TRAINING'?trainingSet.protocol.shared_budget_ms:rapidProtocol.timing.block_budget_ms}
+function deviceCategory(){const w=window.innerWidth;if(!Number.isFinite(w))return'unknown';if(w<=767)return'mobile';if(w<=1024)return'tablet';return'desktop'}
+function pairProgress(i){return `${i} / 3`}
+function applyLocale(next){locale=next;document.documentElement.lang=next;brand.textContent=t('brand');note.textContent=t('note')}
+function makeDeletionToken(){const bytes=new Uint8Array(16);crypto.getRandomValues(bytes);return [...bytes].map(v=>v.toString(16).padStart(2,'0')).join('')}
+async function sha256Hex(value){const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(value));return [...new Uint8Array(digest)].map(v=>v.toString(16).padStart(2,'0')).join('')}
+
+function scheduleDeadline(startAt,budgetMs){
+  attemptClockStart=startAt;
+  function check(){if(!activeRunner||activeRunner.phase!=='RAPID')return;const remaining=budgetMs-(performance.now()-attemptClockStart);if(remaining>0){deadlineTimer=setTimeout(check,Math.max(4,remaining+1));return}try{handleTerminal(activeRunner.expire(performance.now()))}catch(error){showError(error)}}
+  deadlineTimer=setTimeout(check,budgetMs+1);
+}
+
+function renderPair(){
+  const pair=activeRunner.currentPair();if(!pair)return;
+  setRapidMode(true);app.className='card rapid-shell';app.replaceChildren();
+  const head=document.createElement('div');head.className='rapid-head';
+  const progress=document.createElement('span');progress.textContent=pairProgress(activeRunner.activeAttempt.currentIndex+1);
+  const attempt=document.createElement('span');attempt.textContent=`${activeMode==='TRAINING'?t('trainingAttempt'):t('measuredAttempt')} ${activeRunner.activeAttempt.attemptNumber}/3`;
+  head.append(progress,attempt);
+  const stage=document.createElement('div');stage.className='rapid-stage';
+  const choices=[{id:'A',path:pair.assetAPath,position:pair.assetAPosition},{id:'B',path:pair.assetBPath,position:pair.assetBPosition}].sort((a,b)=>a.position==='top'?-1:1);
+  for(const choice of choices){
+    const button=document.createElement('button');button.className='visual-choice';button.type='button';button.setAttribute('aria-label',choice.position==='top'?t('topImage'):t('bottomImage'));
+    const image=document.createElement('img');image.src=assetUrl(choice.path);image.alt='';button.appendChild(image);
+    button.addEventListener('click',()=>{for(const candidate of stage.querySelectorAll('button'))candidate.disabled=true;try{const result=activeRunner.recordChoice(choice.id,performance.now());if(result.status==='CHOICE_RECORDED')renderPair();else handleTerminal(result)}catch(error){showError(error)}});
+    stage.appendChild(button);
+  }
+  app.append(head,stage);
+  const readyAt=performance.now();const ready=activeRunner.markPairReady(readyAt);
+  if(ready.status==='TIMEOUT'){handleTerminal(ready);return}
+  if(ready.positionInBlock===1)scheduleDeadline(readyAt,activeBudgetMs());
+}
+
+function startAttempt(){clearDeadline();activeRunner.startAttempt();renderPair()}
+function createTrainingRunner(){return new FutureSessionOrchestrator({sessionId,blockId:uuid(),sessionPlan:trainingPlan,blockBudgetMs:trainingSet.protocol.shared_budget_ms,protocolVersion:'training-familiarization-v1',stimulusSetVersion:trainingSet.training_set_version,isTraining:true})}
+
+function showLanguageSelect(){
+  setRapidMode(false);app.className='';const card=document.createElement('section');card.className='card intro center';
+  card.innerHTML='<h2>LT / EN</h2><p>Pasirink kalbą · Choose language</p><p class="boundary">Kalba bus naudojama visoje sesijoje · The selected language will be used throughout the session.</p>';
+  const grid=document.createElement('div');grid.className='language-grid';
+  for(const [code,label] of [['lt','Lietuvių'],['en','English']]){const button=document.createElement('button');button.className='primary';button.textContent=label;button.onclick=()=>{applyLocale(code);showTrainingIntro()};grid.appendChild(button)}
+  card.append(grid);app.replaceChildren(card);
+}
+
+function showTrainingIntro(){
+  setRapidMode(false);const card=document.createElement('section');card.className='card intro';
+  card.innerHTML=`<h2>${t('trainingTitle')}</h2><p>${t('trainingText')} <b>${t('sharedTime')}</b></p><p class="boundary">${t('trainingBoundary')}</p>`;
+  const actions=document.createElement('div');actions.className='actions centered';const button=document.createElement('button');button.className='primary';button.textContent=t('startTraining');button.onclick=()=>{trainingRunner=createTrainingRunner();activeRunner=trainingRunner;activeMode='TRAINING';startAttempt()};actions.append(button);card.append(actions);app.className='';app.replaceChildren(card);
+}
+
+function showResearchConsent(){
+  setRapidMode(false);const card=document.createElement('section');card.className='card intro';
+  const title=document.createElement('h2');title.textContent=t('consentTitle');
+  const intro=document.createElement('p');intro.textContent=t('consentIntro');
+  const box=document.createElement('div');box.className='consent-box';
+  const ageLabel=document.createElement('label');ageLabel.className='consent-row';const age=document.createElement('input');age.type='checkbox';age.checked=false;const ageText=document.createElement('span');ageText.className='consent-copy';ageText.textContent=t('ageConfirm');ageLabel.append(age,ageText);
+  const consentLabel=document.createElement('label');consentLabel.className='consent-row';const consent=document.createElement('input');consent.type='checkbox';consent.checked=false;const consentText=document.createElement('span');consentText.className='consent-copy';consentText.textContent=t('researchConsent');consentLabel.append(consent,consentText);
+  const privacy=document.createElement('p');privacy.className='consent-meta';const privacyLink=document.createElement('a');privacyLink.href=`/privacy.html?lang=${locale}`;privacyLink.target='_blank';privacyLink.rel='noopener noreferrer';privacyLink.textContent=t('privacyLink');privacy.append(privacyLink,document.createTextNode(` · ${CONSENT_VERSION}`));
+  const hint=document.createElement('p');hint.className='consent-meta';hint.textContent=t('consentHint');
+  const actions=document.createElement('div');actions.className='actions';
+  const participate=document.createElement('button');participate.className='primary';participate.type='button';participate.textContent=t('consentPrimary');participate.disabled=true;
+  const localOnly=document.createElement('button');localOnly.className='secondary';localOnly.type='button';localOnly.textContent=t('localOnly');localOnly.disabled=true;
+  function sync(){participate.disabled=!(age.checked&&consent.checked);localOnly.disabled=!age.checked}
+  age.addEventListener('change',sync);consent.addEventListener('change',sync);
+  participate.onclick=()=>{researchChoice={mode:'CONSENTED',age18Confirmed:true,researchConsent:true,consentVersion:CONSENT_VERSION};showMeasuredIntro()};
+  localOnly.onclick=()=>{researchChoice={mode:'LOCAL_ONLY',age18Confirmed:true,researchConsent:false,consentVersion:CONSENT_VERSION};showMeasuredIntro()};
+  actions.append(participate,localOnly);box.append(ageLabel,consentLabel,privacy,hint);card.append(title,intro,box,actions);app.className='';app.replaceChildren(card);
+}
+
+function showMeasuredIntro(){
+  setRapidMode(false);const card=document.createElement('section');card.className='card intro';
+  const boundary=researchChoice.mode==='CONSENTED'?t('measuredBoundary'):t('measuredBoundaryLocal');
+  card.innerHTML=`<h2>${t('trainingDone')}</h2><p>${t('measuredText')}</p><p class="boundary">${boundary}</p>`;
+  const actions=document.createElement('div');actions.className='actions centered';const button=document.createElement('button');button.className='primary';button.textContent=t('startMeasured');button.onclick=()=>{runner=new FutureSessionOrchestrator({sessionId,blockId:uuid(),sessionPlan,blockBudgetMs:rapidProtocol.timing.block_budget_ms,protocolVersion:rapidProtocol.protocol_version,stimulusSetVersion:stimulusSet.stimulus_set_version});activeRunner=runner;activeMode='MEASURED';startAttempt()};actions.append(button);card.append(actions);app.className='';app.replaceChildren(card);
+}
+
+function showRetry({training,restart=false}){
+  setRapidMode(false);const card=document.createElement('section');card.className='card retry center';
+  const title=document.createElement('h2');title.textContent=training?t('trainingTimeout'):t('measuredTimeout');
+  const p=document.createElement('p');p.textContent=training?t('trainingRetry'):t('measuredRetry');
+  const button=document.createElement('button');button.className='primary';button.textContent=training?(restart?t('restartTraining'):t('retryTraining')):t('retryMeasured');
+  button.onclick=()=>{if(training&&restart){trainingRunner=createTrainingRunner();activeRunner=trainingRunner}startAttempt()};card.append(title,p,button);app.className='';app.replaceChildren(card);
+}
+
+function handleTerminal(){
+  clearDeadline();
+  if(activeMode==='TRAINING'){
+    if(activeRunner.phase==='RETRY_READY'){showRetry({training:true});return}
+    if(activeRunner.phase==='TRAINING_RESTART_REQUIRED'){showRetry({training:true,restart:true});return}
+    if(activeRunner.phase==='COMPLETE'){showResearchConsent();return}
+  }
+  if(activeRunner.phase==='RETRY_READY'){showRetry({training:false});return}
+  if(activeRunner.phase==='REFLECTION_READY'&&!reflectionStarted){reflectionStarted=true;saveCalibrationThenReflect()}
+}
+
+function buildCalibrationPayload(deletionTokenHash){
+  const telemetry=runner.telemetry();
+  return {schema:'conflictlab.calibration-run.v1',messageId:uploadMessageId,sessionId,releaseId:RELEASE_ID,formId:sessionPlan.formId,protocolVersion:rapidProtocol.protocol_version,stimulusSetVersion:stimulusSet.stimulus_set_version,blockBudgetMs:rapidProtocol.timing.block_budget_ms,technicalPreloadOk:Boolean(bundle),deviceCategory:deviceCategory(),consentVersion:researchChoice.consentVersion,researchConsent:researchChoice.researchConsent,age18Confirmed:researchChoice.age18Confirmed,deletionTokenHash,attempts:telemetry.attempts.map(a=>({blockAttemptId:a.blockAttemptId,blockAttemptNumber:a.blockAttemptNumber,blockBudgetMs:a.blockBudgetMs,blockElapsedMsFinal:a.blockElapsedMsFinal,blockTimedOut:a.blockTimedOut,pageHiddenDuringBlock:a.pageHiddenDuringBlock,isTraining:a.isTraining,protocolVersion:a.protocolVersion,stimulusSetVersion:a.stimulusSetVersion})),events:telemetry.events.map(e=>({eventId:e.eventId,blockAttemptId:e.blockAttemptId,blockAttemptNumber:e.blockAttemptNumber,pairId:e.pairId,positionInBlock:e.positionInBlock,pairExposureNumber:e.pairExposureNumber,pairPresented:e.pairPresented,pairReadyElapsedMs:e.pairReadyElapsedMs,responseStatus:e.choice==='timeout'?'timeout':'choice',visualChoiceLatencyMs:e.visualChoiceLatencyMs,blockElapsedMsAtEvent:e.blockElapsedMsAtEvent,remainingBudgetAtPairStartMs:e.remainingBudgetAtPairStartMs,pageHiddenBeforeEvent:e.pageHiddenBeforeEvent}))};
+}
+
+async function postCalibration(){
+  if(researchChoice.mode!=='CONSENTED'){uploadState={status:'NOT_REQUESTED',error:null,response:null};return true}
+  if(!deletionToken)deletionToken=makeDeletionToken();
+  const deletionTokenHash=await sha256Hex(deletionToken);
+  const payload=buildCalibrationPayload(deletionTokenHash);let lastError=null;uploadState={status:'SAVING',error:null,response:null};
+  for(const wait of [0,500,1500]){if(wait)await new Promise(r=>setTimeout(r,wait));try{const response=await fetch('./server/calibration_api.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload),cache:'no-store',credentials:'same-origin'});const data=await response.json().catch(()=>({}));if(!response.ok)throw new Error(data.code||`HTTP_${response.status}`);uploadState={status:'SAVED',error:null,response:data};return true}catch(error){lastError=error}}
+  uploadState={status:'FAILED',error:String(lastError?.message||lastError),response:null};return false;
+}
+
+async function saveCalibrationThenReflect(){
+  if(researchChoice.mode!=='CONSENTED'){uploadState={status:'NOT_REQUESTED',error:null,response:null};beginReflection();return}
+  setRapidMode(false);app.className='card center';app.innerHTML=`<p class="status">${t('saving')}</p>`;await postCalibration();beginReflection()
+}
+
+function beginReflection(){
+  setRapidMode(false);const anchors=runner.reflectionAnchors();
+  if(!anchors.length){localReflectionSnapshot={stage:'COMPLETE',responses:[],reflectionTotalElapsedMs:null};runner.markReflectionComplete();showProductResult(t('noAnchor'));return}
+  const items=buildReflectionItems({anchors,stimulusSet,reasonMap,locale,allowDraft:true});app.className='';app.replaceChildren();
+  mountProductReflectionUI({root:app,items,locale,assetUrlResolver:path=>assetUrl(path),onSnapshot(snapshot){localReflectionSnapshot=snapshot},onComplete(snapshot){localReflectionSnapshot=snapshot;runner.markReflectionComplete();showProductResult('')}});
+}
+
+function showProductResult(extra=''){
+  setRapidMode(false);clearDeadline();
+  try{localResultState=deriveProductResultState({events:runner.telemetry().events,gateDConfig,gateEConfig,reflectionAnchors:runner.reflectionAnchors()})}catch(error){showError(error);return}
+  const card=document.createElement('section');card.className='card result';
+  const title=document.createElement('h2');title.textContent=t('resultTitle');
+  const status=document.createElement('div');status.className='result-state';status.innerHTML=`<strong>${t('resultUnavailable')}</strong><p>${t('resultWhy')}</p>`;
+  const info=document.createElement('p');info.className=uploadState.status==='SAVED'||uploadState.status==='NOT_REQUESTED'?'ok':'warn';info.textContent=uploadState.status==='SAVED'?t('saved'):(uploadState.status==='NOT_REQUESTED'?t('notUploaded'):t('saveFailed'));
+  const local=document.createElement('p');local.className='boundary';local.textContent=t('localReflection');
+  const gate=document.createElement('p');gate.className='boundary';gate.textContent=`Gate D: ${localResultState.gateDReady?'READY':'NONE'} · Gate E: ${localResultState.gateEReady?'READY':'NONE'} · ${localResultState.resultStatus}`;
+  card.append(title);if(extra){const p=document.createElement('p');p.textContent=extra;card.append(p)}card.append(status,info,local,gate);
+  if(uploadState.status==='SAVED'&&deletionToken){
+    const withdrawal=document.createElement('div');withdrawal.className='withdrawal-box';
+    const strong=document.createElement('strong');strong.textContent=t('withdrawalTitle');
+    const help=document.createElement('p');help.className='boundary';help.textContent=t('withdrawalHelp');
+    const code=document.createElement('code');code.textContent=deletionToken;
+    const copy=document.createElement('button');copy.type='button';copy.className='secondary';copy.textContent=t('copyCode');copy.onclick=async()=>{try{await navigator.clipboard.writeText(deletionToken);copy.textContent=t('copied')}catch(_){}};
+    withdrawal.append(strong,help,code,copy);card.append(withdrawal);
+  }
+  app.className='';app.replaceChildren(card);
+}
+
+function showError(error){setRapidMode(false);clearDeadline();const box=document.createElement('div');box.className='error';box.textContent=`${locale?t('error'):'Technical error'}: ${error?.message||error}`;app.className='';app.replaceChildren(box)}
+
+try{
+  [stimulusSet,rapidProtocol,reasonMap,trainingSet,gateDConfig,gateEConfig]=await Promise.all([
+    fetch('./canonical/config/future-session/stimulus-set-v1.json').then(r=>{if(!r.ok)throw new Error('stimulus config');return r.json()}),
+    fetch('./canonical/config/future-session/rapid-presentation-v1.json').then(r=>{if(!r.ok)throw new Error('rapid config');return r.json()}),
+    fetch('./canonical/config/future-session/reason-map-v1.json').then(r=>{if(!r.ok)throw new Error('reason config');return r.json()}),
+    fetch('./canonical/config/future-session/training-set-v1.json').then(r=>{if(!r.ok)throw new Error('training config');return r.json()}),
+    fetch('./canonical/config/future-session/gate-d-v1.json').then(r=>{if(!r.ok)throw new Error('gate d config');return r.json()}),
+    fetch('./canonical/config/future-session/gate-e-v1.json').then(r=>{if(!r.ok)throw new Error('gate e config');return r.json()}),
+  ]);
+  const cycle=createTwoSessionCycle({protocol:rapidProtocol,stimulusSet});sessionPlan=requestedForm?cycle.sessions.find(s=>s.formId===requestedForm):cycle.sessions[0];if(!sessionPlan)throw new Error('session form unavailable');
+  trainingPlan=createTrainingPlan({trainingSet});
+  const preloadPaths=[...preloadPathsForTraining(trainingPlan),...preloadPathsForSession(sessionPlan)];
+  bundle=await preloadAssetBundle([...new Set(preloadPaths)],{fetchFn(path,options){return fetch(rootPrefix+path,options)}});
+  showLanguageSelect();
+}catch(error){showError(error)}
+
+document.addEventListener('visibilitychange',()=>{if(document.hidden)activeRunner?.markPageHidden()});
+window.addEventListener('pagehide',()=>{clearDeadline();bundle?.release()},{once:true});
+</script>
+</body>
+</html>

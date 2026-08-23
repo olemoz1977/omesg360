@@ -1,0 +1,53 @@
+{
+  "schema": "conflictlab.timing-calibration.v1",
+  "calibration_version": "timing-calibration-v1",
+  "protocol_version": "future-rapid-v1",
+  "candidate_budget_ms": 6000,
+  "lifecycle": "DRAFT",
+  "scope": "MECHANICAL_TIMING_ONLY",
+  "purpose": "Decide whether a 6000 ms shared budget for three sequential pairs creates acceptable completion and missingness mechanics. This calibration does not validate any psychological interpretation, Gate D mapping, Gate E aggregation, latency meaning, or trait claim.",
+  "inclusion": {
+    "primary_attempt_only": true,
+    "exclude_training": true,
+    "exclude_page_hidden": true,
+    "require_three_logical_pair_events": true,
+    "technical_preload_failure_creates_no_research_attempt": true
+  },
+  "data_floor": {
+    "min_clean_primary_blocks": 20,
+    "pair_level_threshold_min_n": 8,
+    "device_gap_min_n_per_group": 5
+  },
+  "green_thresholds": {
+    "primary_block_completion_rate_min": 0.80,
+    "position3_never_presented_rate_max": 0.10,
+    "position3_missing_rate_max": 0.20,
+    "missing_rate_gradient_p3_minus_p1_max": 0.10,
+    "pair_missing_rate_max": 0.30
+  },
+  "red_thresholds": {
+    "primary_block_completion_rate_below": 0.60,
+    "position3_never_presented_rate_above": 0.25,
+    "position3_missing_rate_above": 0.40,
+    "missing_rate_gradient_p3_minus_p1_above": 0.20,
+    "pair_missing_rate_above": 0.50
+  },
+  "diagnostics_only": {
+    "retry_rate": true,
+    "page_hidden_rate": true,
+    "latency_by_block_position": true,
+    "remaining_budget_at_pair_start_by_position": true,
+    "completion_rate_by_device_category": true,
+    "device_completion_gap": true,
+    "pair_specific_missingness": true,
+    "note": "These diagnostics constrain interpretation of timing quality but do not independently assign psychological meaning or alter participant scoring. Device gaps are reported when at least device_gap_min_n_per_group clean blocks exist in each compared category."
+  },
+  "decision_rule": {
+    "INSUFFICIENT_DATA": "fewer than min_clean_primary_blocks after inclusion rules",
+    "REJECT_6000": "one or more red thresholds are crossed",
+    "ADJUST_AND_RETEST": "data floor is met, no red threshold is crossed, but one or more green thresholds fail",
+    "KEEP_6000": "data floor is met and every estimable green threshold passes",
+    "no_automatic_next_budget": true,
+    "note": "ADJUST_AND_RETEST or REJECT_6000 does not automatically choose 7000/7500/8000 ms. The next candidate budget must be versioned and retested under the same presentation protocol."
+  }
+}
