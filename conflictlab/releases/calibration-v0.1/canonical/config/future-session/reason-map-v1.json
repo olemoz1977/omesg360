@@ -1,0 +1,431 @@
+{
+  "schema": "conflictlab.reason-map.v1",
+  "reason_map_version": "reason-map-v1",
+  "stimulus_set_version": "stimulus-set-v1",
+  "lifecycle": "DRAFT",
+  "content_status": "DRAFT_CONTENT_REVIEW_REQUIRED",
+  "released_at": null,
+  "description": "DRAFT pair- and anchor-specific structured reflection reasons for the six F1 stimulus pairs. Content describes possible reasons for a completed A/B choice; it does not validate Gate D, identify a true motive, or infer a participant trait.",
+  "allowed_interpretability_classes": [
+    "DOMAIN_CONSISTENT_REASON",
+    "CROSS_DOMAIN_REASON",
+    "OTHER_REASON",
+    "UNRESOLVED"
+  ],
+  "required_item_fields": [
+    "pair_id",
+    "anchor_choice",
+    "reason_id",
+    "text_lt",
+    "text_en",
+    "interpretability_class"
+  ],
+  "content_policy": {
+    "gate_d_dependency": "NONE_FOR_AUTHORING_OR_DISPLAY",
+    "classification_meaning": "interpretability_class describes the selected reason option only; it is not a claim about the participant's hidden true motive",
+    "participant_facing_labels_hidden": true,
+    "structured_options_per_anchor": 4,
+    "display_order": "RANDOMIZE_FIRST_THREE_KEEP_UNRESOLVED_LAST",
+    "other_reason_free_text": "LOCAL_ONLY_OPTIONAL",
+    "server_reason_id_collection": "EXPLICIT_RESEARCH_CONSENT_ONLY",
+    "trait_language_forbidden": true
+  },
+  "items": [
+    {
+      "pair_id": "CS-PR-01",
+      "anchor_choice": "A",
+      "reason_id": "CS-PR-01-A-R01",
+      "text_lt": "Patiko, kad vaizde buvo matyti daugiau.",
+      "text_en": "I liked that more was visible in the image.",
+      "interpretability_class": "DOMAIN_CONSISTENT_REASON"
+    },
+    {
+      "pair_id": "CS-PR-01",
+      "anchor_choice": "A",
+      "reason_id": "CS-PR-01-A-R02",
+      "text_lt": "Vaizdas atrodė labiau užbaigtas ir tvarkingas.",
+      "text_en": "The image looked more complete and orderly.",
+      "interpretability_class": "CROSS_DOMAIN_REASON"
+    },
+    {
+      "pair_id": "CS-PR-01",
+      "anchor_choice": "A",
+      "reason_id": "CS-PR-01-A-R03",
+      "text_lt": "Kita priežastis.",
+      "text_en": "Another reason.",
+      "interpretability_class": "OTHER_REASON",
+      "allows_local_free_text": true
+    },
+    {
+      "pair_id": "CS-PR-01",
+      "anchor_choice": "A",
+      "reason_id": "CS-PR-01-A-R04",
+      "text_lt": "Sunku tiksliai pasakyti, kodėl pasirinkau.",
+      "text_en": "It is hard to say exactly why I chose it.",
+      "interpretability_class": "UNRESOLVED"
+    },
+    {
+      "pair_id": "CS-PR-01",
+      "anchor_choice": "B",
+      "reason_id": "CS-PR-01-B-R01",
+      "text_lt": "Patiko, kad dalis liko neatskleista ir daugiau reikėjo numanyti.",
+      "text_en": "I liked that part remained unrevealed and more had to be inferred.",
+      "interpretability_class": "DOMAIN_CONSISTENT_REASON"
+    },
+    {
+      "pair_id": "CS-PR-01",
+      "anchor_choice": "B",
+      "reason_id": "CS-PR-01-B-R02",
+      "text_lt": "Vaizdas atrodė paprastesnis ir mažiau apkrautas.",
+      "text_en": "The image looked simpler and less visually busy.",
+      "interpretability_class": "OTHER_REASON"
+    },
+    {
+      "pair_id": "CS-PR-01",
+      "anchor_choice": "B",
+      "reason_id": "CS-PR-01-B-R03",
+      "text_lt": "Kita priežastis.",
+      "text_en": "Another reason.",
+      "interpretability_class": "OTHER_REASON",
+      "allows_local_free_text": true
+    },
+    {
+      "pair_id": "CS-PR-01",
+      "anchor_choice": "B",
+      "reason_id": "CS-PR-01-B-R04",
+      "text_lt": "Sunku tiksliai pasakyti, kodėl pasirinkau.",
+      "text_en": "It is hard to say exactly why I chose it.",
+      "interpretability_class": "UNRESOLVED"
+    },
+    {
+      "pair_id": "CS-RE-01",
+      "anchor_choice": "A",
+      "reason_id": "CS-RE-01-A-R01",
+      "text_lt": "Patiko, kad jungtyje buvo matyti daugiau detalių apie tai, kaip objektai susieti.",
+      "text_en": "I liked that the connector showed more detail about how the objects were linked.",
+      "interpretability_class": "DOMAIN_CONSISTENT_REASON"
+    },
+    {
+      "pair_id": "CS-RE-01",
+      "anchor_choice": "A",
+      "reason_id": "CS-RE-01-A-R02",
+      "text_lt": "Skaidri jungtis atrodė vizualiai lengvesnė.",
+      "text_en": "The transparent connector looked visually lighter.",
+      "interpretability_class": "OTHER_REASON"
+    },
+    {
+      "pair_id": "CS-RE-01",
+      "anchor_choice": "A",
+      "reason_id": "CS-RE-01-A-R03",
+      "text_lt": "Kita priežastis.",
+      "text_en": "Another reason.",
+      "interpretability_class": "OTHER_REASON",
+      "allows_local_free_text": true
+    },
+    {
+      "pair_id": "CS-RE-01",
+      "anchor_choice": "A",
+      "reason_id": "CS-RE-01-A-R04",
+      "text_lt": "Sunku tiksliai pasakyti, kodėl pasirinkau.",
+      "text_en": "It is hard to say exactly why I chose it.",
+      "interpretability_class": "UNRESOLVED"
+    },
+    {
+      "pair_id": "CS-RE-01",
+      "anchor_choice": "B",
+      "reason_id": "CS-RE-01-B-R01",
+      "text_lt": "Patiko, kad vientisa jungtis atskleidė mažiau detalių apie tai, kaip objektai susieti.",
+      "text_en": "I liked that the solid-looking connector revealed less detail about how the objects were linked.",
+      "interpretability_class": "DOMAIN_CONSISTENT_REASON"
+    },
+    {
+      "pair_id": "CS-RE-01",
+      "anchor_choice": "B",
+      "reason_id": "CS-RE-01-B-R02",
+      "text_lt": "Matinė jungtis atrodė ramesnė ir paprastesnė.",
+      "text_en": "The matte connector looked calmer and simpler.",
+      "interpretability_class": "OTHER_REASON"
+    },
+    {
+      "pair_id": "CS-RE-01",
+      "anchor_choice": "B",
+      "reason_id": "CS-RE-01-B-R03",
+      "text_lt": "Kita priežastis.",
+      "text_en": "Another reason.",
+      "interpretability_class": "OTHER_REASON",
+      "allows_local_free_text": true
+    },
+    {
+      "pair_id": "CS-RE-01",
+      "anchor_choice": "B",
+      "reason_id": "CS-RE-01-B-R04",
+      "text_lt": "Sunku tiksliai pasakyti, kodėl pasirinkau.",
+      "text_en": "It is hard to say exactly why I chose it.",
+      "interpretability_class": "UNRESOLVED"
+    },
+    {
+      "pair_id": "CS-CA-01",
+      "anchor_choice": "A",
+      "reason_id": "CS-CA-01-A-R01",
+      "text_lt": "Vertikali riba padėjo aiškiau suvokti erdvės kontekstą.",
+      "text_en": "The vertical boundary helped me read the spatial context more clearly.",
+      "interpretability_class": "DOMAIN_CONSISTENT_REASON"
+    },
+    {
+      "pair_id": "CS-CA-01",
+      "anchor_choice": "A",
+      "reason_id": "CS-CA-01-A-R02",
+      "text_lt": "Vaizdas atrodė labiau struktūruotas ir aiškiai sudėliotas.",
+      "text_en": "The image looked more structured and clearly arranged.",
+      "interpretability_class": "CROSS_DOMAIN_REASON"
+    },
+    {
+      "pair_id": "CS-CA-01",
+      "anchor_choice": "A",
+      "reason_id": "CS-CA-01-A-R03",
+      "text_lt": "Kita priežastis.",
+      "text_en": "Another reason.",
+      "interpretability_class": "OTHER_REASON",
+      "allows_local_free_text": true
+    },
+    {
+      "pair_id": "CS-CA-01",
+      "anchor_choice": "A",
+      "reason_id": "CS-CA-01-A-R04",
+      "text_lt": "Sunku tiksliai pasakyti, kodėl pasirinkau.",
+      "text_en": "It is hard to say exactly why I chose it.",
+      "interpretability_class": "UNRESOLVED"
+    },
+    {
+      "pair_id": "CS-CA-01",
+      "anchor_choice": "B",
+      "reason_id": "CS-CA-01-B-R01",
+      "text_lt": "Patiko, kad be papildomos vertikalios ribos vaizdas paliko daugiau vietos interpretacijai.",
+      "text_en": "I liked that without the extra vertical boundary the image left more room for interpretation.",
+      "interpretability_class": "DOMAIN_CONSISTENT_REASON"
+    },
+    {
+      "pair_id": "CS-CA-01",
+      "anchor_choice": "B",
+      "reason_id": "CS-CA-01-B-R02",
+      "text_lt": "Vaizdas atrodė paprastesnis ir mažiau apkrautas.",
+      "text_en": "The image looked simpler and less visually busy.",
+      "interpretability_class": "OTHER_REASON"
+    },
+    {
+      "pair_id": "CS-CA-01",
+      "anchor_choice": "B",
+      "reason_id": "CS-CA-01-B-R03",
+      "text_lt": "Kita priežastis.",
+      "text_en": "Another reason.",
+      "interpretability_class": "OTHER_REASON",
+      "allows_local_free_text": true
+    },
+    {
+      "pair_id": "CS-CA-01",
+      "anchor_choice": "B",
+      "reason_id": "CS-CA-01-B-R04",
+      "text_lt": "Sunku tiksliai pasakyti, kodėl pasirinkau.",
+      "text_en": "It is hard to say exactly why I chose it.",
+      "interpretability_class": "UNRESOLVED"
+    },
+    {
+      "pair_id": "CR-PZ-01",
+      "anchor_choice": "A",
+      "reason_id": "CR-PZ-01-A-R01",
+      "text_lt": "Patiko, kad erdvė nebuvo iš anksto suskirstyta į atskiras zonas.",
+      "text_en": "I liked that the space was not predefined into separate zones.",
+      "interpretability_class": "DOMAIN_CONSISTENT_REASON"
+    },
+    {
+      "pair_id": "CR-PZ-01",
+      "anchor_choice": "A",
+      "reason_id": "CR-PZ-01-A-R02",
+      "text_lt": "Vaizdas atrodė paprastesnis ir erdvesnis.",
+      "text_en": "The image looked simpler and more spacious.",
+      "interpretability_class": "OTHER_REASON"
+    },
+    {
+      "pair_id": "CR-PZ-01",
+      "anchor_choice": "A",
+      "reason_id": "CR-PZ-01-A-R03",
+      "text_lt": "Kita priežastis.",
+      "text_en": "Another reason.",
+      "interpretability_class": "OTHER_REASON",
+      "allows_local_free_text": true
+    },
+    {
+      "pair_id": "CR-PZ-01",
+      "anchor_choice": "A",
+      "reason_id": "CR-PZ-01-A-R04",
+      "text_lt": "Sunku tiksliai pasakyti, kodėl pasirinkau.",
+      "text_en": "It is hard to say exactly why I chose it.",
+      "interpretability_class": "UNRESOLVED"
+    },
+    {
+      "pair_id": "CR-PZ-01",
+      "anchor_choice": "B",
+      "reason_id": "CR-PZ-01-B-R01",
+      "text_lt": "Patiko, kad erdvė buvo aiškiai suskirstyta į atskiras zonas.",
+      "text_en": "I liked that the space was clearly divided into separate zones.",
+      "interpretability_class": "DOMAIN_CONSISTENT_REASON"
+    },
+    {
+      "pair_id": "CR-PZ-01",
+      "anchor_choice": "B",
+      "reason_id": "CR-PZ-01-B-R02",
+      "text_lt": "Buvo lengviau iš karto suprasti, kur kas turėtų būti.",
+      "text_en": "It was easier to understand immediately where things were supposed to go.",
+      "interpretability_class": "CROSS_DOMAIN_REASON"
+    },
+    {
+      "pair_id": "CR-PZ-01",
+      "anchor_choice": "B",
+      "reason_id": "CR-PZ-01-B-R03",
+      "text_lt": "Kita priežastis.",
+      "text_en": "Another reason.",
+      "interpretability_class": "OTHER_REASON",
+      "allows_local_free_text": true
+    },
+    {
+      "pair_id": "CR-PZ-01",
+      "anchor_choice": "B",
+      "reason_id": "CR-PZ-01-B-R04",
+      "text_lt": "Sunku tiksliai pasakyti, kodėl pasirinkau.",
+      "text_en": "It is hard to say exactly why I chose it.",
+      "interpretability_class": "UNRESOLVED"
+    },
+    {
+      "pair_id": "CR-FS-01",
+      "anchor_choice": "A",
+      "reason_id": "CR-FS-01-A-R01",
+      "text_lt": "Patiko, kad kiekvienam elementui buvo aiškiai atskirta vieta.",
+      "text_en": "I liked that each element had a clearly separate place.",
+      "interpretability_class": "DOMAIN_CONSISTENT_REASON"
+    },
+    {
+      "pair_id": "CR-FS-01",
+      "anchor_choice": "A",
+      "reason_id": "CR-FS-01-A-R02",
+      "text_lt": "Buvo lengviau iš karto suprasti, kur kas turi būti.",
+      "text_en": "It was easier to understand immediately where each thing should go.",
+      "interpretability_class": "CROSS_DOMAIN_REASON"
+    },
+    {
+      "pair_id": "CR-FS-01",
+      "anchor_choice": "A",
+      "reason_id": "CR-FS-01-A-R03",
+      "text_lt": "Kita priežastis.",
+      "text_en": "Another reason.",
+      "interpretability_class": "OTHER_REASON",
+      "allows_local_free_text": true
+    },
+    {
+      "pair_id": "CR-FS-01",
+      "anchor_choice": "A",
+      "reason_id": "CR-FS-01-A-R04",
+      "text_lt": "Sunku tiksliai pasakyti, kodėl pasirinkau.",
+      "text_en": "It is hard to say exactly why I chose it.",
+      "interpretability_class": "UNRESOLVED"
+    },
+    {
+      "pair_id": "CR-FS-01",
+      "anchor_choice": "B",
+      "reason_id": "CR-FS-01-B-R01",
+      "text_lt": "Patiko, kad plokštuma nebuvo suskirstyta į atskiras vietas elementams.",
+      "text_en": "I liked that the surface was not divided into separate places for the elements.",
+      "interpretability_class": "DOMAIN_CONSISTENT_REASON"
+    },
+    {
+      "pair_id": "CR-FS-01",
+      "anchor_choice": "B",
+      "reason_id": "CR-FS-01-B-R02",
+      "text_lt": "Vaizdas atrodė atviresnis ir paprastesnis.",
+      "text_en": "The image looked more open and simpler.",
+      "interpretability_class": "OTHER_REASON"
+    },
+    {
+      "pair_id": "CR-FS-01",
+      "anchor_choice": "B",
+      "reason_id": "CR-FS-01-B-R03",
+      "text_lt": "Kita priežastis.",
+      "text_en": "Another reason.",
+      "interpretability_class": "OTHER_REASON",
+      "allows_local_free_text": true
+    },
+    {
+      "pair_id": "CR-FS-01",
+      "anchor_choice": "B",
+      "reason_id": "CR-FS-01-B-R04",
+      "text_lt": "Sunku tiksliai pasakyti, kodėl pasirinkau.",
+      "text_en": "It is hard to say exactly why I chose it.",
+      "interpretability_class": "UNRESOLVED"
+    },
+    {
+      "pair_id": "CR-PO-01",
+      "anchor_choice": "A",
+      "reason_id": "CR-PO-01-A-R01",
+      "text_lt": "Patiko atskiros aiškios sekcijos skirtingoms funkcijoms.",
+      "text_en": "I liked the separate, clearly defined sections for different functions.",
+      "interpretability_class": "DOMAIN_CONSISTENT_REASON"
+    },
+    {
+      "pair_id": "CR-PO-01",
+      "anchor_choice": "A",
+      "reason_id": "CR-PO-01-A-R02",
+      "text_lt": "Buvo lengviau suprasti, kam skirta kiekviena erdvės dalis.",
+      "text_en": "It was easier to understand what each part of the space was for.",
+      "interpretability_class": "CROSS_DOMAIN_REASON"
+    },
+    {
+      "pair_id": "CR-PO-01",
+      "anchor_choice": "A",
+      "reason_id": "CR-PO-01-A-R03",
+      "text_lt": "Kita priežastis.",
+      "text_en": "Another reason.",
+      "interpretability_class": "OTHER_REASON",
+      "allows_local_free_text": true
+    },
+    {
+      "pair_id": "CR-PO-01",
+      "anchor_choice": "A",
+      "reason_id": "CR-PO-01-A-R04",
+      "text_lt": "Sunku tiksliai pasakyti, kodėl pasirinkau.",
+      "text_en": "It is hard to say exactly why I chose it.",
+      "interpretability_class": "UNRESOLVED"
+    },
+    {
+      "pair_id": "CR-PO-01",
+      "anchor_choice": "B",
+      "reason_id": "CR-PO-01-B-R01",
+      "text_lt": "Patiko atvira erdvė be vidinių pertvarų.",
+      "text_en": "I liked the open space without internal partitions.",
+      "interpretability_class": "DOMAIN_CONSISTENT_REASON"
+    },
+    {
+      "pair_id": "CR-PO-01",
+      "anchor_choice": "B",
+      "reason_id": "CR-PO-01-B-R02",
+      "text_lt": "Vaizdas atrodė erdvesnis ir mažiau apkrautas.",
+      "text_en": "The image looked more spacious and less visually busy.",
+      "interpretability_class": "OTHER_REASON"
+    },
+    {
+      "pair_id": "CR-PO-01",
+      "anchor_choice": "B",
+      "reason_id": "CR-PO-01-B-R03",
+      "text_lt": "Kita priežastis.",
+      "text_en": "Another reason.",
+      "interpretability_class": "OTHER_REASON",
+      "allows_local_free_text": true
+    },
+    {
+      "pair_id": "CR-PO-01",
+      "anchor_choice": "B",
+      "reason_id": "CR-PO-01-B-R04",
+      "text_lt": "Sunku tiksliai pasakyti, kodėl pasirinkau.",
+      "text_en": "It is hard to say exactly why I chose it.",
+      "interpretability_class": "UNRESOLVED"
+    }
+  ]
+}

@@ -1,0 +1,171 @@
+import { NOT_ESTIMABLE } from './calculation_engine.mjs';
+
+const CLAIM_LEVEL = Object.freeze({
+  RAW_OBSERVATION: 0,
+  SPECIFIC_REPEATED_OBSERVATION: 1,
+  DOMAIN_SUPPORTED_PATTERN: 2,
+  RECURRING_RESPONSE_TENDENCY: 3,
+});
+
+function gateEStatusForDomain(gateEConfig, domain) {
+  const entry = gateEConfig?.domains?.[domain];
+  if (!entry) throw new Error(`Gate E domain is missing: ${domain}`);
+  if (!gateEConfig.allowed_status?.includes(entry.status)) {
+    throw new Error(`unsupported Gate E status for ${domain}: ${entry.status}`);
+  }
+  return entry.status;
+}
+
+function countBy(events, predicate) {
+  let count = 0;
+  for (const event of events || []) if (predicate(event)) count += 1;
+  return count;
+}
+
+export function buildEvidenceContext({ events = [], reflectionAnchors = [], positionStrategyFlag = false }) {
+  const primary = events.filter(event => event.blockAttemptNumber === 1 && !event.isTraining);
+  const retries = events.filter(event => event.blockAttemptNumber > 1 && !event.isTraining);
+
+  const primaryChoices = new Map(
+    primary
+      .filter(event => event.pairPresented && (event.choice === 'A' || event.choice === 'B'))
+      .map(event => [event.pairId, event.choice])
+  );
+
+  let retryDivergence = false;
+  for (const event of retries) {
+    if (!event.pairPresented || (event.choice !== 'A' && event.choice !== 'B')) continue;
+    const primaryChoice = primaryChoices.get(event.pairId);
+    if (primaryChoice && primaryChoice !== event.choice) {
+      retryDivergence = true;
+      break;
+    }
+  }
+
+  const timeoutByPosition = { 1: 0, 2: 0, 3: 0 };
+  let shownTimeouts = 0;
+  let primaryNonExposures = 0;
+
+  for (const event of primary) {
+    if (event.choice !== 'timeout') continue;
+    if (event.pairPresented) {
+      shownTimeouts += 1;
+      if (timeoutByPosition[event.positionInBlock] !== undefined) {
+        timeoutByPosition[event.positionInBlock] += 1;
+      }
+    } else {
+      primaryNonExposures += 1;
+    }
+  }
+
+  const retryAnchors = countBy(
+    reflectionAnchors,
+    anchor => anchor.anchorSource === 'FIRST_COMPLETED_RETRY'
+  );
+
+  return {
+    retryOccurred: retries.length > 0,
+    retryDivergence,
+    positionStrategyFlag: Boolean(positionStrategyFlag),
+    shownTimeouts,
+    primaryNonExposures,
+    timeoutByPosition,
+    reflectionAnchorSources: {
+      PRIMARY: countBy(reflectionAnchors, anchor => anchor.anchorSource === 'PRIMARY'),
+      FIRST_COMPLETED_RETRY: retryAnchors,
+    },
+  };
+}
+
+export function evaluateEvidenceStatus({ calcResult, gateEConfig, context = {} }) {
+  if (!calcResult?.domain) throw new Error('calcResult.domain is required');
+  const gateEStatus = gateEStatusForDomain(gateEConfig, calcResult.domain);
+
+  const flags = [];
+  const narrativeConstraints = [];
+
+  if (context.retryOccurred) flags.push('retry_occurred');
+  if (context.retryDivergence) {
+    flags.push('retry_choices_diverged_from_primary');
+    narrativeConstraints.push('mention_retry_divergence');
+  }
+  if (context.positionStrategyFlag) {
+    flags.push('possible_position_strategy');
+    narrativeConstraints.push('remain_cautious_about_position_strategy');
+  }
+  if ((context.shownTimeouts || 0) > 0) {
+    flags.push('shown_timeouts_present');
+    narrativeConstraints.push('mention_missing_choice_coverage');
+  }
+  if ((context.primaryNonExposures || 0) > 0) {
+    flags.push('primary_non_exposures_present');
+    narrativeConstraints.push('mention_non_exposure');
+  }
+  if ((context.reflectionAnchorSources?.FIRST_COMPLETED_RETRY || 0) > 0) {
+    flags.push('some_reflections_anchored_to_retry');
+    narrativeConstraints.push('distinguish_retry_anchored_reflection');
+  }
+
+  // The Evidence Engine is claim-limiting only. It never mutates the calculation.
+  const base = {
+    aggregationGateVersion: gateEConfig.aggregation_gate_version,
+    gateEStatus,
+    directionBalance: calcResult.directionBalance,
+    coverage: calcResult.coverage,
+    flags,
+    narrativeConstraints,
+  };
+
+  if (calcResult.directionBalance === NOT_ESTIMABLE || calcResult.nDirectionalChoices === 0) {
+    return {
+      ...base,
+      evidenceStatus: 'INSUFFICIENT',
+      allowedClaimLevel: CLAIM_LEVEL.RAW_OBSERVATION,
+      narrativeConstraints: [
+        ...narrativeConstraints,
+        'do_not_describe_directional_pattern',
+      ],
+    };
+  }
+
+  if (calcResult.nDirectionalChoices === 1) {
+    return {
+      ...base,
+      evidenceStatus: 'DESCRIPTIVE_ONLY',
+      allowedClaimLevel: CLAIM_LEVEL.RAW_OBSERVATION,
+      flags: [...flags, 'single_observation_only'],
+      narrativeConstraints: [
+        ...narrativeConstraints,
+        'single_observation_language_only',
+        'do_not_use_repeated_pattern_language',
+      ],
+    };
+  }
+
+  if (gateEStatus !== 'VALID') {
+    return {
+      ...base,
+      evidenceStatus: 'DESCRIPTIVE_ONLY',
+      allowedClaimLevel: CLAIM_LEVEL.SPECIFIC_REPEATED_OBSERVATION,
+      flags: [...flags, 'gate_e_not_passed'],
+      narrativeConstraints: [
+        ...narrativeConstraints,
+        'specific_pairs_only',
+        'do_not_generalize_to_domain',
+      ],
+    };
+  }
+
+  return {
+    ...base,
+    evidenceStatus: 'DOMAIN_INTERPRETABLE',
+    allowedClaimLevel: CLAIM_LEVEL.DOMAIN_SUPPORTED_PATTERN,
+    narrativeConstraints: [
+      ...narrativeConstraints,
+      'domain_language_allowed_but_not_trait_language',
+      'do_not_claim_stable_person_characteristic',
+    ],
+  };
+}
+
+export { CLAIM_LEVEL };

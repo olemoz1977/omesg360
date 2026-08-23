@@ -1,0 +1,58 @@
+{
+  "schema": "conflictlab.training-set.v1",
+  "training_set_version": "training-set-v1",
+  "lifecycle": "DRAFT",
+  "purpose": "INTERACTION_FAMILIARIZATION_ONLY",
+  "source_reference": {
+    "manifest_path": "docs/experiments/pair-p0/pair-set-prototype-nine-v1.json",
+    "manifest_version": "prototype-nine-v1",
+    "stable_tag": "pair-p0-prototype-nine-v1-radar-ux-stable",
+    "note": "References existing P0 assets in place. Original P0 files and semantics are not modified."
+  },
+  "protocol": {
+    "pairs_per_block": 3,
+    "shared_budget_ms": 6000,
+    "clock": "client_monotonic_performance_now",
+    "repeat_on_timeout": true,
+    "max_attempts_per_cycle": 3,
+    "requires_success_before_measured_block": true
+  },
+  "data_boundary": {
+    "is_training": true,
+    "analysis_eligible": false,
+    "timing_calibration_eligible": false,
+    "gate_d": "NOT_APPLICABLE",
+    "gate_e": "NOT_APPLICABLE",
+    "server_upload": false,
+    "participant_result": "NONE"
+  },
+  "pairs": [
+    {
+      "pair_id": "P0-001",
+      "asset_a_id": "P0-001-A",
+      "asset_b_id": "P0-001-B",
+      "asset_a_path": "docs/experiments/pair-p0/images/p0-001-a.png",
+      "asset_b_path": "docs/experiments/pair-p0/images/p0-001-b.png",
+      "asset_a_git_blob_sha": "928561e2b7e89e49dfabcc32b125f38731aca7b5",
+      "asset_b_git_blob_sha": "ff3d0c8977061c975860b50be983c75ebba5f9fa"
+    },
+    {
+      "pair_id": "P0-002",
+      "asset_a_id": "P0-002-A",
+      "asset_b_id": "P0-002-B",
+      "asset_a_path": "docs/experiments/pair-p0/images/p0-002-a.png",
+      "asset_b_path": "docs/experiments/pair-p0/images/p0-002-b.png",
+      "asset_a_git_blob_sha": "03b4b87871ec3cf1071b9f7253f440bae60a79a4",
+      "asset_b_git_blob_sha": "12bbca88cf07728df1edaf31706cf2502a878ca6"
+    },
+    {
+      "pair_id": "P0-003",
+      "asset_a_id": "P0-003-A",
+      "asset_b_id": "P0-003-B",
+      "asset_a_path": "docs/experiments/pair-p0/images/p0-003-a.png",
+      "asset_b_path": "docs/experiments/pair-p0/images/p0-003-b.png",
+      "asset_a_git_blob_sha": "1616fd090b474087b91ee4cdca958f465e3d0d66",
+      "asset_b_git_blob_sha": "58ecd20e4e4cd613116382e266ee76b2959c4a6c"
+    }
+  ]
+}

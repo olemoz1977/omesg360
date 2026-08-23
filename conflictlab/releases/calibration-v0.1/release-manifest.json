@@ -1,0 +1,98 @@
+{
+  "schema": "conflictlab.hostinger-release-manifest.v1",
+  "release_id": "calibration-v0.1",
+  "lifecycle": "LAB",
+  "source_methodology_commit_sha": "c1635b5802843d5d4960f12eb5c206800444cc3f",
+  "package_commit_sha": null,
+  "deploy_path": "/conflictlab/releases/calibration-v0.1/",
+  "stable_public_entrypoint": "/wave1/",
+  "owner_approval": {
+    "status": "PENDING",
+    "approved_at": null
+  },
+  "public_switch": {
+    "authorized": false,
+    "authorized_at": null
+  },
+  "protocol": {
+    "rapid": "future-rapid-v1",
+    "training": "training-set-v1",
+    "stimulus_set": "stimulus-set-v1",
+    "reason_map": "reason-map-v1",
+    "timing_calibration": "timing-calibration-v1",
+    "candidate_budget_ms": 6000,
+    "participant_languages": ["lt", "en"],
+    "product_shaped_pilot": true
+  },
+  "research_boundary": {
+    "purpose": "MECHANICAL_TIMING_CALIBRATION_WITH_PRODUCT_SHAPED_LOCAL_FLOW",
+    "gate_d": "NONE",
+    "gate_e": "NONE",
+    "participant_result": "FAIL_CLOSED_NOT_ESTIMABLE",
+    "training_upload": false,
+    "reflection_upload": false,
+    "reason_response_latency_upload": false,
+    "intensity_upload": false,
+    "intensity_response_latency_upload": false,
+    "selected_a_b_identity_stored": false,
+    "persistent_participant_id": false,
+    "wave1_storage_reuse": false,
+    "run_type_server_controlled": true,
+    "technical_runs_enter_calibration_n": false,
+    "external_calibration_activation": "BLOCKED_PENDING_LIVE_CHECKLIST",
+    "consent_version": "timing-research-consent-v0.1",
+    "adult_only_external_research": true,
+    "local_only_no_upload_path": true,
+    "deletion_code_plaintext_stored_server_side": false,
+    "deletion_token_hash": "SHA-256",
+    "retention_days": 90,
+    "local_response_channels": [
+      "reason_id",
+      "optional_free_text",
+      "reason_response_latency_ms",
+      "intensity_1_5",
+      "intensity_response_latency_ms",
+      "reflection_total_elapsed_ms"
+    ],
+    "server_timing_channel": "visual_choice_latency_ms"
+  },
+  "storage": {
+    "tables": [
+      "cl_calibration_runs",
+      "cl_calibration_attempts",
+      "cl_calibration_pair_events"
+    ],
+    "separate_from_wave1": true,
+    "default_collection_mode": "TECHNICAL",
+    "migrations_required_for_this_build": [
+      "server/migration_002_consent_fields.sql",
+      "server/migration_003_deletion_token.sql"
+    ]
+  },
+  "privacy_controls": {
+    "privacy_link_at_collection": "/privacy.html",
+    "explicit_research_opt_in": true,
+    "age_18_declaration": true,
+    "self_service_erasure": "server/delete_my_data.php",
+    "authenticated_data_admin": "server/data_admin.php",
+    "export_schema": "timing-export-v0.1",
+    "retention_cleanup": "server/retention_cleanup.php"
+  },
+  "deployment_state": {
+    "repository_build": "READY_FOR_TECHNICAL_LAB_VALIDATION_AFTER_MIGRATIONS",
+    "hostinger_product_shaped_bytes": "PENDING_OWNER_UPLOAD",
+    "db_migration_required": true,
+    "cron_configuration_required": true,
+    "collection_mode_after_deploy": "TECHNICAL"
+  },
+  "rollback": {
+    "previous_public_release": "wave1-v0.3",
+    "entrypoint_backup_required": false,
+    "note": "This versioned LAB deployment does not replace /wave1/."
+  },
+  "integrity": {
+    "package_sealed": false,
+    "release_manifest_sha256": null,
+    "artifact_inventory_sha256": null
+  }
+}

@@ -1,0 +1,117 @@
+{
+  "schema": "conflictlab.stimulus-set.v1",
+  "stimulus_set_version": "stimulus-set-v1",
+  "lifecycle": "DRAFT",
+  "content_status": "PENDING_STIMULUS_FREEZE",
+  "f1_asset_identity_status": "COMPLETE",
+  "released_at": null,
+  "source_protocol": "wave1-v0.3",
+  "source_manifest_version": "wave1-candidates-v0.2",
+  "source_commit_sha": "44426f715103a90bc79967d2655b75c1f33bbd2c",
+  "description": "DRAFT future-session catalog bound to the six exact pair identities currently used by Wave 1. F1 asset identity is complete; F2 presentation/protocol review and all Gate D/Gate E interpretation remain pending. A/B are stable asset identities; screen position is randomized/counterbalanced separately per event.",
+  "required_pair_fields": [
+    "pair_id",
+    "asset_a_id",
+    "asset_b_id",
+    "asset_a_path",
+    "asset_b_path",
+    "asset_a_sha256",
+    "asset_b_sha256",
+    "asset_a_mime_type",
+    "asset_b_mime_type",
+    "is_training",
+    "source_family"
+  ],
+  "asset_freeze_invariants": {
+    "path": "repository-relative canonical asset path; no traversal or remote URL",
+    "sha256": "64 lowercase hexadecimal characters matching exact file bytes",
+    "mime_type": "must match an allowed image MIME type and the canonical file extension",
+    "identity": "asset_a_id and asset_b_id are stable identities and must differ",
+    "release": "RELEASED requires at least one pair, content_status=FROZEN, released_at, and all assets passing the repository verifier"
+  },
+  "allowed_mime_types": [
+    "image/webp",
+    "image/png",
+    "image/jpeg"
+  ],
+  "pairs": [
+    {
+      "pair_id": "CS-PR-01",
+      "asset_a_id": "CS-PR-01-A",
+      "asset_b_id": "CS-PR-01-B",
+      "asset_a_path": "docs/experiments/stimulus-validation/assets/CS-PR-01/more-reveal.webp",
+      "asset_b_path": "docs/experiments/stimulus-validation/assets/CS-PR-01/less-reveal.jpg",
+      "asset_a_sha256": "e32548525c40380966e696944cf1b2638df354caf1a622bb40635f5b5bbd3ec7",
+      "asset_b_sha256": "0fafcb5706dae77214f137a951e13b6a7e6af5413160a05c568f58ef3face367",
+      "asset_a_mime_type": "image/webp",
+      "asset_b_mime_type": "image/jpeg",
+      "is_training": false,
+      "source_family": "CS-PR"
+    },
+    {
+      "pair_id": "CS-RE-01",
+      "asset_a_id": "CS-RE-01-A",
+      "asset_b_id": "CS-RE-01-B",
+      "asset_a_path": "docs/experiments/stimulus-validation/assets/CS-RE-01/more-evidence.png",
+      "asset_b_path": "docs/experiments/stimulus-validation/assets/CS-RE-01/less-evidence.png",
+      "asset_a_sha256": "95bcc989a18c87a9b6e024c1b2e4cb369d9d46ca714fd74c4f833317a30bd53c",
+      "asset_b_sha256": "6ac7602c8f84091e10a268dead88eb601c0f7f20b9d74e1780143036ba1f9f71",
+      "asset_a_mime_type": "image/png",
+      "asset_b_mime_type": "image/png",
+      "is_training": false,
+      "source_family": "CS-RE"
+    },
+    {
+      "pair_id": "CS-CA-01",
+      "asset_a_id": "CS-CA-01-A",
+      "asset_b_id": "CS-CA-01-B",
+      "asset_a_path": "docs/experiments/stimulus-validation/assets/CS-CA-01/more-reference.png",
+      "asset_b_path": "docs/experiments/stimulus-validation/assets/CS-CA-01/less-reference.png",
+      "asset_a_sha256": "9525b6b044e364397030c5eee208129fc47eb3cb9bdaa9e9285af19e02aa3d9f",
+      "asset_b_sha256": "080730690c658d373cb85c903b468513080a9960633b918b2a2748b6f2f8d9a7",
+      "asset_a_mime_type": "image/png",
+      "asset_b_mime_type": "image/png",
+      "is_training": false,
+      "source_family": "CS-CA"
+    },
+    {
+      "pair_id": "CR-PZ-01",
+      "asset_a_id": "CR-PZ-01-A",
+      "asset_b_id": "CR-PZ-01-B",
+      "asset_a_path": "docs/experiments/stimulus-validation/assets/CR-PZ-01/no-predefined-zones.png",
+      "asset_b_path": "docs/experiments/stimulus-validation/assets/CR-PZ-01/predefined-zones.png",
+      "asset_a_sha256": "06714c8c245a3aa044a5d16483ff6868a62dde12233421d75dd52bbb6e646e12",
+      "asset_b_sha256": "724ae8b52967bcdb7314824485e8f130db0d532821544f5b582f5ed052c38cbe",
+      "asset_a_mime_type": "image/png",
+      "asset_b_mime_type": "image/png",
+      "is_training": false,
+      "source_family": "CR-PZ"
+    },
+    {
+      "pair_id": "CR-FS-01",
+      "asset_a_id": "CR-FS-01-A",
+      "asset_b_id": "CR-FS-01-B",
+      "asset_a_path": "docs/experiments/stimulus-validation/assets/CR-FS-01/fixed-slots.png",
+      "asset_b_path": "docs/experiments/stimulus-validation/assets/CR-FS-01/continuous-capacity.png",
+      "asset_a_sha256": "55aa7c86ade15973be1eccd2921c6b798f7e65dded885950f1c62bf48f66dcc2",
+      "asset_b_sha256": "3457eb4108506d278c8a05163264f499065acab26edeeb242913e28906e01ee0",
+      "asset_a_mime_type": "image/png",
+      "asset_b_mime_type": "image/png",
+      "is_training": false,
+      "source_family": "CR-FS"
+    },
+    {
+      "pair_id": "CR-PO-01",
+      "asset_a_id": "CR-PO-01-A",
+      "asset_b_id": "CR-PO-01-B",
+      "asset_a_path": "docs/experiments/stimulus-validation/assets/CR-PO-01/partitioned-space.png",
+      "asset_b_path": "docs/experiments/stimulus-validation/assets/CR-PO-01/open-space.png",
+      "asset_a_sha256": "39f6b904c340f7c148d4099fa67170f5674192145f4c6e43802438393d8e1d86",
+      "asset_b_sha256": "a07636d61c567c0bc18d92d76d8c4e26bed6fe488b68d57cd2281b1b36bd50b5",
+      "asset_a_mime_type": "image/png",
+      "asset_b_mime_type": "image/png",
+      "is_training": false,
+      "source_family": "CR-PO"
+    }
+  ]
+}

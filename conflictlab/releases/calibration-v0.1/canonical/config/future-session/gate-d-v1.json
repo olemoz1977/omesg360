@@ -1,0 +1,27 @@
+{
+  "schema": "conflictlab.gate-d.v1",
+  "mapping_version": "gate-d-v1",
+  "stimulus_set_version": null,
+  "lifecycle": "DRAFT",
+  "released_at": null,
+  "description": "Pair-level directional mapping catalog bound to an exact versioned stimulus contrast. No pair contributes directional evidence unless mapping_status is VALIDATED and event asset identities match the mapping.",
+  "allowed_domains": ["CS", "CR"],
+  "allowed_mapping_status": ["VALIDATED", "PENDING", "NONE"],
+  "required_mapping_fields": [
+    "pair_id",
+    "asset_a_id",
+    "asset_b_id",
+    "domain",
+    "mapping_status",
+    "asset_a_direction",
+    "asset_b_direction",
+    "evidence_reference"
+  ],
+  "mapping_invariants": {
+    "identity": "pair_id, asset_a_id and asset_b_id must match the referenced stimulus_set_version exactly",
+    "VALIDATED": "asset_a_direction and asset_b_direction must each be +1 or -1 and must be opposite",
+    "PENDING": "directions must be null",
+    "NONE": "directions must be null"
+  },
+  "mappings": []
+}
