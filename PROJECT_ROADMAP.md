@@ -1,7 +1,7 @@
 # OMESG360 / 2rasi project roadmap and handover
 
 Status: ACTIVE CONTINUITY DOCUMENT
-Last updated: 2026-08-23 05:25 Europe/Vilnius
+Last updated: 2026-08-24 Europe/Vilnius
 Primary OMESG360 branch: `main`
 Primary 2rasi branch: `hero-webgl`
 
@@ -19,7 +19,11 @@ Primary 2rasi branch: `hero-webgl`
 ## Root cause of second overwrite
 Hostinger Git auto-deployment was still enabled. A harmless GitHub `main` bootstrap commit therefore caused Hostinger to redeploy the old mixed `main` tree into `public_html`. GitHub Actions did not perform that overwrite.
 
-Non-negotiable rule: GitHub must not whole-root sync or delete the Hostinger `public_html` tree.
+Hard rule: GitHub must not whole-root sync or delete the Hostinger `public_html` tree.
+
+This does **not** prohibit future product development inside `public_html`.
+
+New folders and necessary file changes are allowed when each change is evaluated for impact on the existing production system. Prefer isolated/backward-compatible additions and preserve all server-only runtime state.
 
 ## GitHub `main` — recovered source
 `main` is now the active clean source line. It contains:
@@ -42,9 +46,9 @@ Not committed by design:
 Never resume `agent/leadership-360-home`. `recovery/v02-clean-baseline` is historical recovery lineage; `main` is now the active source.
 
 ## Deployment model
-Frontend-only plain FTP allowlist. No `rsync`, no `--delete`, no whole-root sync.
+Frontend-only plain FTP allowlist for the current normal deployment path. No `rsync`, no `--delete`, no whole-root sync.
 
-Managed frontend package:
+Current managed frontend package:
 - `index.html`
 - `privacy.html`
 - robots/sitemaps and verification files
@@ -52,6 +56,8 @@ Managed frontend package:
 - `leadership-360/index.html`
 
 Wave1 and Calibration are mirrored in GitHub for recovery/source integrity, but remain outside the normal frontend deployment package. Their two live `config.php` files remain server-only.
+
+Future modules may receive their own controlled deployment contract or an explicitly extended allowlist after impact review. Do not silently broaden the current deployment surface.
 
 ## Validation state
 - Dry-run #48: PASS; exact FTP root verified; no production write.
@@ -79,12 +85,85 @@ Human/live end-to-end validation completed on 2026-08-23:
 - EN path: PASS;
 - LT path: PASS.
 
-Leadership integration is now frozen. Reopen only for a new explicit product requirement or production defect.
+Leadership integration is frozen. Reopen only for a new explicit product requirement or production defect.
+
+## Current research state
+
+Wave1 and Calibration are active data-collection surfaces. They remain evidence-gated research inputs, not invitations to reopen 2Pair core feature work.
+
+Current rule:
+- collect data under the existing protocol boundaries;
+- do not redesign live mechanics from weak interim evidence;
+- when an evidence gate is reached, freeze the relevant dataset and analyse it before unrelated development.
+
+Cross-portfolio WorkStyle v0.7 is also collecting pilot data on 2rasi. Leadership SJT is frozen as a possible later WorkStyle evolution stage.
+
+## OMESG360 operational product direction — VISION ONLY
+
+Two related operational concepts were captured on 2026-08-24. Neither is in active development.
+
+### Competency Matrix / Capability
+Source:
+`COMPETENCY_MATRIX_VISION.md`
+
+Status:
+**VISION CAPTURED / NOT IN ACTIVE DEVELOPMENT**.
+
+Direction:
+- Team Lead operational capability tool;
+- current standard / SOP connects to competence evaluation;
+- current level, target/need, gap, Globėjas/trainer, training plan and reassessment;
+- `N` / `-` means no need to know and is not the same as `0`;
+- future analysis should consider coverage, single-point dependency and knowledge concentration;
+- a strong system must not depend on one `superhero`.
+
+### Darbo vietos knyga / Workplace Book
+Source:
+`WORKPLACE_BOOK_VISION.md`
+
+Status:
+**KEEP / MERGE INTO FUTURE OMESG360 CORE / NOT IN ACTIVE DEVELOPMENT**.
+
+Direction:
+- operator/shop-floor access to current relevant workplace knowledge;
+- standard work / SOP / TWI / quality / safety / SMED / abnormal-condition guidance where relevant;
+- SOP is part of standardization and is continuously improvable;
+- avoid duplicate process knowledge between Workplace Book and Competency Matrix;
+- potential long-term shared loop: `Process / Flow -> Stability -> Standardization -> People Capability -> Improvement`.
+
+## Knowledge / training source material — NOT PRODUCTS YET
+
+Two source-material families have been identified:
+
+1. Lean / Six Sigma / TOC teaching material
+   - future OMESG360 knowledge-base source candidate;
+   - keep as source material;
+   - do not publish 1:1; audit accuracy, provenance and framing first.
+
+2. Team Lead / `Vilko valanda` teaching material
+   - feedback, engagement, collaboration, leadership, resilience, situational leadership, PAEI/organizational lifecycle, Karpman, growth mindset and related topics;
+   - future Team Lead learning-source candidate;
+   - keep as source material;
+   - do not productize or publish 1:1 before audit/rebuild.
+
+No Knowledge Base, Academy, Competency Matrix or Workplace Book development is active now.
 
 ## Current gate
-OMESG360 production baseline is healthy and recovered. Leadership integration is complete. Do not re-enable Hostinger Git auto-deployment.
 
-## Next product step
-Return to 2Pair core work. Wave1 and Calibration remain active research satellites; new product work should consolidate validated findings into the main 2Pair direction rather than reopening recovery or Leadership integration.
+OMESG360 production baseline is healthy and recovered. Leadership integration is complete. Wave1 and Calibration are collecting evidence.
 
-`PROJECT_ROADMAP.md` + `RECOVERY_AND_INTEGRATION_PLAN.md` remain source of truth.
+Do not re-enable Hostinger Git auto-deployment.
+
+Do not start new OMESG360 product implementation merely to create activity while evidence-gated streams are running.
+
+## Next controlled work
+
+Current safe work while research data accumulates:
+1. keep source-of-truth documentation current;
+2. protect production stability;
+3. support Wave1 / Calibration analysis and data quality when needed;
+4. perform portfolio / legacy-tool audit without redesigning tools during the audit.
+
+Competency Matrix, Workplace Book, Knowledge Base and Team Lead learning concepts remain captured visions until explicitly reprioritized.
+
+`PROJECT_ROADMAP.md` + `RECOVERY_AND_INTEGRATION_PLAN.md` remain the OMESG360 production/recovery source of truth. Cross-portfolio priority is maintained in `olemoz1977/2rasi-web/PORTFOLIO_ROADMAP.md`.
