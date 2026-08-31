@@ -1,0 +1,60 @@
+name: Find PrioLens Recovered Assets By Hash
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/find-priolens-recovered-assets-by-hash.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  FTP_HOST: 46.202.142.134
+  FTP_USER: ${{ secrets.HOSTINGER_FTP_USER }}
+  FTP_PASSWORD: ${{ secrets.HOSTINGER_FTP_PASSWORD }}
+  REMOTE_GALLERY: /domains/omesg360.eu/public_html/priolens-research-assets/Gallery
+
+jobs:
+  find:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Install FTP client
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq lftp
+      - name: Download Gallery to temp and match SHA-256
+        shell: bash
+        run: |
+          set -euo pipefail
+          tmp="$(mktemp -d)"
+          common='set ftp:ssl-allow no; set net:max-retries 2; set net:timeout 20; set cmd:fail-exit yes; set mirror:parallel-transfer-count 6;'
+          lftp -c "$common open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; mirror --only-newer=false \"$REMOTE_GALLERY\" \"$tmp/Gallery\""
+          target_backpack='6306d35208a9ca4aefe14f78a8f5c228a5333c8f4b8f3228c6033b819ad77a5b'
+          target_audio='330542fd1df064f239b72f4a21a788e28d1afaa1d773ffe8a5c75291102fcedc'
+          mkdir -p priolens
+          out=priolens/recovered-asset-hash-matches.txt
+          : > "$out"
+          echo "BACKPACK_SHA256=$target_backpack" >> "$out"
+          find "$tmp/Gallery" -type f -print0 | sort -z | xargs -0 sha256sum | while read -r h p; do
+            rel="${p#${tmp}/Gallery/}"
+            if [[ "$h" == "$target_backpack" ]]; then echo "BACKPACK_MATCH=$rel" >> "$out"; fi
+            if [[ "$h" == "$target_audio" ]]; then echo "AUDIO_MATCH=$rel" >> "$out"; fi
+          done
+          echo "AUDIO_SHA256=$target_audio" >> "$out"
+          if ! grep -q '^BACKPACK_MATCH=' "$out"; then echo 'BACKPACK_MATCH=NOT_FOUND' >> "$out"; fi
+          if ! grep -q '^AUDIO_MATCH=' "$out"; then echo 'AUDIO_MATCH=NOT_FOUND' >> "$out"; fi
+          cat "$out"
+      - name: Commit match report
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add priolens/recovered-asset-hash-matches.txt
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'chore(priolens): record recovered asset hash matches'
+          git push origin HEAD:main
