@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="lt">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>PrioLens Open14 v0.2 · Research</title>
+<style>
+:root{--bg:#f7f7f5;--ink:#181818;--muted:#727272;--line:#deded9;--card:#fff}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,sans-serif}body{min-height:100dvh}.wrap{width:min(100%,900px);margin:auto;padding:0 12px;min-height:100dvh}.top{height:48px;display:flex;align-items:center;justify-content:space-between}.brand{font-weight:800}.pill{font-size:12px;color:var(--muted);border:1px solid var(--line);padding:6px 9px;border-radius:99px;background:#fff}.screen{display:none}.screen.active{display:block}.intro,.result{padding:6vh 4px 42px}h1{font-size:clamp(36px,10vw,62px);letter-spacing:-.055em;line-height:.96;margin:0 0 18px}.lead{font-size:clamp(18px,4.8vw,25px);line-height:1.3;max-width:720px}.note{font-size:13px;line-height:1.5;color:var(--muted);max-width:720px}.card,.row,.domainCard{background:var(--card);border:1px solid var(--line);border-radius:16px}.card{padding:14px 15px;margin:18px 0}.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:16px}button{font:inherit;cursor:pointer}.primary,.secondary{border-radius:14px;padding:12px 15px;font-weight:700;min-height:44px}.primary{border:0;background:#171717;color:#fff}.primary:disabled{opacity:.35;cursor:not-allowed}.secondary{border:1px solid var(--line);background:#fff;color:#181818}.bad{color:#9a3b3b}.ok{color:#3d7045}
+#trial.active{height:calc(100dvh - 48px);display:flex;flex-direction:column;overflow:hidden}.trialhead{height:40px;display:flex;align-items:center;justify-content:space-between}.q{font-size:14px;font-weight:700}.count{font-size:13px;color:#777}.progress{height:3px;background:#e7e7e2;border-radius:10px;overflow:hidden}.progress i{display:block;height:100%;background:#222;width:0}.stage{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 50px;grid-template-rows:repeat(3,minmax(0,1fr));gap:6px 7px;padding:7px 0 10px}.stim{grid-column:1;width:100%;height:100%;border:0;background:transparent;padding:2px 4px;display:flex;align-items:center;justify-content:center}.stim:nth-of-type(1){grid-row:1}.stim:nth-of-type(2){grid-row:2}.stim:nth-of-type(3){grid-row:3}.stim img{display:block;height:100%;width:auto;max-width:100%;max-height:100%;aspect-ratio:1/1;object-fit:contain;border:1px solid #d6d6d1;background:#eee;border-radius:16px}.stage.locked button{pointer-events:none}.none{grid-column:2;grid-row:1/4;border:1px solid var(--line);background:#fff;color:#666;border-radius:14px;padding:10px 0;font-size:12px;font-weight:650;writing-mode:vertical-rl;transform:rotate(180deg);display:flex;align-items:center;justify-content:center}
+#suff.active{padding:12px 0 40px}.suffHead{padding:18px 4px 8px}.suffHead h2{font-size:28px;margin:0 0 8px}.domainCard{padding:14px;margin:12px 0}.domainTitle{font-size:13px;color:#777;margin-bottom:12px;font-weight:700}.item{padding:10px 0;border-top:1px solid #eeeeea}.item:first-of-type{border-top:0}.statement{font-size:16px;line-height:1.35;margin-bottom:10px}.scale{display:grid;grid-template-columns:repeat(6,1fr);gap:5px}.scale button{border:1px solid var(--line);background:#fff;border-radius:10px;min-height:38px;font-size:12px;padding:5px}.scale button.on{background:#1d1d1d;color:#fff;border-color:#1d1d1d}.scale button.na{font-size:10px;color:#777}.scale button.na.on{color:#fff}.suffNav{display:flex;justify-content:space-between;gap:8px;margin-top:14px}
+.result h1{font-size:42px}.section{margin:24px 0}.section h2{font-size:19px;margin:0 0 10px}.rows{display:grid;gap:8px}.row{padding:12px 14px}.rowtop{display:flex;justify-content:space-between;gap:10px}.name{font-weight:760}.score{font-size:13px;color:#666}.cue{font-size:12px;color:#777;margin-top:3px}.bar{height:7px;background:#ecece8;border-radius:8px;margin-top:9px;overflow:hidden}.bar i{display:block;height:100%;background:#252525}.debug{font-size:12px;color:#777;white-space:pre-wrap;background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px;overflow:auto}.hidden{display:none!important}@media(max-width:620px){.scale{grid-template-columns:repeat(3,1fr)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><div class="brand">PrioLens</div><div class="pill">Open14 · v0.2 research</div></div>
+
+  <section id="intro" class="screen active intro">
+    <h1>Kurį renkiesi?</h1>
+    <p class="lead">Trys vaizdai vienu metu. Pasirink tą, kuris pirmas patraukia.</p>
+    <p class="note">14 trumpų pasirinkimų. Po jų bus kita, atskira perspektyva apie tai, kiek skirtingų dalykų šiuo metu tavo gyvenime pakanka.</p>
+    <div class="card"><b id="bankTitle">Tikrinamas tyrimo bankas…</b><p id="bankStatus" class="note">Open14 paleidžiamas tik tada, kai visi reikalingi vaizdai turi realius runtime adresus.</p></div>
+    <div class="actions"><button id="start" class="primary" disabled>Pradėti</button></div>
+  </section>
+
+  <section id="trial" class="screen">
+    <div class="trialhead"><div class="q">Kuris pirmas patraukia?</div><div id="counter" class="count">1 / 14</div></div>
+    <div class="progress"><i id="prog"></i></div>
+    <div id="stage" class="stage">
+      <button class="stim" data-slot="0"><img alt=""></button>
+      <button class="stim" data-slot="1"><img alt=""></button>
+      <button class="stim" data-slot="2"><img alt=""></button>
+      <button id="none" class="none">Nė vienas aiškiai</button>
+    </div>
+  </section>
+
+  <section id="suff" class="screen">
+    <div class="suffHead"><h2>Dabar kita perspektyva.</h2><p class="note">Įvertink ne tai, kiek tau tai svarbu, o kiek šiuo metu tavo gyvenime to pakanka.</p><div id="suffCount" class="count">1 / 6</div></div>
+    <div id="domainMount"></div>
+    <div class="suffNav"><button id="suffBack" class="secondary">Atgal</button><button id="suffNext" class="primary">Toliau</button></div>
+  </section>
+
+  <section id="result" class="screen result">
+    <h1>Dvi perspektyvos.</h1>
+    <p class="note">Tai šios sesijos pasirinkimų ir tavo dabartinio įsivertinimo aprašymas, ne asmenybės profilis ar diagnozė.</p>
+    <div class="section"><h2>Kas kartojosi</h2><div id="repeatRows" class="rows"></div></div>
+    <div class="section"><h2>Kaip pats vertini dabartinę situaciją</h2><div id="suffRows" class="rows"></div></div>
+    <div class="section"><h2>Kur verta pažvelgti dar kartą</h2><div id="compareRows" class="rows"></div></div>
+    <div class="actions"><button id="export" class="secondary">Eksportuoti JSON</button><button id="restart" class="primary">Nauja sesija</button></div>
+    <details class="section"><summary>Tyrimo diagnostika</summary><pre id="debug" class="debug"></pre></details>
+  </section>
+</div>
+
+<script type="module">
+import { buildOpen14Plan, FAMILY_SET } from './p3_open14_planner_v02.mjs';
+import { assignOpen14Exemplars, listMissingRuntimeAssets } from './p3_open14_exemplar_assigner_v01.mjs';
+
+const FAMILY_LABEL={REST:'Poilsis / atsigavimas',RESOURCE:'Resursai',SAFETY:'Saugumas',ORDER:'Tvarka / aiškumas',CONNECTION:'Ryšys',BELONGING:'Priklausymas',CARE:'Rūpinimasis kitu',AUTONOMY:'Autonomija',CONTROL:'Kontrolė / valdymas',RECOGNITION:'Pripažinimas',MASTERY:'Meistriškumas',EXPLORATION:'Tyrinėjimas',KNOWLEDGE:'Mokymasis / supratimas',OPPORTUNITY:'Galimybė'};
+const DOMAINS=[
+{id:'REST_RESOURCE',title:'Poilsis ir resursai',families:['REST','RESOURCE'],items:[['RESTORATION_ENERGY','Šiuo metu turiu pakankamai poilsio ir energijos kasdienybei.'],['MATERIAL_RESOURCES','Šiuo metu turiu pakankamai kasdienių resursų tam, ko man realiai reikia.']]},
+{id:'SAFETY_STABILITY',title:'Saugumas ir stabilumas',families:['SAFETY','ORDER'],items:[['SAFETY_STABILITY','Šiuo metu jaučiu pakankamai saugumo ir stabilumo.'],['CLARITY_PREDICTABILITY','Mano kasdienybėje pakanka aiškumo ir nuspėjamumo, kad žinočiau, ko tikėtis.']]},
+{id:'CONNECTION_SUPPORT',title:'Ryšys, priklausymas ir parama',families:['CONNECTION','BELONGING'],items:[['CONNECTION_BELONGING','Mano gyvenime pakanka artimo ryšio ir jausmo, kad priklausau kitiems.'],['CARE_SUPPORT_PRESENT','Mano gyvenime pakanka rūpesčio, paramos ir žmogiško dėmesio.']]},
+{id:'AGENCY_ESTEEM',title:'Autonomija ir pripažinimas',families:['AUTONOMY','CONTROL','RECOGNITION'],items:[['AUTONOMY_AGENCY','Man svarbiose srityse turiu pakankamai laisvės pats spręsti ir veikti.'],['RECOGNITION_ESTEEM','Jaučiu, kad mano pastangos, nuomonė ar indėlis yra pakankamai pastebimi ir vertinami.']]},
+{id:'GROWTH_CAPABILITY',title:'Augimas ir gebėjimai',families:['MASTERY','EXPLORATION','KNOWLEDGE','OPPORTUNITY'],items:[['LEARNING_GROWTH','Turiu pakankamai galimybių mokytis, atrasti ir augti.'],['CAPABILITY_MASTERY','Galiu pakankamai naudoti ir tobulinti savo gebėjimus.']]},
+{id:'MEANING_CONTRIBUTION',title:'Prasmė ir indėlis',families:[],items:[['MEANING_PURPOSE','Tai, ką šiuo metu darau, man atrodo pakankamai prasminga.'],['CONTRIBUTION','Jaučiu, kad turiu pakankamai galimybių prisidėti prie kažko svarbaus ne tik sau.']]}
+];
+const $=id=>document.getElementById(id); const screens=[...document.querySelectorAll('.screen')];
+const stimBtns=[...document.querySelectorAll('.stim')];
+let bank=null,assignment=null,state=null,t0=0,locked=false,suffIndex=0;
+
+function show(id){screens.forEach(s=>s.classList.toggle('active',s.id===id));scrollTo(0,0)}
+function seedNow(){return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2,9)}`}
+function doublePaint(cb){requestAnimationFrame(()=>requestAnimationFrame(cb))}
+function median(xs){const a=[...xs].sort((a,b)=>a-b);if(!a.length)return null;const m=Math.floor(a.length/2);return a.length%2?a[m]:(a[m-1]+a[m])/2}
+function mean(xs){const a=xs.filter(x=>Number.isFinite(x));return a.length?a.reduce((s,x)=>s+x,0)/a.length:null}
+
+async function init(){
+  try{
+    bank=await fetch('./bank.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw new Error(`bank ${r.status}`);return r.json()});
+    const missing=listMissingRuntimeAssets(bank);
+    if(missing.length){
+      $('bankTitle').textContent='Open14 bankas dar nepilnas';
+      $('bankStatus').innerHTML=`Trūksta realių runtime assetų: <span class="bad">${missing.join(', ')}</span>. Startas užblokuotas pagal fail-closed taisyklę.`;
+      return;
+    }
+    $('bankTitle').textContent='Open14 bankas paruoštas';$('bankTitle').className='ok';$('bankStatus').textContent='Visi assetai turi runtime adresus.';$('start').disabled=false;
+  }catch(err){$('bankTitle').textContent='Banko klaida';$('bankStatus').textContent=String(err)}
+}
+
+async function preload(paths){await Promise.all([...new Set(paths)].map(src=>new Promise((res,rej)=>{const im=new Image();im.onload=res;im.onerror=()=>rej(new Error(`Image load failed: ${src}`));im.src=src})))}
+
+async function startSession(){
+  const seed=seedNow(); const plan=buildOpen14Plan(seed); assignment=assignOpen14Exemplars(plan,bank,seed);
+  await preload(assignment.trials.flatMap(t=>t.stimuli.map(s=>s.runtimePath)));
+  state={schema:'2rasi.priolens.open14.session-v0.2',startedAt:new Date().toISOString(),seed,planSchema:plan.schema,bankSchema:bank.schema,assignerSchema:assignment.schema,plannerAudit:plan.audit,exemplarAudit:assignment.audit,choices:[],sufficiencySchema:'2rasi.priolens.sufficiency-v0.2',sufficiency:{},completedAt:null};
+  suffIndex=0;show('trial');renderTrial();
+}
+
+function renderTrial(){
+  locked=false;$('stage').classList.remove('locked');const i=state.choices.length;const trial=assignment.trials[i];$('counter').textContent=`${i+1} / 14`;$('prog').style.width=`${(i/14)*100}%`;
+  trial.stimuli.forEach((s,slot)=>{const img=stimBtns[slot].querySelector('img');img.src=s.runtimePath;img.dataset.exemplar=s.exemplarId;img.alt='';});
+  doublePaint(()=>{t0=performance.now()});
+}
+
+function choose(slot){
+  if(locked)return;locked=true;$('stage').classList.add('locked');const i=state.choices.length;const trial=assignment.trials[i];const rt=Math.round(performance.now()-t0);const stim=slot===null?null:trial.stimuli[slot];
+  state.choices.push({trialId:trial.trialId,trialIndex:i+1,designIndex:trial.designIndex,positions:trial.positions,stimuli:trial.stimuli.map(s=>({familyId:s.familyId,exemplarId:s.exemplarId,slot:s.slot,runtimePath:s.runtimePath})),choice:stim?{familyId:stim.familyId,exemplarId:stim.exemplarId,slot}:null,noClearChoice:slot===null,rtMs:rt,pointerType:lastPointerType||null});
+  setTimeout(()=>{if(state.choices.length<14)renderTrial();else{show('suff');renderSuff();}},120);
+}
+let lastPointerType=null; stimBtns.forEach(b=>{b.addEventListener('pointerdown',e=>lastPointerType=e.pointerType);b.addEventListener('click',()=>choose(Number(b.dataset.slot)))});$('none').addEventListener('pointerdown',e=>lastPointerType=e.pointerType);$('none').addEventListener('click',()=>choose(null));
+
+function renderSuff(){
+  const d=DOMAINS[suffIndex];$('suffCount').textContent=`${suffIndex+1} / 6`;$('suffBack').disabled=suffIndex===0;$('suffNext').textContent=suffIndex===5?'Pamatyti rezultatą':'Toliau';
+  const mount=$('domainMount');mount.innerHTML='';const card=document.createElement('div');card.className='domainCard';card.innerHTML=`<div class="domainTitle">${d.title}</div>`;
+  d.items.forEach(([key,text])=>{const item=document.createElement('div');item.className='item';item.innerHTML=`<div class="statement">${text}</div><div class="scale"></div>`;const scale=item.querySelector('.scale');[1,2,3,4,5,null].forEach(v=>{const b=document.createElement('button');b.type='button';b.className=v===null?'na':'';b.textContent=v===null?'Sunku pasakyti':String(v);const current=Object.prototype.hasOwnProperty.call(state.sufficiency,key)?state.sufficiency[key]:undefined;if(current===v)b.classList.add('on');b.onclick=()=>{state.sufficiency[key]=v;renderSuff()};scale.appendChild(b)});card.appendChild(item)});mount.appendChild(card);
+}
+function currentDomainComplete(){return DOMAINS[suffIndex].items.every(([key])=>Object.prototype.hasOwnProperty.call(state.sufficiency,key))}
+$('suffBack').onclick=()=>{if(suffIndex>0){suffIndex--;renderSuff()}};$('suffNext').onclick=()=>{if(!currentDomainComplete()){alert('Pažymėk abu teiginius arba pasirink „Sunku pasakyti“.');return}if(suffIndex<5){suffIndex++;renderSuff()}else finish()};
+
+function familyStats(){
+  const out=Object.fromEntries(FAMILY_SET.map(f=>[f.id,{shown:0,chosen:0,shownA:0,shownB:0,chosenA:0,chosenB:0,crossExemplar:false}]));
+  for(const c of state.choices){for(const s of c.stimuli){const x=out[s.familyId];x.shown++;if(s.exemplarId.endsWith('-A'))x.shownA++;else if(s.exemplarId.endsWith('-B'))x.shownB++;}if(c.choice){const x=out[c.choice.familyId];x.chosen++;if(c.choice.exemplarId.endsWith('-A'))x.chosenA++;else if(c.choice.exemplarId.endsWith('-B'))x.chosenB++;}}
+  for(const x of Object.values(out)){x.crossExemplar=x.chosenA>0&&x.chosenB>0;x.rate=x.shown?x.chosen/x.shown:0;x.exemplarConcentrated=x.chosen>=2&&!x.crossExemplar;}
+  return out;
+}
+function domainStats(){return Object.fromEntries(DOMAINS.map(d=>[d.id,mean(d.items.map(([k])=>state.sufficiency[k]).filter(v=>v!==null))]))}
+function macroStats(){const shown={BASIC:0,SOCIAL:0,AGENCY:0,GROWTH:0},chosen={BASIC:0,SOCIAL:0,AGENCY:0,GROWTH:0};for(const c of state.choices){for(const s of c.stimuli)shown[s.macro]++;if(c.choice){const fam=bank.families[c.choice.familyId];chosen[fam.macro]++;}}return Object.fromEntries(Object.keys(shown).map(k=>[k,{shown:shown[k],chosen:chosen[k],rate:shown[k]?chosen[k]/shown[k]:null}]))}
+
+function finish(){state.completedAt=new Date().toISOString();state.familyStats=familyStats();state.domainStats=domainStats();state.macroStats=macroStats();state.rtMedianMs=median(state.choices.map(x=>x.rtMs));state.noClearChoiceCount=state.choices.filter(x=>x.noClearChoice).length;show('result');renderResult()}
+function addRow(mount,name,score,cue,pct){const r=document.createElement('div');r.className='row';r.innerHTML=`<div class="rowtop"><div class="name">${name}</div><div class="score">${score}</div></div><div class="cue">${cue||''}</div>${pct===null?'':`<div class="bar"><i style="width:${pct}%"></i></div>`}`;mount.appendChild(r)}
+function renderResult(){
+  const rep=$('repeatRows');rep.innerHTML='';const repeated=Object.entries(state.familyStats).filter(([,x])=>x.chosen>=2&&x.crossExemplar).sort((a,b)=>b[1].chosen-a[1].chosen);
+  if(!repeated.length)addRow(rep,'Nė viena tema nepasikartojo per abu savo vaizdus','', 'Šioje sesijoje pasirinkimai buvo labiau išsisklaidę arba susitelkė ties pavieniais exemplarais.',null);else repeated.forEach(([id,x])=>addRow(rep,FAMILY_LABEL[id],`${x.chosen}/3`,x.chosen===3?'Kartojosi kiekvieną kartą, kai šeima pasirodė.':'Kartojosi per du skirtingus šeimos vaizdus.',x.rate*100));
+  const sr=$('suffRows');sr.innerHTML='';for(const d of DOMAINS){const v=state.domainStats[d.id];addRow(sr,d.title,v===null?'Sunku pasakyti':v.toFixed(1),v===null?'':`1 = visai nepakanka · 5 = visiškai pakanka`,v===null?null:(v/5)*100)}
+  const cr=$('compareRows');cr.innerHTML='';const comps=[];for(const d of DOMAINS){if(!d.families.length)continue;const rel=d.families.filter(f=>state.familyStats[f]?.chosen>=2&&state.familyStats[f]?.crossExemplar);if(!rel.length)continue;const v=state.domainStats[d.id];if(v===null)continue;const famNames=rel.map(f=>FAMILY_LABEL[f]).join(', ');let cue;if(v<=2.5)cue=`${famNames} kartojosi per skirtingus vaizdus, o šią platesnę sritį pats vertini kaip mažiau pakankamą.`;else if(v>=3.5)cue=`${famNames} kartojosi per skirtingus vaizdus ir kartu ši platesnė sritis atrodo gana pakankama.`;else cue=`${famNames} kartojosi, o tavo dabartinis šios platesnės srities įvertinimas yra per vidurį.`;comps.push({name:d.title,cue});}
+  if(!comps.length)addRow(cr,'Ryškaus sugretinimo šioje sesijoje nėra','', 'Tai nėra problema: abu kanalai neprivalo sudaryti tvarkingo vieno profilio.',null);else comps.slice(0,3).forEach(c=>addRow(cr,c.name,'',c.cue,null));
+  $('debug').textContent=JSON.stringify(state,null,2);
+}
+
+$('start').onclick=()=>startSession().catch(err=>{alert(String(err));console.error(err)});$('restart').onclick=()=>location.reload();$('export').onclick=()=>{const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`priolens_open14_${state.seed}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)};
+init();
+</script>
+</body>
+</html>
