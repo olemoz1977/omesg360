@@ -6,6 +6,8 @@ on:
       - main
     paths:
       - priolens/**
+      - .github/workflows/deploy-priolens-hostinger.yml
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -84,7 +86,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          body="$(curl -fsS --retry 4 --retry-delay 2 'https://omesg360.eu/priolens/?cb='"${GITHUB_SHA}")"
+          body="$(curl -fsS --retry 4 --retry-delay 2 "https://omesg360.eu/priolens/?cb=${GITHUB_SHA}")"
           grep -Fq '2rasi.priolens.p3.research-v0.4' <<<"$body"
           grep -Fq 'three-equal-image-rows-plus-right-optout-rail-v0.1' <<<"$body"
           grep -Fq '/priolens-research-assets/Gallery/S01.webp' <<<"$body"
