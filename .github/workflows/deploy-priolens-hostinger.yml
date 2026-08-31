@@ -1,0 +1,102 @@
+name: Deploy PrioLens runtime to Hostinger
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - priolens/**
+
+permissions:
+  contents: read
+
+concurrency:
+  group: omesg360-priolens-runtime
+  cancel-in-progress: false
+
+env:
+  FTP_HOST: 46.202.142.134
+  FTP_USER: ${{ secrets.HOSTINGER_FTP_USER }}
+  FTP_PASSWORD: ${{ secrets.HOSTINGER_FTP_PASSWORD }}
+  REMOTE_BASE: /domains/omesg360.eu/public_html/priolens
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate PrioLens v0.4 host runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f priolens/index.html
+          grep -Fq '2rasi.priolens.p3.research-v0.4' priolens/index.html
+          grep -Fq 'three-equal-image-rows-plus-right-optout-rail-v0.1' priolens/index.html
+          grep -Fq '/priolens-research-assets/Gallery/S01.webp' priolens/index.html
+          grep -Fq '/priolens-research-assets/Gallery/S16.webp' priolens/index.html
+          ! grep -Fq '2rasi.priolens.p3.research-v0.3' priolens/index.html
+          echo 'PASS: PrioLens host runtime contract v0.4'
+
+      - name: Verify FTP secrets
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ -n "${FTP_USER:-}" ]] || { echo 'Missing HOSTINGER_FTP_USER' >&2; exit 1; }
+          [[ -n "${FTP_PASSWORD:-}" ]] || { echo 'Missing HOSTINGER_FTP_PASSWORD' >&2; exit 1; }
+
+      - name: Install FTP client
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq lftp
+
+      - name: Verify exact PrioLens target read-only
+        shell: bash
+        run: |
+          set -euo pipefail
+          common='set ftp:ssl-allow no; set net:max-retries 2; set net:timeout 20; set cmd:fail-exit yes;'
+          lftp -c "$common open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; cls -ld \"${REMOTE_BASE}\"" >/dev/null
+          echo 'PASS: exact /public_html/priolens target verified'
+          echo 'PROTECTED: sibling /public_html/priolens-research-assets is outside this deploy target.'
+
+      - name: Backup current Hostinger index
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .rollback
+          common='set ftp:ssl-allow no; set net:max-retries 2; set net:timeout 20;'
+          if lftp -c "$common open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; cls -1 \"${REMOTE_BASE}/index.html\"" >/dev/null 2>&1; then
+            lftp -c "$common open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; get \"${REMOTE_BASE}/index.html\" -o .rollback/index.html"
+            echo 'BACKUP_READY=1' >> "$GITHUB_ENV"
+          else
+            echo 'BACKUP_READY=0' >> "$GITHUB_ENV"
+          fi
+
+      - name: Upload PrioLens index only
+        shell: bash
+        run: |
+          set -euo pipefail
+          common='set ftp:ssl-allow no; set net:max-retries 2; set net:timeout 20; set cmd:fail-exit yes;'
+          lftp -c "$common open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; put -O \"${REMOTE_BASE}/\" priolens/index.html"
+          echo 'Uploaded only /public_html/priolens/index.html. No delete operation used.'
+
+      - name: Post-deploy PrioLens smoke
+        shell: bash
+        run: |
+          set -euo pipefail
+          body="$(curl -fsS --retry 4 --retry-delay 2 'https://omesg360.eu/priolens/?cb='"${GITHUB_SHA}")"
+          grep -Fq '2rasi.priolens.p3.research-v0.4' <<<"$body"
+          grep -Fq 'three-equal-image-rows-plus-right-optout-rail-v0.1' <<<"$body"
+          grep -Fq '/priolens-research-assets/Gallery/S01.webp' <<<"$body"
+          curl -fsS --retry 4 --retry-delay 2 -o /dev/null 'https://omesg360.eu/priolens-research-assets/Gallery/S01.webp'
+          curl -fsS --retry 4 --retry-delay 2 -o /dev/null 'https://omesg360.eu/priolens-research-assets/Gallery/S16.webp'
+          echo 'PASS: live PrioLens v0.4 runtime and sibling research assets reachable'
+
+      - name: Restore previous index if deploy or smoke fails
+        if: ${{ failure() && env.BACKUP_READY == '1' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          common='set ftp:ssl-allow no; set net:max-retries 2; set net:timeout 20; set cmd:fail-exit yes;'
+          lftp -c "$common open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; put -O \"${REMOTE_BASE}/\" .rollback/index.html"
+          echo 'Previous PrioLens index restored. Research assets were never modified.'
