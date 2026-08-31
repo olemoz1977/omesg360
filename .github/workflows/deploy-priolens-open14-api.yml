@@ -59,7 +59,7 @@ jobs:
           echo 'Uploaded api.php, health.php, cleanup.php and .htaccess only.'
           echo 'PROTECTED BY CONSTRUCTION: config.php is never uploaded or overwritten by this workflow.'
 
-      - name: HTTP smoke without DB credentials
+      - name: HTTP input-validation smoke
         shell: bash
         run: |
           set -euo pipefail
@@ -70,6 +70,19 @@ jobs:
           [[ "$code" == '400' ]] || { echo "Expected invalid POST 400, got $code" >&2; cat /tmp/post-body >&2; exit 1; }
           grep -q 'Missing:' /tmp/post-body
           echo 'PASS: isolated API endpoint reachable and validating input'
+
+      - name: Verify database health
+        shell: bash
+        run: |
+          set -euo pipefail
+          health='https://omesg360.eu/priolens-open14-api/health.php'
+          code="$(curl -sS --retry 4 --retry-delay 2 -o /tmp/health-body -w '%{http_code}' "$health")"
+          cat /tmp/health-body
+          [[ "$code" == '200' ]] || { echo "Expected health 200, got $code" >&2; exit 1; }
+          grep -q '"ok":true' /tmp/health-body
+          grep -q '"database":true' /tmp/health-body
+          grep -q '"table":true' /tmp/health-body
+          echo 'PASS: PrioLens database connection and table are ready'
 
 # This workflow intentionally does not deploy config.php, database credentials,
 # Open14 runtime, historical /priolens/ v0.4, or research assets.
