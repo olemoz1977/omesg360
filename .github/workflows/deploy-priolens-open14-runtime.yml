@@ -1,0 +1,107 @@
+name: Deploy PrioLens Open14 runtime
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - priolens/open14-v02/index.html
+      - priolens/open14-v02/bank.json
+      - priolens/open14-v02/p3_open14_planner_v02.mjs
+      - priolens/open14-v02/p3_open14_exemplar_assigner_v01.mjs
+      - .github/workflows/deploy-priolens-open14-runtime.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: omesg360-priolens-open14-runtime
+  cancel-in-progress: false
+
+env:
+  FTP_HOST: 46.202.142.134
+  FTP_USER: ${{ secrets.HOSTINGER_FTP_USER }}
+  FTP_PASSWORD: ${{ secrets.HOSTINGER_FTP_PASSWORD }}
+  REMOTE_DIR: /domains/omesg360.eu/public_html/priolens-open14-v02
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate runtime source
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          b=json.loads(Path('priolens/open14-v02/bank.json').read_text())
+          assert b['schema']=='2rasi.priolens.open14.bank-v0.2'
+          assert b['status']=='READY_FOR_OWNER_SMOKE'
+          assert b['missingRuntimeAssets']==[]
+          for fid,fam in b['families'].items():
+              assert len(fam['exemplars'])==2, fid
+              for ex in fam['exemplars']:
+                  assert ex.get('runtimePath'), ex['id']
+          html=Path('priolens/open14-v02/index.html').read_text()
+          for needle in ['sessionUuid:crypto.randomUUID','/priolens-open14-api/api.php','submitSession','90 dienų']:
+              assert needle in html, needle
+          print('PASS: bank complete and API-integrated runtime source present')
+          PY
+          node -e "import('./priolens/open14-v02/p3_open14_planner_v02.mjs').then(m=>{const p=m.buildOpen14Plan('deploy-smoke'); if(!p.audit) process.exit(2); console.log('planner pass')})"
+          node -e "import('./priolens/open14-v02/p3_open14_exemplar_assigner_v01.mjs').then(()=>console.log('assigner import pass'))"
+
+      - name: Verify FTP secrets
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ -n "${FTP_USER:-}" ]] || { echo 'Missing HOSTINGER_FTP_USER' >&2; exit 1; }
+          [[ -n "${FTP_PASSWORD:-}" ]] || { echo 'Missing HOSTINGER_FTP_PASSWORD' >&2; exit 1; }
+
+      - name: Install FTP client
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq lftp
+
+      - name: Upload managed runtime files only
+        shell: bash
+        run: |
+          set -euo pipefail
+          lftp -c "set ftp:ssl-allow no; set net:max-retries 4; set net:timeout 30; open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; set cmd:fail-exit no; mkdir -p \"$REMOTE_DIR\"; set cmd:fail-exit yes; put -O \"$REMOTE_DIR/\" priolens/open14-v02/index.html; put -O \"$REMOTE_DIR/\" priolens/open14-v02/bank.json; put -O \"$REMOTE_DIR/\" priolens/open14-v02/p3_open14_planner_v02.mjs; put -O \"$REMOTE_DIR/\" priolens/open14-v02/p3_open14_exemplar_assigner_v01.mjs"
+          echo 'Uploaded isolated Open14 runtime only.'
+
+      - name: HTTP smoke runtime and dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          base='https://omesg360.eu/priolens-open14-v02'
+          curl -fsS --retry 4 --retry-delay 2 "$base/" -o /tmp/index
+          grep -q 'PrioLens Open14 v0.2' /tmp/index
+          grep -q 'priolens-open14-api/api.php' /tmp/index
+          curl -fsS --retry 4 --retry-delay 2 "$base/bank.json" -o /tmp/bank
+          python - <<'PY'
+          import json
+          b=json.load(open('/tmp/bank'))
+          assert b['status']=='READY_FOR_OWNER_SMOKE'
+          assert not b['missingRuntimeAssets']
+          assert all(ex.get('runtimePath') for f in b['families'].values() for ex in f['exemplars'])
+          print('bank smoke pass')
+          PY
+          curl -fsS --retry 4 --retry-delay 2 "$base/p3_open14_planner_v02.mjs" -o /dev/null
+          curl -fsS --retry 4 --retry-delay 2 "$base/p3_open14_exemplar_assigner_v01.mjs" -o /dev/null
+          health="$(curl -fsS --retry 4 --retry-delay 2 'https://omesg360.eu/priolens-open14-api/health.php')"
+          echo "$health" | grep -q '"ok":true'
+          curl -fsS --retry 4 --retry-delay 2 'https://omesg360.eu/priolens-research-assets/Open14-v02/priolens_care-a_v01.webp' -o /dev/null
+          curl -fsS --retry 4 --retry-delay 2 'https://omesg360.eu/priolens-research-assets/Open14-v02/priolens_recognition-b_v01.webp' -o /dev/null
+          echo 'PASS: Open14 runtime, bank, API health and pilot assets reachable'
+
+      - name: Historical runtime boundary smoke
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsS --retry 4 --retry-delay 2 'https://omesg360.eu/priolens/' -o /tmp/old
+          grep -Eq 'PrioLens P3|research-v0\.4|v0\.4' /tmp/old
+          echo 'PASS: historical /priolens/ remains reachable'
+
+# Deliberately isolated from historical /priolens/ and persistent research-assets.
