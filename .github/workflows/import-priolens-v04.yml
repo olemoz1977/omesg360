@@ -1,0 +1,147 @@
+name: Import PrioLens v0.4 source and build Hostinger runtime
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/import-priolens-v04.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  FTP_HOST: 46.202.142.134
+  FTP_USER: ${{ secrets.HOSTINGER_FTP_USER }}
+  FTP_PASSWORD: ${{ secrets.HOSTINGER_FTP_PASSWORD }}
+  REMOTE_BASE: /domains/omesg360.eu/public_html/priolens
+
+jobs:
+  import-build-commit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Verify FTP secrets
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ -n "${FTP_USER:-}" ]] || { echo 'Missing HOSTINGER_FTP_USER' >&2; exit 1; }
+          [[ -n "${FTP_PASSWORD:-}" ]] || { echo 'Missing HOSTINGER_FTP_PASSWORD' >&2; exit 1; }
+
+      - name: Install FTP client
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq lftp
+
+      - name: Import standalone v0.4 source read-only
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p priolens/source
+          common='set ftp:ssl-allow no; set net:max-retries 2; set net:timeout 20; set cmd:fail-exit yes;'
+          lftp -c "$common open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; get \"${REMOTE_BASE}/priolens_p3_standalone_v04_layout.html\" -o priolens/source/priolens_p3_standalone_v04_layout.html"
+          sha256sum priolens/source/priolens_p3_standalone_v04_layout.html
+          grep -Fq '2rasi.priolens.p3.research-v0.4' priolens/source/priolens_p3_standalone_v04_layout.html
+          grep -Fq 'three-equal-image-rows-plus-right-optout-rail-v0.1' priolens/source/priolens_p3_standalone_v04_layout.html
+          echo 'PASS: imported source is P3 v0.4'
+
+      - name: Build lean Hostinger runtime from v0.4 source
+        shell: python
+        run: |
+          from pathlib import Path
+          import re, json, hashlib
+
+          src_path = Path('priolens/source/priolens_p3_standalone_v04_layout.html')
+          src = src_path.read_text(encoding='utf-8')
+
+          mapping = {
+            'exploration-01':'/priolens-research-assets/Gallery/S01.webp',
+            'influence-02':'/priolens-research-assets/Gallery/S02.webp',
+            'connection-01':'/priolens-research-assets/Gallery/S03.webp',
+            'influence-01':'/priolens-research-assets/Gallery/S04.webp',
+            'autonomy-01':'/priolens-research-assets/Gallery/S05.webp',
+            'opportunity-02':'/priolens-research-assets/Gallery/S07.webp',
+            'protection-01':'/priolens-research-assets/Gallery/S08.webp',
+            'exploration-02':'/priolens-research-assets/Gallery/S09.webp',
+            'autonomy-02':'/priolens-research-assets/Gallery/S11.webp',
+            'mastery-01':'/priolens-research-assets/Gallery/S12.webp',
+            'protection-02':'/priolens-research-assets/Gallery/S13.webp',
+            'connection-02':'/priolens-research-assets/Gallery/S14.webp',
+            'opportunity-01':'/priolens-research-assets/Gallery/S15.webp',
+            'mastery-02':'/priolens-research-assets/Gallery/S16.webp'
+          }
+
+          host = re.sub(
+            r'(<script id="priolens-embedded-stimuli">window\.__PRIOLENS_EMBEDDED_IMG__=)\{.*?\}(;</script>)',
+            lambda m: m.group(1)+json.dumps(mapping, ensure_ascii=False, separators=(',',':'))+m.group(2),
+            src,
+            flags=re.S
+          )
+          host = host.replace('<title>PrioLens P3 v0.4</title>', '<title>PrioLens P3 v0.4 · Hostinger research</title>')
+          host = host.replace('<button id="bake" class="secondary">Išsaugoti standalone</button>', '<button id="bake" class="secondary hidden">Išsaugoti standalone</button>')
+          host = host.replace(
+            "function validMap(map){return !!map&&NEED.every(id=>typeof map[id]==='string'&&map[id].startsWith('data:image/'))}",
+            "function validMap(map){return !!map&&NEED.every(id=>typeof map[id]==='string'&&map[id].length>0)}"
+          )
+          host = host.replace(
+            "setReady('Standalone režimas: 14 stimulų jau įkepti į šį failą. Nieko įkelti nereikia.',true);return",
+            "setReady('Hostinger režimas: 14 stimulų įkelti iš atskiro research assets katalogo.',true);return"
+          )
+          host = host.replace("a.download='priolens_p3_standalone_v03.html'", "a.download='priolens_p3_standalone_v04_layout.html'")
+          host = host.replace("a.download='priolens-p3-v03-'+state.seed+'.json'", "a.download='priolens-p3-v04-'+state.seed+'.json'")
+
+          out = Path('priolens/index.html')
+          out.write_text(host, encoding='utf-8')
+
+          source_sha = hashlib.sha256(src_path.read_bytes()).hexdigest()
+          runtime_sha = hashlib.sha256(out.read_bytes()).hexdigest()
+          manifest = {
+            'product':'PrioLens P3',
+            'runtime_schema':'2rasi.priolens.p3.research-v0.4',
+            'layout':'three-equal-image-rows-plus-right-optout-rail-v0.1',
+            'planner':'exact-slot-balance-v0.1',
+            'source':'source/priolens_p3_standalone_v04_layout.html',
+            'source_sha256':source_sha,
+            'runtime_sha256':runtime_sha,
+            'asset_base':'/priolens-research-assets/Gallery/',
+            'asset_count':14,
+            'certainty_status':'HOLD_NOT_ACTIVE',
+            'deploy_target':'/domains/omesg360.eu/public_html/priolens/index.html',
+            'research_assets_deploy_owned':False
+          }
+          Path('priolens/manifest.json').write_text(json.dumps(manifest, ensure_ascii=False, indent=2)+'\n', encoding='utf-8')
+          Path('priolens/DEPLOY.txt').write_text(
+            'PrioLens research runtime on omesg360.eu\n'
+            'Source of truth: this GitHub repository.\n'
+            'Runtime deploy target: /public_html/priolens/index.html\n'
+            'Persistent research assets: /public_html/priolens-research-assets/ (NOT deploy-owned).\n'
+            'Generated from P3 standalone v0.4; images are referenced by absolute sibling paths.\n',
+            encoding='utf-8'
+          )
+
+          assert '2rasi.priolens.p3.research-v0.4' in host
+          assert 'three-equal-image-rows-plus-right-optout-rail-v0.1' in host
+          assert host.count('/priolens-research-assets/Gallery/') == 14
+          assert '2rasi.priolens.p3.research-v0.3' not in host
+          assert 'data:image/' not in host
+          print('PASS: lean Hostinger runtime built')
+          print('source_sha256='+source_sha)
+          print('runtime_sha256='+runtime_sha)
+
+      - name: Commit imported source and generated runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add priolens/source/priolens_p3_standalone_v04_layout.html priolens/index.html priolens/manifest.json priolens/DEPLOY.txt
+          if git diff --cached --quiet; then
+            echo 'No PrioLens source/runtime changes to commit.'
+            exit 0
+          fi
+          git commit -m 'feat(priolens): import P3 v0.4 and build Hostinger runtime'
+          git push origin HEAD:main
