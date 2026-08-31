@@ -1,0 +1,14 @@
+{
+  "product": "PrioLens P3",
+  "runtime_schema": "2rasi.priolens.p3.research-v0.4",
+  "layout": "three-equal-image-rows-plus-right-optout-rail-v0.1",
+  "planner": "exact-slot-balance-v0.1",
+  "source": "source/priolens_p3_standalone_v04_layout.html",
+  "source_sha256": "6d83113b54b4ecb2c319ee1079976434ca3f9e5239cddf1b3a8047dc34a03fda",
+  "runtime_sha256": "037e1a522c902bec2dfc4f03e53e415cc25b5a6670a970d69d0ae30446b2c73c",
+  "asset_base": "/priolens-research-assets/Gallery/",
+  "asset_count": 14,
+  "certainty_status": "HOLD_NOT_ACTIVE",
+  "deploy_target": "/domains/omesg360.eu/public_html/priolens/index.html",
+  "research_assets_deploy_owned": false
+}

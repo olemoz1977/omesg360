@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="lt"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>PrioLens P3 v0.4 · Hostinger research</title><style>
+:root{--bg:#f7f7f5;--ink:#181818;--muted:#737373;--line:#deded9}*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,sans-serif}body{min-height:100dvh}.wrap{width:min(100%,900px);margin:auto;padding:0 12px;min-height:100dvh}.top{height:50px;display:flex;align-items:center;justify-content:space-between}.brand{font-weight:800}.pill{font-size:12px;color:var(--muted);border:1px solid var(--line);padding:6px 9px;border-radius:99px;background:#fff}.screen{display:none}.screen.active{display:block}.intro{padding:6vh 4px 30px}h1{font-size:clamp(38px,11vw,66px);letter-spacing:-.06em;line-height:.94;margin:0 0 18px}.lead{font-size:clamp(19px,5vw,27px);line-height:1.25;margin:0 0 16px;max-width:720px}.note{font-size:14px;line-height:1.5;color:var(--muted);max-width:720px}.card,.row,.metric{background:#fff;border:1px solid var(--line);border-radius:16px}.card{padding:14px 15px;margin:18px 0}.card b{display:block;margin-bottom:5px}.card p{margin:0;color:#666;font-size:13px;line-height:1.45}.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:16px}button{font:inherit;cursor:pointer}.primary,.secondary{border-radius:14px;padding:12px 15px;font-weight:700;min-height:44px}.primary{border:0;background:#171717;color:#fff}.secondary{border:1px solid var(--line);background:#fff;color:#181818}.status{font-size:12px;color:#777;margin-top:9px}.bad{color:#923f3f}#trial.active{height:calc(100dvh - 50px);display:flex;flex-direction:column;overflow:hidden}.trialhead{height:42px;display:flex;align-items:center;justify-content:space-between}.q{font-size:14px;font-weight:700}.count{font-size:13px;color:#777}.progress{height:3px;background:#e7e7e2;border-radius:10px;overflow:hidden}.progress i{display:block;height:100%;background:#222;width:0}.stage{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 54px;grid-template-rows:repeat(3,minmax(0,1fr));gap:7px 8px;padding:8px 0 10px;align-items:stretch}.stim{grid-column:1;width:100%;height:100%;border:0;background:transparent;padding:3px 6px;min-width:0;display:flex;align-items:center;justify-content:center}.stim:nth-of-type(1){grid-row:1}.stim:nth-of-type(2){grid-row:2}.stim:nth-of-type(3){grid-row:3}.stim img{display:block;height:100%;width:auto;max-width:100%;max-height:100%;aspect-ratio:1/1;object-fit:contain;border:1px solid #d6d6d1;background:#eee;border-radius:18px}.stim.sel img{outline:3px solid #111;outline-offset:2px}.stage.locked button{pointer-events:none}.none{grid-column:2;grid-row:1/4;width:100%;height:100%;align-self:stretch;justify-self:stretch;border:1px solid var(--line);background:#fff;color:#666;border-radius:16px;padding:10px 0;font-size:13px;font-weight:650;letter-spacing:.01em;writing-mode:vertical-rl;transform:rotate(180deg);display:flex;align-items:center;justify-content:center}.result{padding:14px 0 50px}.sub{color:#777;line-height:1.45}.summary{background:#191919;color:#fff;border-radius:20px;padding:18px;margin:18px 0}.summary small{color:#aaa;text-transform:uppercase;letter-spacing:.1em}.summary h2{font-size:22px;line-height:1.2;margin:8px 0}.summary p{margin:0;color:#d2d2d2;font-size:13px;line-height:1.5}.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:18px}.metric{padding:12px}.metric b{display:block;font-size:24px}.metric span{font-size:11px;color:#777}.tabs{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px}.tab{border:1px solid var(--line);background:#fff;border-radius:99px;padding:8px 11px;font-size:12px;font-weight:700}.tab.on{background:#1d1d1d;color:#fff;border-color:#1d1d1d}.rows{display:grid;gap:8px}.row{padding:12px 14px}.rowtop{display:flex;justify-content:space-between;gap:10px}.name{font-weight:750}.score{font-size:13px;color:#666}.cue{font-size:12px;color:#777;margin-top:3px}.bar{height:7px;background:#ecece8;border-radius:8px;margin-top:9px;overflow:hidden}.bar i{display:block;height:100%;background:#252525}.ctx{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}.ctx span{font-size:12px;color:#666;background:#f3f3f0;border-radius:8px;padding:6px 8px}.modelnote{font-size:12px;color:#777;line-height:1.45}.hidden{display:none!important}.tablebox{overflow:auto;border:1px solid var(--line);border-radius:14px;background:#fff}table{border-collapse:collapse;width:100%;min-width:600px;font-size:12px}th,td{padding:8px;border-bottom:1px solid #ecece8;text-align:center}th:first-child,td:first-child{text-align:left;font-weight:700}.foot{font-size:12px;color:#888;line-height:1.45;margin-top:18px}@media(max-width:620px){.stage{grid-template-columns:minmax(0,1fr) 50px;gap:6px 7px;padding-top:7px}.stim{padding:2px 4px}.stim img{border-radius:16px}.none{border-radius:14px;font-size:12px}.metrics{grid-template-columns:1fr}}
+</style></head><body><div class="wrap"><div class="top"><div class="brand">PrioLens P3</div><div class="pill">3-image research · v0.4</div></div>
+<section id="intro" class="screen active intro"><h1>Kurį renkiesi?</h1><p class="lead">Trys lygiaverčiai vaizdai vienu metu. Vienas greitas pasirinkimas.</p><p class="note">14 triadų, 7 aktyvios kryptys. Kiekvienas stimulas rodomas po kartą kiekviename iš 3 ekrano slotų. CER šiame eksperimente neaktyvus. Reakcijos laikas fiksuojamas, bet nėra verčiamas psichologiniu balu.</p><div id="sourceCard" class="card hidden" data-embedded="true"><b id="sourceTitle">Tik pirmam paleidimui</b><p id="sourceHelp">Jei šiame faile stimulai dar neįkepti ir naršyklė jų neprisimena, vieną kartą pasirink seną <code>priolens_working_beta_v03.html</code>. Po to jie saugomi lokaliai. Dar geriau: spausk „Sukurti standalone kopiją“ ir gausi naują HTML su visais 14 vaizdų viduje.</p><div class="actions"><button id="load" class="secondary">Pasirinkti seną beta</button><input id="file" type="file" accept=".html,text/html" hidden=""></div><div id="status" class="status">Paruošta. 14 stimulų išsaugoti šiame naršyklės profilyje. Daugiau seno beta rinktis nereikės.</div></div><div class="actions"><button id="start" class="primary">Pradėti P3</button><button id="bake" class="secondary hidden">Išsaugoti standalone</button></div></section>
+<section id="trial" class="screen"><div class="trialhead"><div class="q">Kuris pirmas patraukia?</div><div id="counter" class="count">1 / 14</div></div><div class="progress"><i id="prog"></i></div><div id="stage" class="stage"><button class="stim" data-slot="0"><img alt=""></button><button class="stim" data-slot="1"><img alt=""></button><button class="stim" data-slot="2"><img alt=""></button><button id="none" class="none">Nė vienas aiškiai</button></div></section>
+<section id="result" class="screen result"><h1>Ką parodė P3?</h1><p class="sub">Rezultatas aprašo tik šią sesiją ir šiuos stimulus. Tai nėra asmenybės profilis.</p><div id="summary" class="summary"></div><div class="metrics"><div class="metric"><b id="med">—</b><span>RT mediana</span></div><div class="metric"><b id="nn">—</b><span>nė vienas aiškiai</span></div><div class="metric"><b id="spread">—</b><span>#1–#2 skirtumas</span></div></div><div class="tabs"><button class="tab on" data-v="raw">Dažnis</button><button class="tab" data-v="model">Modelis</button><button class="tab" data-v="context">Kontekstas</button><button class="tab" data-v="matrix">Dvikovų projekcija</button></div><div id="raw"><p class="modelnote">Kiek kartų kryptis pasirinkta iš visų jos parodymų.</p><div id="rawRows" class="rows"></div></div><div id="model" class="hidden"><p class="modelnote">Eksperimentinis Plackett–Luce tipo įvertis iš 3 alternatyvų pasirinkimų.</p><div id="modelRows" class="rows"></div></div><div id="context" class="hidden"><p class="modelnote">Du subalansuoti ratai leidžia matyti, ar kryptis išlieka, kai pasikeičia trečia alternatyva.</p><div id="ctxRows" class="rows"></div></div><div id="matrix" class="hidden"><p class="modelnote">Kai A laimi A/B/C triadoje, registruojama A&gt;B ir A&gt;C. Tarp dviejų nepasirinktų alternatyvų ryšys nenumanomas.</p><div id="matrixBox" class="tablebox"></div></div><div class="actions"><button id="restart" class="primary">Nauja P3 sesija</button><button id="export" class="secondary">Eksportuoti JSON</button></div><p class="foot">RT lieka atskira telemetrija. CER sąmoningai neįtrauktas.</p></section></div>
+<script id="priolens-embedded-stimuli">window.__PRIOLENS_EMBEDDED_IMG__={"exploration-01":"/priolens-research-assets/Gallery/S01.webp","influence-02":"/priolens-research-assets/Gallery/S02.webp","connection-01":"/priolens-research-assets/Gallery/S03.webp","influence-01":"/priolens-research-assets/Gallery/S04.webp","autonomy-01":"/priolens-research-assets/Gallery/S05.webp","opportunity-02":"/priolens-research-assets/Gallery/S07.webp","protection-01":"/priolens-research-assets/Gallery/S08.webp","exploration-02":"/priolens-research-assets/Gallery/S09.webp","autonomy-02":"/priolens-research-assets/Gallery/S11.webp","mastery-01":"/priolens-research-assets/Gallery/S12.webp","protection-02":"/priolens-research-assets/Gallery/S13.webp","connection-02":"/priolens-research-assets/Gallery/S14.webp","opportunity-01":"/priolens-research-assets/Gallery/S15.webp","mastery-02":"/priolens-research-assets/Gallery/S16.webp"};</script>
+<script>
+(()=>{
+const defs=[
+{id:'autonomy',lt:'Autonomija',cue:'laisvė pačiam nustatyti kryptį ar būdą',stim:['autonomy-01','autonomy-02']},
+{id:'exploration',lt:'Tyrinėjimas',cue:'nežinomo tyrinėjimas ir atradimas',stim:['exploration-01','exploration-02']},
+{id:'mastery',lt:'Meistriškumas',cue:'tikslumas, kompetencija ir atlikimo kokybė',stim:['mastery-01','mastery-02']},
+{id:'connection',lt:'Ryšys',cue:'abipusis kontaktas, artumas ar priklausymas',stim:['connection-01','connection-02']},
+{id:'influence',lt:'Poveikis',cue:'galimybė pakeisti tai, kas vyksta toliau',stim:['influence-01','influence-02']},
+{id:'protection',lt:'Apsauga',cue:'apsauga, išsaugojimas ir žalos mažinimas',stim:['protection-01','protection-02']},
+{id:'opportunity',lt:'Galimybė',cue:'prieinama galimybė arba potenciali nauda',stim:['opportunity-01','opportunity-02']}
+];
+const D=Object.fromEntries(defs.map(d=>[d.id,d]));
+const stimToDir=Object.fromEntries(defs.flatMap(d=>d.stim.map(s=>[s,d.id])));
+let IMG=(window.__PRIOLENS_EMBEDDED_IMG__&&typeof window.__PRIOLENS_EMBEDDED_IMG__==='object')?window.__PRIOLENS_EMBEDDED_IMG__:{},state=null,t0=0,locked=false;
+const $=x=>document.getElementById(x),buttons=[...document.querySelectorAll('.stim')],screens=[...document.querySelectorAll('.screen')];
+function show(id){screens.forEach(s=>s.classList.toggle('active',s.id===id));scrollTo(0,0)}
+function xmur3(s){let h=1779033703^s.length;for(let i=0;i<s.length;i++){h=Math.imul(h^s.charCodeAt(i),3432918353);h=h<<13|h>>>19}return()=>{h=Math.imul(h^h>>>16,2246822507);h=Math.imul(h^h>>>13,3266489909);return(h^h>>>16)>>>0}}
+function rng(a){return()=>{let t=a+=0x6D2B79F5;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return((t^t>>>14)>>>0)/4294967296}}
+function sh(a,r){for(let i=a.length-1;i;i--){let j=Math.floor(r()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+const F=[[0,1,2],[0,3,4],[0,5,6],[1,3,5],[1,4,6],[2,3,6],[2,4,5]];
+const F2=[[0,1,3],[0,2,5],[0,6,4],[1,2,6],[1,5,4],[3,2,4],[3,5,6]];
+
+function perfectMatching(trials,edgeSets,r){
+  const order=sh([...trials.keys()],r), owner={};
+  function dfs(ti,seen){
+    const edges=sh([...edgeSets[ti]],r);
+    for(const stim of edges){
+      if(seen.has(stim))continue;
+      seen.add(stim);
+      if(owner[stim]===undefined||dfs(owner[stim],seen)){owner[stim]=ti;return true}
+    }
+    return false;
+  }
+  for(const ti of order)if(!dfs(ti,new Set()))throw Error('Nepavyko rasti tobulo slotų atitikimo');
+  const out=Array(trials.length).fill(null);
+  for(const [stim,ti] of Object.entries(owner))out[ti]=stim;
+  if(out.some(x=>!x))throw Error('Nepilnas slotų atitikimas');
+  return out;
+}
+
+function balanceSlots(trials,r){
+  const edges=trials.map(t=>t.dirs.map(id=>t.stims[id]));
+  const m1=perfectMatching(trials,edges,r);
+  const rem1=edges.map((xs,i)=>xs.filter(s=>s!==m1[i]));
+  const m2=perfectMatching(trials,rem1,r);
+  const m3=edges.map((xs,i)=>xs.find(s=>s!==m1[i]&&s!==m2[i]));
+  const matchings=[m1,m2,m3];
+  const perm=sh([0,1,2],r);
+  return trials.map((t,i)=>{
+    const slotStimuli=perm.map(mi=>matchings[mi][i]);
+    const positions=slotStimuli.map(s=>stimToDir[s]);
+    return {...t,positions,slotStimuli};
+  });
+}
+
+function validatePlan(trials){
+  if(trials.length!==14)throw Error('Planner: turi būti 14 trialų');
+  const allStim=defs.flatMap(d=>d.stim), counts=Object.fromEntries(allStim.map(s=>[s,0]));
+  const slotCounts=Object.fromEntries(allStim.map(s=>[s,[0,0,0]]));
+  const dirSlots=Object.fromEntries(defs.map(d=>[d.id,[0,0,0]]));
+  for(const t of trials){
+    if(t.dirs.length!==3||new Set(t.dirs).size!==3)throw Error('Planner: triale turi būti 3 unikalios kryptys');
+    if(!t.slotStimuli||t.slotStimuli.length!==3||new Set(t.slotStimuli).size!==3)throw Error('Planner: blogi slotai');
+    t.slotStimuli.forEach((s,slot)=>{
+      if(!(s in counts))throw Error('Planner: nežinomas stimulas');
+      counts[s]++;slotCounts[s][slot]++;dirSlots[stimToDir[s]][slot]++;
+    });
+  }
+  for(const s of allStim){
+    if(counts[s]!==3)throw Error(`Planner: ${s} parodytas ${counts[s]} kartus`);
+    if(slotCounts[s].some(n=>n!==1))throw Error(`Planner: ${s} nėra 1/1/1 per slotus`);
+  }
+  for(const d of defs)if(dirSlots[d.id].some(n=>n!==2))throw Error(`Planner: ${d.id} nėra 2/2/2 per slotus`);
+  return {stimulusSlots:slotCounts,directionSlots:dirSlots};
+}
+
+function plan(seed){
+  const r=rng(xmur3(seed)());
+  const sets=[...F.map(x=>({round:'A',x})),...F2.map(x=>({round:'B',x}))];
+  const cnt=Object.fromEntries(defs.map(d=>[d.id,[0,0]]));
+  let trials=sets.map(z=>{
+    const dirs=z.x.map(i=>defs[i].id),stims={};
+    dirs.forEach(id=>{const c=cnt[id];let k=c[0]===c[1]?(r()<.5?0:1):(c[0]<c[1]?0:1);c[k]++;stims[id]=D[id].stim[k]});
+    return {round:z.round,dirs,stims};
+  });
+  trials=balanceSlots(trials,r);
+  const audit=validatePlan(trials);
+  trials=sh(trials,r);
+  return {trials,audit};
+}
+
+const NEED=defs.flatMap(d=>d.stim);
+const DB_NAME='priolens-p3-assets-v01',DB_STORE='kv',DB_KEY='legacy-active-14';
+function dbOpen(){return new Promise((res,rej)=>{try{const q=indexedDB.open(DB_NAME,1);q.onupgradeneeded=()=>{if(!q.result.objectStoreNames.contains(DB_STORE))q.result.createObjectStore(DB_STORE)};q.onsuccess=()=>res(q.result);q.onerror=()=>rej(q.error)}catch(e){rej(e)}})}
+async function dbGet(){try{const db=await dbOpen();return await new Promise((res,rej)=>{const tx=db.transaction(DB_STORE,'readonly'),q=tx.objectStore(DB_STORE).get(DB_KEY);q.onsuccess=()=>res(q.result||null);q.onerror=()=>rej(q.error)})}catch(_){return null}}
+async function dbPut(v){try{const db=await dbOpen();await new Promise((res,rej)=>{const tx=db.transaction(DB_STORE,'readwrite');tx.objectStore(DB_STORE).put(v,DB_KEY);tx.oncomplete=res;tx.onerror=()=>rej(tx.error)});return true}catch(_){return false}}
+function validMap(map){return !!map&&NEED.every(id=>typeof map[id]==='string'&&map[id].length>0)}
+function setReady(msg,embedded=false){$('status').className='status';$('status').textContent=msg;$('start').disabled=false;$('bake').disabled=false;$('sourceCard').classList.add('hidden');$('bake').classList.toggle('hidden',embedded)}
+function standaloneHtml(){
+  const clone=document.documentElement.cloneNode(true);
+  const node=clone.querySelector('#priolens-embedded-stimuli');
+  if(!node)throw Error('Nerastas embed taškas');
+  node.textContent='window.__PRIOLENS_EMBEDDED_IMG__='+JSON.stringify(IMG).replace(/</g,'\\u003c')+';';
+  const card=clone.querySelector('#sourceCard');
+  if(card)card.setAttribute('data-embedded','true');
+  return '<!doctype html>\n'+clone.outerHTML;
+}
+function bakeStandalone(){
+  if(!validMap(IMG))return;
+  const blob=new Blob([standaloneHtml()],{type:'text/html;charset=utf-8'}),a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);a.download='priolens_p3_standalone_v04_layout.html';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1500);
+}
+async function bootAssets(){
+  try{
+    if(validMap(IMG)){await preload();setReady('Hostinger režimas: 14 stimulų įkelti iš atskiro research assets katalogo.',true);return}
+    const cached=await dbGet();
+    if(validMap(cached)){IMG=cached;await preload();setReady('14 stimulų rasti naršyklėje. Nieko įkelti nereikia.');return}
+    $('status').textContent='Stimulai dar neišsaugoti. Vieną kartą pasirink seną beta HTML.';
+  }catch(e){$('status').className='status bad';$('status').textContent='Nepavyko paruošti stimulų: '+(e.message||e)}
+}
+function extract(txt){const p=txt.indexOf('const IMG');if(p<0)throw Error('Nerastas const IMG blokas');const eq=txt.indexOf('=',p),start=txt.indexOf('{',eq);let depth=0,str=false,esc=false,end=-1;for(let i=start;i<txt.length;i++){const c=txt[i];if(str){if(esc)esc=false;else if(c==='\\')esc=true;else if(c==='"')str=false;continue}if(c==='"'){str=true;continue}if(c==='{')depth++;else if(c==='}'&&!--depth){end=i+1;break}}if(end<0)throw Error('Nepavyko perskaityti IMG bloko');return JSON.parse(txt.slice(start,end))}
+async function preload(){await Promise.all(Object.values(IMG).map(src=>new Promise((res,rej)=>{const im=new Image;im.onload=res;im.onerror=()=>rej(Error('Stimulo dekodavimo klaida'));im.src=src})))}
+async function loadFile(f){try{$('status').className='status';$('status').textContent='Skaitau 14 stimulų…';const map=extract(await f.text()),miss=NEED.filter(id=>!map[id]);if(miss.length)throw Error('Trūksta: '+miss.join(', '));IMG=Object.fromEntries(NEED.map(id=>[id,map[id]]));await preload();const saved=await dbPut(IMG);setReady(saved?'Paruošta. 14 stimulų išsaugoti šiame naršyklės profilyje. Daugiau seno beta rinktis nereikės.':'Paruošta šiai sesijai. Naršyklė neleido cache, todėl rekomenduoju iškart sukurti standalone kopiją.')}catch(e){$('status').className='status bad';$('status').textContent=e.message;$('start').disabled=true;$('bake').disabled=true}}
+function start(){const seed=Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,8),p=plan(seed);state={schema:'2rasi.priolens.p3.research-v0.4',seed,planner:'exact-slot-balance-v0.1',layout:'three-equal-image-rows-plus-right-optout-rail-v0.1',startedAt:new Date().toISOString(),certaintyStatus:'HOLD_NOT_ACTIVE',index:0,plan:p.trials,slotAudit:p.audit,trials:[],shown:Object.fromEntries(defs.map(d=>[d.id,0])),chosen:Object.fromEntries(defs.map(d=>[d.id,0]))};show('trial');render()}
+function render(){locked=true;$('stage').classList.add('locked');const t=state.plan[state.index];$('counter').textContent=`${state.index+1} / 14`;$('prog').style.width=(state.index/14*100)+'%';buttons.forEach((b,i)=>{const id=t.positions[i];b.classList.remove('sel');b.dataset.id=id;b.dataset.stim=t.stims[id];b.querySelector('img').src=IMG[t.stims[id]]});requestAnimationFrame(()=>requestAnimationFrame(()=>{t0=performance.now();locked=false;$('stage').classList.remove('locked')}))}
+function choose(id,slot,pt){if(locked)return;locked=true;$('stage').classList.add('locked');const t=state.plan[state.index],lat=Math.round(performance.now()-t0);t.dirs.forEach(x=>state.shown[x]++);if(id)state.chosen[id]++;state.trials.push({index:state.index+1,round:t.round,directions:[...t.dirs],positions:[...t.positions],slotStimuli:[...t.slotStimuli],stimuli:{...t.stims},chosenDirection:id||null,chosenStimulus:id?t.stims[id]:null,chosenSlot:slot,noClearChoice:!id,latencyMs:lat,inputType:pt||null});if(++state.index===14){state.completedAt=new Date().toISOString();finish()}else setTimeout(render,90)}
+function med(a){if(!a.length)return null;a=[...a].sort((x,y)=>x-y);let m=a.length>>1;return a.length%2?a[m]:Math.round((a[m-1]+a[m])/2)}
+function raw(){return defs.map(d=>({...d,shown:state.shown[d.id],chosen:state.chosen[d.id],rate:state.shown[d.id]?state.chosen[d.id]/state.shown[d.id]:0})).sort((a,b)=>b.chosen-a.chosen||b.rate-a.rate||a.id.localeCompare(b.id))}
+function topSet(r){const max=Math.max(...r.map(x=>x.chosen));return max===0?[]:r.filter(x=>x.chosen===max)}
+function pl(){const ids=defs.map(d=>d.id),th=Object.fromEntries(ids.map(x=>[x,0])),u=state.trials.filter(t=>t.chosenDirection);if(!u.length)return Object.fromEntries(ids.map(x=>[x,1/ids.length]));let lr=.08;for(let it=0;it<900;it++){const g=Object.fromEntries(ids.map(x=>[x,0]));u.forEach(t=>{const ex=t.directions.map(x=>Math.exp(Math.max(-8,Math.min(8,th[x])))),z=ex.reduce((a,b)=>a+b,0);t.directions.forEach((x,i)=>g[x]+=(x===t.chosenDirection?1:0)-ex[i]/z)});ids.forEach(x=>th[x]+=lr*g[x]);const av=ids.reduce((s,x)=>s+th[x],0)/ids.length;ids.forEach(x=>th[x]-=av);if(it===300)lr=.04;if(it===600)lr=.02}const w=Object.fromEntries(ids.map(x=>[x,Math.exp(th[x])])),z=ids.reduce((s,x)=>s+w[x],0);ids.forEach(x=>w[x]/=z);return w}
+function rounds(){const o={A:{},B:{}};defs.forEach(d=>['A','B'].forEach(r=>o[r][d.id]={shown:0,chosen:0}));state.trials.forEach(t=>{t.directions.forEach(x=>o[t.round][x].shown++);if(t.chosenDirection)o[t.round][t.chosenDirection].chosen++});return o}
+function matrix(){const ids=defs.map(d=>d.id),m={};ids.forEach(a=>{m[a]={};ids.forEach(b=>m[a][b]=0)});state.trials.forEach(t=>{if(!t.chosenDirection)return;t.directions.filter(x=>x!==t.chosenDirection).forEach(l=>m[t.chosenDirection][l]++)});return m}
+function rowsHtml(arr,val,bar){return arr.map(x=>`<div class="row"><div class="rowtop"><div class="name">${x.lt}</div><div class="score">${val(x)}</div></div><div class="cue">${x.cue}</div><div class="bar"><i style="width:${bar(x)}%"></i></div></div>`).join('')}
+function joinLt(names){if(names.length<2)return names[0]||'';if(names.length===2)return names[0]+' ir '+names[1];return names.slice(0,-1).join(', ')+' ir '+names[names.length-1]}
+function finish(){
+  $('prog').style.width='100%';
+  const r=raw(),tops=topSet(r),n=state.trials.filter(t=>t.noClearChoice).length,m=med(state.trials.map(t=>t.latencyMs));
+  let headline,body,spread='—';
+  if(!tops.length){headline='Šioje sesijoje nei viena kryptis neišsiskyrė pagal pasirinkimus.';body='Visuose trialuose pasirinktas „Nė vienas aiškiai“. Žalias pasirinkimų pėdsakas išsaugotas diagnostikai.'}
+  else if(tops.length===1){const a=tops[0],b=r.find(x=>x.id!==a.id);headline=`Šioje sesijoje dažniausiai rinkaisi ${a.lt} vaizdus: ${a.chosen} iš ${a.shown} parodymų.`;body=b?`Kitas dažniausias rezultatas: ${b.lt} ${b.chosen}/${b.shown}.`:'';spread=b?Math.round((a.rate-b.rate)*100)+' p.p.':'—'}
+  else{const a=tops[0];headline=`Šioje sesijoje išsiskyrė ${tops.length===2?'dvi kryptys':'kelios kryptys'}: ${joinLt(tops.map(x=>x.lt))}.`;body=`${tops.length===2?'Abi':'Visos'} pasirinktos po ${a.chosen} iš ${a.shown} parodymų. Tai yra tikslus bendras pirmas rezultatas, todėl #1 neskiriamas.`;spread='0 p.p.'}
+  $('summary').innerHTML=`<small>P3 sesijos pėdsakas</small><h2>${headline}</h2><p>${body}</p>`;
+  $('med').textContent=m==null?'—':(m/1000).toFixed(2)+' s';$('nn').textContent=n+'/14';$('spread').textContent=spread;
+  $('rawRows').innerHTML=rowsHtml(r,x=>`${x.chosen}/${x.shown} · ${Math.round(x.rate*100)}%`,x=>Math.round(x.rate*100));
+  const w=pl(),mr=defs.map(d=>({...d,w:w[d.id]})).sort((a,b)=>b.w-a.w),mx=mr[0]?.w||1;
+  $('modelRows').innerHTML=rowsHtml(mr,x=>(x.w*100).toFixed(1)+'%',x=>Math.round(x.w/mx*100));
+  const c=rounds(),cr=defs.map(d=>{const A=c.A[d.id],B=c.B[d.id],ra=A.shown?A.chosen/A.shown:0,rb=B.shown?B.chosen/B.shown:0;return{...d,A,B,delta:Math.abs(ra-rb)}}).sort((a,b)=>a.delta-b.delta);
+  $('ctxRows').innerHTML=cr.map(x=>`<div class="row"><div class="rowtop"><div class="name">${x.lt}</div><div class="score">Δ ${Math.round(x.delta*100)} p.p.</div></div><div class="cue">${x.cue}</div><div class="ctx"><span>Ratas A: ${x.A.chosen}/${x.A.shown}</span><span>Ratas B: ${x.B.chosen}/${x.B.shown}</span></div></div>`).join('');
+  const mm=matrix(),ids=defs.map(d=>d.id),shrt={autonomy:'AUT',exploration:'EXP',mastery:'MAS',connection:'CON',influence:'INF',protection:'PRO',opportunity:'OPP'};let h='<table><tr><th>Laimėjo prieš</th>'+ids.map(x=>`<th>${shrt[x]}</th>`).join('')+'</tr>';ids.forEach(a=>{h+=`<tr><td>${shrt[a]}</td>`+ids.map(b=>`<td>${a===b?'·':mm[a][b]}</td>`).join('')+'</tr>'});$('matrixBox').innerHTML=h+'</table>';
+  show('result');
+}
+function exportJ(){const payload={...state,analysis:{raw:raw().map(x=>({id:x.id,shown:x.shown,chosen:x.chosen,selectionRate:x.rate})),topDirections:topSet(raw()).map(x=>x.id),plackettLuce:pl(),roundCounts:rounds(),impliedPairwiseWins:matrix(),slotAudit:state.slotAudit}};const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='priolens-p3-v04-'+state.seed+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
+$('load').onclick=()=>$('file').click();$('file').onchange=e=>e.target.files[0]&&loadFile(e.target.files[0]);$('bake').onclick=bakeStandalone;$('start').onclick=start;$('restart').onclick=start;$('export').onclick=exportJ;$('none').onpointerdown=e=>choose(null,null,e.pointerType);buttons.forEach(b=>b.onpointerdown=e=>{b.classList.add('sel');choose(b.dataset.id,+b.dataset.slot,e.pointerType)});document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));t.classList.add('on');['raw','model','context','matrix'].forEach(v=>$(v).classList.toggle('hidden',v!==t.dataset.v))});
+bootAssets();
+})();
+</script>
+</body></html>

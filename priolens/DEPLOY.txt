@@ -1,0 +1,5 @@
+PrioLens research runtime on omesg360.eu
+Source of truth: this GitHub repository.
+Runtime deploy target: /public_html/priolens/index.html
+Persistent research assets: /public_html/priolens-research-assets/ (NOT deploy-owned).
+Generated from P3 standalone v0.4; images are referenced by absolute sibling paths.
