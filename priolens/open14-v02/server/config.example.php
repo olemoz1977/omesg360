@@ -1,8 +1,9 @@
 <?php
-// Copy to config.php on the server only after backend approval.
-// Never commit real credentials.
+// PrioLens Open14 formative pilot.
+// Copy this file to config.php on Hostinger ONLY.
+// Never commit the real password to GitHub or send it in chat.
 
 define('DB_HOST', 'localhost');
-define('DB_NAME', 'CHANGE_ME');
-define('DB_USER', 'CHANGE_ME');
-define('DB_PASS', 'CHANGE_ME');
+define('DB_NAME', 'u986950573_priolens');
+define('DB_USER', 'u986950573_priolensuser');
+define('DB_PASS', 'PASTE_THE_HOSTINGER_DB_PASSWORD_HERE');
