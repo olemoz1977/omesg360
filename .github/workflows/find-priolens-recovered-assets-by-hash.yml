@@ -32,7 +32,7 @@ jobs:
           set -euo pipefail
           tmp="$(mktemp -d)"
           common='set ftp:ssl-allow no; set net:max-retries 2; set net:timeout 20; set cmd:fail-exit yes; set mirror:parallel-transfer-count 6;'
-          lftp -c "$common open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; mirror --only-newer=false \"$REMOTE_GALLERY\" \"$tmp/Gallery\""
+          lftp -c "$common open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; mirror \"$REMOTE_GALLERY\" \"$tmp/Gallery\""
           target_backpack='6306d35208a9ca4aefe14f78a8f5c228a5333c8f4b8f3228c6033b819ad77a5b'
           target_audio='330542fd1df064f239b72f4a21a788e28d1afaa1d773ffe8a5c75291102fcedc'
           mkdir -p priolens
