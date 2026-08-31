@@ -55,7 +55,7 @@ jobs:
         run: |
           set -euo pipefail
           common='set ftp:ssl-allow no; set net:max-retries 2; set net:timeout 20; set cmd:fail-exit yes;'
-          lftp -c "$common open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; mkdir -p \"$REMOTE_DIR\"; put -O \"$REMOTE_DIR/\" priolens/open14-v02/server/api.php; put -O \"$REMOTE_DIR/\" priolens/open14-v02/server/health.php; put -O \"$REMOTE_DIR/\" priolens/open14-v02/server/cleanup.php; put -O \"$REMOTE_DIR/\" priolens/open14-v02/server/.htaccess"
+          lftp -c "$common open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; put -O \"$REMOTE_DIR/\" priolens/open14-v02/server/api.php; put -O \"$REMOTE_DIR/\" priolens/open14-v02/server/health.php; put -O \"$REMOTE_DIR/\" priolens/open14-v02/server/cleanup.php; put -O \"$REMOTE_DIR/\" priolens/open14-v02/server/.htaccess"
           echo 'Uploaded api.php, health.php, cleanup.php and .htaccess only.'
           echo 'PROTECTED BY CONSTRUCTION: config.php is never uploaded or overwritten by this workflow.'
 
