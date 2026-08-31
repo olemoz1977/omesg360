@@ -1,0 +1,36 @@
+{
+  "schema": "2rasi.priolens.open14.host-asset-provenance-v0.2",
+  "status": "HOSTINGER_HTTP_SMOKE_PASS",
+  "note": "Canonical pilot binaries are stored outside Git in the persistent Hostinger research-assets area. GitHub connector binary truncation made repo copies non-canonical, so only provenance is versioned here.",
+  "assets": [
+    {
+      "exemplarId": "CARE-A",
+      "runtimePath": "/priolens-research-assets/Open14-v02/priolens_care-a_v01.webp",
+      "bytes": 32758,
+      "sha256": "32a2253f3e03420aa994d60aff737bac0901d2de627f423d2664579012bb08cd"
+    },
+    {
+      "exemplarId": "CARE-B",
+      "runtimePath": "/priolens-research-assets/Open14-v02/priolens_care-b_v01.webp",
+      "bytes": 27794,
+      "sha256": "fddc837ce47e762e4a0cc4be8d1fcb4f781f9b3f6ab358bae62bfa877804f152"
+    },
+    {
+      "exemplarId": "RECOGNITION-A",
+      "runtimePath": "/priolens-research-assets/Open14-v02/priolens_recognition-a_v01.webp",
+      "bytes": 27150,
+      "sha256": "0bf2266a674009845639fff0b4b351dcb2bc32dbe02000a9973f402449bfeff0"
+    },
+    {
+      "exemplarId": "RECOGNITION-B",
+      "runtimePath": "/priolens-research-assets/Open14-v02/priolens_recognition-b_v01.webp",
+      "bytes": 21722,
+      "sha256": "4fdad68219d0c4c7e7bdca9f763963f24b87a791ec0303270e13512bf5fa67d7"
+    }
+  ],
+  "verification": {
+    "workflow": "Verify PrioLens Open14 host assets",
+    "runId": 33452688466,
+    "result": "success"
+  }
+}
