@@ -1,0 +1,139 @@
+name: Audit PrioLens Open14 Visual Balance
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/audit-priolens-open14-visual-balance.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Install analysis deps
+        run: |
+          python -m pip install --quiet pillow opencv-python-headless numpy
+
+      - name: Compute visual metrics and contact sheets
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import csv, math
+          import numpy as np
+          import cv2
+          from PIL import Image, ImageOps, ImageDraw, ImageFont
+
+          ROOT = Path('priolens/gallery-review/open14-v01')
+          OUT = Path('priolens/open14-audit-v01')
+          OUT.mkdir(parents=True, exist_ok=True)
+
+          mapping = [
+            ('REST','20260730_215302742.png'),('REST','1786077050034.png'),
+            ('RESOURCE','file_00000000673881f4bc390c5618110a68.png'),('RESOURCE','20260731_050136952.png'),
+            ('SAFETY','S08.webp'),('SAFETY','20260829_233727670.png'),
+            ('ORDER','20260730_230415808.png'),('ORDER','S10.webp'),
+            ('CONNECTION','S03.webp'),('CONNECTION','20260829_235204397.png'),
+            ('AUTONOMY','S05.webp'),('AUTONOMY_PLACEHOLDER','20260730_230640978.png'),
+            ('CONTROL','S04.webp'),('CONTROL','file_0000000092148210be3631f7c20ec0da.png'),
+            ('MASTERY','S12.webp'),('MASTERY','S16.webp'),
+            ('EXPLORATION','S09.webp'),('EXPLORATION','20260809_235839567.png'),
+            ('KNOWLEDGE','20260730_230227381.png'),('KNOWLEDGE','20260730_233054250.png'),
+            ('OPPORTUNITY','file_0000000024fc8210a5fb3823b3d86a9f.png'),('OPPORTUNITY','file_00000000c7f0821081be7676884bb00f.png'),
+          ]
+
+          face = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
+          rows=[]
+          thumbs=[]
+
+          for fam, fn in mapping:
+            p=ROOT/fn
+            if not p.exists():
+              raise SystemExit(f'missing {p}')
+            im=Image.open(p).convert('RGB')
+            arr=np.asarray(im)
+            gray=cv2.cvtColor(arr, cv2.COLOR_RGB2GRAY)
+            hsv=cv2.cvtColor(arr, cv2.COLOR_RGB2HSV)
+            lum=float(gray.mean())
+            contrast=float(gray.std())
+            saturation=float(hsv[:,:,1].mean())
+            edges=cv2.Canny(gray,80,160)
+            edge_density=float((edges>0).mean())
+            hist=cv2.calcHist([gray],[0],None,[256],[0,256]).ravel()
+            prob=hist/hist.sum()
+            prob=prob[prob>0]
+            entropy=float(-(prob*np.log2(prob)).sum())
+            faces=face.detectMultiScale(gray,scaleFactor=1.1,minNeighbors=5,minSize=(35,35))
+            face_count=int(len(faces))
+            # simple colorfulness metric (Hasler/Susstrunk style)
+            a=arr.astype(np.float32)
+            rg=a[:,:,0]-a[:,:,1]
+            yb=0.5*(a[:,:,0]+a[:,:,1])-a[:,:,2]
+            colorfulness=float(np.sqrt(rg.std()**2+yb.std()**2)+0.3*np.sqrt(rg.mean()**2+yb.mean()**2))
+            rows.append(dict(family=fam,file=fn,width=im.width,height=im.height,aspect=round(im.width/im.height,3),luminance=round(lum,2),contrast=round(contrast,2),saturation=round(saturation,2),colorfulness=round(colorfulness,2),entropy=round(entropy,3),edge_density=round(edge_density,4),face_count=face_count,bytes=p.stat().st_size))
+
+            tile=ImageOps.fit(im,(300,240),method=Image.Resampling.LANCZOS)
+            canvas=Image.new('RGB',(300,285),'white')
+            canvas.paste(tile,(0,0))
+            d=ImageDraw.Draw(canvas)
+            d.text((8,246),fam,fill='black')
+            d.text((8,263),fn[:42],fill='black')
+            thumbs.append(canvas)
+
+          with (OUT/'metrics.csv').open('w',newline='',encoding='utf-8') as f:
+            w=csv.DictWriter(f,fieldnames=rows[0].keys())
+            w.writeheader(); w.writerows(rows)
+
+          # family summary
+          fams={}
+          for r in rows:
+            fams.setdefault(r['family'],[]).append(r)
+          with (OUT/'family-summary.csv').open('w',newline='',encoding='utf-8') as f:
+            fields=['family','n','luminance_mean','contrast_mean','saturation_mean','colorfulness_mean','entropy_mean','edge_density_mean','faces_total']
+            w=csv.DictWriter(f,fieldnames=fields); w.writeheader()
+            for fam, rr in fams.items():
+              w.writerow({
+                'family':fam,'n':len(rr),
+                'luminance_mean':round(np.mean([x['luminance'] for x in rr]),2),
+                'contrast_mean':round(np.mean([x['contrast'] for x in rr]),2),
+                'saturation_mean':round(np.mean([x['saturation'] for x in rr]),2),
+                'colorfulness_mean':round(np.mean([x['colorfulness'] for x in rr]),2),
+                'entropy_mean':round(np.mean([x['entropy'] for x in rr]),3),
+                'edge_density_mean':round(np.mean([x['edge_density'] for x in rr]),4),
+                'faces_total':sum(x['face_count'] for x in rr),
+              })
+
+          # two readable contact sheets, 11 images each
+          for page in range(2):
+            subset=thumbs[page*11:(page+1)*11]
+            cols=3; rowsn=math.ceil(len(subset)/cols)
+            sheet=Image.new('RGB',(cols*300,rowsn*285),(238,238,238))
+            for i,t in enumerate(subset):
+              sheet.paste(t,((i%cols)*300,(i//cols)*285))
+            sheet.save(OUT/f'contact-sheet-{page+1}.jpg',quality=72,optimize=True)
+
+          print('audited',len(rows),'images')
+          PY
+
+      - name: Commit audit outputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add priolens/open14-audit-v01
+          if git diff --cached --quiet; then
+            echo 'No changes.'
+            exit 0
+          fi
+          git commit -m 'chore(priolens): add Open14 visual balance audit outputs'
+          git push origin HEAD:main
