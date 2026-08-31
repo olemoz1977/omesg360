@@ -33,18 +33,18 @@ jobs:
           tmp="$(mktemp -d)"
           common='set ftp:ssl-allow no; set net:max-retries 2; set net:timeout 20; set cmd:fail-exit yes; set mirror:parallel-transfer-count 6;'
           lftp -c "$common open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; mirror \"$REMOTE_GALLERY\" \"$tmp/Gallery\""
-          target_backpack='6306d35208a9ca4aefe14f78a8f5c228a5333c8f4b8f3228c6033b819ad77a5b'
-          target_audio='330542fd1df064f239b72f4a21a788e28d1afaa1d773ffe8a5c75291102fcedc'
+          target_backpack='8b0b6f4f4deca94326f0f0396f18d3aa0144e801c2ff52d51a3deb54560de7dd'
+          target_audio='f9e40818b87266373c84f7b8efa97ae2d179065e07c0e3bb743557692c8f2d5f'
           mkdir -p priolens
           out=priolens/recovered-asset-hash-matches.txt
           : > "$out"
           echo "BACKPACK_SHA256=$target_backpack" >> "$out"
+          echo "AUDIO_SHA256=$target_audio" >> "$out"
           find "$tmp/Gallery" -type f -print0 | sort -z | xargs -0 sha256sum | while read -r h p; do
             rel="${p#${tmp}/Gallery/}"
             if [[ "$h" == "$target_backpack" ]]; then echo "BACKPACK_MATCH=$rel" >> "$out"; fi
             if [[ "$h" == "$target_audio" ]]; then echo "AUDIO_MATCH=$rel" >> "$out"; fi
           done
-          echo "AUDIO_SHA256=$target_audio" >> "$out"
           if ! grep -q '^BACKPACK_MATCH=' "$out"; then echo 'BACKPACK_MATCH=NOT_FOUND' >> "$out"; fi
           if ! grep -q '^AUDIO_MATCH=' "$out"; then echo 'AUDIO_MATCH=NOT_FOUND' >> "$out"; fi
           cat "$out"
