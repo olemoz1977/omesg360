@@ -1,5 +1,7 @@
 -- PrioLens Open14 v0.2 formative pilot
--- DRAFT ONLY. Do not run until data-retention/storage decision is approved.
+-- Approved storage: dedicated Hostinger MySQL database.
+-- Approved retention: 90 days.
+-- No name/email/IP/user-agent columns.
 
 CREATE TABLE IF NOT EXISTS priolens_open14_sessions (
   id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -14,12 +16,15 @@ CREATE TABLE IF NOT EXISTS priolens_open14_sessions (
   completed_at_client VARCHAR(40) NULL,
   payload_json LONGTEXT NOT NULL,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  expires_at TIMESTAMP GENERATED ALWAYS AS (created_at + INTERVAL 90 DAY) STORED,
   PRIMARY KEY (id),
   UNIQUE KEY uq_submission_id (submission_id),
   UNIQUE KEY uq_session_uuid (session_uuid),
   KEY idx_created_at (created_at),
+  KEY idx_expires_at (expires_at),
   KEY idx_bank_schema (bank_schema)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Intentionally no name/email/IP/user-agent columns.
--- Retention cleanup policy must be approved before pilot launch.
+-- Retention invariant:
+-- rows older than 90 days must be deleted by the retention cleanup job.
+-- expires_at is stored explicitly so expiry is auditable.
