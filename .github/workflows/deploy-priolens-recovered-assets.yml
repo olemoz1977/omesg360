@@ -62,3 +62,5 @@ jobs:
           curl -fsS --retry 4 --retry-delay 2 -o /dev/null 'https://omesg360.eu/priolens-research-assets/Recovered/priolens_aut_backpack_v01.webp'
           curl -fsS --retry 4 --retry-delay 2 -o /dev/null 'https://omesg360.eu/priolens-research-assets/Recovered/priolens_aut_control_audio_boundary_v01.webp'
           echo 'PASS: recovered research assets reachable'
+
+# Research-assets upload is intentionally separate from the deploy-owned /priolens runtime.
