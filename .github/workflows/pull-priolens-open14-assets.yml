@@ -1,0 +1,78 @@
+name: Pull PrioLens Open14 Assets
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/pull-priolens-open14-assets.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  FTP_HOST: 46.202.142.134
+  FTP_USER: ${{ secrets.HOSTINGER_FTP_USER }}
+  FTP_PASSWORD: ${{ secrets.HOSTINGER_FTP_PASSWORD }}
+  REMOTE_GALLERY: /domains/omesg360.eu/public_html/priolens-research-assets/Gallery
+
+jobs:
+  pull:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - run: sudo apt-get update -qq && sudo apt-get install -y -qq lftp
+      - name: Pull Open14 existing candidates
+        shell: bash
+        run: |
+          set -euo pipefail
+          out='priolens/gallery-review/open14-v01'
+          mkdir -p "$out"
+          files=(
+            '20260730_215302742.png'
+            '1786077050034.png'
+            'file_00000000673881f4bc390c5618110a68.png'
+            '20260731_050136952.png'
+            'S08.webp'
+            '20260829_233727670.png'
+            '20260730_230415808.png'
+            'S10.webp'
+            'S03.webp'
+            '20260829_235204397.png'
+            'S05.webp'
+            '20260730_230640978.png'
+            'S04.webp'
+            'file_0000000092148210be3631f7c20ec0da.png'
+            'S12.webp'
+            'S16.webp'
+            'S09.webp'
+            '20260809_235839567.png'
+            '20260730_230227381.png'
+            '20260730_233054250.png'
+            'file_0000000024fc8210a5fb3823b3d86a9f.png'
+            'file_00000000c7f0821081be7676884bb00f.png'
+          )
+          common='set ftp:ssl-allow no; set net:max-retries 2; set net:timeout 20; set cmd:fail-exit yes;'
+          for f in "${files[@]}"; do
+            echo "Pulling $f"
+            lftp -c "$common open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; get \"${REMOTE_GALLERY}/$f\" -o \"${out}/$f\""
+          done
+          count=$(find "$out" -maxdepth 1 -type f | wc -l)
+          echo "Open14 mirrored assets: $count"
+          test "$count" -eq 22
+      - name: Commit Open14 review set
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add priolens/gallery-review/open14-v01
+          if git diff --cached --quiet; then
+            echo 'Open14 review set unchanged.'
+            exit 0
+          fi
+          git commit -m 'chore(priolens): mirror Open14 Gallery candidates'
+          git push origin HEAD:main
