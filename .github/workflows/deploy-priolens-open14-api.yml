@@ -1,0 +1,73 @@
+name: Deploy PrioLens Open14 pilot API
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - priolens/open14-v02/server/api.php
+      - priolens/open14-v02/server/cleanup.php
+      - priolens/open14-v02/server/.htaccess
+      - .github/workflows/deploy-priolens-open14-api.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: omesg360-priolens-open14-api
+  cancel-in-progress: false
+
+env:
+  FTP_HOST: 46.202.142.134
+  FTP_USER: ${{ secrets.HOSTINGER_FTP_USER }}
+  FTP_PASSWORD: ${{ secrets.HOSTINGER_FTP_PASSWORD }}
+  REMOTE_DIR: /domains/omesg360.eu/public_html/priolens-open14-api
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate PHP source
+        run: |
+          set -euo pipefail
+          php -l priolens/open14-v02/server/api.php
+          php -l priolens/open14-v02/server/cleanup.php
+          test -s priolens/open14-v02/server/.htaccess
+          echo 'PASS: API package syntax valid'
+
+      - name: Verify FTP secrets
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ -n "${FTP_USER:-}" ]] || { echo 'Missing HOSTINGER_FTP_USER' >&2; exit 1; }
+          [[ -n "${FTP_PASSWORD:-}" ]] || { echo 'Missing HOSTINGER_FTP_PASSWORD' >&2; exit 1; }
+
+      - name: Install FTP client
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq lftp
+
+      - name: Upload managed API files only
+        shell: bash
+        run: |
+          set -euo pipefail
+          common='set ftp:ssl-allow no; set net:max-retries 2; set net:timeout 20; set cmd:fail-exit yes;'
+          lftp -c "$common open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; mkdir -p \"$REMOTE_DIR\"; put -O \"$REMOTE_DIR/\" priolens/open14-v02/server/api.php; put -O \"$REMOTE_DIR/\" priolens/open14-v02/server/cleanup.php; put -O \"$REMOTE_DIR/\" priolens/open14-v02/server/.htaccess"
+          echo 'Uploaded api.php, cleanup.php and .htaccess only.'
+          echo 'PROTECTED BY CONSTRUCTION: config.php is never uploaded or overwritten by this workflow.'
+
+      - name: HTTP smoke without DB credentials
+        shell: bash
+        run: |
+          set -euo pipefail
+          base='https://omesg360.eu/priolens-open14-api/api.php'
+          code="$(curl -sS --retry 4 --retry-delay 2 -o /tmp/get-body -w '%{http_code}' "$base")"
+          [[ "$code" == '405' ]] || { echo "Expected GET 405, got $code" >&2; cat /tmp/get-body >&2; exit 1; }
+          code="$(curl -sS --retry 4 --retry-delay 2 -o /tmp/post-body -w '%{http_code}' -H 'Content-Type: application/json' --data '{}' "$base")"
+          [[ "$code" == '400' ]] || { echo "Expected invalid POST 400, got $code" >&2; cat /tmp/post-body >&2; exit 1; }
+          grep -q 'Missing:' /tmp/post-body
+          echo 'PASS: isolated API endpoint reachable and validating input'
+
+# This workflow intentionally does not deploy config.php, database credentials,
+# Open14 runtime, historical /priolens/ v0.4, or research assets.
