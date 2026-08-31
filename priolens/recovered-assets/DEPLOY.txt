@@ -1,0 +1,3 @@
+PrioLens recovered research assets.
+Persistent target: /public_html/priolens-research-assets/Recovered/
+No delete or mirror operation is allowed for this deployment.
