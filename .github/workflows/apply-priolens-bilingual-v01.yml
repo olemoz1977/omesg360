@@ -1,0 +1,261 @@
+name: Apply PrioLens bilingual runtime v01
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/apply-priolens-bilingual-v01.yml
+
+permissions:
+  contents: write
+
+env:
+  FTP_HOST: 46.202.142.134
+  FTP_USER: ${{ secrets.HOSTINGER_FTP_USER }}
+  FTP_PASSWORD: ${{ secrets.HOSTINGER_FTP_PASSWORD }}
+  RUNTIME_DIR: /domains/omesg360.eu/public_html/priolens-open14-v02
+  API_DIR: /domains/omesg360.eu/public_html/priolens-open14-api
+
+jobs:
+  patch-deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Patch bilingual runtime and language telemetry
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          p=Path('priolens/open14-v02/index.html')
+          h=p.read_text()
+
+          const_pat=r"const DRAFT_KEY='priolens\.open14\.v02\.draft';\nconst DEBUG_MODE=.*?\nconst FAMILY_LABEL=.*?\nconst DOMAINS=\[\n.*?\n\];"
+          if not re.search(const_pat,h,re.S):
+              raise SystemExit('missing language constants block')
+          const_new=r'''const PARAMS=new URLSearchParams(location.search);
+          const FROM_2RASI=PARAMS.get('from');
+          const LANG=(PARAMS.get('lang')==='en'||(!PARAMS.has('lang')&&FROM_2RASI==='com'))?'en':'lt';
+          const DEBUG_MODE=PARAMS.get('debug')==='1';
+          const DRAFT_KEY_BASE='priolens.open14.v02.draft';
+          const DRAFT_KEY=`${DRAFT_KEY_BASE}.${LANG}`;
+          const TXT={
+            lt:{
+              introTitle:'Kurį renkiesi?',introLead:'Trys vaizdai vienu metu. Pasirink tą, kuris pirmas patraukia.',introNote1:'14 trumpų pasirinkimų. Po jų bus kita, atskira perspektyva apie tai, kiek skirtingų dalykų šiuo metu tavo gyvenime pakanka.',introNote2:'Formuojamojo piloto metu sesijos duomenys išsaugomi tyrimo duomenų bazėje. Numatyta saugojimo trukmė – iki 90 dienų. Rezultatas nėra asmenybės profilis ar diagnozė.',
+              bankChecking:'Tikrinamas tyrimo bankas…',bankCheckingStatus:'Open14 paleidžiamas tik tada, kai visi reikalingi vaizdai turi realius runtime adresus.',start:'Pradėti',trialQuestion:'Kuris pirmas patraukia?',none:'Nė vienas aiškiai',
+              suffTitle:'Dabar kita perspektyva.',suffLead:'Įvertink ne tai, kiek tau tai svarbu, o kiek šiuo metu tavo gyvenime to pakanka. Kiekviename teiginyje pasirink skalės vietą arba „Sunku pasakyti“.',validation:'Dar neatsakyta. Pasirink skalės vietą abiem teiginiams arba „Sunku pasakyti“.',back:'Atgal',next:'Toliau',seeResult:'Pamatyti rezultatą',
+              resultTitle:'Dvi perspektyvos.',resultLead:'Tai šios sesijos pasirinkimų ir tavo dabartinio įsivertinimo aprašymas, ne asmenybės profilis ar diagnozė.',saveChecking:'Sesijos išsaugojimas tikrinamas…',short:'Trumpai',repeatedHeading:'Kas kartojosi',suffHeading:'Kaip pats vertini dabartinę situaciją',compareHeading:'Kur verta pažvelgti dar kartą',restart:'Atlikti dar kartą',back2rasi:'Grįžti į 2rasi',export:'Eksportuoti JSON',debug:'Tyrimo diagnostika',
+              veryLow:'Labai trūksta',enough:'Pakanka',hardToSay:'Sunku pasakyti',unanswered:'Neatsakyta',selected:'Pasirinkta',autoSave:'Progresas saugomas automatiškai. Nutrūkus galėsi tęsti šiame įrenginyje.',rangeAria:'Nuo labai trūksta iki pakanka',
+              resumeFound:n=>`Rasta nebaigta sesija: ${n}/14 vaizdinių pasirinkimų. Gali tęsti nuo tos vietos.`,resume:'Tęsti sesiją',newSession:'Pradėti naują',
+              bankIncomplete:'Open14 bankas dar nepilnas',missingAssets:n=>`Trūksta realių runtime assetų: ${n}. Startas užblokuotas pagal fail-closed taisyklę.`,bankReady:'Open14 bankas paruoštas',assetsReady:'Visi assetai turi runtime adresus.',bankError:'Banko klaida',
+              saving:'Išsaugoma anoniminė tyrimo sesija…',saved:'Anoniminė tyrimo sesija išsaugota.',saveFailed:'Automatinis išsaugojimas nepavyko. Rezultatas šiame ekrane išlieka.',
+              noRepeated:'Nė viena tema nepasikartojo per abu savo vaizdus',noRepeatedCue:'Šioje sesijoje pasirinkimai buvo labiau išsisklaidę arba susitelkė ties pavieniais vaizdais.',repeatEvery:'Kartojosi kiekvieną kartą, kai ši tema pasirodė.',repeatAcross:'Kartojosi per du skirtingus šios temos vaizdus.',
+              answered0:'0/2 atsakyta',partial:n=>`${n}/2 atsakyta`,partialCue:'Dalinė informacija. Vieno atsakymo nepakanka pilnam šios srities įvertinimui.',completeCue:'2/2 atsakyta · 1 = visai nepakanka · 5 = visiškai pakanka',
+              noCompare:'Ryškaus sugretinimo šioje sesijoje nėra',noCompareCue:'Tai nėra problema: abi perspektyvos neprivalo sudaryti tvarkingo vieno profilio.',
+              lowCue:f=>`${f} kartojosi per skirtingus vaizdus, o šią platesnę sritį pats vertini kaip mažiau pakankamą.`,highCue:f=>`${f} kartojosi per skirtingus vaizdus ir kartu ši platesnė sritis atrodo gana pakankama.`,midCue:f=>`${f} kartojosi, o tavo dabartinis šios platesnės srities įvertinimas yra per vidurį.`,
+              summaryNone:'Šioje sesijoje neatsirado tema, kuri pasikartotų per abu savo vaizdus. Pasirinkimai buvo labiau išsisklaidę.',summaryRepeated:(names,more)=>`Per skirtingus vaizdus šioje sesijoje kartojosi ${names}${more?' ir dar kelios temos':''}.`,summaryCompare:names=>`Su tavo dabartiniu įsivertinimu verta sugretinti ${names}. Žemiau matai, kur šios dvi perspektyvos susitinka.`,summaryNoCompare:'Su dabartinio pakankamumo vertinimu aiškaus sugretinimo nėra. Ir tai yra normalus šios sesijos rezultatas.',summaryNext:'Tai nėra išvada apie tai, ko tau trūksta. Žiūrėk į rezultatą kaip į klausimą: ar kuri nors iš šių vietų atpažįstama tavo dabartinėje situacijoje? Jei smalsu, kitą kartą gali atlikti sesiją dar kartą ir pažiūrėti, kas išlieka.'
+            },
+            en:{
+              introTitle:'Which one do you choose?',introLead:'Three images at a time. Choose the one that pulls you first.',introNote1:'14 quick choices. After them, you will see a separate perspective on how sufficient different areas of your life feel right now.',introNote2:'During the formative pilot, session data is stored in the research database. The intended retention period is up to 90 days. The result is not a personality profile or diagnosis.',
+              bankChecking:'Checking the research image set…',bankCheckingStatus:'Open14 starts only when every required image has a valid runtime address.',start:'Start',trialQuestion:'Which pulls you first?',none:'None clearly',
+              suffTitle:'Now a different perspective.',suffLead:'Rate not how important this is to you, but how much of it you currently have in your life. For each statement, choose a point on the scale or “Hard to say”.',validation:'Still unanswered. Choose a point on the scale for both statements or “Hard to say”.',back:'Back',next:'Next',seeResult:'See result',
+              resultTitle:'Two perspectives.',resultLead:'This describes this session’s choices and your current self-assessment. It is not a personality profile or diagnosis.',saveChecking:'Checking session save…',short:'In short',repeatedHeading:'What repeated',suffHeading:'How you rate your current situation',compareHeading:'Where it may be worth looking again',restart:'Do it again',back2rasi:'Back to 2rasi',export:'Export JSON',debug:'Research diagnostics',
+              veryLow:'Far too little',enough:'Enough',hardToSay:'Hard to say',unanswered:'Not answered',selected:'Selected',autoSave:'Progress is saved automatically. If interrupted, you can continue on this device.',rangeAria:'From far too little to enough',
+              resumeFound:n=>`An unfinished session was found: ${n}/14 visual choices. You can continue where you left off.`,resume:'Continue session',newSession:'Start new',
+              bankIncomplete:'Open14 image set is incomplete',missingAssets:n=>`Missing runtime assets: ${n}. Start is blocked by the fail-closed rule.`,bankReady:'Open14 image set is ready',assetsReady:'All images have valid runtime addresses.',bankError:'Image-set error',
+              saving:'Saving anonymous research session…',saved:'Anonymous research session saved.',saveFailed:'Automatic saving failed. Your result remains visible on this screen.',
+              noRepeated:'No theme repeated across both of its images',noRepeatedCue:'In this session, choices were more spread out or concentrated on individual images.',repeatEvery:'Repeated every time this theme appeared.',repeatAcross:'Repeated across two different images of this theme.',
+              answered0:'0/2 answered',partial:n=>`${n}/2 answered`,partialCue:'Partial information. One answer is not enough for a full reading of this area.',completeCue:'2/2 answered · 1 = not enough at all · 5 = enough',
+              noCompare:'No strong comparison in this session',noCompareCue:'That is not a problem: the two perspectives do not have to form one neat profile.',
+              lowCue:f=>`${f} repeated across different images, while you rated this broader area as less sufficient right now.`,highCue:f=>`${f} repeated across different images, while this broader area currently feels fairly sufficient.`,midCue:f=>`${f} repeated, while your current rating of this broader area sits around the middle.`,
+              summaryNone:'This session did not produce a theme that repeated across both of its images. Your choices were more spread out.',summaryRepeated:(names,more)=>`Across different images, the themes that repeated in this session were ${names}${more?' and a few other themes':''}.`,summaryCompare:names=>`Compared with your current self-ratings, it may be worth looking at ${names}. Below you can see where the two perspectives meet.`,summaryNoCompare:'There is no clear comparison with your current sufficiency ratings. That is also a valid result for this session.',summaryNext:'This is not a conclusion about what you lack. Treat it as a question: does any of this feel recognizable in your current situation? If you are curious, repeat the session later and see what remains.'
+            }
+          };
+          const T=TXT[LANG];
+          const FAMILY_LABELS={
+            lt:{REST:'Poilsis / atsigavimas',RESOURCE:'Resursai',SAFETY:'Saugumas',ORDER:'Tvarka / aiškumas',CONNECTION:'Ryšys',BELONGING:'Priklausymas',CARE:'Rūpinimasis kitu',AUTONOMY:'Autonomija',CONTROL:'Kontrolė / valdymas',RECOGNITION:'Pripažinimas',MASTERY:'Meistriškumas',EXPLORATION:'Tyrinėjimas',KNOWLEDGE:'Mokymasis / supratimas',OPPORTUNITY:'Galimybė'},
+            en:{REST:'Rest / recovery',RESOURCE:'Resources',SAFETY:'Safety',ORDER:'Order / clarity',CONNECTION:'Connection',BELONGING:'Belonging',CARE:'Caring for others',AUTONOMY:'Autonomy',CONTROL:'Control',RECOGNITION:'Recognition',MASTERY:'Mastery',EXPLORATION:'Exploration',KNOWLEDGE:'Learning / understanding',OPPORTUNITY:'Opportunity'}
+          };
+          const FAMILY_LABEL=FAMILY_LABELS[LANG];
+          const DOMAIN_SETS={
+            lt:[
+              {id:'REST_RESOURCE',title:'Poilsis ir resursai',families:['REST','RESOURCE'],items:[['RESTORATION_ENERGY','Šiuo metu turiu pakankamai poilsio ir energijos kasdienybei.'],['MATERIAL_RESOURCES','Šiuo metu turiu pakankamai kasdienių resursų tam, ko man realiai reikia.']]},
+              {id:'SAFETY_STABILITY',title:'Saugumas ir stabilumas',families:['SAFETY','ORDER'],items:[['SAFETY_STABILITY','Šiuo metu jaučiu pakankamai saugumo ir stabilumo.'],['CLARITY_PREDICTABILITY','Mano kasdienybėje pakanka aiškumo ir nuspėjamumo, kad žinočiau, ko tikėtis.']]},
+              {id:'CONNECTION_SUPPORT',title:'Ryšys, priklausymas ir parama',families:['CONNECTION','BELONGING'],items:[['CONNECTION_BELONGING','Mano gyvenime pakanka artimo ryšio ir jausmo, kad priklausau kitiems.'],['CARE_SUPPORT_PRESENT','Mano gyvenime pakanka rūpesčio, paramos ir žmogiško dėmesio.']]},
+              {id:'AGENCY_ESTEEM',title:'Autonomija ir pripažinimas',families:['AUTONOMY','CONTROL','RECOGNITION'],items:[['AUTONOMY_AGENCY','Man svarbiose srityse turiu pakankamai laisvės pats spręsti ir veikti.'],['RECOGNITION_ESTEEM','Jaučiu, kad mano pastangos, nuomonė ar indėlis yra pakankamai pastebimi ir vertinami.']]},
+              {id:'GROWTH_CAPABILITY',title:'Augimas ir gebėjimai',families:['MASTERY','EXPLORATION','KNOWLEDGE','OPPORTUNITY'],items:[['LEARNING_GROWTH','Turiu pakankamai galimybių mokytis, atrasti ir augti.'],['CAPABILITY_MASTERY','Galiu pakankamai naudoti ir tobulinti savo gebėjimus.']]},
+              {id:'MEANING_CONTRIBUTION',title:'Prasmė ir indėlis',families:[],items:[['MEANING_PURPOSE','Tai, ką šiuo metu darau, man atrodo pakankamai prasminga.'],['CONTRIBUTION','Jaučiu, kad turiu pakankamai galimybių prisidėti prie kažko svarbaus ne tik sau.']]}
+            ],
+            en:[
+              {id:'REST_RESOURCE',title:'Rest and resources',families:['REST','RESOURCE'],items:[['RESTORATION_ENERGY','Right now, I have enough rest and energy for everyday life.'],['MATERIAL_RESOURCES','Right now, I have enough everyday resources for what I realistically need.']]},
+              {id:'SAFETY_STABILITY',title:'Safety and stability',families:['SAFETY','ORDER'],items:[['SAFETY_STABILITY','Right now, I feel I have enough safety and stability.'],['CLARITY_PREDICTABILITY','There is enough clarity and predictability in my everyday life for me to know what to expect.']]},
+              {id:'CONNECTION_SUPPORT',title:'Connection, belonging and support',families:['CONNECTION','BELONGING'],items:[['CONNECTION_BELONGING','I have enough close connection and a sense of belonging with others in my life.'],['CARE_SUPPORT_PRESENT','There is enough care, support and human attention in my life.']]},
+              {id:'AGENCY_ESTEEM',title:'Autonomy and recognition',families:['AUTONOMY','CONTROL','RECOGNITION'],items:[['AUTONOMY_AGENCY','In areas that matter to me, I have enough freedom to decide and act for myself.'],['RECOGNITION_ESTEEM','I feel that my efforts, opinions or contribution are noticed and valued enough.']]},
+              {id:'GROWTH_CAPABILITY',title:'Growth and capability',families:['MASTERY','EXPLORATION','KNOWLEDGE','OPPORTUNITY'],items:[['LEARNING_GROWTH','I have enough opportunities to learn, discover and grow.'],['CAPABILITY_MASTERY','I can use and develop my abilities enough.']]},
+              {id:'MEANING_CONTRIBUTION',title:'Meaning and contribution',families:[],items:[['MEANING_PURPOSE','What I am doing right now feels meaningful enough to me.'],['CONTRIBUTION','I feel I have enough opportunities to contribute to something important beyond myself.']]}
+            ]
+          };
+          const DOMAINS=DOMAIN_SETS[LANG];'''
+          h=re.sub(const_pat,const_new,h,count=1,flags=re.S)
+
+          anchor="const $=id=>document.getElementById(id),screens=[...document.querySelectorAll('.screen')],stimBtns=[...document.querySelectorAll('.stim')];\nconst FROM_2RASI=new URLSearchParams(location.search).get('from');\n$('back2rasi').href=FROM_2RASI==='com'?'https://2rasi.com/#experiments':'https://2rasi.lt/#experiments';\nif(DEBUG_MODE){$('debugDetails').classList.remove('hidden');$('export').classList.remove('hidden');$('exportStatus').classList.remove('hidden')}"
+          if anchor not in h:
+              raise SystemExit('missing static language anchor')
+          static=r'''const $=id=>document.getElementById(id),screens=[...document.querySelectorAll('.screen')],stimBtns=[...document.querySelectorAll('.stim')];
+          function applyStaticLanguage(){
+            document.documentElement.lang=LANG;
+            document.title=LANG==='en'?'PrioLens Open14 v0.2 · Research':'PrioLens Open14 v0.2 · Tyrimas';
+            const introNotes=document.querySelectorAll('#intro > p.note');
+            document.querySelector('#intro h1').textContent=T.introTitle;document.querySelector('#intro .lead').textContent=T.introLead;
+            if(introNotes[0])introNotes[0].textContent=T.introNote1;if(introNotes[1])introNotes[1].textContent=T.introNote2;
+            $('bankTitle').textContent=T.bankChecking;$('bankStatus').textContent=T.bankCheckingStatus;$('start').textContent=T.start;
+            document.querySelector('.trialhead .q').textContent=T.trialQuestion;$('none').textContent=T.none;
+            document.querySelector('.suffHead h2').textContent=T.suffTitle;document.querySelector('.suffHead .note').textContent=T.suffLead;$('suffError').textContent=T.validation;$('suffBack').textContent=T.back;$('suffNext').textContent=T.next;
+            document.querySelector('#result h1').textContent=T.resultTitle;document.querySelector('#result > p.note').textContent=T.resultLead;$('saveStatus').textContent=T.saveChecking;document.querySelector('.summaryCard h2').textContent=T.short;
+            const heads=document.querySelectorAll('#result .section > h2');if(heads[0])heads[0].textContent=T.repeatedHeading;if(heads[1])heads[1].textContent=T.suffHeading;if(heads[2])heads[2].textContent=T.compareHeading;
+            $('restart').textContent=T.restart;$('back2rasi').textContent=T.back2rasi;$('export').textContent=T.export;document.querySelector('#debugDetails summary').textContent=T.debug;
+            const target=(FROM_2RASI==='com'||(FROM_2RASI!=='lt'&&LANG==='en'))?'https://2rasi.com/#experiments':'https://2rasi.lt/#experiments';$('back2rasi').href=target;
+          }
+          applyStaticLanguage();
+          if(DEBUG_MODE){$('debugDetails').classList.remove('hidden');$('export').classList.remove('hidden');$('exportStatus').classList.remove('hidden')}'''
+          h=h.replace(anchor,static,1)
+
+          draft_pat=r"function clearLocalDraft\(\)\{.*?\}\nfunction loadLocalDraft\(\)\{.*?\}"
+          if not re.search(draft_pat,h,re.S):
+              raise SystemExit('missing draft functions')
+          draft_new=r'''function clearLocalDraft(){try{localStorage.removeItem(DRAFT_KEY);if(LANG==='lt')localStorage.removeItem(DRAFT_KEY_BASE)}catch(err){console.warn('local draft clear failed',err)}}
+          function loadLocalDraft(){try{let raw=localStorage.getItem(DRAFT_KEY);if(!raw&&LANG==='lt')raw=localStorage.getItem(DRAFT_KEY_BASE);if(!raw)return null;const x=JSON.parse(raw);if(!x||x.schema!=='2rasi.priolens.open14.session-v0.2'||x.completedAt||!Array.isArray(x.choices)||!x.sufficiency)return null;if(x.language&&x.language!==LANG)return null;if(!x.language&&LANG==='en')return null;if(!x.language)x.language='lt';return x}catch(err){return null}}'''
+          h=re.sub(draft_pat,draft_new,h,count=1,flags=re.S)
+
+          resume_pat=r"function offerResumeIfAvailable\(\)\{.*?\}\nasync function resumeSession"
+          if not re.search(resume_pat,h,re.S):
+              raise SystemExit('missing resume offer')
+          resume_new=r'''function offerResumeIfAvailable(){const d=loadLocalDraft();if(!d)return;if(bank&&d.bankSchema!==bank.schema){clearLocalDraft();return}$('bankStatus').textContent=T.resumeFound(d.choices.length);$('start').textContent=T.resume;$('start').dataset.resume='1';if(!$('newSession')){const b=document.createElement('button');b.id='newSession';b.className='secondary';b.textContent=T.newSession;b.onclick=()=>{clearLocalDraft();$('start').dataset.resume='';$('start').textContent=T.start;b.remove();startSession().catch(err=>{alert(String(err));console.error(err)})};$('start').parentElement.appendChild(b)}}
+          async function resumeSession'''
+          h=re.sub(resume_pat,resume_new,h,count=1,flags=re.S)
+          h=h.replace("state=d;if(state.choices.length<14)","state=d;if(!state.language)state.language=LANG;if(state.choices.length<14)",1)
+
+          init_pat=r"async function init\(\)\{.*?\}\nasync function preload"
+          if not re.search(init_pat,h,re.S):
+              raise SystemExit('missing init')
+          init_new=r'''async function init(){try{bank=await fetch('./bank.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw new Error(`bank ${r.status}`);return r.json()});const missing=listMissingRuntimeAssets(bank);if(missing.length){$('bankTitle').textContent=T.bankIncomplete;$('bankStatus').innerHTML=`<span class="bad">${T.missingAssets(missing.join(', '))}</span>`;return}$('bankTitle').textContent=T.bankReady;$('bankTitle').className='ok';$('bankStatus').textContent=T.assetsReady;$('start').disabled=false;offerResumeIfAvailable()}catch(err){$('bankTitle').textContent=T.bankError;$('bankStatus').textContent=String(err)}}
+          async function preload'''
+          h=re.sub(init_pat,init_new,h,count=1,flags=re.S)
+
+          old="state={schema:'2rasi.priolens.open14.session-v0.2',sessionUuid:crypto.randomUUID(),startedAt:new Date().toISOString(),seed,"
+          new="state={schema:'2rasi.priolens.open14.session-v0.2',language:LANG,sessionUuid:crypto.randomUUID(),startedAt:new Date().toISOString(),seed,"
+          if old not in h: raise SystemExit('missing new-session state')
+          h=h.replace(old,new,1)
+
+          suff_pat=r"function renderSuff\(\)\{.*?\}\nfunction currentDomainComplete"
+          if not re.search(suff_pat,h,re.S):
+              raise SystemExit('missing renderSuff')
+          suff_new=r'''function renderSuff(){const d=DOMAINS[suffIndex];$('suffCount').textContent=`${suffIndex+1} / 6`;$('suffBack').disabled=suffIndex===0;$('suffNext').textContent=suffIndex===5?T.seeResult:T.next;$('suffError').classList.toggle('hidden',!(suffValidationShown&&!currentDomainComplete()));const mount=$('domainMount');mount.innerHTML='';const card=document.createElement('div');card.className='domainCard';card.innerHTML=`<div class="domainTitle">${d.title}</div>`;d.items.forEach(([key,text])=>{const answered=Object.prototype.hasOwnProperty.call(state.sufficiency,key);const item=document.createElement('div');item.className='item'+(suffValidationShown&&!answered?' validationError':'');item.innerHTML=`<div class="statement">${text}</div><div class="scale"><div class="rangeRow"><div class="rangeBox"><input type="range" min="1" max="5" step="1" aria-label="${T.rangeAria}"><div class="rangeLabels"><span>${T.veryLow}</span><span>${T.enough}</span></div><div class="answerState" aria-live="polite"></div></div><button type="button" class="na">${T.hardToSay}</button></div></div>`;const current=answered?state.sufficiency[key]:undefined;const slider=item.querySelector('input[type=range]'),na=item.querySelector('button.na'),answerState=item.querySelector('.answerState');slider.value=Number.isFinite(current)?current:3;if(!answered){slider.classList.add('unset');answerState.textContent=T.unanswered;answerState.classList.add('unsetState')}else if(current===null){na.classList.add('on');answerState.textContent=T.hardToSay}else{answerState.textContent=T.selected}slider.oninput=()=>{slider.classList.remove('unset');na.classList.remove('on');answerState.textContent=T.selected;answerState.classList.remove('unsetState');item.classList.remove('validationError');state.sufficiency[key]=Number(slider.value);saveLocalDraft();if(currentDomainComplete()){$('suffError').classList.add('hidden');suffValidationShown=false}};slider.onchange=()=>{state.sufficiency[key]=Number(slider.value);checkpointProgress()};na.onclick=()=>{state.sufficiency[key]=null;checkpointProgress();if(currentDomainComplete())suffValidationShown=false;renderSuff()};card.appendChild(item)});const n=document.createElement('div');n.className='autosaveNote';n.textContent=T.autoSave;card.appendChild(n);mount.appendChild(card)}
+          function currentDomainComplete'''
+          h=re.sub(suff_pat,suff_new,h,count=1,flags=re.S)
+
+          submit_pat=r"async function submitSession\(\)\{.*?\}\nfunction finish"
+          if not re.search(submit_pat,h,re.S):
+              raise SystemExit('missing submitSession')
+          submit_new=r'''async function submitSession(){const el=$('saveStatus');try{el.textContent=T.saving;const r=await fetch(API_PATH,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(state)});const data=await r.json().catch(()=>({}));if(!r.ok||!data.ok)throw new Error(data.message||`HTTP ${r.status}`);state.submission={ok:true,inserted:Boolean(data.inserted),submissionId:data.submissionId||null};clearLocalDraft();el.textContent=T.saved;el.className='note ok';$('debug').textContent=JSON.stringify(state,null,2)}catch(err){state.submission={ok:false,error:String(err)};el.textContent=T.saveFailed;el.className='note bad';$('debug').textContent=JSON.stringify(state,null,2);console.error(err)}}
+          function finish'''
+          h=re.sub(submit_pat,submit_new,h,count=1,flags=re.S)
+
+          result_pat=r"function joinLt\(xs\)\{.*?\}\nfunction renderResult\(\)\{.*?\}\n\$\('start'\)\.onclick"
+          if not re.search(result_pat,h,re.S):
+              raise SystemExit('missing result renderer')
+          result_new=r'''function joinNatural(xs){if(!xs.length)return'';if(xs.length===1)return xs[0];const conj=LANG==='en'?' and ':' ir ';return `${xs.slice(0,-1).join(', ')}${conj}${xs.at(-1)}`}
+          function renderResult(){
+            const coverage=state.domainCoverage||domainCoverage();
+            const rep=$('repeatRows');rep.innerHTML='';
+            const repeated=Object.entries(state.familyStats).filter(([,x])=>x.chosen>=2&&x.crossExemplar).sort((a,b)=>b[1].chosen-a[1].chosen);
+            if(!repeated.length)addRow(rep,T.noRepeated,'',T.noRepeatedCue,null);
+            else repeated.forEach(([id,x])=>addRow(rep,FAMILY_LABEL[id],`${x.chosen}/3`,x.chosen===3?T.repeatEvery:T.repeatAcross,x.rate*100));
+
+            const sr=$('suffRows');sr.innerHTML='';
+            for(const d of DOMAINS){const c=coverage[d.id],v=c.value;if(c.answered===0)addRow(sr,d.title,T.hardToSay,T.answered0,null);else if(!c.complete)addRow(sr,d.title,T.partial(c.answered),T.partialCue,null);else addRow(sr,d.title,v.toFixed(1),T.completeCue,(v/5)*100)}
+
+            const cr=$('compareRows');cr.innerHTML='';const comps=[];
+            for(const d of DOMAINS){if(!d.families.length||!coverage[d.id].complete)continue;const rel=d.families.filter(f=>state.familyStats[f]?.chosen>=2&&state.familyStats[f]?.crossExemplar);if(!rel.length)continue;const v=state.domainStats[d.id];const famNames=rel.map(f=>FAMILY_LABEL[f]).join(', ');const cue=v<=2.5?T.lowCue(famNames):v>=3.5?T.highCue(famNames):T.midCue(famNames);comps.push({name:d.title,cue})}
+            if(!comps.length)addRow(cr,T.noCompare,'',T.noCompareCue,null);else comps.slice(0,3).forEach(c=>addRow(cr,c.name,'',c.cue,null));
+
+            const names=repeated.slice(0,3).map(([id])=>FAMILY_LABEL[id]);const first=!repeated.length?T.summaryNone:T.summaryRepeated(joinNatural(names),repeated.length>3);const second=comps.length?T.summaryCompare(joinNatural(comps.slice(0,2).map(c=>c.name.toLowerCase()))):T.summaryNoCompare;$('summaryText').textContent=`${first} ${second}`;$('summaryNext').textContent=T.summaryNext;$('debug').textContent=JSON.stringify(state,null,2)
+          }
+          $('start').onclick'''
+          h=re.sub(result_pat,result_new,h,count=1,flags=re.S)
+
+          p.write_text(h)
+
+          for api_name in ['api.php','progress.php']:
+              ap=Path('priolens/open14-v02/server')/api_name
+              s=ap.read_text()
+              needle="foreach ($requiredTop as $field)"
+              idx=s.find(needle)
+              if idx<0: raise SystemExit(f'missing requiredTop loop in {api_name}')
+              # place validation after the complete foreach statement, using stable nearby schema check as anchor
+              schema_anchor="if ($body['schema'] !== '2rasi.priolens.open14.session-v0.2')"
+              pos=s.find(schema_anchor)
+              if pos<0: raise SystemExit(f'missing schema anchor in {api_name}')
+              validation="if (array_key_exists('language', $body) && !in_array($body['language'], ['lt','en'], true)) fail_json(400, 'Invalid language');\n\n"
+              if "Invalid language" not in s:
+                  s=s[:pos]+validation+s[pos:]
+              ap.write_text(s)
+
+          print('BILINGUAL_PATCH_OK')
+          PY
+
+      - name: Validate patched sources
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q "const LANG=" priolens/open14-v02/index.html
+          grep -q "language:LANG" priolens/open14-v02/index.html
+          grep -q "Which one do you choose?" priolens/open14-v02/index.html
+          grep -q "Right now, I have enough rest and energy" priolens/open14-v02/index.html
+          grep -q "Numatyta saugojimo trukmė" priolens/open14-v02/index.html
+          grep -q "intended retention period" priolens/open14-v02/index.html
+          grep -q "Invalid language" priolens/open14-v02/server/api.php
+          grep -q "Invalid language" priolens/open14-v02/server/progress.php
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          h=Path('priolens/open14-v02/index.html').read_text()
+          m=re.search(r'<script type="module">(.*?)</script>',h,re.S)
+          assert m
+          Path('/tmp/priolens-runtime.mjs').write_text(m.group(1))
+          PY
+          node --check /tmp/priolens-runtime.mjs
+          php -l priolens/open14-v02/server/api.php
+          php -l priolens/open14-v02/server/progress.php
+
+      - name: Commit bilingual runtime
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add priolens/open14-v02/index.html priolens/open14-v02/server/api.php priolens/open14-v02/server/progress.php
+          git commit -m 'feat(priolens): make Open14 bilingual LT EN'
+          git push
+
+      - name: Install FTP client
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq lftp
+
+      - name: Publish runtime and API
+        shell: bash
+        run: |
+          set -euo pipefail
+          lftp -c "set ftp:ssl-allow no; set net:max-retries 4; set net:timeout 30; open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; put -O \"$RUNTIME_DIR/\" priolens/open14-v02/index.html"
+          lftp -c "set ftp:ssl-allow no; set net:max-retries 4; set net:timeout 30; open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; put -O \"$API_DIR/\" priolens/open14-v02/server/api.php; put -O \"$API_DIR/\" priolens/open14-v02/server/progress.php"
+
+      - name: Live source smoke
+        shell: bash
+        run: |
+          set -euo pipefail
+          body=$(curl -fsS --retry 4 --retry-delay 1 'https://omesg360.eu/priolens-open14-v02/?lang=en&from=com')
+          grep -q 'Which one do you choose?' <<<"$body"
+          grep -q 'language:LANG' <<<"$body"
+          grep -q 'Right now, I have enough rest and energy' <<<"$body"
+          curl -fsS --retry 4 --retry-delay 1 https://omesg360.eu/priolens-open14-api/health.php >/dev/null
