@@ -48,11 +48,11 @@ jobs:
               for ex in fam['exemplars']:
                   assert ex.get('runtimePath'), ex['id']
           html=Path('priolens/open14-v02/index.html').read_text()
-          for needle in ['sessionUuid:crypto.randomUUID','/priolens-open14-api/api.php','submitSession','90 dienų']:
+          for needle in ['sessionUuid:crypto.randomUUID','/priolens-open14-api/api.php','/priolens-open14-api/progress.php','submitSession','DRAFT_KEY','resumeSession','Labai trūksta','90 dienų']:
               assert needle in html, needle
           ht=Path('priolens/open14-v02/.htaccess').read_text()
           assert 'AddType application/javascript .mjs' in ht
-          print('PASS: bank complete, API-integrated runtime and mjs MIME rule present')
+          print('PASS: bank complete, autosave/resume runtime and mjs MIME rule present')
           PY
           node -e "import('./priolens/open14-v02/p3_open14_planner_v02.mjs').then(m=>{const p=m.buildOpen14Plan('deploy-smoke'); if(!p.audit) process.exit(2); console.log('planner pass')})"
           node -e "import('./priolens/open14-v02/p3_open14_exemplar_assigner_v01.mjs').then(()=>console.log('assigner import pass'))"
@@ -82,6 +82,9 @@ jobs:
           curl -fsS --retry 4 --retry-delay 2 "$base/" -o /tmp/index
           grep -q 'PrioLens Open14 v0.2' /tmp/index
           grep -q 'priolens-open14-api/api.php' /tmp/index
+          grep -q 'priolens-open14-api/progress.php' /tmp/index
+          grep -q 'Labai trūksta' /tmp/index
+          grep -q 'Tęsti sesiją' /tmp/index
           curl -fsS --retry 4 --retry-delay 2 "$base/bank.json" -o /tmp/bank
           python - <<'PY'
           import json
@@ -102,9 +105,11 @@ jobs:
           done
           health="$(curl -fsS --retry 4 --retry-delay 2 'https://omesg360.eu/priolens-open14-api/health.php')"
           echo "$health" | grep -q '"ok":true'
+          progress_code="$(curl -sS -o /tmp/progress-get -w '%{http_code}' 'https://omesg360.eu/priolens-open14-api/progress.php')"
+          [[ "$progress_code" == '405' ]]
           curl -fsS --retry 4 --retry-delay 2 'https://omesg360.eu/priolens-research-assets/Open14-v02/priolens_care-a_v01.webp' -o /dev/null
           curl -fsS --retry 4 --retry-delay 2 'https://omesg360.eu/priolens-research-assets/Open14-v02/priolens_recognition-b_v01.webp' -o /dev/null
-          echo 'PASS: Open14 runtime, JS module MIME, bank, API health and pilot assets reachable'
+          echo 'PASS: Open14 runtime, autosave endpoint, JS module MIME, bank, API health and pilot assets reachable'
 
       - name: Historical runtime boundary smoke
         shell: bash
