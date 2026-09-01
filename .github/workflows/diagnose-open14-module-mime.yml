@@ -1,0 +1,28 @@
+name: Diagnose Open14 module MIME
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/diagnose-open14-module-mime.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Inspect live response headers
+        shell: bash
+        run: |
+          set -euo pipefail
+          for u in \
+            'https://omesg360.eu/priolens-open14-v02/' \
+            'https://omesg360.eu/priolens-open14-v02/bank.json' \
+            'https://omesg360.eu/priolens-open14-v02/p3_open14_planner_v02.mjs' \
+            'https://omesg360.eu/priolens-open14-v02/p3_open14_exemplar_assigner_v01.mjs'; do
+            echo "=== $u ==="
+            curl -fsSI --retry 4 --retry-delay 2 "$u" | sed -n '1p;/^[Cc]ontent-[Tt]ype:/p;/^[Cc]ache-[Cc]ontrol:/p'
+          done
