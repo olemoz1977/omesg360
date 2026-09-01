@@ -8,6 +8,7 @@ on:
       - priolens/open14-v02/bank.json
       - priolens/open14-v02/p3_open14_planner_v02.mjs
       - priolens/open14-v02/p3_open14_exemplar_assigner_v01.mjs
+      - priolens/open14-v02/.htaccess
       - .github/workflows/deploy-priolens-open14-runtime.yml
   workflow_dispatch:
 
@@ -49,7 +50,9 @@ jobs:
           html=Path('priolens/open14-v02/index.html').read_text()
           for needle in ['sessionUuid:crypto.randomUUID','/priolens-open14-api/api.php','submitSession','90 dienų']:
               assert needle in html, needle
-          print('PASS: bank complete and API-integrated runtime source present')
+          ht=Path('priolens/open14-v02/.htaccess').read_text()
+          assert 'AddType application/javascript .mjs' in ht
+          print('PASS: bank complete, API-integrated runtime and mjs MIME rule present')
           PY
           node -e "import('./priolens/open14-v02/p3_open14_planner_v02.mjs').then(m=>{const p=m.buildOpen14Plan('deploy-smoke'); if(!p.audit) process.exit(2); console.log('planner pass')})"
           node -e "import('./priolens/open14-v02/p3_open14_exemplar_assigner_v01.mjs').then(()=>console.log('assigner import pass'))"
@@ -68,7 +71,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          lftp -c "set ftp:ssl-allow no; set net:max-retries 4; set net:timeout 30; open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; set cmd:fail-exit no; mkdir -p \"$REMOTE_DIR\"; set cmd:fail-exit yes; put -O \"$REMOTE_DIR/\" priolens/open14-v02/index.html; put -O \"$REMOTE_DIR/\" priolens/open14-v02/bank.json; put -O \"$REMOTE_DIR/\" priolens/open14-v02/p3_open14_planner_v02.mjs; put -O \"$REMOTE_DIR/\" priolens/open14-v02/p3_open14_exemplar_assigner_v01.mjs"
+          lftp -c "set ftp:ssl-allow no; set net:max-retries 4; set net:timeout 30; open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; set cmd:fail-exit no; mkdir -p \"$REMOTE_DIR\"; set cmd:fail-exit yes; put -O \"$REMOTE_DIR/\" priolens/open14-v02/index.html; put -O \"$REMOTE_DIR/\" priolens/open14-v02/bank.json; put -O \"$REMOTE_DIR/\" priolens/open14-v02/p3_open14_planner_v02.mjs; put -O \"$REMOTE_DIR/\" priolens/open14-v02/p3_open14_exemplar_assigner_v01.mjs; put -O \"$REMOTE_DIR/\" priolens/open14-v02/.htaccess"
           echo 'Uploaded isolated Open14 runtime only.'
 
       - name: HTTP smoke runtime and dependencies
@@ -88,13 +91,20 @@ jobs:
           assert all(ex.get('runtimePath') for f in b['families'].values() for ex in f['exemplars'])
           print('bank smoke pass')
           PY
-          curl -fsS --retry 4 --retry-delay 2 "$base/p3_open14_planner_v02.mjs" -o /dev/null
-          curl -fsS --retry 4 --retry-delay 2 "$base/p3_open14_exemplar_assigner_v01.mjs" -o /dev/null
+          for f in p3_open14_planner_v02.mjs p3_open14_exemplar_assigner_v01.mjs; do
+            curl -fsS --retry 4 --retry-delay 2 "$base/$f" -o /dev/null
+            ct="$(curl -fsSI --retry 4 --retry-delay 2 "$base/$f" | tr -d '\r' | awk -F': ' 'tolower($1)=="content-type"{print tolower($2)}' | tail -1)"
+            echo "$f content-type=$ct"
+            case "$ct" in
+              application/javascript*|text/javascript*) ;;
+              *) echo "Bad module MIME for $f: $ct" >&2; exit 1;;
+            esac
+          done
           health="$(curl -fsS --retry 4 --retry-delay 2 'https://omesg360.eu/priolens-open14-api/health.php')"
           echo "$health" | grep -q '"ok":true'
           curl -fsS --retry 4 --retry-delay 2 'https://omesg360.eu/priolens-research-assets/Open14-v02/priolens_care-a_v01.webp' -o /dev/null
           curl -fsS --retry 4 --retry-delay 2 'https://omesg360.eu/priolens-research-assets/Open14-v02/priolens_recognition-b_v01.webp' -o /dev/null
-          echo 'PASS: Open14 runtime, bank, API health and pilot assets reachable'
+          echo 'PASS: Open14 runtime, JS module MIME, bank, API health and pilot assets reachable'
 
       - name: Historical runtime boundary smoke
         shell: bash
