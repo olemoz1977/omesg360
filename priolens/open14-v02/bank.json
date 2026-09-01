@@ -11,13 +11,14 @@
       "exemplars": [
         {
           "id": "REST-A",
-          "runtimePath": "/priolens-research-assets/Open14-geometry-v01/rest-a_sq_center_v01.webp",
-          "sourceRuntimePath": "/priolens-research-assets/Gallery/20260730_215302742.png",
-          "geometryStatus": "HUMAN_ACCEPTED_CENTER_CROP_1TO1",
-          "semanticStatus": "REASSIGN_REQUIRED_SEMANTIC_MISMATCH",
-          "originalIntent": "pasirinkimas tarp klasikinių batų ir sportbačių",
-          "firstImpulse": "rinktis tarp klasikinių batų ir sportbačių",
-          "risk": "current REST assignment is not supported by the original creation intent; do not interpret as rest/restoration"
+          "runtimePath": "/priolens-research-assets/Open14-remediation-v01/rest-a_sq_bottom_v01.webp",
+          "sourceRuntimePath": "/priolens-research-assets/Gallery/20260730_233524155.png",
+          "geometryStatus": "HUMAN_ACCEPTED_BOTTOM_CROP_1TO1",
+          "firstImpulse": "persijungti į poilsį / namų komfortą",
+          "risk": "formative REST exemplar; owner selected bottom crop after direct visual review",
+          "previousRuntimePath": "/priolens-research-assets/Open14-geometry-v01/rest-a_sq_center_v01.webp",
+          "previousAssetOriginalIntent": "pasirinkimas tarp klasikinių batų ir sportbačių",
+          "status": "OWNER_ACCEPTED_REPLACEMENT_SWITCHED"
         },
         {
           "id": "REST-B",
@@ -90,17 +91,19 @@
       "exemplars": [
         {
           "id": "CONNECTION-A",
-          "runtimePath": "/priolens-research-assets/Gallery/S03.webp",
+          "runtimePath": "/priolens-research-assets/Open14-remediation-v01/connection-a_clean_small_v01.webp",
           "firstImpulse": "užmegzti ryšį su kitu žmogumi",
-          "visualStatus": "CLEAN_REQUIRED_WATERMARK",
-          "risk": "KlingAI watermark detected in runtime asset; clean or replace with clean equivalent before external pilot"
+          "visualStatus": "HUMAN_ACCEPTED_WATERMARK_CLEANUP_SMALL",
+          "risk": "owner visually accepted small-mask cleanup; retain as formative Connection exemplar",
+          "sourceRuntimePath": "/priolens-research-assets/Gallery/S03.webp"
         },
         {
           "id": "CONNECTION-B",
-          "runtimePath": "/priolens-research-assets/Gallery/20260829_235204397.png",
+          "runtimePath": "/priolens-research-assets/Open14-remediation-v01/connection-b_clean_small_v01.webp",
           "firstImpulse": "veikti kartu / perduoti objektą",
-          "visualStatus": "CLEAN_REQUIRED_WATERMARK",
-          "risk": "watermark visually confirmed during owner smoke; clean or replace with clean equivalent before external pilot"
+          "visualStatus": "HUMAN_ACCEPTED_WATERMARK_CLEANUP_SMALL",
+          "risk": "owner visually accepted small-mask cleanup; retain as formative Connection exemplar",
+          "sourceRuntimePath": "/priolens-research-assets/Gallery/20260829_235204397.png"
         }
       ]
     },
@@ -243,12 +246,13 @@
       "exemplars": [
         {
           "id": "KNOWLEDGE-A",
-          "runtimePath": "/priolens-research-assets/Open14-geometry-v01/knowledge-a_sq_center_v01.webp",
-          "sourceRuntimePath": "/priolens-research-assets/Gallery/20260730_230227381.png",
-          "geometryStatus": "HUMAN_ACCEPTED_CENTER_CROP_1TO1",
-          "firstImpulse": "mokytis / būti klasėje",
-          "semanticStatus": "REPLACE_SEARCH_BETTER_CANDIDATE",
-          "risk": "owner prefers a more direct learning/understanding cue; search Gallery for clearer book/learning candidate"
+          "runtimePath": "/priolens-research-assets/Open14-remediation-v01/knowledge-a_sq_top_v01.webp",
+          "sourceRuntimePath": "/priolens-research-assets/Gallery/20260730_233054250.png",
+          "geometryStatus": "HUMAN_ACCEPTED_TOP_CROP_1TO1",
+          "firstImpulse": "ieškoti žinių / mokytis",
+          "risk": "formative Learning / Understanding exemplar; owner selected top crop after direct visual review",
+          "previousRuntimePath": "/priolens-research-assets/Open14-geometry-v01/knowledge-a_sq_center_v01.webp",
+          "status": "OWNER_ACCEPTED_REPLACEMENT_SWITCHED"
         },
         {
           "id": "KNOWLEDGE-B",
