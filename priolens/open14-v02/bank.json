@@ -134,9 +134,10 @@
           "runtimePath": "/priolens-research-assets/Open14-geometry-v01/belonging-b_sq_center_v01.webp",
           "sourceRuntimePath": "/priolens-research-assets/Gallery/20260731_043300801.png",
           "geometryStatus": "HUMAN_ACCEPTED_CENTER_CROP_1TO1",
-          "semanticStatus": "HOLD_OWNER_REVIEW_ASYMMETRIC_WARMTH",
+          "semanticStatus": "FORMATIVE_BOUNDARY_RETAIN_CURRENT",
           "firstImpulse": "dalintis šiluma / būti kartu",
-          "risk": "belonging reading is debatable because visible steam/warmth appears associated mainly with one participant/object"
+          "risk": "current asymmetric-warmth exemplar retained as formative boundary probe; generated friends-circle image stored as reserve but not switched because it duplicates BELONGING-A social-circle mechanism and risks CONNECTION cross-load",
+          "reserveCandidateRuntimePath": "/priolens-research-assets/Open14-v02/file_000000009a0881f49ae08d6fcc47f9d7.png"
         }
       ]
     },
@@ -187,12 +188,13 @@
       "exemplars": [
         {
           "id": "CONTROL-A",
-          "runtimePath": "/priolens-research-assets/Gallery/S04.webp",
-          "visualStatus": "REPLACE_REQUIRED_VISUAL_CREDIBILITY",
-          "firstImpulse": "nukreipti / valdyti srautą",
-          "risk": "owner rejected all shortlist v01 candidates; keep old non-pilot-safe runtime only until a new credible direct-control candidate is found",
-          "ownerShortlistDecision": "REJECT",
-          "status": "SEARCH_REQUIRED_AFTER_SHORTLIST_REJECT"
+          "runtimePath": "/priolens-research-assets/Open14-v02/file_00000000dbb881f48b13b7b69cb0ef6f.png",
+          "firstImpulse": "tiesiogiai valdyti / keisti sistemos būseną",
+          "risk": "generated industrial joystick replacement; visually credible direct-control mechanism; formative pending external data",
+          "status": "OWNER_ACCEPTED_REPLACEMENT_SWITCHED",
+          "previousRuntimePath": "/priolens-research-assets/Gallery/S04.webp",
+          "sourceRuntimePath": "/priolens-research-assets/Open14-v02/file_00000000dbb881f48b13b7b69cb0ef6f.png",
+          "geometryStatus": "OWNER_ACCEPTED_SQUARE_1TO1"
         },
         {
           "id": "CONTROL-B",
@@ -290,8 +292,8 @@
           "id": "OPPORTUNITY-A",
           "runtimePath": "/priolens-research-assets/Gallery/file_0000000024fc8210a5fb3823b3d86a9f.png",
           "firstImpulse": "pradėti kurti iš paruoštų medžiagų",
-          "semanticStatus": "HOLD_SEARCH_BETTER_CANDIDATE",
-          "risk": "owner requested additional candidate search before freezing this exemplar"
+          "semanticStatus": "FORMATIVE_BOUNDARY_RETAIN_CURRENT",
+          "risk": "greenhouse-door direction not adopted because it cross-loads EXPLORATION and duplicates an existing near-identical asset; retain current immediate-available-materials boundary probe for formative pilot"
         },
         {
           "id": "OPPORTUNITY-B",
