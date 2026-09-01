@@ -1,0 +1,83 @@
+name: Deploy PrioLens candidate shortlist v01
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/deploy-priolens-candidate-shortlist-v01.yml
+
+permissions:
+  contents: read
+
+env:
+  FTP_HOST: 46.202.142.134
+  FTP_USER: ${{ secrets.HOSTINGER_FTP_USER }}
+  FTP_PASSWORD: ${{ secrets.HOSTINGER_FTP_PASSWORD }}
+  REVIEW_DIR: /domains/omesg360.eu/public_html/priolens-candidate-shortlist-v01
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build curated mobile shortlist
+        shell: bash
+        run: |
+          mkdir -p /tmp/review
+          cat > /tmp/review/index.html <<'HTML'
+          <!doctype html><html lang="lt"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>PrioLens candidate shortlist v01</title>
+          <style>
+          body{font-family:system-ui,-apple-system,sans-serif;background:#0f1115;color:#eee;margin:0;padding:14px}h1{font-size:22px;margin:4px 0 6px}.intro{color:#aaa;font-size:14px;line-height:1.45;margin-bottom:24px}.sec{margin:30px 0}.sec h2{font-size:20px;margin:0 0 4px}.target{color:#b7c0ce;font-size:13px;margin:0 0 12px}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}.card{background:#1a1d23;border:1px solid #353a44;border-radius:13px;padding:7px}.card img{width:100%;aspect-ratio:1/1;object-fit:contain;background:#050608;border-radius:8px}.id{font-size:17px;font-weight:800;margin-top:6px}.meta{font-size:10px;color:#8f98a7;word-break:break-all;line-height:1.25}.note{font-size:12px;color:#87c998;margin-top:3px}@media(min-width:800px){.grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+          </style></head><body>
+          <h1>PrioLens · likę 5 pakeitimai</h1>
+          <div class="intro">Rinkis ne „gražiausią“, o tą, kurio pirmas ~1 s skaitymas arčiausiai nurodyto impulso. CLIP naudotas tik kandidatams surasti. A–D yra šio puslapio žymos.</div>
+
+          <section class="sec"><h2>REST-B</h2><div class="target">Tikslas: poilsis / atsistatymas / aiški pauzė, ne komforto prekė ar pasiekimas.</div><div class="grid">
+          <div class="card"><img src="/priolens-research-assets/Gallery/20260730_220850179.png"><div class="id">A</div><div class="meta">20260730_220850179.png · 768×1360 · CLIP #1</div></div>
+          <div class="card"><img src="/priolens-research-assets/Gallery/20260730_232752414.png"><div class="id">B</div><div class="meta">20260730_232752414.png · 768×1360 · CLIP #2</div></div>
+          <div class="card"><img src="/priolens-research-assets/Gallery/20260730_233059566.png"><div class="id">C</div><div class="meta">20260730_233059566.png · 768×1360 · CLIP #3</div></div>
+          <div class="card"><img src="/priolens-research-assets/Gallery/1785948607280.png"><div class="id">D</div><div class="meta">1785948607280.png · 1024×1024 · CLIP #10</div><div class="note">įtrauktas, nes jau 1:1</div></div>
+          </div></section>
+
+          <section class="sec"><h2>ORDER-A</h2><div class="target">Tikslas: aiškiai paskirtos vietos / tvarkinga struktūra. Pirmenybė „shadow-board“ logikai.</div><div class="grid">
+          <div class="card"><img src="/priolens-research-assets/Gallery/file_00000000047082119dea4783f54683d5.png"><div class="id">A</div><div class="meta">file_000000000470... · 1254×1254 · CLIP #1</div></div>
+          <div class="card"><img src="/priolens-research-assets/Gallery/file_000000003c0c81fb80655b530662c0ee.png"><div class="id">B</div><div class="meta">file_000000003c0c... · 1254×1254 · CLIP #2</div></div>
+          <div class="card"><img src="/priolens-research-assets/Gallery/20260805_222858501.png"><div class="id">C</div><div class="meta">20260805_222858501.png · 2048×2048 · CLIP #3</div></div>
+          <div class="card"><img src="/priolens-research-assets/Gallery/20260808_231944060.png"><div class="id">D</div><div class="meta">20260808_231944060.png · 2048×2048 · CLIP #6</div></div>
+          </div></section>
+
+          <section class="sec"><h2>ORDER-B</h2><div class="target">Tikslas: sužymėtos / paskirtos zonos, ribos ir vietos. Turi skirtis nuo ORDER-A objektų tvarkymo.</div><div class="grid">
+          <div class="card"><img src="/priolens-research-assets/Gallery/20260730_082954248.png"><div class="id">A</div><div class="meta">20260730_082954248.png · 768×1360 · CLIP #1</div></div>
+          <div class="card"><img src="/priolens-research-assets/Gallery/20260731_042747442.png"><div class="id">B</div><div class="meta">20260731_042747442.png · 768×1360 · CLIP #4</div></div>
+          <div class="card"><img src="/priolens-research-assets/Gallery/file_00000000fdf0821099271633f3930bad.png"><div class="id">C</div><div class="meta">file_00000000fdf0... · 1254×1254 · CLIP #8</div></div>
+          <div class="card"><img src="/priolens-research-assets/Gallery/20260731_042545269.png"><div class="id">D</div><div class="meta">20260731_042545269.png · 768×1360 · CLIP #9</div></div>
+          </div></section>
+
+          <section class="sec"><h2>CONTROL-A</h2><div class="target">Tikslas: realus, patikimas tiesioginio valdymo mechanizmas. Jokio „AI instrumento“.</div><div class="grid">
+          <div class="card"><img src="/priolens-research-assets/Gallery/1786544004102.png"><div class="id">A</div><div class="meta">1786544004102.png · 1024×1024 · CLIP #1</div></div>
+          <div class="card"><img src="/priolens-research-assets/Gallery/file_0000000010ec820da325a18b91ef6420.png"><div class="id">B</div><div class="meta">file_0000000010ec... · 1254×1254 · CLIP #2</div></div>
+          <div class="card"><img src="/priolens-research-assets/Gallery/file_00000000d1d481f4bde2fe963dcc9381.png"><div class="id">C</div><div class="meta">file_00000000d1d4... · 1254×1254 · CLIP #3</div></div>
+          <div class="card"><img src="/priolens-research-assets/Gallery/file_00000000165881f4b5a872f68db713ac.png"><div class="id">D</div><div class="meta">file_000000001658... · 1254×1254 · CLIP #4</div></div>
+          </div></section>
+
+          <section class="sec"><h2>KNOWLEDGE-B</h2><div class="target">Tikslas: aktyviai mokytis / suprasti per skaitmeninę terpę. Ne tiesiog „dirbti kompiuteriu“.</div><div class="grid">
+          <div class="card"><img src="/priolens-research-assets/Gallery/20260730_021452636.png"><div class="id">A</div><div class="meta">20260730_021452636.png · 768×1360 · CLIP #2</div></div>
+          <div class="card"><img src="/priolens-research-assets/Gallery/20260730_022124068.png"><div class="id">B</div><div class="meta">20260730_022124068.png · 768×1360 · CLIP #3</div></div>
+          <div class="card"><img src="/priolens-research-assets/Gallery/20260730_233626457.png"><div class="id">C</div><div class="meta">20260730_233626457.png · 768×1360 · CLIP #4</div></div>
+          <div class="card"><img src="/priolens-research-assets/Gallery/20260731_245233521.png"><div class="id">D</div><div class="meta">20260731_245233521.png · 768×1360 · CLIP #5</div></div>
+          </div></section>
+          </body></html>
+          HTML
+      - name: Install lftp
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq lftp
+      - name: Deploy shortlist
+        shell: bash
+        run: |
+          set -euo pipefail
+          lftp -c "set ftp:ssl-allow no; set net:max-retries 4; set net:timeout 30; open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; mkdir -p \"$REVIEW_DIR\"; mirror -R /tmp/review \"$REVIEW_DIR\""
+      - name: Smoke shortlist
+        run: |
+          curl -fsS --retry 5 --retry-delay 3 https://omesg360.eu/priolens-candidate-shortlist-v01/ | grep -q 'likę 5 pakeitimai'
