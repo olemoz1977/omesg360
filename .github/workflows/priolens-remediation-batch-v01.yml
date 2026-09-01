@@ -9,16 +9,17 @@ on:
 permissions:
   contents: write
 
+env:
+  FTP_HOST: 46.202.142.134
+  FTP_USER: ${{ secrets.HOSTINGER_FTP_USER }}
+  FTP_PASSWORD: ${{ secrets.HOSTINGER_FTP_PASSWORD }}
+  GALLERY: /domains/omesg360.eu/public_html/priolens-research-assets/Gallery
+  OUT: /domains/omesg360.eu/public_html/priolens-research-assets/Open14-remediation-v01
+  REVIEW: /domains/omesg360.eu/public_html/priolens-remediation-review-v01
+
 jobs:
   remediate:
     runs-on: ubuntu-latest
-    env:
-      FTP_HOST: ${{ secrets.FTP_HOST }}
-      FTP_USER: ${{ secrets.FTP_USER }}
-      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
-      GALLERY: /domains/omesg360.eu/public_html/priolens-research-assets/Gallery
-      OUT: /domains/omesg360.eu/public_html/priolens-research-assets/Open14-remediation-v01
-      REVIEW: /domains/omesg360.eu/public_html/priolens-remediation-review-v01
     steps:
       - uses: actions/checkout@v4
 
@@ -66,18 +67,15 @@ jobs:
               text=ocr(path)
               return {'size':size,'ocr':text,'watermark_keyword':any(k in text for k in keywords)}
 
-          # SAFETY-B exact perceptual duplicate check.
           with Image.open(src/'safety-current.png') as a, Image.open(src/'safety-s13.webp') as b:
               safety_dist=int(imagehash.phash(a.convert('RGB'))-imagehash.phash(b.convert('RGB')))
           safety=audit(src/'safety-s13.webp')
           safety['phashDistanceToCurrent']=safety_dist
           safety['switchReady']=(safety_dist==0 and not safety['watermark_keyword'])
 
-          # AUTONOMY-A accepted candidate: switch only if square and no detected watermark keyword.
           autonomy=audit(src/'autonomy-a.png')
           autonomy['switchReady']=(autonomy['size'][0]==autonomy['size'][1] and not autonomy['watermark_keyword'])
 
-          # Portrait candidate crop variants, originals untouched.
           crops={}
           for key,fn in [('rest-a','rest-a.png'),('knowledge-a','knowledge-a.png')]:
               im=Image.open(src/fn).convert('RGB')
@@ -97,7 +95,6 @@ jobs:
                   rows.append(name)
               crops[key]={'sourceSize':[w,h],'variants':rows,'sourceOcr':ocr(src/fn)}
 
-          # CONNECTION watermark cleanup candidates. We intentionally do not switch bank here.
           cleanup={}
           for key,fn in [('connection-a','connection-a.webp'),('connection-b','connection-b.png')]:
               img=cv2.imread(str(src/fn),cv2.IMREAD_COLOR)
@@ -117,9 +114,8 @@ jobs:
           Path('/tmp/report.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8')
           print(json.dumps(report,ensure_ascii=False,indent=2))
 
-          # Human review page.
           def url(name): return '/priolens-research-assets/Open14-remediation-v01/'+name
-          html=['<!doctype html><html lang="lt"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>PrioLens remediation review</title><style>body{font-family:system-ui;background:#111;color:#eee;margin:0;padding:18px}h1{font-size:22px}.sec{margin:28px 0}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}.card{background:#1d1d1d;border:1px solid #333;border-radius:12px;padding:8px}.card img{width:100%;aspect-ratio:1/1;object-fit:contain;background:#000;border-radius:8px}.tag{font-size:13px;color:#bbb;margin-top:6px}.orig{border-color:#754}.ok{border-color:#476}</style></head><body><h1>PrioLens · remediation review v01</h1>']
+          html=['<!doctype html><html lang="lt"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>PrioLens remediation review</title><style>body{font-family:system-ui;background:#111;color:#eee;margin:0;padding:18px}h1{font-size:22px}.sec{margin:28px 0}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}.card{background:#1d1d1d;border:1px solid #333;border-radius:12px;padding:8px}.card img{width:100%;aspect-ratio:1/1;object-fit:contain;background:#000;border-radius:8px}.tag{font-size:13px;color:#bbb;margin-top:6px}.orig{border-color:#754}</style></head><body><h1>PrioLens · remediation review v01</h1>']
           for title,key in [('REST-A · šlepetės','rest-a'),('KNOWLEDGE-A · biblioteka','knowledge-a')]:
               html.append(f'<div class="sec"><h2>{title}</h2><div class="grid">')
               for n in crops[key]['variants']:
