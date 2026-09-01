@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - priolens/open14-v02/server/api.php
+      - priolens/open14-v02/server/progress.php
       - priolens/open14-v02/server/health.php
       - priolens/open14-v02/server/cleanup.php
       - priolens/open14-v02/server/.htaccess
@@ -35,6 +36,7 @@ jobs:
         run: |
           set -euo pipefail
           php -l priolens/open14-v02/server/api.php
+          php -l priolens/open14-v02/server/progress.php
           php -l priolens/open14-v02/server/health.php
           php -l priolens/open14-v02/server/cleanup.php
           test -s priolens/open14-v02/server/.htaccess
@@ -55,21 +57,23 @@ jobs:
         run: |
           set -euo pipefail
           common='set ftp:ssl-allow no; set net:max-retries 2; set net:timeout 20; set cmd:fail-exit yes;'
-          lftp -c "$common open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; put -O \"$REMOTE_DIR/\" priolens/open14-v02/server/api.php; put -O \"$REMOTE_DIR/\" priolens/open14-v02/server/health.php; put -O \"$REMOTE_DIR/\" priolens/open14-v02/server/cleanup.php; put -O \"$REMOTE_DIR/\" priolens/open14-v02/server/.htaccess"
-          echo 'Uploaded api.php, health.php, cleanup.php and .htaccess only.'
+          lftp -c "$common open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; put -O \"$REMOTE_DIR/\" priolens/open14-v02/server/api.php; put -O \"$REMOTE_DIR/\" priolens/open14-v02/server/progress.php; put -O \"$REMOTE_DIR/\" priolens/open14-v02/server/health.php; put -O \"$REMOTE_DIR/\" priolens/open14-v02/server/cleanup.php; put -O \"$REMOTE_DIR/\" priolens/open14-v02/server/.htaccess"
+          echo 'Uploaded api.php, progress.php, health.php, cleanup.php and .htaccess only.'
           echo 'PROTECTED BY CONSTRUCTION: config.php is never uploaded or overwritten by this workflow.'
 
       - name: HTTP input-validation smoke
         shell: bash
         run: |
           set -euo pipefail
-          base='https://omesg360.eu/priolens-open14-api/api.php'
-          code="$(curl -sS --retry 4 --retry-delay 2 -o /tmp/get-body -w '%{http_code}' "$base")"
-          [[ "$code" == '405' ]] || { echo "Expected GET 405, got $code" >&2; cat /tmp/get-body >&2; exit 1; }
-          code="$(curl -sS --retry 4 --retry-delay 2 -o /tmp/post-body -w '%{http_code}' -H 'Content-Type: application/json' --data '{}' "$base")"
+          base='https://omesg360.eu/priolens-open14-api'
+          code="$(curl -sS --retry 4 --retry-delay 2 -o /tmp/get-body -w '%{http_code}' "$base/api.php")"
+          [[ "$code" == '405' ]] || { echo "Expected API GET 405, got $code" >&2; cat /tmp/get-body >&2; exit 1; }
+          code="$(curl -sS --retry 4 --retry-delay 2 -o /tmp/progress-get -w '%{http_code}' "$base/progress.php")"
+          [[ "$code" == '405' ]] || { echo "Expected progress GET 405, got $code" >&2; cat /tmp/progress-get >&2; exit 1; }
+          code="$(curl -sS --retry 4 --retry-delay 2 -o /tmp/post-body -w '%{http_code}' -H 'Content-Type: application/json' --data '{}' "$base/api.php")"
           [[ "$code" == '400' ]] || { echo "Expected invalid POST 400, got $code" >&2; cat /tmp/post-body >&2; exit 1; }
           grep -q 'Missing:' /tmp/post-body
-          echo 'PASS: isolated API endpoint reachable and validating input'
+          echo 'PASS: final and progress endpoints reachable and validating input'
 
       - name: Verify database health
         shell: bash
