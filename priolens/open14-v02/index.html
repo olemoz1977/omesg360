@@ -43,7 +43,7 @@
     <div class="section"><h2>Kur verta pažvelgti dar kartą</h2><div id="compareRows" class="rows"></div></div>
     <div class="actions"><button id="export" class="secondary">Eksportuoti JSON</button><button id="restart" class="primary">Nauja sesija</button></div>
     <p id="exportStatus" class="note"></p>
-    <details class="section"><summary>Tyrimo diagnostika</summary><pre id="debug" class="debug"></pre></details>
+    <details id="debugDetails" class="section hidden"><summary>Tyrimo diagnostika</summary><pre id="debug" class="debug"></pre></details>
   </section>
 </div>
 <script type="module">
@@ -52,6 +52,7 @@ import { assignOpen14Exemplars, listMissingRuntimeAssets } from './p3_open14_exe
 const API_PATH='/priolens-open14-api/api.php';
 const PROGRESS_PATH='/priolens-open14-api/progress.php';
 const DRAFT_KEY='priolens.open14.v02.draft';
+const DEBUG_MODE=new URLSearchParams(location.search).get('debug')==='1';
 const FAMILY_LABEL={REST:'Poilsis / atsigavimas',RESOURCE:'Resursai',SAFETY:'Saugumas',ORDER:'Tvarka / aiškumas',CONNECTION:'Ryšys',BELONGING:'Priklausymas',CARE:'Rūpinimasis kitu',AUTONOMY:'Autonomija',CONTROL:'Kontrolė / valdymas',RECOGNITION:'Pripažinimas',MASTERY:'Meistriškumas',EXPLORATION:'Tyrinėjimas',KNOWLEDGE:'Mokymasis / supratimas',OPPORTUNITY:'Galimybė'};
 const DOMAINS=[
 {id:'REST_RESOURCE',title:'Poilsis ir resursai',families:['REST','RESOURCE'],items:[['RESTORATION_ENERGY','Šiuo metu turiu pakankamai poilsio ir energijos kasdienybei.'],['MATERIAL_RESOURCES','Šiuo metu turiu pakankamai kasdienių resursų tam, ko man realiai reikia.']]},
@@ -62,6 +63,7 @@ const DOMAINS=[
 {id:'MEANING_CONTRIBUTION',title:'Prasmė ir indėlis',families:[],items:[['MEANING_PURPOSE','Tai, ką šiuo metu darau, man atrodo pakankamai prasminga.'],['CONTRIBUTION','Jaučiu, kad turiu pakankamai galimybių prisidėti prie kažko svarbaus ne tik sau.']]}
 ];
 const $=id=>document.getElementById(id),screens=[...document.querySelectorAll('.screen')],stimBtns=[...document.querySelectorAll('.stim')];
+if(DEBUG_MODE)$('debugDetails').classList.remove('hidden');
 let bank=null,assignment=null,state=null,t0=0,locked=false,suffIndex=0,lastPointerType=null,progressTimer=null,suffValidationShown=false;
 function saveLocalDraft(){if(!state||state.completedAt)return;try{localStorage.setItem(DRAFT_KEY,JSON.stringify(state))}catch(err){console.warn('local draft save failed',err)}}
 function clearLocalDraft(){try{localStorage.removeItem(DRAFT_KEY)}catch(err){console.warn('local draft clear failed',err)}}
