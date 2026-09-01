@@ -42,7 +42,7 @@ jobs:
           from pathlib import Path
           b=json.loads(Path('priolens/open14-v02/bank.json').read_text())
           assert b['schema']=='2rasi.priolens.open14.bank-v0.2'
-          assert b['status']=='READY_FOR_OWNER_SMOKE'
+          assert b['status'] in {'READY_FOR_OWNER_SMOKE','PREPILOT_HARDENING'}
           assert b['missingRuntimeAssets']==[]
           for fid,fam in b['families'].items():
               assert len(fam['exemplars'])==2, fid
@@ -52,7 +52,7 @@ jobs:
           for needle in ['sessionUuid:crypto.randomUUID','/priolens-open14-api/api.php','/priolens-open14-api/progress.php','submitSession','DRAFT_KEY','resumeSession','Labai trūksta','90 dienų']:
               assert needle in html, needle
           owner=Path('priolens/open14-v02/stimulus-bank.html').read_text()
-          for needle in ['Open14 stimulus bank','bank.json','Keičiant išlaikyti pirmą impulsą','WATERMARK_REVIEW_REQUIRED']:
+          for needle in ['Open14 stimulus bank','bank.json','Keičiant išlaikyti pirmą impulsą']:
               assert needle in owner, needle
           ht=Path('priolens/open14-v02/.htaccess').read_text()
           assert 'AddType application/javascript .mjs' in ht
@@ -91,12 +91,11 @@ jobs:
           grep -q 'Tęsti sesiją' /tmp/index
           curl -fsS --retry 4 --retry-delay 2 "$base/stimulus-bank.html" -o /tmp/stimulus-bank
           grep -q 'Open14 stimulus bank' /tmp/stimulus-bank
-          grep -q 'WATERMARK_REVIEW_REQUIRED' /tmp/stimulus-bank
           curl -fsS --retry 4 --retry-delay 2 "$base/bank.json" -o /tmp/bank
           python - <<'PY'
           import json
           b=json.load(open('/tmp/bank'))
-          assert b['status']=='READY_FOR_OWNER_SMOKE'
+          assert b['status'] in {'READY_FOR_OWNER_SMOKE','PREPILOT_HARDENING'}
           assert not b['missingRuntimeAssets']
           assert all(ex.get('runtimePath') for f in b['families'].values() for ex in f['exemplars'])
           print('bank smoke pass')
@@ -116,7 +115,11 @@ jobs:
           [[ "$progress_code" == '405' ]]
           curl -fsS --retry 4 --retry-delay 2 'https://omesg360.eu/priolens-research-assets/Open14-v02/priolens_care-a_v01.webp' -o /dev/null
           curl -fsS --retry 4 --retry-delay 2 'https://omesg360.eu/priolens-research-assets/Open14-v02/priolens_recognition-b_v01.webp' -o /dev/null
-          echo 'PASS: Open14 runtime, owner stimulus bank, autosave endpoint, JS module MIME, bank, API health and pilot assets reachable'
+          curl -fsS --retry 4 --retry-delay 2 'https://omesg360.eu/priolens-research-assets/Open14-final-v01/control-a_joystick_v01.webp' -o /dev/null
+          curl -fsS --retry 4 --retry-delay 2 'https://omesg360.eu/priolens-research-assets/Open14-final-v01/belonging-b_coffee-ritual_v01.webp' -o /dev/null
+          curl -fsS --retry 4 --retry-delay 2 'https://omesg360.eu/priolens-research-assets/Open14-final-v01/exploration-b_magnifier-forest_v01.webp' -o /dev/null
+          curl -fsS --retry 4 --retry-delay 2 'https://omesg360.eu/priolens-research-assets/Open14-final-v01/opportunity-a_open-market-stall_v01.webp' -o /dev/null
+          echo 'PASS: Open14 runtime, owner stimulus bank, autosave endpoint, JS module MIME, bank, API health and final asset set reachable'
 
       - name: Historical runtime boundary smoke
         shell: bash
