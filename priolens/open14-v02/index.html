@@ -9,7 +9,7 @@
 *{box-sizing:border-box}html,body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,sans-serif}body{min-height:100dvh}.wrap{width:min(100%,900px);margin:auto;padding:0 12px;min-height:100dvh}.top{height:48px;display:flex;align-items:center;justify-content:space-between}.brand{font-weight:800}.pill{font-size:12px;color:var(--muted);border:1px solid var(--line);padding:6px 9px;border-radius:99px;background:#fff}.screen{display:none}.screen.active{display:block}.intro,.result{padding:6vh 4px 42px}h1{font-size:clamp(36px,10vw,62px);letter-spacing:-.055em;line-height:.96;margin:0 0 18px}.lead{font-size:clamp(18px,4.8vw,25px);line-height:1.3;max-width:720px}.note{font-size:15px;line-height:1.55;color:#5f5f5f;max-width:720px}.card,.row,.domainCard{background:var(--card);border:1px solid var(--line);border-radius:16px}.card{padding:14px 15px;margin:18px 0}.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:16px}button{font:inherit;cursor:pointer}.primary,.secondary{border-radius:14px;padding:12px 15px;font-weight:700;min-height:44px}.primary{border:0;background:#171717;color:#fff}.primary:disabled{opacity:.35;cursor:not-allowed}.secondary{border:1px solid var(--line);background:#fff;color:#181818}.bad{color:#9a3b3b}.ok{color:#3d7045}
 #trial.active{height:calc(100dvh - 48px);display:flex;flex-direction:column;overflow:hidden}.trialhead{height:40px;display:flex;align-items:center;justify-content:space-between}.q{font-size:16px;font-weight:750}.count{font-size:14px;color:#626262}.progress{height:3px;background:#e7e7e2;border-radius:10px;overflow:hidden}.progress i{display:block;height:100%;background:#222;width:0}.stage{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:repeat(3,minmax(0,1fr)) auto;gap:6px;padding:7px 0 10px}.stim{grid-column:1;width:100%;height:100%;border:0;background:transparent;padding:2px 4px;display:flex;align-items:center;justify-content:center}.stim:nth-of-type(1){grid-row:1}.stim:nth-of-type(2){grid-row:2}.stim:nth-of-type(3){grid-row:3}.stim img{display:block;height:100%;width:auto;max-width:100%;max-height:100%;aspect-ratio:1/1;object-fit:contain;border:1px solid #d6d6d1;background:#eee;border-radius:16px}.stage.locked button{pointer-events:none}.none{grid-column:1;grid-row:4;border:1.5px solid #aaa9a3;background:#fff;color:#303030;border-radius:14px;padding:10px 14px;min-height:48px;font-size:15px;font-weight:760;writing-mode:horizontal-tb;transform:none;display:flex;align-items:center;justify-content:center}
 #suff.active{padding:12px 0 40px}.suffHead{padding:18px 4px 8px}.suffHead h2{font-size:28px;margin:0 0 8px}.domainCard{padding:14px;margin:12px 0}.domainTitle{font-size:15px;color:#555;margin-bottom:14px;font-weight:760}.item{padding:10px 0;border-top:1px solid #eeeeea}.item:first-of-type{border-top:0}.statement{font-size:18px;line-height:1.45;margin-bottom:12px}.scale{display:grid;gap:9px}.rangeRow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center}.rangeBox{min-width:0}.rangeBox input[type=range]{width:100%;margin:4px 0 0;accent-color:#1d1d1d;min-height:34px}.rangeBox input[type=range].unset{opacity:.58;accent-color:#8b8b86}.rangeLabels{display:flex;justify-content:space-between;gap:10px;font-size:13px;color:#5f5f5f;margin-top:2px}.scale button.na{border:1px solid #bbb;background:#fff;border-radius:10px;min-height:44px;font-size:14px;color:#444;padding:9px 12px;white-space:nowrap}.scale button.na.on{background:#1d1d1d;color:#fff;border-color:#1d1d1d}.autosaveNote{font-size:13px;color:#666;margin-top:10px}.answerState{font-size:13px;font-weight:700;color:#555;margin-top:5px}.answerState.unsetState{color:#735d00}.item.validationError{margin:6px -8px 0;padding:12px 8px;border:2px solid #b54a4a;border-radius:12px;background:#fff8f8}.suffError{margin:10px 0 0;padding:11px 12px;border:2px solid #b54a4a;border-radius:12px;background:#fff4f4;color:#7d2525;font-size:15px;font-weight:750;line-height:1.4}.suffNav{display:flex;justify-content:space-between;gap:8px;margin-top:14px}
-.result h1{font-size:42px}.section{margin:24px 0}.section h2{font-size:19px;margin:0 0 10px}.rows{display:grid;gap:8px}.row{padding:12px 14px}.rowtop{display:flex;justify-content:space-between;gap:10px}.name{font-weight:760}.score{font-size:13px;color:#666}.cue{font-size:12px;color:#777;margin-top:3px}.bar{height:7px;background:#ecece8;border-radius:8px;margin-top:9px;overflow:hidden}.bar i{display:block;height:100%;background:#252525}.debug{font-size:12px;color:#777;white-space:pre-wrap;background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px;overflow:auto}.hidden{display:none!important}@media(max-width:620px){.rangeRow{grid-template-columns:1fr}.scale button.na{justify-self:start}}
+.result h1{font-size:42px}.summaryCard{background:#fff;border:1px solid var(--line);border-radius:18px;padding:16px 16px;margin:18px 0 24px}.summaryCard h2{font-size:22px;margin:0 0 10px}.summaryText{font-size:18px;line-height:1.48;margin:0}.summaryNext{font-size:15px;line-height:1.55;color:#555;margin:12px 0 0}.resultActions{align-items:stretch}.actionLink{display:inline-flex;align-items:center;justify-content:center;text-decoration:none}.section{margin:24px 0}.section h2{font-size:19px;margin:0 0 10px}.rows{display:grid;gap:8px}.row{padding:12px 14px}.rowtop{display:flex;justify-content:space-between;gap:10px}.name{font-weight:760}.score{font-size:13px;color:#666}.cue{font-size:12px;color:#777;margin-top:3px}.bar{height:7px;background:#ecece8;border-radius:8px;margin-top:9px;overflow:hidden}.bar i{display:block;height:100%;background:#252525}.debug{font-size:12px;color:#777;white-space:pre-wrap;background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px;overflow:auto}.hidden{display:none!important}@media(max-width:620px){.rangeRow{grid-template-columns:1fr}.scale button.na{justify-self:start}}
 </style>
 </head>
 <body>
@@ -38,11 +38,12 @@
     <h1>Dvi perspektyvos.</h1>
     <p class="note">Tai šios sesijos pasirinkimų ir tavo dabartinio įsivertinimo aprašymas, ne asmenybės profilis ar diagnozė.</p>
     <p id="saveStatus" class="note">Sesijos išsaugojimas tikrinamas…</p>
+    <div class="summaryCard"><h2>Trumpai</h2><p id="summaryText" class="summaryText"></p><p id="summaryNext" class="summaryNext"></p></div>
     <div class="section"><h2>Kas kartojosi</h2><div id="repeatRows" class="rows"></div></div>
     <div class="section"><h2>Kaip pats vertini dabartinę situaciją</h2><div id="suffRows" class="rows"></div></div>
     <div class="section"><h2>Kur verta pažvelgti dar kartą</h2><div id="compareRows" class="rows"></div></div>
-    <div class="actions"><button id="export" class="secondary">Eksportuoti JSON</button><button id="restart" class="primary">Nauja sesija</button></div>
-    <p id="exportStatus" class="note"></p>
+    <div class="actions resultActions"><button id="restart" class="primary">Atlikti dar kartą</button><a id="back2rasi" class="secondary actionLink" href="https://2rasi.lt/#experiments">Grįžti į 2rasi</a><button id="export" class="secondary hidden">Eksportuoti JSON</button></div>
+    <p id="exportStatus" class="note hidden"></p>
     <details id="debugDetails" class="section hidden"><summary>Tyrimo diagnostika</summary><pre id="debug" class="debug"></pre></details>
   </section>
 </div>
@@ -63,7 +64,9 @@ const DOMAINS=[
 {id:'MEANING_CONTRIBUTION',title:'Prasmė ir indėlis',families:[],items:[['MEANING_PURPOSE','Tai, ką šiuo metu darau, man atrodo pakankamai prasminga.'],['CONTRIBUTION','Jaučiu, kad turiu pakankamai galimybių prisidėti prie kažko svarbaus ne tik sau.']]}
 ];
 const $=id=>document.getElementById(id),screens=[...document.querySelectorAll('.screen')],stimBtns=[...document.querySelectorAll('.stim')];
-if(DEBUG_MODE)$('debugDetails').classList.remove('hidden');
+const FROM_2RASI=new URLSearchParams(location.search).get('from');
+$('back2rasi').href=FROM_2RASI==='com'?'https://2rasi.com/#experiments':'https://2rasi.lt/#experiments';
+if(DEBUG_MODE){$('debugDetails').classList.remove('hidden');$('export').classList.remove('hidden');$('exportStatus').classList.remove('hidden')}
 let bank=null,assignment=null,state=null,t0=0,locked=false,suffIndex=0,lastPointerType=null,progressTimer=null,suffValidationShown=false;
 function saveLocalDraft(){if(!state||state.completedAt)return;try{localStorage.setItem(DRAFT_KEY,JSON.stringify(state))}catch(err){console.warn('local draft save failed',err)}}
 function clearLocalDraft(){try{localStorage.removeItem(DRAFT_KEY)}catch(err){console.warn('local draft clear failed',err)}}
@@ -87,12 +90,56 @@ function renderSuff(){const d=DOMAINS[suffIndex];$('suffCount').textContent=`${s
 function currentDomainComplete(){return DOMAINS[suffIndex].items.every(([key])=>Object.prototype.hasOwnProperty.call(state.sufficiency,key))}
 $('suffBack').onclick=()=>{if(suffIndex>0){suffValidationShown=false;suffIndex--;renderSuff()}};$('suffNext').onclick=()=>{if(!currentDomainComplete()){suffValidationShown=true;renderSuff();$('suffError').scrollIntoView({behavior:'smooth',block:'center'});return}suffValidationShown=false;if(suffIndex<5){suffIndex++;renderSuff()}else finish()};
 function familyStats(){const out=Object.fromEntries(FAMILY_SET.map(f=>[f.id,{shown:0,chosen:0,shownA:0,shownB:0,chosenA:0,chosenB:0,crossExemplar:false}]));for(const c of state.choices){for(const s of c.stimuli){const x=out[s.familyId];x.shown++;if(s.exemplarId.endsWith('-A'))x.shownA++;else if(s.exemplarId.endsWith('-B'))x.shownB++}if(c.choice){const x=out[c.choice.familyId];x.chosen++;if(c.choice.exemplarId.endsWith('-A'))x.chosenA++;else if(c.choice.exemplarId.endsWith('-B'))x.chosenB++}}for(const x of Object.values(out)){x.crossExemplar=x.chosenA>0&&x.chosenB>0;x.rate=x.shown?x.chosen/x.shown:0;x.exemplarConcentrated=x.chosen>=2&&!x.crossExemplar}return out}
-function domainStats(){return Object.fromEntries(DOMAINS.map(d=>[d.id,mean(d.items.map(([k])=>state.sufficiency[k]).filter(v=>v!==null))]))}
+function domainCoverage(){return Object.fromEntries(DOMAINS.map(d=>{const vals=d.items.map(([k])=>state.sufficiency[k]);const answered=vals.filter(v=>Number.isFinite(v));return[d.id,{answered:answered.length,total:vals.length,complete:answered.length===vals.length,value:answered.length?mean(answered):null}]}))}
+function domainStats(){const c=domainCoverage();return Object.fromEntries(DOMAINS.map(d=>[d.id,c[d.id].value]))}
 function macroStats(){const shown={BASIC:0,SOCIAL:0,AGENCY:0,GROWTH:0},chosen={BASIC:0,SOCIAL:0,AGENCY:0,GROWTH:0};for(const c of state.choices){for(const s of c.stimuli)shown[s.macro]++;if(c.choice)chosen[c.choice.macro]++}return Object.fromEntries(Object.keys(shown).map(k=>[k,{shown:shown[k],chosen:chosen[k],rate:shown[k]?chosen[k]/shown[k]:null}]))}
 async function submitSession(){const el=$('saveStatus');try{el.textContent='Išsaugoma anoniminė tyrimo sesija…';const r=await fetch(API_PATH,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(state)});const data=await r.json().catch(()=>({}));if(!r.ok||!data.ok)throw new Error(data.message||`HTTP ${r.status}`);state.submission={ok:true,inserted:Boolean(data.inserted),submissionId:data.submissionId||null};clearLocalDraft();el.textContent='Anoniminė tyrimo sesija išsaugota.';el.className='note ok';$('debug').textContent=JSON.stringify(state,null,2)}catch(err){state.submission={ok:false,error:String(err)};el.textContent='Automatinis išsaugojimas nepavyko. Rezultatas išlieka, JSON gali eksportuoti rankiniu būdu.';el.className='note bad';$('debug').textContent=JSON.stringify(state,null,2);console.error(err)}}
-function finish(){state.completedAt=new Date().toISOString();state.familyStats=familyStats();state.domainStats=domainStats();state.macroStats=macroStats();state.rtMedianMs=median(state.choices.map(x=>x.rtMs));state.noClearChoiceCount=state.choices.filter(x=>x.noClearChoice).length;show('result');renderResult();submitSession()}
+function finish(){state.completedAt=new Date().toISOString();state.familyStats=familyStats();state.domainCoverage=domainCoverage();state.domainStats=Object.fromEntries(DOMAINS.map(d=>[d.id,state.domainCoverage[d.id].value]));state.macroStats=macroStats();state.rtMedianMs=median(state.choices.map(x=>x.rtMs));state.noClearChoiceCount=state.choices.filter(x=>x.noClearChoice).length;show('result');renderResult();submitSession()}
 function addRow(mount,name,score,cue,pct){const r=document.createElement('div');r.className='row';r.innerHTML=`<div class="rowtop"><div class="name">${name}</div><div class="score">${score}</div></div><div class="cue">${cue||''}</div>${pct===null?'':`<div class="bar"><i style="width:${pct}%"></i></div>`}`;mount.appendChild(r)}
-function renderResult(){const rep=$('repeatRows');rep.innerHTML='';const repeated=Object.entries(state.familyStats).filter(([,x])=>x.chosen>=2&&x.crossExemplar).sort((a,b)=>b[1].chosen-a[1].chosen);if(!repeated.length)addRow(rep,'Nė viena tema nepasikartojo per abu savo vaizdus','', 'Šioje sesijoje pasirinkimai buvo labiau išsisklaidę arba susitelkė ties pavieniais exemplarais.',null);else repeated.forEach(([id,x])=>addRow(rep,FAMILY_LABEL[id],`${x.chosen}/3`,x.chosen===3?'Kartojosi kiekvieną kartą, kai šeima pasirodė.':'Kartojosi per du skirtingus šeimos vaizdus.',x.rate*100));const sr=$('suffRows');sr.innerHTML='';for(const d of DOMAINS){const v=state.domainStats[d.id];addRow(sr,d.title,v===null?'Sunku pasakyti':v.toFixed(1),v===null?'':'1 = visai nepakanka · 5 = visiškai pakanka',v===null?null:(v/5)*100)}const cr=$('compareRows');cr.innerHTML='';const comps=[];for(const d of DOMAINS){if(!d.families.length)continue;const rel=d.families.filter(f=>state.familyStats[f]?.chosen>=2&&state.familyStats[f]?.crossExemplar);if(!rel.length)continue;const v=state.domainStats[d.id];if(v===null)continue;const famNames=rel.map(f=>FAMILY_LABEL[f]).join(', ');let cue;if(v<=2.5)cue=`${famNames} kartojosi per skirtingus vaizdus, o šią platesnę sritį pats vertini kaip mažiau pakankamą.`;else if(v>=3.5)cue=`${famNames} kartojosi per skirtingus vaizdus ir kartu ši platesnė sritis atrodo gana pakankama.`;else cue=`${famNames} kartojosi, o tavo dabartinis šios platesnės srities įvertinimas yra per vidurį.`;comps.push({name:d.title,cue})}if(!comps.length)addRow(cr,'Ryškaus sugretinimo šioje sesijoje nėra','', 'Tai nėra problema: abu kanalai neprivalo sudaryti tvarkingo vieno profilio.',null);else comps.slice(0,3).forEach(c=>addRow(cr,c.name,'',c.cue,null));$('debug').textContent=JSON.stringify(state,null,2)}
+function joinLt(xs){if(!xs.length)return'';if(xs.length===1)return xs[0];return `${xs.slice(0,-1).join(', ')} ir ${xs.at(-1)}`}
+function renderResult(){
+  const coverage=state.domainCoverage||domainCoverage();
+  const rep=$('repeatRows');rep.innerHTML='';
+  const repeated=Object.entries(state.familyStats).filter(([,x])=>x.chosen>=2&&x.crossExemplar).sort((a,b)=>b[1].chosen-a[1].chosen);
+  if(!repeated.length)addRow(rep,'Nė viena tema nepasikartojo per abu savo vaizdus','', 'Šioje sesijoje pasirinkimai buvo labiau išsisklaidę arba susitelkė ties pavieniais vaizdais.',null);
+  else repeated.forEach(([id,x])=>addRow(rep,FAMILY_LABEL[id],`${x.chosen}/3`,x.chosen===3?'Kartojosi kiekvieną kartą, kai ši tema pasirodė.':'Kartojosi per du skirtingus šios temos vaizdus.',x.rate*100));
+
+  const sr=$('suffRows');sr.innerHTML='';
+  for(const d of DOMAINS){
+    const c=coverage[d.id],v=c.value;
+    if(c.answered===0)addRow(sr,d.title,'Sunku pasakyti','0/2 atsakyta',null);
+    else if(!c.complete)addRow(sr,d.title,`${c.answered}/${c.total} atsakyta`,'Dalinė informacija. Vieno atsakymo nepakanka pilnam šios srities įvertinimui.',null);
+    else addRow(sr,d.title,v.toFixed(1),'2/2 atsakyta · 1 = visai nepakanka · 5 = visiškai pakanka',(v/5)*100);
+  }
+
+  const cr=$('compareRows');cr.innerHTML='';
+  const comps=[];
+  for(const d of DOMAINS){
+    if(!d.families.length||!coverage[d.id].complete)continue;
+    const rel=d.families.filter(f=>state.familyStats[f]?.chosen>=2&&state.familyStats[f]?.crossExemplar);
+    if(!rel.length)continue;
+    const v=state.domainStats[d.id];
+    const famNames=rel.map(f=>FAMILY_LABEL[f]).join(', ');
+    let cue;
+    if(v<=2.5)cue=`${famNames} kartojosi per skirtingus vaizdus, o šią platesnę sritį pats vertini kaip mažiau pakankamą.`;
+    else if(v>=3.5)cue=`${famNames} kartojosi per skirtingus vaizdus ir kartu ši platesnė sritis atrodo gana pakankama.`;
+    else cue=`${famNames} kartojosi, o tavo dabartinis šios platesnės srities įvertinimas yra per vidurį.`;
+    comps.push({name:d.title,cue});
+  }
+  if(!comps.length)addRow(cr,'Ryškaus sugretinimo šioje sesijoje nėra','', 'Tai nėra problema: abi perspektyvos neprivalo sudaryti tvarkingo vieno profilio.',null);
+  else comps.slice(0,3).forEach(c=>addRow(cr,c.name,'',c.cue,null));
+
+  const names=repeated.slice(0,3).map(([id])=>FAMILY_LABEL[id]);
+  let first;
+  if(!repeated.length)first='Šioje sesijoje neatsirado tema, kuri pasikartotų per abu savo vaizdus. Pasirinkimai buvo labiau išsisklaidę.';
+  else first=`Per skirtingus vaizdus šioje sesijoje kartojosi ${joinLt(names)}${repeated.length>3?' ir dar kelios temos':''}.`;
+  let second;
+  if(comps.length)second=`Su tavo dabartiniu įsivertinimu verta sugretinti ${joinLt(comps.slice(0,2).map(c=>c.name.toLowerCase()))}. Žemiau matai, kur šios dvi perspektyvos susitinka.`;
+  else second='Su dabartinio pakankamumo vertinimu aiškaus sugretinimo nėra. Ir tai yra normalus šios sesijos rezultatas.';
+  $('summaryText').textContent=`${first} ${second}`;
+  $('summaryNext').textContent='Tai nėra išvada apie tai, ko tau trūksta. Žiūrėk į rezultatą kaip į klausimą: ar kuri nors iš šių vietų atpažįstama tavo dabartinėje situacijoje? Jei smalsu, kitą kartą gali atlikti sesiją dar kartą ir pažiūrėti, kas išlieka.';
+  $('debug').textContent=JSON.stringify(state,null,2);
+}
 $('start').onclick=()=>($('start').dataset.resume==='1'?resumeSession():startSession()).catch(err=>{alert(String(err));console.error(err)});$('restart').onclick=()=>{clearLocalDraft();location.reload()};async function exportJson(){
   const text=JSON.stringify(state,null,2),name=`priolens_open14_${state.seed}.json`;
   const file=new File([text],name,{type:'application/json'});
