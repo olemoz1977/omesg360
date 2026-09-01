@@ -1,0 +1,70 @@
+name: Promote PrioLens bank to prepilot v01
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/promote-priolens-bank-prepilot-v01.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  FTP_HOST: 46.202.142.134
+  FTP_USER: ${{ secrets.HOSTINGER_FTP_USER }}
+  FTP_PASSWORD: ${{ secrets.HOSTINGER_FTP_PASSWORD }}
+  RUNTIME_REMOTE_DIR: /domains/omesg360.eu/public_html/priolens-open14-v02
+
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Promote bank metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('priolens/open14-v02/bank.json')
+          b=json.loads(p.read_text())
+          b['status']='PREPILOT_HARDENING'
+          b['assetReviewStatus']='OWNER_FINALIZED_FINAL_AUDIT_PASS'
+          p.write_text(json.dumps(b,ensure_ascii=False,indent=2)+'\n')
+          PY
+          python -m json.tool priolens/open14-v02/bank.json >/dev/null
+
+      - name: Commit bank metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add priolens/open14-v02/bank.json
+          git commit -m 'chore(priolens): mark Open14 bank prepilot hardening'
+          git push
+
+      - name: Deploy promoted bank
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq lftp
+          lftp -c "set ftp:ssl-allow no; set net:max-retries 4; set net:timeout 30; open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; put -O \"$RUNTIME_REMOTE_DIR/\" priolens/open14-v02/bank.json"
+
+      - name: Live metadata smoke
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsS --retry 4 --retry-delay 2 'https://omesg360.eu/priolens-open14-v02/bank.json' -o /tmp/bank.json
+          python - <<'PY'
+          import json
+          b=json.load(open('/tmp/bank.json'))
+          assert b['status']=='PREPILOT_HARDENING'
+          assert b['assetReviewStatus']=='OWNER_FINALIZED_FINAL_AUDIT_PASS'
+          print('PASS: live bank promoted to PREPILOT_HARDENING')
+          PY
