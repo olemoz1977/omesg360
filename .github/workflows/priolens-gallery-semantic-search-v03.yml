@@ -1,0 +1,182 @@
+name: PrioLens Gallery semantic candidate search v03
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/priolens-gallery-semantic-search-v03.yml
+
+permissions:
+  contents: read
+
+env:
+  FTP_HOST: 46.202.142.134
+  FTP_USER: ${{ secrets.HOSTINGER_FTP_USER }}
+  FTP_PASSWORD: ${{ secrets.HOSTINGER_FTP_PASSWORD }}
+  REMOTE_GALLERY: /domains/omesg360.eu/public_html/priolens-research-assets/Gallery
+  REVIEW_DIR: /domains/omesg360.eu/public_html/priolens-candidate-review-v02
+
+jobs:
+  search:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq lftp tesseract-ocr
+          python -m pip install --quiet pillow transformers
+          python -m pip install --quiet torch torchvision --index-url https://download.pytorch.org/whl/cpu
+
+      - name: Mirror Gallery
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/gallery /tmp/review
+          lftp -c "set ftp:ssl-allow no; set net:max-retries 4; set net:timeout 30; open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; mirror --parallel=4 --only-newer \"$REMOTE_GALLERY\" /tmp/gallery"
+
+      - name: Rank Gallery with CLIP and build mobile review page
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, html, subprocess
+          from pathlib import Path
+          from urllib.parse import quote
+          from PIL import Image
+          import torch
+          from transformers import CLIPModel, CLIPProcessor
+
+          gallery=Path('/tmp/gallery')
+          out=Path('/tmp/review')
+          bank=json.loads(Path('priolens/open14-v02/bank.json').read_text(encoding='utf-8'))
+
+          excluded=set()
+          for fam in bank['families'].values():
+              for ex in fam['exemplars']:
+                  for key in ('runtimePath','sourceRuntimePath','previousRuntimePath'):
+                      v=ex.get(key)
+                      if v and '/Gallery/' in v:
+                          excluded.add(Path(v).name)
+          excluded.update({'1786077050034.png','20260730_230415808.png','S10.webp','S04.webp','20260811_180451129.png'})
+
+          targets={
+            'REST-B':[
+              'a calm restorative break, resting, relaxation, physical recovery, quiet pause',
+              'a person or place clearly inviting rest and recovery, not work or achievement'
+            ],
+            'ORDER-A':[
+              'tools neatly organized on a shadow board with clearly assigned places',
+              'objects arranged in obvious designated positions, visual order and structure'
+            ],
+            'ORDER-B':[
+              'clearly marked assigned zones or spaces, structured layout, designated places',
+              'parking or storage spaces with clear boundaries and assigned positions'
+            ],
+            'CONTROL-A':[
+              'a hand using a real physical valve lever knob or control to directly change a system',
+              'credible direct control mechanism, adjusting flow power direction or state with one control'
+            ],
+            'KNOWLEDGE-B':[
+              'active learning on a laptop or computer, studying and understanding new information',
+              'digital learning, online study, educational material on a computer, clearly learning not working'
+            ],
+            'BELONGING-B':[
+              'several people clearly together as one group, shared belonging and inclusion',
+              'being part of a group, equal togetherness, no single person receiving special attention'
+            ],
+            'OPPORTUNITY-A':[
+              'a clear valuable opportunity ready to use right now, available possibility, easy to act on',
+              'something valuable prepared and accessible, inviting immediate use or action'
+            ],
+          }
+
+          valid=[]
+          for p in sorted(gallery.iterdir()):
+              if not p.is_file() or p.name in excluded: continue
+              try:
+                  with Image.open(p) as im: im.verify()
+                  valid.append(p)
+              except Exception: pass
+          print('GALLERY_VALID_CANDIDATES=',len(valid),'EXCLUDED=',len(excluded))
+
+          model_id='openai/clip-vit-base-patch32'
+          model=CLIPModel.from_pretrained(model_id)
+          proc=CLIPProcessor.from_pretrained(model_id)
+          model.eval()
+
+          text_emb={}
+          with torch.no_grad():
+              for label,prompts in targets.items():
+                  t=proc(text=prompts,return_tensors='pt',padding=True)
+                  base=model.text_model(input_ids=t['input_ids'], attention_mask=t.get('attention_mask')).pooler_output
+                  f=model.text_projection(base)
+                  f=f/f.norm(dim=-1,keepdim=True)
+                  f=f.mean(dim=0); f=f/f.norm()
+                  text_emb[label]=f
+
+          feats=[]; paths=[]; sizes={}
+          bs=24
+          for i in range(0,len(valid),bs):
+              batch=valid[i:i+bs]; ims=[]; good=[]
+              for p in batch:
+                  try:
+                      im=Image.open(p).convert('RGB'); sizes[p.name]=im.size
+                      ims.append(im.copy()); good.append(p)
+                  except Exception: pass
+              if not good: continue
+              x=proc(images=ims,return_tensors='pt')
+              with torch.no_grad():
+                  base=model.vision_model(pixel_values=x['pixel_values']).pooler_output
+                  f=model.visual_projection(base)
+                  f=f/f.norm(dim=-1,keepdim=True)
+              feats.append(f); paths.extend(good)
+          F=torch.cat(feats,dim=0)
+
+          wm_words=('kling','kiing','gemini','openai')
+          def ocr_mark(p):
+              try:
+                  q=subprocess.run(['tesseract',str(p),'stdout','--psm','11'],capture_output=True,text=True,timeout=15)
+                  txt=' '.join(q.stdout.lower().split()); hit=[w for w in wm_words if w in txt]
+                  return txt[:120],hit
+              except Exception: return '',[]
+
+          report={}
+          for label,te in text_emb.items():
+              scores=(F@te).tolist()
+              ranked=sorted(zip(scores,paths),key=lambda x:x[0],reverse=True)[:10]
+              rows=[]; print('\n===',label,'===')
+              for rank,(score,p) in enumerate(ranked,1):
+                  txt,hit=ocr_mark(p); w,h=sizes[p.name]
+                  row={'rank':rank,'file':p.name,'score':round(float(score),4),'size':[w,h],'watermarkHit':hit,'ocr':txt}
+                  rows.append(row)
+                  print(rank,round(float(score),4),p.name,f'{w}x{h}','WM='+(','.join(hit) if hit else '-'))
+              report[label]=rows
+
+          (out/'report.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8')
+          css='''body{font-family:system-ui;background:#101114;color:#eee;margin:0;padding:14px}h1{font-size:22px;margin:4px 0 8px}.note{color:#aaa;font-size:13px;margin-bottom:22px}.sec{margin:28px 0}.sec h2{font-size:19px;position:sticky;top:0;background:#101114;padding:8px 0;z-index:2}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.card{background:#1b1d22;border:1px solid #343740;border-radius:12px;padding:7px}.card img{width:100%;aspect-ratio:1/1;object-fit:contain;background:#080808;border-radius:8px}.meta{font-size:12px;line-height:1.35;margin-top:6px;word-break:break-all}.rank{font-weight:700}.wm{color:#ffb36b}.clean{color:#92d49c}@media(min-width:800px){.grid{grid-template-columns:repeat(4,minmax(0,1fr))}}'''
+          body=['<!doctype html><html lang="lt"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>PrioLens candidate review v02</title><style>',css,'</style></head><body>']
+          body.append('<h1>PrioLens · Gallery kandidatų atranka v02</h1><div class="note">CLIP balas yra tik paieškos reitingas, ne stimulo validumas. Rinkis pagal pirmą ~1 s vaizdo skaitymą. WM = OCR aptiktas watermark tekstas.</div>')
+          for label,rows in report.items():
+              body.append(f'<section class="sec"><h2>{html.escape(label)}</h2><div class="grid">')
+              for r in rows:
+                  fn=r['file']; url='/priolens-research-assets/Gallery/'+quote(fn); wm=','.join(r['watermarkHit'])
+                  status=f'<span class="wm">WM {html.escape(wm)}</span>' if wm else '<span class="clean">WM nerasta</span>'
+                  body.append(f'<div class="card"><img loading="lazy" src="{url}"><div class="meta"><span class="rank">#{r["rank"]}</span> · score {r["score"]}<br>{html.escape(fn)}<br>{r["size"][0]}×{r["size"][1]} · {status}</div></div>')
+              body.append('</div></section>')
+          body.append('</body></html>')
+          (out/'index.html').write_text(''.join(body),encoding='utf-8')
+          PY
+
+      - name: Deploy candidate review page
+        shell: bash
+        run: |
+          set -euo pipefail
+          lftp -c "set ftp:ssl-allow no; set net:max-retries 4; set net:timeout 30; open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; mkdir -p \"$REVIEW_DIR\"; mirror -R /tmp/review \"$REVIEW_DIR\""
+
+      - name: Smoke review page
+        run: |
+          curl -fsS --retry 5 --retry-delay 3 https://omesg360.eu/priolens-candidate-review-v02/ | grep -q 'Gallery kandidatų atranka v02'
