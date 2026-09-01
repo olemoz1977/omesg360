@@ -147,10 +147,19 @@ try {
     if ($recentCount > 5000) fail_json(429, 'Submission limit reached');
 
     $submissionId = uuid_v4();
-    $stmt = $pdo->prepare("INSERT IGNORE INTO priolens_open14_sessions
+    $stmt = $pdo->prepare("INSERT INTO priolens_open14_sessions
         (submission_id, session_uuid, session_schema, bank_schema, planner_schema, assigner_schema,
          seed, started_at_client, completed_at_client, payload_json)
-        VALUES (?,?,?,?,?,?,?,?,?,?)");
+        VALUES (?,?,?,?,?,?,?,?,?,?)
+        ON DUPLICATE KEY UPDATE
+          session_schema=VALUES(session_schema),
+          bank_schema=VALUES(bank_schema),
+          planner_schema=VALUES(planner_schema),
+          assigner_schema=VALUES(assigner_schema),
+          seed=VALUES(seed),
+          started_at_client=VALUES(started_at_client),
+          completed_at_client=VALUES(completed_at_client),
+          payload_json=VALUES(payload_json)");
     $stmt->execute([
         $submissionId,$sessionUuid,$body['schema'],$body['bankSchema'],$body['planSchema'],
         $body['assignerSchema'],$seed,$body['startedAt'],$body['completedAt'],$canonicalPayload
