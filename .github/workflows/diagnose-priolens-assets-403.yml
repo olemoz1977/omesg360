@@ -1,0 +1,37 @@
+name: Diagnose PrioLens research assets 403
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/diagnose-priolens-assets-403.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  FTP_HOST: 46.202.142.134
+  FTP_USER: ${{ secrets.HOSTINGER_FTP_USER }}
+  FTP_PASSWORD: ${{ secrets.HOSTINGER_FTP_PASSWORD }}
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install FTP client
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq lftp
+      - name: Inspect FTP existence and HTTP variants
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo '=== FTP Gallery sample ==='
+          lftp -c "set ftp:ssl-allow no; open -u \"$FTP_USER\",\"$FTP_PASSWORD\" ftp://$FTP_HOST; cls -l /domains/omesg360.eu/public_html/priolens-research-assets/Gallery/S08.webp; cls -l /domains/omesg360.eu/public_html/priolens-research-assets/Gallery/20260829_233727670.png; cls -l /domains/omesg360.eu/public_html/priolens-research-assets/Open14-v02/priolens_care-a_v01.webp; cls -la /domains/omesg360.eu/public_html/priolens-research-assets/ | head -50"
+
+          u='https://omesg360.eu/priolens-research-assets/Open14-v02/priolens_care-a_v01.webp'
+          echo '=== plain curl ==='
+          curl -sS -D - -o /dev/null "$u" | sed -n '1p;/^[Cc]ontent-[Tt]ype:/p;/^[Ll]ocation:/p;/^[Ss]erver:/p'
+          echo '=== browser UA ==='
+          curl -sS -A 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 Chrome/140 Mobile Safari/537.36' -D - -o /dev/null "$u" | sed -n '1p;/^[Cc]ontent-[Tt]ype:/p;/^[Ll]ocation:/p;/^[Ss]erver:/p'
+          echo '=== browser UA + same-origin referer ==='
+          curl -sS -A 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 Chrome/140 Mobile Safari/537.36' -e 'https://omesg360.eu/priolens-open14-v02/' -D - -o /dev/null "$u" | sed -n '1p;/^[Cc]ontent-[Tt]ype:/p;/^[Ll]ocation:/p;/^[Ss]erver:/p'
