@@ -16,6 +16,8 @@
 <div id="mount">Kraunamas bankas…</div>
 <script>
 const knownFlags={
+  'REST-B':['REPLACE_REQUIRED_WATERMARK','2_WATERMARKS_VISIBLE'],
+  'ORDER-B':['REPLACE_REQUIRED_SEMANTIC_MISMATCH'],
   'CONNECTION-B':['WATERMARK_REVIEW_REQUIRED']
 };
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
