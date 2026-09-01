@@ -20,20 +20,21 @@ env:
 jobs:
   build-deploy:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
       - run: python -m pip install --quiet pillow
-      - name: Download five active portrait sources
+      - name: Stage canonical portrait mirrors
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p /tmp/open14-geometry-review/src
-          base='https://omesg360.eu/priolens-research-assets/Gallery'
-          for f in 20260730_215302742.png 20260731_050136952.png 20260730_230415808.png 20260731_043300801.png 20260730_230227381.png; do
-            curl -fL --retry 5 --retry-all-errors --retry-delay 2 -A 'Mozilla/5.0' -e 'https://omesg360.eu/priolens-open14-v02/' "$base/$f" -o "/tmp/open14-geometry-review/src/$f"
-            sleep 1
-          done
+          dst=/tmp/open14-geometry-review/src
+          mkdir -p "$dst"
+          cp priolens/gallery-review/open14-v01/20260730_215302742.png "$dst/"
+          cp priolens/gallery-review/open14-v01/20260731_050136952.png "$dst/"
+          cp priolens/gallery-review/open14-v01/20260730_230415808.png "$dst/"
+          cp priolens/gallery-review/open14-v01/20260730_230227381.png "$dst/"
+          cp priolens/gallery-review/open-spectrum-v01/20260731_043300801.png "$dst/"
       - name: Build deterministic crop review
         run: python priolens/open14-v02/tools/build_geometry_review.py
       - name: Validate review outputs
@@ -58,7 +59,7 @@ jobs:
           set -euo pipefail
           curl -fsS --retry 4 --retry-delay 2 'https://omesg360.eu/priolens-geometry-review-v01/' -o /tmp/review
           grep -q 'Open14 1:1 crop review' /tmp/review
-          for f in rest-a_sq_top_v01.webp rest-a_sq_center_v01.webp rest-a_sq_bottom_v01.webp knowledge-a_sq_center_v01.webp; do
+          for f in rest-a_sq_top_v01.webp rest-a_sq_center_v01.webp rest-a_sq_bottom_v01.webp knowledge-a_sq_center_v01.webp belonging-b_sq_center_v01.webp; do
             curl -fsS --retry 4 --retry-delay 2 "https://omesg360.eu/priolens-research-assets/Open14-geometry-v01/$f" -o /dev/null
           done
           echo 'PASS: isolated geometry review live; production bank untouched'
