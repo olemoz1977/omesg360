@@ -1,0 +1,76 @@
+name: Hide PrioLens participant diagnostics v01
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/hide-priolens-participant-debug-v01.yml
+
+permissions:
+  contents: write
+
+env:
+  FTP_HOST: 46.202.142.134
+  FTP_USER: ${{ secrets.HOSTINGER_FTP_USER }}
+  FTP_PASSWORD: ${{ secrets.HOSTINGER_FTP_PASSWORD }}
+  REMOTE_DIR: /domains/omesg360.eu/public_html/priolens-open14-v02
+
+jobs:
+  patch-deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Patch participant debug visibility
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('priolens/open14-v02/index.html')
+          s=p.read_text()
+          old='<details class="section"><summary>Tyrimo diagnostika</summary><pre id="debug" class="debug"></pre></details>'
+          new='<details id="debugDetails" class="section hidden"><summary>Tyrimo diagnostika</summary><pre id="debug" class="debug"></pre></details>'
+          if old not in s:
+              raise SystemExit('diagnostics block anchor not found')
+          s=s.replace(old,new,1)
+          anchor="const DRAFT_KEY='priolens.open14.v02.draft';"
+          repl=anchor+"\nconst DEBUG_MODE=new URLSearchParams(location.search).get('debug')==='1';"
+          if anchor not in s:
+              raise SystemExit('debug mode constant anchor not found')
+          s=s.replace(anchor,repl,1)
+          anchor2="const $=id=>document.getElementById(id),screens=[...document.querySelectorAll('.screen')],stimBtns=[...document.querySelectorAll('.stim')];"
+          repl2=anchor2+"\nif(DEBUG_MODE)$('debugDetails').classList.remove('hidden');"
+          if anchor2 not in s:
+              raise SystemExit('debug reveal anchor not found')
+          s=s.replace(anchor2,repl2,1)
+          p.write_text(s)
+          PY
+          grep -q 'id="debugDetails" class="section hidden"' priolens/open14-v02/index.html
+          grep -q "const DEBUG_MODE=new URLSearchParams(location.search).get('debug')==='1';" priolens/open14-v02/index.html
+          grep -q "if(DEBUG_MODE)\$('debugDetails').classList.remove('hidden');" priolens/open14-v02/index.html
+      - name: Commit runtime patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add priolens/open14-v02/index.html
+          git commit -m 'fix(priolens): hide diagnostics from participants'
+          git push origin HEAD:main
+      - name: Install FTP client
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq lftp
+      - name: Publish patched runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          lftp -c "set ftp:ssl-allow no; set net:max-retries 4; set net:timeout 30; open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; put -O \"$REMOTE_DIR/\" priolens/open14-v02/index.html"
+      - name: Live smoke
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsS --retry 4 --retry-delay 1 https://omesg360.eu/priolens-open14-v02/ > /tmp/live.html
+          grep -q 'id="debugDetails" class="section hidden"' /tmp/live.html
+          grep -q "const DEBUG_MODE=new URLSearchParams(location.search).get('debug')==='1';" /tmp/live.html
