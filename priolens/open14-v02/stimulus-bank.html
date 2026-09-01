@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="lt">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PrioLens · Open14 stimulus bank</title>
+<style>
+:root{--bg:#f5f5f2;--card:#fff;--line:#ddd;--ink:#181818;--muted:#6e6e6e;--warn:#7a4b00;--bad:#8a1f1f;--ok:#245b39}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,Segoe UI,sans-serif}main{max-width:1180px;margin:auto;padding:20px 12px 60px}h1{margin:0 0 6px;font-size:28px}.intro{max-width:850px;color:var(--muted);margin:0 0 18px}.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 20px}.pill{border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 10px;font-size:12px}.family{margin:18px 0 28px}.familyHead{display:flex;gap:8px;align-items:baseline;margin-bottom:8px}.familyHead h2{margin:0;font-size:20px}.macro{font-size:12px;color:var(--muted);font-weight:700}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px;display:grid;grid-template-columns:180px 1fr;gap:13px}.preview{width:100%;aspect-ratio:1/1;object-fit:contain;background:#eee;border-radius:12px;border:1px solid var(--line)}.id{font-weight:800;font-size:16px}.meaning{margin:6px 0 10px;font-size:16px}.label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-top:8px}.path{font:11px/1.35 ui-monospace,SFMono-Regular,Consolas,monospace;word-break:break-all;color:#555}.flag{display:inline-block;margin:4px 5px 0 0;padding:4px 7px;border-radius:999px;background:#f2f2f2;font-size:11px}.flag.warn{background:#fff3d9;color:var(--warn)}.flag.bad{background:#fde7e7;color:var(--bad)}.flag.ok{background:#e7f4eb;color:var(--ok)}.empty{color:var(--muted)}@media(max-width:820px){.grid{grid-template-columns:1fr}.card{grid-template-columns:120px 1fr}}@media(max-width:500px){.card{grid-template-columns:1fr}.preview{max-width:240px}.grid{gap:10px}}
+</style>
+</head>
+<body><main>
+<h1>Open14 stimulus bank</h1>
+<p class="intro">Owner katalogas. Kiekvienas aktyvus vaizdas susietas su konkrečiu exemplar ID ir jo pirmo impulso taikiniu. Keičiant vaizdą svarbiausia išlaikyti šį pirmą skaitymą, o ne failo pavadinimą. Puslapis skaito gyvą <code>bank.json</code>, todėl mappingas atsinaujina kartu su runtime banku.</p>
+<div class="toolbar"><span class="pill">14 šeimų</span><span class="pill">28 exemplarai</span><span class="pill">A / B poros</span><span class="pill">Owner tool, ne participant UI</span></div>
+<div id="mount">Kraunamas bankas…</div>
+<script>
+const knownFlags={
+  'CONNECTION-B':['WATERMARK_REVIEW_REQUIRED']
+};
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const cls=f=>/REPLACE_REQUIRED|WATERMARK/.test(f)?'bad':/BOUNDARY|REVIEW/.test(f)?'warn':/ACCEPTED|PASS/.test(f)?'ok':'';
+async function init(){
+  const r=await fetch('./bank.json',{cache:'no-store'}); if(!r.ok) throw new Error('bank.json '+r.status);
+  const b=await r.json(); const out=[];
+  for(const [fid,fam] of Object.entries(b.families)){
+    const cards=fam.exemplars.map(ex=>{
+      const meaning=ex.firstImpulseTarget||ex.firstImpulse||'';
+      const flags=[ex.status,ex.geometryStatus,...(knownFlags[ex.id]||[])].filter(Boolean);
+      const source=ex.sourceRuntimePath?`<div class="label">Originalo šaltinis</div><div class="path">${esc(ex.sourceRuntimePath)}</div>`:'';
+      const mechanism=ex.mechanism?`<div class="label">Mechanizmas / ribos</div><div>${esc(ex.mechanism)}</div>`:'';
+      const risk=ex.risk?`<div class="label">Žinoma rizika</div><div>${esc(ex.risk)}</div>`:'';
+      return `<article class="card"><div><img class="preview" src="${esc(ex.runtimePath)}" alt="${esc(ex.id)}"></div><div><div class="id">${esc(ex.id)}</div><div class="label">Keičiant išlaikyti pirmą impulsą</div><div class="meaning">${esc(meaning)}</div><div>${flags.length?flags.map(f=>`<span class="flag ${cls(f)}">${esc(f)}</span>`).join(''):'<span class="flag">ACTIVE</span>'}</div>${mechanism}${risk}<div class="label">Dabartinis runtime failas</div><div class="path">${esc(ex.runtimePath)}</div>${source}</div></article>`;
+    }).join('');
+    out.push(`<section class="family"><div class="familyHead"><h2>${esc(fid)}</h2><span class="macro">${esc(fam.macro)}</span><span class="macro">${esc(fam.display)}</span></div><div class="grid">${cards}</div></section>`);
+  }
+  document.getElementById('mount').innerHTML=out.join('');
+}
+init().catch(err=>{document.getElementById('mount').textContent='Klaida: '+err.message;console.error(err)});
+</script>
+</main></body></html>
