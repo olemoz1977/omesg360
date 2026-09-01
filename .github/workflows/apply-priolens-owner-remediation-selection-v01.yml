@@ -1,0 +1,102 @@
+name: Apply PrioLens owner remediation selections v01
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/apply-priolens-owner-remediation-selection-v01.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    env:
+      FTP_HOST: 46.202.142.134
+      FTP_USER: ${{ secrets.HOSTINGER_FTP_USER }}
+      FTP_PASSWORD: ${{ secrets.HOSTINGER_FTP_PASSWORD }}
+      RUNTIME_DIR: /domains/omesg360.eu/public_html/priolens-open14-v02
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Patch accepted owner selections
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('priolens/open14-v02/bank.json')
+          bank=json.loads(p.read_text(encoding='utf-8'))
+
+          rest=bank['families']['REST']['exemplars'][0]
+          rest['previousRuntimePath']=rest['runtimePath']
+          rest['previousAssetOriginalIntent']=rest.get('originalIntent','pasirinkimas tarp klasikinių batų ir sportbačių')
+          rest['sourceRuntimePath']='/priolens-research-assets/Gallery/20260730_233524155.png'
+          rest['runtimePath']='/priolens-research-assets/Open14-remediation-v01/rest-a_sq_bottom_v01.webp'
+          rest['geometryStatus']='HUMAN_ACCEPTED_BOTTOM_CROP_1TO1'
+          rest['status']='OWNER_ACCEPTED_REPLACEMENT_SWITCHED'
+          rest['firstImpulse']='persijungti į poilsį / namų komfortą'
+          rest['risk']='formative REST exemplar; owner selected bottom crop after direct visual review'
+          rest.pop('semanticStatus',None)
+          rest.pop('originalIntent',None)
+
+          know=bank['families']['KNOWLEDGE']['exemplars'][0]
+          know['previousRuntimePath']=know['runtimePath']
+          know['sourceRuntimePath']='/priolens-research-assets/Gallery/20260730_233054250.png'
+          know['runtimePath']='/priolens-research-assets/Open14-remediation-v01/knowledge-a_sq_top_v01.webp'
+          know['geometryStatus']='HUMAN_ACCEPTED_TOP_CROP_1TO1'
+          know['status']='OWNER_ACCEPTED_REPLACEMENT_SWITCHED'
+          know['firstImpulse']='ieškoti žinių / mokytis'
+          know['risk']='formative Learning / Understanding exemplar; owner selected top crop after direct visual review'
+          know.pop('semanticStatus',None)
+
+          ca=bank['families']['CONNECTION']['exemplars'][0]
+          ca['sourceRuntimePath']=ca['runtimePath']
+          ca['runtimePath']='/priolens-research-assets/Open14-remediation-v01/connection-a_clean_small_v01.webp'
+          ca['visualStatus']='HUMAN_ACCEPTED_WATERMARK_CLEANUP_SMALL'
+          ca['risk']='owner visually accepted small-mask cleanup; retain as formative Connection exemplar'
+
+          cb=bank['families']['CONNECTION']['exemplars'][1]
+          cb['sourceRuntimePath']=cb['runtimePath']
+          cb['runtimePath']='/priolens-research-assets/Open14-remediation-v01/connection-b_clean_small_v01.webp'
+          cb['visualStatus']='HUMAN_ACCEPTED_WATERMARK_CLEANUP_SMALL'
+          cb['risk']='owner visually accepted small-mask cleanup; retain as formative Connection exemplar'
+
+          p.write_text(json.dumps(bank,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+          PY
+
+          git config user.name 'olemoz1977'
+          git config user.email 'olemoz1977@gmail.com'
+          git add priolens/open14-v02/bank.json
+          git commit -m 'fix(priolens): apply accepted Rest Knowledge and Connection assets'
+          git push
+
+      - name: Install lftp
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq lftp
+
+      - name: Deploy current bank.json
+        shell: bash
+        run: |
+          set -euo pipefail
+          lftp -c "set ftp:ssl-allow no; set net:max-retries 4; set net:timeout 30; open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; put priolens/open14-v02/bank.json -o \"$RUNTIME_DIR/bank.json\""
+
+      - name: Smoke accepted assets and live bank
+        shell: bash
+        run: |
+          set -euo pipefail
+          for u in \
+            https://omesg360.eu/priolens-research-assets/Open14-remediation-v01/rest-a_sq_bottom_v01.webp \
+            https://omesg360.eu/priolens-research-assets/Open14-remediation-v01/knowledge-a_sq_top_v01.webp \
+            https://omesg360.eu/priolens-research-assets/Open14-remediation-v01/connection-a_clean_small_v01.webp \
+            https://omesg360.eu/priolens-research-assets/Open14-remediation-v01/connection-b_clean_small_v01.webp; do
+            curl -fsSI --retry 5 --retry-delay 2 "$u" | grep -qi '200'
+          done
+          curl -fsS --retry 5 --retry-delay 2 https://omesg360.eu/priolens-open14-v02/bank.json > /tmp/live-bank.json
+          grep -q 'rest-a_sq_bottom_v01.webp' /tmp/live-bank.json
+          grep -q 'knowledge-a_sq_top_v01.webp' /tmp/live-bank.json
+          grep -q 'connection-a_clean_small_v01.webp' /tmp/live-bank.json
+          grep -q 'connection-b_clean_small_v01.webp' /tmp/live-bank.json
