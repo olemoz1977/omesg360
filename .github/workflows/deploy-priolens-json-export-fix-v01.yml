@@ -1,0 +1,48 @@
+name: Deploy PrioLens JSON export fix v01
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/deploy-priolens-json-export-fix-v01.yml
+
+permissions:
+  contents: read
+
+env:
+  FTP_HOST: 46.202.142.134
+  FTP_USER: ${{ secrets.HOSTINGER_FTP_USER }}
+  FTP_PASSWORD: ${{ secrets.HOSTINGER_FTP_PASSWORD }}
+  REMOTE_DIR: /domains/omesg360.eu/public_html/priolens-open14-v02
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate export fix
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q 'async function exportJson' priolens/open14-v02/index.html
+          grep -q 'navigator.canShare' priolens/open14-v02/index.html
+          grep -q 'navigator.clipboard.writeText' priolens/open14-v02/index.html
+          grep -q 'id="exportStatus"' priolens/open14-v02/index.html
+      - name: Install FTP client
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq lftp
+      - name: Upload index
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ -n "${FTP_USER:-}" ]] && [[ -n "${FTP_PASSWORD:-}" ]]
+          lftp -c "set ftp:ssl-allow no; set net:max-retries 4; set net:timeout 30; open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; put -O \"$REMOTE_DIR/\" priolens/open14-v02/index.html"
+      - name: Live smoke
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsS --retry 5 --retry-delay 2 'https://omesg360.eu/priolens-open14-v02/' -o /tmp/live
+          grep -q 'async function exportJson' /tmp/live
+          grep -q 'navigator.canShare' /tmp/live
+          grep -q 'navigator.clipboard.writeText' /tmp/live
+          grep -q 'id="exportStatus"' /tmp/live
+          echo 'PASS: in-app JSON export fallback live'
