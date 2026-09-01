@@ -41,6 +41,7 @@
     <div class="section"><h2>Kaip pats vertini dabartinę situaciją</h2><div id="suffRows" class="rows"></div></div>
     <div class="section"><h2>Kur verta pažvelgti dar kartą</h2><div id="compareRows" class="rows"></div></div>
     <div class="actions"><button id="export" class="secondary">Eksportuoti JSON</button><button id="restart" class="primary">Nauja sesija</button></div>
+    <p id="exportStatus" class="note"></p>
     <details class="section"><summary>Tyrimo diagnostika</summary><pre id="debug" class="debug"></pre></details>
   </section>
 </div>
@@ -89,7 +90,20 @@ async function submitSession(){const el=$('saveStatus');try{el.textContent='Išs
 function finish(){state.completedAt=new Date().toISOString();state.familyStats=familyStats();state.domainStats=domainStats();state.macroStats=macroStats();state.rtMedianMs=median(state.choices.map(x=>x.rtMs));state.noClearChoiceCount=state.choices.filter(x=>x.noClearChoice).length;show('result');renderResult();submitSession()}
 function addRow(mount,name,score,cue,pct){const r=document.createElement('div');r.className='row';r.innerHTML=`<div class="rowtop"><div class="name">${name}</div><div class="score">${score}</div></div><div class="cue">${cue||''}</div>${pct===null?'':`<div class="bar"><i style="width:${pct}%"></i></div>`}`;mount.appendChild(r)}
 function renderResult(){const rep=$('repeatRows');rep.innerHTML='';const repeated=Object.entries(state.familyStats).filter(([,x])=>x.chosen>=2&&x.crossExemplar).sort((a,b)=>b[1].chosen-a[1].chosen);if(!repeated.length)addRow(rep,'Nė viena tema nepasikartojo per abu savo vaizdus','', 'Šioje sesijoje pasirinkimai buvo labiau išsisklaidę arba susitelkė ties pavieniais exemplarais.',null);else repeated.forEach(([id,x])=>addRow(rep,FAMILY_LABEL[id],`${x.chosen}/3`,x.chosen===3?'Kartojosi kiekvieną kartą, kai šeima pasirodė.':'Kartojosi per du skirtingus šeimos vaizdus.',x.rate*100));const sr=$('suffRows');sr.innerHTML='';for(const d of DOMAINS){const v=state.domainStats[d.id];addRow(sr,d.title,v===null?'Sunku pasakyti':v.toFixed(1),v===null?'':'1 = visai nepakanka · 5 = visiškai pakanka',v===null?null:(v/5)*100)}const cr=$('compareRows');cr.innerHTML='';const comps=[];for(const d of DOMAINS){if(!d.families.length)continue;const rel=d.families.filter(f=>state.familyStats[f]?.chosen>=2&&state.familyStats[f]?.crossExemplar);if(!rel.length)continue;const v=state.domainStats[d.id];if(v===null)continue;const famNames=rel.map(f=>FAMILY_LABEL[f]).join(', ');let cue;if(v<=2.5)cue=`${famNames} kartojosi per skirtingus vaizdus, o šią platesnę sritį pats vertini kaip mažiau pakankamą.`;else if(v>=3.5)cue=`${famNames} kartojosi per skirtingus vaizdus ir kartu ši platesnė sritis atrodo gana pakankama.`;else cue=`${famNames} kartojosi, o tavo dabartinis šios platesnės srities įvertinimas yra per vidurį.`;comps.push({name:d.title,cue})}if(!comps.length)addRow(cr,'Ryškaus sugretinimo šioje sesijoje nėra','', 'Tai nėra problema: abu kanalai neprivalo sudaryti tvarkingo vieno profilio.',null);else comps.slice(0,3).forEach(c=>addRow(cr,c.name,'',c.cue,null));$('debug').textContent=JSON.stringify(state,null,2)}
-$('start').onclick=()=>($('start').dataset.resume==='1'?resumeSession():startSession()).catch(err=>{alert(String(err));console.error(err)});$('restart').onclick=()=>{clearLocalDraft();location.reload()};$('export').onclick=()=>{const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`priolens_open14_${state.seed}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)};
+$('start').onclick=()=>($('start').dataset.resume==='1'?resumeSession():startSession()).catch(err=>{alert(String(err));console.error(err)});$('restart').onclick=()=>{clearLocalDraft();location.reload()};async function exportJson(){
+  const text=JSON.stringify(state,null,2),name=`priolens_open14_${state.seed}.json`;
+  const file=new File([text],name,{type:'application/json'});
+  let canFileShare=false;
+  try{canFileShare=!!(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]}))}catch(err){console.warn('file share capability check failed',err)}
+  if(canFileShare){
+    try{await navigator.share({files:[file],title:'PrioLens JSON'});$('exportStatus').textContent='Atidarytas sistemos bendrinimo langas.';return}catch(err){if(err&&err.name==='AbortError')return;console.warn('file share failed',err)}
+  }
+  let downloadAttempted=false;
+  try{const url=URL.createObjectURL(file),a=document.createElement('a');a.href=url;a.download=name;a.rel='noopener';a.style.display='none';document.body.appendChild(a);a.click();a.remove();downloadAttempted=true;setTimeout(()=>URL.revokeObjectURL(url),1500)}catch(err){console.warn('download failed',err)}
+  try{await navigator.clipboard.writeText(text);$('exportStatus').textContent=downloadAttempted?'Jei failas neatsisiuntė, JSON taip pat nukopijuotas į iškarpinę.':'JSON nukopijuotas į iškarpinę.'}
+  catch(err){console.warn('clipboard fallback failed',err);$('exportStatus').textContent=downloadAttempted?'Bandytas failo atsisiuntimas. Jei vidinis naršyklės langas jį blokavo, atidaryk puslapį Chrome / Safari.':'Šis vidinis naršyklės langas failo eksporto nepalaiko. Atidaryk puslapį Chrome / Safari.'}
+}
+$('export').onclick=exportJson;
 window.addEventListener('pagehide',()=>{if(state&&!state.completedAt){saveLocalDraft();try{navigator.sendBeacon(PROGRESS_PATH,new Blob([JSON.stringify(state)],{type:'application/json'}))}catch(err){}}});
 init();
 </script>
