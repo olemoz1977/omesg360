@@ -1,0 +1,66 @@
+name: Audit PrioLens Open14 watermarks
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/audit-priolens-open14-watermarks.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install OCR and image tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq tesseract-ocr imagemagick
+
+      - name: Download active runtime assets and OCR corners
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/priolens-wm
+          python - <<'PY'
+          import json, pathlib, subprocess, urllib.parse, os
+          bank=json.load(open('priolens/open14-v02/bank.json'))
+          base='https://omesg360.eu'
+          out=pathlib.Path('/tmp/priolens-wm')
+          rows=[]
+          for fid,fam in bank['families'].items():
+              for ex in fam['exemplars']:
+                  exid=ex['id']
+                  path=ex['runtimePath']
+                  status='|'.join(str(ex.get(k,'')) for k in ['status','geometryStatus','semanticStatus','visualStatus'])
+                  fn=out/(exid.replace('/','_')+pathlib.Path(urllib.parse.urlparse(path).path).suffix)
+                  url=base+path
+                  subprocess.run(['curl','-fsS','--retry','4','--retry-delay','2',url,'-o',str(fn)],check=True)
+                  # OCR full image and four corner crops. psm 11 is sparse text.
+                  texts=[]
+                  for label,geom in [('full',None),('tl','35%x35%+0+0'),('tr','35%x35%+65%+0'),('bl','35%x35%+0+65%'),('br','35%x35%+65%+65%')]:
+                      src=fn
+                      crop=out/f'{exid}_{label}.png'
+                      if geom:
+                          # use percent crop via ImageMagick fx expression through shell
+                          cmd=f"convert '{fn}' -gravity {'NorthWest' if label=='tl' else 'NorthEast' if label=='tr' else 'SouthWest' if label=='bl' else 'SouthEast'} -crop 35%x35%+0+0 +repage '{crop}'"
+                          subprocess.run(cmd,shell=True,check=True)
+                          src=crop
+                      try:
+                          p=subprocess.run(['tesseract',str(src),'stdout','--psm','11'],capture_output=True,text=True,timeout=30)
+                          text=' '.join(p.stdout.split())
+                      except Exception as e:
+                          text=''
+                      if text:
+                          texts.append(f'{label}:{text}')
+                  rows.append((exid,status,' || '.join(texts)))
+          print('=== PRIOLENS WATERMARK OCR REPORT ===')
+          for exid,status,text in rows:
+              print(f'{exid}\tSTATUS={status or "ACTIVE"}\tOCR={text or "<none>"}')
+          print('=== END REPORT ===')
+          PY
