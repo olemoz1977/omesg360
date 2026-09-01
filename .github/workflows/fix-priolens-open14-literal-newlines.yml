@@ -35,6 +35,7 @@ jobs:
             ('</p>\\n    <p class="note">Formative pilotui', '</p>\n    <p class="note">Formative pilotui'),
             ('</p>\\n    <p id="saveStatus"', '</p>\n    <p id="saveStatus"'),
             ("from './p3_open14_exemplar_assigner_v01.mjs';\\nconst API_PATH", "from './p3_open14_exemplar_assigner_v01.mjs';\nconst API_PATH"),
+            ("console.error(err)}}\\nfunction finish()", "console.error(err)}}\nfunction finish()"),
           ]
           for old, new in targets:
             count = s.count(old)
@@ -42,7 +43,7 @@ jobs:
               raise SystemExit(f'Expected exactly one match, got {count}: {old}')
             s = s.replace(old, new)
           p.write_text(s, encoding='utf-8')
-          print('PASS: three literal newline regressions fixed')
+          print('PASS: four literal newline regressions fixed')
 
       - name: Parse-check browser module
         shell: bash
@@ -55,8 +56,8 @@ jobs:
           m=re.search(r'<script type="module">(.*?)</script>', s, re.S)
           if not m: raise SystemExit('module script not found')
           Path('/tmp/open14-app.mjs').write_text(m.group(1), encoding='utf-8')
-          if "\\nconst API_PATH" in s: raise SystemExit('literal newline still present before API_PATH')
-          if '>\\n    <p' in s: raise SystemExit('literal newline still present in HTML paragraphs')
+          for bad in ("\\nconst API_PATH", ">\\n    <p", "\\nfunction finish"):
+            if bad in s: raise SystemExit(f'literal newline still present: {bad}')
           PY
           node --check /tmp/open14-app.mjs
           grep -q "const API_PATH='/priolens-open14-api/api.php';" priolens/open14-v02/index.html
@@ -96,7 +97,7 @@ jobs:
           url='https://omesg360.eu/priolens-open14-v02/'
           curl -fsS --retry 5 --retry-delay 2 "$url?smoke=${GITHUB_RUN_ID}" -o /tmp/live.html
           grep -q "const API_PATH='/priolens-open14-api/api.php';" /tmp/live.html
-          grep -q 'Open14 bankas paruoštas' /tmp/live.html || true
           if grep -Fq '\nconst API_PATH' /tmp/live.html; then echo 'literal JS newline still live' >&2; exit 1; fi
           if grep -Fq '>\n    <p' /tmp/live.html; then echo 'literal HTML newline still live' >&2; exit 1; fi
+          if grep -Fq '\nfunction finish' /tmp/live.html; then echo 'literal JS newline before finish still live' >&2; exit 1; fi
           echo 'PASS: live HTML regression removed'
