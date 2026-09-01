@@ -1,0 +1,41 @@
+name: Verify all Open14 bank runtime URLs
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/verify-open14-bank-urls.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify every bank runtimePath
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY' > /tmp/paths.txt
+          import json
+          b=json.load(open('priolens/open14-v02/bank.json'))
+          for fid,fam in b['families'].items():
+              for ex in fam['exemplars']:
+                  print(f"{fid}\t{ex['id']}\t{ex['runtimePath']}")
+          PY
+          bad=0
+          while IFS=$'\t' read -r family ex path; do
+            url="https://omesg360.eu${path}"
+            code=$(curl -sS -o /dev/null -w '%{http_code}' --retry 2 --retry-delay 1 "$url" || true)
+            if [ "$code" = "200" ]; then
+              echo "PASS $family $ex $path"
+            else
+              echo "FAIL $code $family $ex $path"
+              bad=$((bad+1))
+            fi
+          done < /tmp/paths.txt
+          echo "BAD_COUNT=$bad"
+          test "$bad" -eq 0
