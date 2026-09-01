@@ -25,7 +25,10 @@
           "runtimePath": "/priolens-research-assets/Gallery/1786077050034.png",
           "visualStatus": "REPLACE_REQUIRED_WATERMARK",
           "firstImpulse": "atsigerti / atsigaivinti",
-          "risk": "two visible watermarks; do not use for external pilot"
+          "risk": "owner selected shortlist B; runtime remains old until reviewed 1:1 crop is chosen and switched",
+          "ownerShortlistDecision": "B",
+          "selectedCandidateSourceRuntimePath": "/priolens-research-assets/Gallery/20260730_232752414.png",
+          "status": "OWNER_SELECTED_CANDIDATE_CROP_REVIEW_PENDING"
         }
       ]
     },
@@ -72,16 +75,25 @@
       "exemplars": [
         {
           "id": "ORDER-A",
-          "runtimePath": "/priolens-research-assets/Gallery/20260730_230415808.png",
-          "geometryStatus": "REPLACE_REQUIRED_1TO1",
-          "firstImpulse": "tvarka / paskirtos vietos"
+          "runtimePath": "/priolens-research-assets/Open14-remediation-v02/order-a_owner-b_v01.webp",
+          "geometryStatus": "OWNER_ACCEPTED_SQUARE_NORMALIZED_1TO1",
+          "firstImpulse": "tvarka / paskirtos vietos",
+          "previousRuntimePath": "/priolens-research-assets/Gallery/20260730_230415808.png",
+          "sourceRuntimePath": "/priolens-research-assets/Gallery/file_000000003c0c81fb80655b530662c0ee.png",
+          "status": "OWNER_ACCEPTED_REPLACEMENT_SWITCHED",
+          "ownerShortlistDecision": "B",
+          "risk": "owner selected shortlist B; normalized from square source to 640x640 WebP without crop/distortion; OCR watermark keyword screen passed"
         },
         {
           "id": "ORDER-B",
-          "runtimePath": "/priolens-research-assets/Gallery/S10.webp",
-          "semanticStatus": "REPLACE_REQUIRED_SEMANTIC_MISMATCH",
+          "runtimePath": "/priolens-research-assets/Open14-remediation-v02/order-b_owner-c_v01.webp",
           "firstImpulse": "tvarkingai ir matomai laikyti",
-          "risk": "owner first-glance review does not read this as order / structure clearly enough"
+          "risk": "owner selected shortlist C; normalized from square source to 640x640 WebP without crop/distortion; OCR watermark keyword screen passed",
+          "previousRuntimePath": "/priolens-research-assets/Gallery/S10.webp",
+          "sourceRuntimePath": "/priolens-research-assets/Gallery/file_00000000fdf0821099271633f3930bad.png",
+          "geometryStatus": "OWNER_ACCEPTED_SQUARE_NORMALIZED_1TO1",
+          "status": "OWNER_ACCEPTED_REPLACEMENT_SWITCHED",
+          "ownerShortlistDecision": "C"
         }
       ]
     },
@@ -177,7 +189,9 @@
           "runtimePath": "/priolens-research-assets/Gallery/S04.webp",
           "visualStatus": "REPLACE_REQUIRED_VISUAL_CREDIBILITY",
           "firstImpulse": "nukreipti / valdyti srautą",
-          "risk": "central instrument/object looks artificial or implausible, which can dominate first-glance attention over control meaning"
+          "risk": "owner rejected all shortlist v01 candidates; keep old non-pilot-safe runtime only until a new credible direct-control candidate is found",
+          "ownerShortlistDecision": "REJECT",
+          "status": "SEARCH_REQUIRED_AFTER_SHORTLIST_REJECT"
         },
         {
           "id": "CONTROL-B",
@@ -258,9 +272,11 @@
           "id": "KNOWLEDGE-B",
           "runtimePath": "/priolens-research-assets/Gallery/20260811_180451129.png",
           "firstImpulse": "pamatyti aiškiau / daugiau",
-          "status": "BOUNDARY_PROBE",
+          "status": "OWNER_SELECTED_CANDIDATE_CROP_REVIEW_PENDING",
           "semanticStatus": "REPLACE_SEARCH_BETTER_CANDIDATE",
-          "risk": "current see-clearer/more boundary probe is too broad; search for a clearer learning/understanding candidate, potentially digital learning"
+          "risk": "owner selected shortlist B; runtime remains old until reviewed 1:1 crop is chosen and switched",
+          "ownerShortlistDecision": "B",
+          "selectedCandidateSourceRuntimePath": "/priolens-research-assets/Gallery/20260730_022124068.png"
         }
       ]
     },
