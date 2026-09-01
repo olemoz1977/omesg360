@@ -1,0 +1,194 @@
+name: Apply PrioLens shortlist owner decisions v01
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/apply-priolens-shortlist-owner-decisions-v01.yml
+
+permissions:
+  contents: write
+
+env:
+  FTP_HOST: 46.202.142.134
+  FTP_USER: ${{ secrets.HOSTINGER_FTP_USER }}
+  FTP_PASSWORD: ${{ secrets.HOSTINGER_FTP_PASSWORD }}
+  GALLERY_DIR: /domains/omesg360.eu/public_html/priolens-research-assets/Gallery
+  ASSET_DIR: /domains/omesg360.eu/public_html/priolens-research-assets/Open14-remediation-v02
+  REVIEW_DIR: /domains/omesg360.eu/public_html/priolens-shortlist-crop-review-v01
+  RUNTIME_DIR: /domains/omesg360.eu/public_html/priolens-open14-v02
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq lftp tesseract-ocr
+          python -m pip install --quiet pillow
+
+      - name: Fetch selected Gallery sources
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/src /tmp/assets /tmp/review
+          lftp -c "set ftp:ssl-allow no; set net:max-retries 4; set net:timeout 30; open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; get \"$GALLERY_DIR/20260730_232752414.png\" -o /tmp/src/rest-b.png; get \"$GALLERY_DIR/file_000000003c0c81fb80655b530662c0ee.png\" -o /tmp/src/order-a.png; get \"$GALLERY_DIR/file_00000000fdf0821099271633f3930bad.png\" -o /tmp/src/order-b.png; get \"$GALLERY_DIR/20260730_022124068.png\" -o /tmp/src/knowledge-b.png"
+
+      - name: Audit, normalize square selections and build portrait crop review
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from PIL import Image
+          from pathlib import Path
+          import subprocess, json, html
+
+          src=Path('/tmp/src'); assets=Path('/tmp/assets'); review=Path('/tmp/review')
+          assets.mkdir(exist_ok=True); review.mkdir(exist_ok=True)
+
+          def ocr(p):
+              try:
+                  q=subprocess.run(['tesseract',str(p),'stdout','--psm','11'],capture_output=True,text=True,timeout=20)
+                  return ' '.join(q.stdout.lower().split())
+              except Exception:
+                  return ''
+
+          wm_words=('kling','kiing','gemini','openai')
+          audit={}
+          for label,fn in [('REST-B','rest-b.png'),('ORDER-A','order-a.png'),('ORDER-B','order-b.png'),('KNOWLEDGE-B','knowledge-b.png')]:
+              p=src/fn
+              with Image.open(p) as im:
+                  size=im.size
+              text=ocr(p)
+              hits=[w for w in wm_words if w in text]
+              audit[label]={'size':size,'ocr':text[:240],'watermarkHits':hits}
+              print(label,size,'WM=',hits or '-')
+
+          # Square owner-accepted choices: normalize without crop/distortion.
+          for label,srcfn,outfn in [
+              ('ORDER-A','order-a.png','order-a_owner-b_v01.webp'),
+              ('ORDER-B','order-b.png','order-b_owner-c_v01.webp')
+          ]:
+              with Image.open(src/srcfn) as im:
+                  im=im.convert('RGB')
+                  if im.width != im.height:
+                      raise SystemExit(f'{label} selected source unexpectedly non-square: {im.size}')
+                  im.resize((640,640),Image.Resampling.LANCZOS).save(assets/outfn,'WEBP',quality=88,method=6)
+              if audit[label]['watermarkHits']:
+                  raise SystemExit(f'{label} watermark OCR hit: {audit[label]["watermarkHits"]}')
+
+          # Portrait selections: make top/center/bottom square crops for owner review.
+          crop_manifest={}
+          for label,srcfn,stem in [
+              ('REST-B','rest-b.png','rest-b_owner-b'),
+              ('KNOWLEDGE-B','knowledge-b.png','knowledge-b_owner-b')
+          ]:
+              with Image.open(src/srcfn) as im:
+                  im=im.convert('RGB')
+                  side=min(im.width,im.height)
+                  xs=(im.width-side)//2
+                  ys={'top':0,'center':(im.height-side)//2,'bottom':im.height-side}
+                  crop_manifest[label]=[]
+                  for pos,y in ys.items():
+                      box=(xs,y,xs+side,y+side)
+                      c=im.crop(box).resize((640,640),Image.Resampling.LANCZOS)
+                      outfn=f'{stem}_sq_{pos}_v01.webp'
+                      c.save(assets/outfn,'WEBP',quality=88,method=6)
+                      crop_manifest[label].append({'pos':pos,'file':outfn})
+
+          Path('/tmp/audit.json').write_text(json.dumps(audit,ensure_ascii=False,indent=2),encoding='utf-8')
+
+          css='''body{font-family:system-ui;background:#101114;color:#eee;margin:0;padding:14px}h1{font-size:22px}.note{color:#aaa;font-size:13px;margin-bottom:20px}.sec{margin:24px 0}.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.card{background:#1b1d22;border:1px solid #343740;border-radius:12px;padding:6px}.card img{width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:8px}.meta{font-size:12px;margin-top:5px;text-align:center;font-weight:700}@media(max-width:520px){.grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}.card{padding:4px}.meta{font-size:11px}}'''
+          body=['<!doctype html><html lang="lt"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>PrioLens crop review</title><style>',css,'</style></head><body>']
+          body.append('<h1>PrioLens · priimtų portrait kandidatų 1:1 crop</h1><div class="note">Kandidatas jau pasirinktas. Čia renkamės tik 1:1 kadravimą, nekeisdami stimulo semantikos.</div>')
+          for label,rows in crop_manifest.items():
+              body.append(f'<section class="sec"><h2>{label}</h2><div class="grid">')
+              for r in rows:
+                  body.append(f'<div class="card"><img src="/priolens-research-assets/Open14-remediation-v02/{html.escape(r["file"])}"><div class="meta">{r["pos"]}</div></div>')
+              body.append('</div></section>')
+          body.append('</body></html>')
+          (review/'index.html').write_text(''.join(body),encoding='utf-8')
+          PY
+
+      - name: Upload remediation assets and crop review
+        shell: bash
+        run: |
+          set -euo pipefail
+          lftp -c "set ftp:ssl-allow no; set net:max-retries 4; set net:timeout 30; open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; mkdir -p \"$ASSET_DIR\"; mirror -R /tmp/assets \"$ASSET_DIR\"; mkdir -p \"$REVIEW_DIR\"; mirror -R /tmp/review \"$REVIEW_DIR\""
+
+      - name: Patch bank with owner decisions and switch clean square selections
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('priolens/open14-v02/bank.json')
+          bank=json.loads(p.read_text(encoding='utf-8'))
+
+          rest=bank['families']['REST']['exemplars'][1]
+          rest['ownerShortlistDecision']='B'
+          rest['selectedCandidateSourceRuntimePath']='/priolens-research-assets/Gallery/20260730_232752414.png'
+          rest['status']='OWNER_SELECTED_CANDIDATE_CROP_REVIEW_PENDING'
+          rest['risk']='owner selected shortlist B; runtime remains old until reviewed 1:1 crop is chosen and switched'
+
+          oa=bank['families']['ORDER']['exemplars'][0]
+          oa['previousRuntimePath']=oa['runtimePath']
+          oa['sourceRuntimePath']='/priolens-research-assets/Gallery/file_000000003c0c81fb80655b530662c0ee.png'
+          oa['runtimePath']='/priolens-research-assets/Open14-remediation-v02/order-a_owner-b_v01.webp'
+          oa['geometryStatus']='OWNER_ACCEPTED_SQUARE_NORMALIZED_1TO1'
+          oa['status']='OWNER_ACCEPTED_REPLACEMENT_SWITCHED'
+          oa['ownerShortlistDecision']='B'
+          oa['risk']='owner selected shortlist B; normalized from square source to 640x640 WebP without crop/distortion; OCR watermark keyword screen passed'
+
+          ob=bank['families']['ORDER']['exemplars'][1]
+          ob['previousRuntimePath']=ob['runtimePath']
+          ob['sourceRuntimePath']='/priolens-research-assets/Gallery/file_00000000fdf0821099271633f3930bad.png'
+          ob['runtimePath']='/priolens-research-assets/Open14-remediation-v02/order-b_owner-c_v01.webp'
+          ob['geometryStatus']='OWNER_ACCEPTED_SQUARE_NORMALIZED_1TO1'
+          ob['status']='OWNER_ACCEPTED_REPLACEMENT_SWITCHED'
+          ob['ownerShortlistDecision']='C'
+          ob['risk']='owner selected shortlist C; normalized from square source to 640x640 WebP without crop/distortion; OCR watermark keyword screen passed'
+          ob.pop('semanticStatus',None)
+
+          ctrl=bank['families']['CONTROL']['exemplars'][0]
+          ctrl['ownerShortlistDecision']='REJECT'
+          ctrl['status']='SEARCH_REQUIRED_AFTER_SHORTLIST_REJECT'
+          ctrl['risk']='owner rejected all shortlist v01 candidates; keep old non-pilot-safe runtime only until a new credible direct-control candidate is found'
+
+          kb=bank['families']['KNOWLEDGE']['exemplars'][1]
+          kb['ownerShortlistDecision']='B'
+          kb['selectedCandidateSourceRuntimePath']='/priolens-research-assets/Gallery/20260730_022124068.png'
+          kb['status']='OWNER_SELECTED_CANDIDATE_CROP_REVIEW_PENDING'
+          kb['risk']='owner selected shortlist B; runtime remains old until reviewed 1:1 crop is chosen and switched'
+
+          p.write_text(json.dumps(bank,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+          PY
+          git config user.name 'olemoz1977'
+          git config user.email 'olemoz1977@gmail.com'
+          git add priolens/open14-v02/bank.json
+          git commit -m 'fix(priolens): apply shortlist owner decisions and switch Order assets'
+          git push
+
+      - name: Deploy current bank and smoke selected assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          lftp -c "set ftp:ssl-allow no; set net:max-retries 4; set net:timeout 30; open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; put priolens/open14-v02/bank.json -o \"$RUNTIME_DIR/bank.json\""
+          for u in \
+            https://omesg360.eu/priolens-research-assets/Open14-remediation-v02/order-a_owner-b_v01.webp \
+            https://omesg360.eu/priolens-research-assets/Open14-remediation-v02/order-b_owner-c_v01.webp \
+            https://omesg360.eu/priolens-research-assets/Open14-remediation-v02/rest-b_owner-b_sq_top_v01.webp \
+            https://omesg360.eu/priolens-research-assets/Open14-remediation-v02/knowledge-b_owner-b_sq_top_v01.webp; do
+            curl -fsSI --retry 5 --retry-delay 2 "$u" | grep -qi '200'
+          done
+          curl -fsS --retry 5 --retry-delay 2 https://omesg360.eu/priolens-shortlist-crop-review-v01/ | grep -q 'portrait kandidatų 1:1 crop'
+          curl -fsS --retry 5 --retry-delay 2 https://omesg360.eu/priolens-open14-v02/bank.json > /tmp/live-bank.json
+          grep -q 'order-a_owner-b_v01.webp' /tmp/live-bank.json
+          grep -q 'order-b_owner-c_v01.webp' /tmp/live-bank.json
+          grep -q 'SEARCH_REQUIRED_AFTER_SHORTLIST_REJECT' /tmp/live-bank.json
