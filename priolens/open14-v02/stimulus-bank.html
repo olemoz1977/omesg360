@@ -15,10 +15,7 @@
 <div class="toolbar"><span class="pill">14 šeimų</span><span class="pill">28 exemplarai</span><span class="pill">A / B poros</span><span class="pill">Owner tool, ne participant UI</span></div>
 <div id="mount">Kraunamas bankas…</div>
 <script>
-const knownFlags={
-  'REST-B':['2_WATERMARKS_VISIBLE'],
-  'CONNECTION-B':['WATERMARK_REVIEW_REQUIRED']
-};
+const knownFlags={};
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const cls=f=>/REPLACE_REQUIRED|REASSIGN_REQUIRED|SEMANTIC_MISMATCH|WATERMARK|VISUAL_CREDIBILITY/.test(f)?'bad':/BOUNDARY|REVIEW|HOLD/.test(f)?'warn':/ACCEPTED|PASS/.test(f)?'ok':'';
 async function init(){

@@ -131,13 +131,14 @@
         },
         {
           "id": "BELONGING-B",
-          "runtimePath": "/priolens-research-assets/Open14-geometry-v01/belonging-b_sq_center_v01.webp",
-          "sourceRuntimePath": "/priolens-research-assets/Gallery/20260731_043300801.png",
-          "geometryStatus": "HUMAN_ACCEPTED_CENTER_CROP_1TO1",
-          "semanticStatus": "FORMATIVE_BOUNDARY_RETAIN_CURRENT",
-          "firstImpulse": "dalintis šiluma / būti kartu",
-          "risk": "current asymmetric-warmth exemplar retained as formative boundary probe; generated friends-circle image stored as reserve but not switched because it duplicates BELONGING-A social-circle mechanism and risks CONNECTION cross-load",
-          "reserveCandidateRuntimePath": "/priolens-research-assets/Open14-v02/file_000000009a0881f49ae08d6fcc47f9d7.png"
+          "runtimePath": "/priolens-research-assets/Open14-final-v01/belonging-b_coffee-ritual_v01.webp",
+          "sourceRuntimePath": "/priolens-research-assets/Open14-v02/file_00000000dbc881f4862ffcc2c88533cc.png",
+          "geometryStatus": "OWNER_ACCEPTED_SQUARE_NORMALIZED_1TO1",
+          "semanticStatus": "FORMATIVE_ACCEPTED_FOR_PILOT_RESEARCH",
+          "firstImpulse": "būti kartu / dalintis tuo pačiu kasdieniu momentu",
+          "risk": "three-person shared coffee ritual removes prior asymmetric warmth cue; possible residual CONNECTION cross-load remains formative",
+          "previousRuntimePath": "/priolens-research-assets/Open14-geometry-v01/belonging-b_sq_center_v01.webp",
+          "status": "OWNER_ACCEPTED_REPLACEMENT_SWITCHED"
         }
       ]
     },
@@ -188,13 +189,14 @@
       "exemplars": [
         {
           "id": "CONTROL-A",
-          "runtimePath": "/priolens-research-assets/Open14-v02/file_00000000dbb881f48b13b7b69cb0ef6f.png",
+          "runtimePath": "/priolens-research-assets/Open14-final-v01/control-a_joystick_v01.webp",
           "firstImpulse": "tiesiogiai valdyti / keisti sistemos būseną",
-          "risk": "generated industrial joystick replacement; visually credible direct-control mechanism; formative pending external data",
+          "risk": "owner-approved generated industrial joystick; visually credible direct-control mechanism; formative pending external data",
           "status": "OWNER_ACCEPTED_REPLACEMENT_SWITCHED",
-          "previousRuntimePath": "/priolens-research-assets/Gallery/S04.webp",
+          "previousRuntimePath": "/priolens-research-assets/Open14-v02/file_00000000dbb881f48b13b7b69cb0ef6f.png",
           "sourceRuntimePath": "/priolens-research-assets/Open14-v02/file_00000000dbb881f48b13b7b69cb0ef6f.png",
-          "geometryStatus": "OWNER_ACCEPTED_SQUARE_1TO1"
+          "geometryStatus": "OWNER_ACCEPTED_SQUARE_NORMALIZED_1TO1",
+          "visualStatus": "OWNER_ACCEPTED_VISUAL_CREDIBILITY"
         },
         {
           "id": "CONTROL-B",
@@ -251,8 +253,14 @@
         },
         {
           "id": "EXPLORATION-B",
-          "runtimePath": "/priolens-research-assets/Gallery/20260809_235839567.png",
-          "firstImpulse": "pažiūrėti už kliūties / atrasti"
+          "runtimePath": "/priolens-research-assets/Open14-final-v01/exploration-b_magnifier-forest_v01.webp",
+          "firstImpulse": "tyrinėti / atrasti nepažįstamą objektą",
+          "previousRuntimePath": "/priolens-research-assets/Gallery/20260809_235839567.png",
+          "sourceRuntimePath": "/priolens-research-assets/Open14-v02/1788263299238.png",
+          "risk": "magnifier may weakly cross-load Learning/Understanding, but unknown forest object keeps discovery mechanism dominant; formative",
+          "semanticStatus": "FORMATIVE_ACCEPTED_FOR_PILOT_RESEARCH",
+          "geometryStatus": "OWNER_ACCEPTED_SQUARE_NORMALIZED_1TO1",
+          "status": "OWNER_ACCEPTED_REPLACEMENT_SWITCHED"
         }
       ]
     },
@@ -290,10 +298,14 @@
       "exemplars": [
         {
           "id": "OPPORTUNITY-A",
-          "runtimePath": "/priolens-research-assets/Gallery/file_0000000024fc8210a5fb3823b3d86a9f.png",
-          "firstImpulse": "pradėti kurti iš paruoštų medžiagų",
-          "semanticStatus": "FORMATIVE_BOUNDARY_RETAIN_CURRENT",
-          "risk": "greenhouse-door direction not adopted because it cross-loads EXPLORATION and duplicates an existing near-identical asset; retain current immediate-available-materials boundary probe for formative pilot"
+          "runtimePath": "/priolens-research-assets/Open14-final-v01/opportunity-a_open-market-stall_v01.webp",
+          "firstImpulse": "pastebėti laisvą vietą veikiančioje aplinkoje / pasinaudoti galimybe",
+          "semanticStatus": "FORMATIVE_ACCEPTED_FOR_PILOT_RESEARCH",
+          "risk": "may read as an empty stall rather than opportunity for some viewers; retained specifically as formative Opportunity boundary test",
+          "previousRuntimePath": "/priolens-research-assets/Gallery/file_0000000024fc8210a5fb3823b3d86a9f.png",
+          "sourceRuntimePath": "/priolens-research-assets/Open14-v02/1788265327179.png",
+          "geometryStatus": "OWNER_ACCEPTED_SQUARE_NORMALIZED_1TO1",
+          "status": "OWNER_ACCEPTED_REPLACEMENT_SWITCHED"
         },
         {
           "id": "OPPORTUNITY-B",
@@ -307,5 +319,6 @@
     "SUCCESS_ACHIEVEMENT"
   ],
   "missingRuntimeAssets": [],
-  "startPolicy": "FAIL_CLOSED_IF_ANY_REQUIRED_RUNTIME_PATH_IS_NULL"
+  "startPolicy": "FAIL_CLOSED_IF_ANY_REQUIRED_RUNTIME_PATH_IS_NULL",
+  "assetReviewStatus": "OWNER_FINALIZED_PENDING_FINAL_AUDIT"
 }
