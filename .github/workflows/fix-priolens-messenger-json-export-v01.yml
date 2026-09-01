@@ -30,20 +30,23 @@ jobs:
               raise SystemExit('result actions anchor not found')
           s=s.replace(old,new,1)
           old_js="$('export').onclick=()=>{const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`priolens_open14_${state.seed}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)};"
-          new_js="""async function exportJson(){
-  const text=JSON.stringify(state,null,2),name=`priolens_open14_${state.seed}.json`;
-  const file=new File([text],name,{type:'application/json'});
-  let canFileShare=false;
-  try{canFileShare=!!(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]}))}catch(err){console.warn('file share capability check failed',err)}
-  if(canFileShare){
-    try{await navigator.share({files:[file],title:'PrioLens JSON'});$('exportStatus').textContent='Atidarytas sistemos bendrinimo langas.';return}catch(err){if(err?.name==='AbortError')return;console.warn('file share failed',err)}
-  }
-  let downloadAttempted=false;
-  try{const url=URL.createObjectURL(file),a=document.createElement('a');a.href=url;a.download=name;a.rel='noopener';a.style.display='none';document.body.appendChild(a);a.click();a.remove();downloadAttempted=true;setTimeout(()=>URL.revokeObjectURL(url),1500)}catch(err){console.warn('download failed',err)}
-  try{await navigator.clipboard.writeText(text);$('exportStatus').textContent=downloadAttempted?'Jei failas neatsisiuntė, JSON taip pat nukopijuotas į iškarpinę.':'JSON nukopijuotas į iškarpinę.'}
-  catch(err){console.warn('clipboard fallback failed',err);$('exportStatus').textContent=downloadAttempted?'Bandytas failo atsisiuntimas. Jei vidinis naršyklės langas jį blokavo, atidaryk puslapį Chrome / Safari.':'Šis vidinis naršyklės langas failo eksporto nepalaiko. Atidaryk puslapį Chrome / Safari.'}
-}
-$('export').onclick=exportJson;"""
+          lines=[
+            "async function exportJson(){",
+            "  const text=JSON.stringify(state,null,2),name=`priolens_open14_${state.seed}.json`;",
+            "  const file=new File([text],name,{type:'application/json'});",
+            "  let canFileShare=false;",
+            "  try{canFileShare=!!(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]}))}catch(err){console.warn('file share capability check failed',err)}",
+            "  if(canFileShare){",
+            "    try{await navigator.share({files:[file],title:'PrioLens JSON'});$('exportStatus').textContent='Atidarytas sistemos bendrinimo langas.';return}catch(err){if(err&&err.name==='AbortError')return;console.warn('file share failed',err)}",
+            "  }",
+            "  let downloadAttempted=false;",
+            "  try{const url=URL.createObjectURL(file),a=document.createElement('a');a.href=url;a.download=name;a.rel='noopener';a.style.display='none';document.body.appendChild(a);a.click();a.remove();downloadAttempted=true;setTimeout(()=>URL.revokeObjectURL(url),1500)}catch(err){console.warn('download failed',err)}",
+            "  try{await navigator.clipboard.writeText(text);$('exportStatus').textContent=downloadAttempted?'Jei failas neatsisiuntė, JSON taip pat nukopijuotas į iškarpinę.':'JSON nukopijuotas į iškarpinę.'}",
+            "  catch(err){console.warn('clipboard fallback failed',err);$('exportStatus').textContent=downloadAttempted?'Bandytas failo atsisiuntimas. Jei vidinis naršyklės langas jį blokavo, atidaryk puslapį Chrome / Safari.':'Šis vidinis naršyklės langas failo eksporto nepalaiko. Atidaryk puslapį Chrome / Safari.'}",
+            "}",
+            "$('export').onclick=exportJson;"
+          ]
+          new_js='\n'.join(lines)
           if old_js not in s:
               raise SystemExit('old export handler not found')
           s=s.replace(old_js,new_js,1)
