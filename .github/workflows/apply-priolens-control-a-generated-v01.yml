@@ -1,0 +1,115 @@
+name: Apply PrioLens generated CONTROL-A v01
+
+on:
+  push:
+    paths:
+      - '.github/workflows/apply-priolens-control-a-generated-v01.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    env:
+      FTP_HOST: 46.202.142.134
+      FTP_USER: ${{ secrets.HOSTINGER_FTP_USER }}
+      FTP_PASSWORD: ${{ secrets.HOSTINGER_FTP_PASSWORD }}
+      ASSET_DIR: /domains/omesg360.eu/public_html/priolens-research-assets/Open14-remediation-v03
+      RUNTIME_DIR: /domains/omesg360.eu/public_html/priolens-open14-v02
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Reconstruct and verify CONTROL-A asset
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat priolens/tmp-control-a/part*.txt | tr -d '\n' | base64 -d > /tmp/control-a_generated_v01.webp
+          echo 'fcb4c785b4fe72f392ee796569c86be6f534fdff1fc19f802df1bcda945f6092  /tmp/control-a_generated_v01.webp' | sha256sum -c -
+          test "$(stat -c%s /tmp/control-a_generated_v01.webp)" = "42882"
+          file /tmp/control-a_generated_v01.webp | grep -q 'Web/P image'
+
+      - name: Install lftp
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq lftp
+
+      - name: Upload CONTROL-A asset
+        shell: bash
+        run: |
+          set -euo pipefail
+          lftp -c "set ftp:ssl-allow no; set net:max-retries 4; set net:timeout 30; open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; mkdir -p \"$ASSET_DIR\"; put /tmp/control-a_generated_v01.webp -o \"$ASSET_DIR/control-a_generated_v01.webp\""
+
+      - name: Patch bank and provenance
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          p=Path('priolens/open14-v02/bank.json')
+          bank=json.loads(p.read_text(encoding='utf-8'))
+          bank['status']='PRE_PILOT_HARDENING'
+
+          ctrl=bank['families']['CONTROL']['exemplars'][0]
+          ctrl['previousRuntimePath']=ctrl['runtimePath']
+          ctrl['runtimePath']='/priolens-research-assets/Open14-remediation-v03/control-a_generated_v01.webp'
+          ctrl['sourceType']='AI_GENERATED_CONCEPT_ONLY'
+          ctrl['geometryStatus']='GENERATED_SQUARE_640_1TO1'
+          ctrl['status']='RESEARCH_ACCEPTED_REPLACEMENT_SWITCHED'
+          ctrl['firstImpulse']='tiesiogiai valdyti / pakeisti sistemos būseną'
+          ctrl['risk']='formative CONTROL exemplar; credible industrial joystick mechanism; possible machinery/skill association remains for external data'
+          ctrl['provenance']='generated in ChatGPT from a generic industrial joystick control concept; external web images were used as concept references only, not copied as source assets'
+          ctrl['previousShortlistDecision']=ctrl.get('ownerShortlistDecision','REJECT')
+          ctrl.pop('ownerShortlistDecision',None)
+          ctrl.pop('visualStatus',None)
+
+          bel=bank['families']['BELONGING']['exemplars'][1]
+          bel['semanticStatus']='RESEARCH_RETAIN_FOR_FORMATIVE_BOUNDARY_PROBE'
+          bel['status']='RESEARCH_RETAINED_FOR_FORMATIVE_PILOT'
+          bel['risk']='owner noted asymmetric warmth/steam cue; retained because replacement group-circle concept would cross-load more strongly with CONNECTION and duplicate BELONGING-A; test this boundary externally'
+
+          opp=bank['families']['OPPORTUNITY']['exemplars'][0]
+          opp['semanticStatus']='RESEARCH_RETAIN_FOR_FORMATIVE_BOUNDARY_PROBE'
+          opp['status']='RESEARCH_RETAINED_FOR_FORMATIVE_PILOT'
+          opp['risk']='current prepared-materials opportunity scene retained because greenhouse/open-door alternative cross-loads more strongly with EXPLORATION; possible MASTERY/RESOURCE overlap remains a formative boundary question'
+
+          p.write_text(json.dumps(bank,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+
+          provenance={
+            'schema':'2rasi.priolens.host-asset-provenance-v0.3',
+            'assetId':'CONTROL-A',
+            'runtimePath':'/priolens-research-assets/Open14-remediation-v03/control-a_generated_v01.webp',
+            'generatedAt':'2026-09-01',
+            'generator':'ChatGPT image generation',
+            'sourceType':'AI_GENERATED_CONCEPT_ONLY',
+            'concept':'realistic industrial joystick directly manipulated by a gloved hand to control a system',
+            'externalReferencePolicy':'generic web images informed the concept only; no external image file is the source asset',
+            'dimensions':[640,640],
+            'format':'webp',
+            'sha256':'fcb4c785b4fe72f392ee796569c86be6f534fdff1fc19f802df1bcda945f6092',
+            'bytes':42882
+          }
+          Path('priolens/open14-v02/CONTROL_A_ASSET_PROVENANCE_v0.1.json').write_text(json.dumps(provenance,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+          PY
+
+          git config user.name 'olemoz1977'
+          git config user.email 'olemoz1977@gmail.com'
+          git add priolens/open14-v02/bank.json priolens/open14-v02/CONTROL_A_ASSET_PROVENANCE_v0.1.json
+          git rm priolens/tmp-control-a/part*.txt
+          git commit -m 'fix(priolens): switch generated CONTROL-A and resolve remaining stimulus holds'
+          git push
+
+      - name: Deploy bank and GET smoke
+        shell: bash
+        run: |
+          set -euo pipefail
+          lftp -c "set ftp:ssl-allow no; set net:max-retries 4; set net:timeout 30; open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; put priolens/open14-v02/bank.json -o \"$RUNTIME_DIR/bank.json\""
+          curl -fsS --retry 5 --retry-delay 2 https://omesg360.eu/priolens-research-assets/Open14-remediation-v03/control-a_generated_v01.webp -o /tmp/live-control.webp
+          echo 'fcb4c785b4fe72f392ee796569c86be6f534fdff1fc19f802df1bcda945f6092  /tmp/live-control.webp' | sha256sum -c -
+          curl -fsS --retry 5 --retry-delay 2 https://omesg360.eu/priolens-open14-v02/bank.json > /tmp/live-bank.json
+          grep -q 'control-a_generated_v01.webp' /tmp/live-bank.json
+          grep -q 'RESEARCH_RETAIN_FOR_FORMATIVE_BOUNDARY_PROBE' /tmp/live-bank.json
+          grep -q 'PRE_PILOT_HARDENING' /tmp/live-bank.json
