@@ -1,0 +1,34 @@
+name: Deploy PrioLens remediated bank now
+
+on:
+  push:
+    paths:
+      - '.github/workflows/deploy-priolens-bank-remediation-now.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  FTP_HOST: 46.202.142.134
+  FTP_USER: ${{ secrets.HOSTINGER_FTP_USER }}
+  FTP_PASSWORD: ${{ secrets.HOSTINGER_FTP_PASSWORD }}
+  REMOTE_RUNTIME: /domains/omesg360.eu/public_html/priolens-open14-v02
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy current bank.json
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq lftp
+          python -m json.tool priolens/open14-v02/bank.json >/dev/null
+          lftp -c "set ftp:ssl-allow no; set net:max-retries 4; set net:timeout 30; open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; put priolens/open14-v02/bank.json -o \"$REMOTE_RUNTIME/bank.json\""
+      - name: Smoke live bank switches
+        run: |
+          set -euo pipefail
+          body="$(curl -fsS --retry 5 --retry-delay 3 https://omesg360.eu/priolens-open14-v02/bank.json)"
+          printf '%s' "$body" | grep -q '/priolens-research-assets/Gallery/S13.webp'
+          printf '%s' "$body" | grep -q '/priolens-research-assets/Gallery/file_00000000cc8c81f4a927534c8316290c.png'
