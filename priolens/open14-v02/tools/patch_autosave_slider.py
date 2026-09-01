@@ -6,7 +6,7 @@ def repl(text, old, new, label):
         raise SystemExit(f"missing patch anchor: {label}")
     return text.replace(old, new, 1)
 
-# Final API: allow existing partial row to be finalized.
+# Final API: allow an existing partial checkpoint row to be finalized.
 p = Path("priolens/open14-v02/server/api.php")
 api = p.read_text()
 api = repl(api, "INSERT IGNORE INTO priolens_open14_sessions", "INSERT INTO priolens_open14_sessions", "api insert")
@@ -26,14 +26,6 @@ api = repl(
     "api upsert",
 )
 p.write_text(api)
-
-# API deploy workflow knows about progress.php.
-p = Path(".github/workflows/deploy-priolens-open14-api.yml")
-y = p.read_text()
-y = repl(y, "      - priolens/open14-v02/server/api.php\n", "      - priolens/open14-v02/server/api.php\n      - priolens/open14-v02/server/progress.php\n", "api trigger")
-y = repl(y, "          php -l priolens/open14-v02/server/api.php\n", "          php -l priolens/open14-v02/server/api.php\n          php -l priolens/open14-v02/server/progress.php\n", "api lint")
-y = repl(y, 'put -O \\"$REMOTE_DIR/\\" priolens/open14-v02/server/api.php; put -O', 'put -O \\"$REMOTE_DIR/\\" priolens/open14-v02/server/api.php; put -O \\"$REMOTE_DIR/\\" priolens/open14-v02/server/progress.php; put -O', "api upload")
-p.write_text(y)
 
 # Runtime UI + persistence.
 p = Path("priolens/open14-v02/index.html")
@@ -65,12 +57,5 @@ h = repl(h, "state.submission={ok:true,inserted:Boolean(data.inserted),submissio
 h = repl(h, "$('start').onclick=()=>startSession().catch(err=>{alert(String(err));console.error(err)});$('restart').onclick=()=>location.reload();", "$('start').onclick=()=>($('start').dataset.resume==='1'?resumeSession():startSession()).catch(err=>{alert(String(err));console.error(err)});$('restart').onclick=()=>{clearLocalDraft();location.reload()};", "resume click")
 h = repl(h, "\ninit();\n</script>", "\nwindow.addEventListener('pagehide',()=>{if(state&&!state.completedAt){saveLocalDraft();try{navigator.sendBeacon(PROGRESS_PATH,new Blob([JSON.stringify(state)],{type:'application/json'}))}catch(err){}}});\ninit();\n</script>", "pagehide checkpoint")
 p.write_text(h)
-
-# Runtime deploy checks know about autosave + slider.
-p = Path(".github/workflows/deploy-priolens-open14-runtime.yml")
-y = p.read_text()
-y = repl(y, "for needle in ['sessionUuid:crypto.randomUUID','/priolens-open14-api/api.php','submitSession','90 dienų']:", "for needle in ['sessionUuid:crypto.randomUUID','/priolens-open14-api/api.php','/priolens-open14-api/progress.php','submitSession','DRAFT_KEY','90 dienų']:", "runtime validation")
-y = repl(y, "          grep -q 'priolens-open14-api/api.php' /tmp/index\n", "          grep -q 'priolens-open14-api/api.php' /tmp/index\n          grep -q 'priolens-open14-api/progress.php' /tmp/index\n          grep -q 'Labai trūksta' /tmp/index\n", "runtime smoke")
-p.write_text(y)
 
 print('PATCH_OK')
