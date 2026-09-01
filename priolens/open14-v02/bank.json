@@ -22,13 +22,14 @@
         },
         {
           "id": "REST-B",
-          "runtimePath": "/priolens-research-assets/Gallery/1786077050034.png",
-          "visualStatus": "REPLACE_REQUIRED_WATERMARK",
-          "firstImpulse": "atsigerti / atsigaivinti",
-          "risk": "owner selected shortlist B; runtime remains old until reviewed 1:1 crop is chosen and switched",
+          "runtimePath": "/priolens-research-assets/Open14-remediation-v02/rest-b_owner-b_sq_center_v01.webp",
+          "firstImpulse": "pailsėti / atsistatyti",
+          "risk": "owner selected shortlist B and center crop after direct visual review; OCR watermark keyword screen passed",
           "ownerShortlistDecision": "B",
-          "selectedCandidateSourceRuntimePath": "/priolens-research-assets/Gallery/20260730_232752414.png",
-          "status": "OWNER_SELECTED_CANDIDATE_CROP_REVIEW_PENDING"
+          "status": "OWNER_ACCEPTED_REPLACEMENT_SWITCHED",
+          "previousRuntimePath": "/priolens-research-assets/Gallery/1786077050034.png",
+          "sourceRuntimePath": "/priolens-research-assets/Gallery/20260730_232752414.png",
+          "geometryStatus": "HUMAN_ACCEPTED_CENTER_CROP_1TO1"
         }
       ]
     },
@@ -270,13 +271,14 @@
         },
         {
           "id": "KNOWLEDGE-B",
-          "runtimePath": "/priolens-research-assets/Gallery/20260811_180451129.png",
-          "firstImpulse": "pamatyti aiškiau / daugiau",
-          "status": "OWNER_SELECTED_CANDIDATE_CROP_REVIEW_PENDING",
-          "semanticStatus": "REPLACE_SEARCH_BETTER_CANDIDATE",
-          "risk": "owner selected shortlist B; runtime remains old until reviewed 1:1 crop is chosen and switched",
+          "runtimePath": "/priolens-research-assets/Open14-remediation-v02/knowledge-b_owner-b_sq_bottom_v01.webp",
+          "firstImpulse": "mokytis / suprasti per skaitmeninę terpę",
+          "status": "OWNER_ACCEPTED_REPLACEMENT_SWITCHED",
+          "risk": "owner selected shortlist B and bottom crop after direct visual review; OCR watermark keyword screen passed",
           "ownerShortlistDecision": "B",
-          "selectedCandidateSourceRuntimePath": "/priolens-research-assets/Gallery/20260730_022124068.png"
+          "previousRuntimePath": "/priolens-research-assets/Gallery/20260811_180451129.png",
+          "sourceRuntimePath": "/priolens-research-assets/Gallery/20260730_022124068.png",
+          "geometryStatus": "HUMAN_ACCEPTED_BOTTOM_CROP_1TO1"
         }
       ]
     },
