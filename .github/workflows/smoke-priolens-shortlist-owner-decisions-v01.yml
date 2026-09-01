@@ -1,0 +1,39 @@
+name: Smoke PrioLens shortlist owner decisions v01
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/smoke-priolens-shortlist-owner-decisions-v01.yml
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: GET smoke selected remediation assets and live bank
+        shell: bash
+        run: |
+          set -euo pipefail
+          for u in \
+            https://omesg360.eu/priolens-research-assets/Open14-remediation-v02/order-a_owner-b_v01.webp \
+            https://omesg360.eu/priolens-research-assets/Open14-remediation-v02/order-b_owner-c_v01.webp \
+            https://omesg360.eu/priolens-research-assets/Open14-remediation-v02/rest-b_owner-b_sq_top_v01.webp \
+            https://omesg360.eu/priolens-research-assets/Open14-remediation-v02/rest-b_owner-b_sq_center_v01.webp \
+            https://omesg360.eu/priolens-research-assets/Open14-remediation-v02/rest-b_owner-b_sq_bottom_v01.webp \
+            https://omesg360.eu/priolens-research-assets/Open14-remediation-v02/knowledge-b_owner-b_sq_top_v01.webp \
+            https://omesg360.eu/priolens-research-assets/Open14-remediation-v02/knowledge-b_owner-b_sq_center_v01.webp \
+            https://omesg360.eu/priolens-research-assets/Open14-remediation-v02/knowledge-b_owner-b_sq_bottom_v01.webp; do
+            code=$(curl -L -sS -o /tmp/a --retry 5 --retry-delay 2 -w '%{http_code}' "$u")
+            test "$code" = "200" || { echo "FAIL $code $u"; exit 1; }
+            test -s /tmp/a || { echo "EMPTY $u"; exit 1; }
+            echo "OK $u"
+          done
+          code=$(curl -L -sS -o /tmp/review.html --retry 5 --retry-delay 2 -w '%{http_code}' https://omesg360.eu/priolens-shortlist-crop-review-v01/)
+          test "$code" = "200"
+          grep -q 'portrait kandidatų 1:1 crop' /tmp/review.html
+          code=$(curl -L -sS -o /tmp/bank.json --retry 5 --retry-delay 2 -w '%{http_code}' https://omesg360.eu/priolens-open14-v02/bank.json)
+          test "$code" = "200"
+          grep -q 'order-a_owner-b_v01.webp' /tmp/bank.json
+          grep -q 'order-b_owner-c_v01.webp' /tmp/bank.json
+          grep -q 'SEARCH_REQUIRED_AFTER_SHORTLIST_REJECT' /tmp/bank.json
