@@ -1,0 +1,64 @@
+name: Fix PrioLens Messenger JSON export v01
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/fix-priolens-messenger-json-export-v01.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Patch export flow
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('priolens/open14-v02/index.html')
+          s=p.read_text()
+          old='<div class="actions"><button id="export" class="secondary">Eksportuoti JSON</button><button id="restart" class="primary">Nauja sesija</button></div>\n    <details class="section">'
+          new='<div class="actions"><button id="export" class="secondary">Eksportuoti JSON</button><button id="restart" class="primary">Nauja sesija</button></div>\n    <p id="exportStatus" class="note"></p>\n    <details class="section">'
+          if old not in s:
+              raise SystemExit('result actions anchor not found')
+          s=s.replace(old,new,1)
+          old_js="$('export').onclick=()=>{const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`priolens_open14_${state.seed}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)};"
+          new_js="""async function exportJson(){
+  const text=JSON.stringify(state,null,2),name=`priolens_open14_${state.seed}.json`;
+  const file=new File([text],name,{type:'application/json'});
+  let canFileShare=false;
+  try{canFileShare=!!(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]}))}catch(err){console.warn('file share capability check failed',err)}
+  if(canFileShare){
+    try{await navigator.share({files:[file],title:'PrioLens JSON'});$('exportStatus').textContent='Atidarytas sistemos bendrinimo langas.';return}catch(err){if(err?.name==='AbortError')return;console.warn('file share failed',err)}
+  }
+  let downloadAttempted=false;
+  try{const url=URL.createObjectURL(file),a=document.createElement('a');a.href=url;a.download=name;a.rel='noopener';a.style.display='none';document.body.appendChild(a);a.click();a.remove();downloadAttempted=true;setTimeout(()=>URL.revokeObjectURL(url),1500)}catch(err){console.warn('download failed',err)}
+  try{await navigator.clipboard.writeText(text);$('exportStatus').textContent=downloadAttempted?'Jei failas neatsisiuntė, JSON taip pat nukopijuotas į iškarpinę.':'JSON nukopijuotas į iškarpinę.'}
+  catch(err){console.warn('clipboard fallback failed',err);$('exportStatus').textContent=downloadAttempted?'Bandytas failo atsisiuntimas. Jei vidinis naršyklės langas jį blokavo, atidaryk puslapį Chrome / Safari.':'Šis vidinis naršyklės langas failo eksporto nepalaiko. Atidaryk puslapį Chrome / Safari.'}
+}
+$('export').onclick=exportJson;"""
+          if old_js not in s:
+              raise SystemExit('old export handler not found')
+          s=s.replace(old_js,new_js,1)
+          p.write_text(s)
+          PY
+          grep -q "async function exportJson" priolens/open14-v02/index.html
+          grep -q "navigator.canShare" priolens/open14-v02/index.html
+          grep -q "navigator.clipboard.writeText" priolens/open14-v02/index.html
+          grep -q 'id="exportStatus"' priolens/open14-v02/index.html
+      - name: Commit patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add priolens/open14-v02/index.html
+          git commit -m 'fix(priolens): support JSON export in in-app browsers'
+          git push origin HEAD:main
