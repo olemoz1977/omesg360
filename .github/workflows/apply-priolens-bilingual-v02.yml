@@ -1,0 +1,95 @@
+name: Apply PrioLens bilingual runtime v02
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/apply-priolens-bilingual-v02.yml
+
+permissions:
+  contents: write
+
+env:
+  FTP_HOST: 46.202.142.134
+  FTP_USER: ${{ secrets.HOSTINGER_FTP_USER }}
+  FTP_PASSWORD: ${{ secrets.HOSTINGER_FTP_PASSWORD }}
+  RUNTIME_DIR: /domains/omesg360.eu/public_html/priolens-open14-v02
+  API_DIR: /domains/omesg360.eu/public_html/priolens-open14-api
+
+jobs:
+  patch-deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run repaired bilingual migration
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          y=Path('.github/workflows/apply-priolens-bilingual-v01.yml').read_text()
+          m=re.search(r"python - <<'PY'\n(.*?)\n          PY",y,re.S)
+          if not m: raise SystemExit('cannot extract v01 migration script')
+          script=m.group(1)
+          script='\n'.join(line[10:] if line.startswith('          ') else line for line in script.splitlines())
+          old='draft_pat=r"function clearLocalDraft\\(\\)\\{.*?\\}\\nfunction loadLocalDraft\\(\\)\\{.*?\\}"'
+          new='draft_pat=r"function clearLocalDraft\\(\\)\\{.*?(?=\\nasync function postProgress)"'
+          if old not in script: raise SystemExit('cannot repair draft regex')
+          script=script.replace(old,new,1)
+          exec(compile(script,'bilingual-migration-v02','exec'),{})
+          PY
+
+      - name: Validate patched sources
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q "const LANG=" priolens/open14-v02/index.html
+          grep -q "language:LANG" priolens/open14-v02/index.html
+          grep -q "Which one do you choose?" priolens/open14-v02/index.html
+          grep -q "Right now, I have enough rest and energy" priolens/open14-v02/index.html
+          grep -q "Numatyta saugojimo trukmė" priolens/open14-v02/index.html
+          grep -q "intended retention period" priolens/open14-v02/index.html
+          grep -q "Invalid language" priolens/open14-v02/server/api.php
+          grep -q "Invalid language" priolens/open14-v02/server/progress.php
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          h=Path('priolens/open14-v02/index.html').read_text()
+          m=re.search(r'<script type="module">(.*?)</script>',h,re.S)
+          assert m
+          Path('/tmp/priolens-runtime.mjs').write_text(m.group(1))
+          PY
+          node --check /tmp/priolens-runtime.mjs
+          php -l priolens/open14-v02/server/api.php
+          php -l priolens/open14-v02/server/progress.php
+
+      - name: Commit bilingual runtime
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add priolens/open14-v02/index.html priolens/open14-v02/server/api.php priolens/open14-v02/server/progress.php
+          git commit -m 'feat(priolens): make Open14 bilingual LT EN'
+          git push
+
+      - name: Install FTP client
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq lftp
+
+      - name: Publish runtime and API
+        shell: bash
+        run: |
+          set -euo pipefail
+          lftp -c "set ftp:ssl-allow no; set net:max-retries 4; set net:timeout 30; open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; put -O \"$RUNTIME_DIR/\" priolens/open14-v02/index.html"
+          lftp -c "set ftp:ssl-allow no; set net:max-retries 4; set net:timeout 30; open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; put -O \"$API_DIR/\" priolens/open14-v02/server/api.php; put -O \"$API_DIR/\" priolens/open14-v02/server/progress.php"
+
+      - name: Live source smoke
+        shell: bash
+        run: |
+          set -euo pipefail
+          body=$(curl -fsS --retry 4 --retry-delay 1 'https://omesg360.eu/priolens-open14-v02/?lang=en&from=com')
+          grep -q 'Which one do you choose?' <<<"$body"
+          grep -q 'language:LANG' <<<"$body"
+          grep -q 'Right now, I have enough rest and energy' <<<"$body"
+          curl -fsS --retry 4 --retry-delay 1 https://omesg360.eu/priolens-open14-api/health.php >/dev/null
