@@ -46,6 +46,8 @@ foreach ($requiredTop as $field) {
     if (!array_key_exists($field, $body)) fail_json(400, 'Missing: '.$field);
 }
 
+if (array_key_exists('language', $body) && !in_array($body['language'], ['lt','en'], true)) fail_json(400, 'Invalid language');
+
 if ($body['schema'] !== '2rasi.priolens.open14.session-v0.2') fail_json(400, 'Unsupported session schema');
 if ($body['sufficiencySchema'] !== '2rasi.priolens.sufficiency-v0.2') fail_json(400, 'Unsupported sufficiency schema');
 if (!is_string($body['bankSchema']) || strlen($body['bankSchema']) > 96 ||

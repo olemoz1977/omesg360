@@ -30,6 +30,8 @@ if (!is_array($body)) fail_json(400, 'Invalid payload');
 $requiredTop = ['schema','sessionUuid','startedAt','completedAt','seed','planSchema','bankSchema','assignerSchema','choices','sufficiencySchema','sufficiency'];
 foreach ($requiredTop as $field) if (!array_key_exists($field, $body)) fail_json(400, 'Missing: '.$field);
 
+if (array_key_exists('language', $body) && !in_array($body['language'], ['lt','en'], true)) fail_json(400, 'Invalid language');
+
 if ($body['schema'] !== '2rasi.priolens.open14.session-v0.2') fail_json(400, 'Unsupported session schema');
 if ($body['sufficiencySchema'] !== '2rasi.priolens.sufficiency-v0.2') fail_json(400, 'Unsupported sufficiency schema');
 if ($body['completedAt'] !== null) fail_json(400, 'Progress endpoint accepts incomplete sessions only');
