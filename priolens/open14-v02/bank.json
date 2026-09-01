@@ -57,8 +57,11 @@
         },
         {
           "id": "SAFETY-B",
-          "runtimePath": "/priolens-research-assets/Gallery/20260829_233727670.png",
-          "firstImpulse": "saugiai laikyti / apsaugoti"
+          "runtimePath": "/priolens-research-assets/Gallery/S13.webp",
+          "firstImpulse": "saugiai laikyti / apsaugoti",
+          "sourceRuntimePath": "/priolens-research-assets/Gallery/20260829_233727670.png",
+          "visualStatus": "CLEAN_EQUIVALENT_PHASH0",
+          "risk": "clean Gallery equivalent selected after pHash=0 comparison; no watermark keyword detected in OCR pass"
         }
       ]
     },
@@ -147,10 +150,11 @@
       "exemplars": [
         {
           "id": "AUTONOMY-A",
-          "runtimePath": "/priolens-research-assets/Gallery/S05.webp",
-          "semanticStatus": "REPLACE_REQUIRED_SEMANTIC_MISMATCH",
-          "firstImpulse": "rinktis tinkamą įrankį",
-          "risk": "owner first-glance review does not clearly read self-direction / autonomy from this image"
+          "runtimePath": "/priolens-research-assets/Gallery/file_00000000cc8c81f4a927534c8316290c.png",
+          "firstImpulse": "pasirinkti savo kryptį",
+          "risk": "forked-path candidate selected for self-direction; continue to treat as formative stimulus pending external data",
+          "sourceRuntimePath": "/priolens-research-assets/Gallery/S05.webp",
+          "status": "OWNER_ACCEPTED_CANDIDATE_SWITCHED"
         },
         {
           "id": "AUTONOMY-B",
