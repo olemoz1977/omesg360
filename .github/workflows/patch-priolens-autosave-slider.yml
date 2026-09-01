@@ -1,0 +1,215 @@
+name: Patch PrioLens autosave resume and sufficiency slider
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/patch-priolens-autosave-slider.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  FTP_HOST: 46.202.142.134
+  FTP_USER: ${{ secrets.HOSTINGER_FTP_USER }}
+  FTP_PASSWORD: ${{ secrets.HOSTINGER_FTP_PASSWORD }}
+  RUNTIME_DIR: /domains/omesg360.eu/public_html/priolens-open14-v02
+  API_DIR: /domains/omesg360.eu/public_html/priolens-open14-api
+
+jobs:
+  patch-deploy-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Patch runtime and final API
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+
+          def repl(text, old, new, label):
+              if old not in text:
+                  raise SystemExit(f'missing patch anchor: {label}')
+              return text.replace(old,new,1)
+
+          # Final API: allow an existing progress row to be finalized in place.
+          p=Path('priolens/open14-v02/server/api.php')
+          api=p.read_text()
+          api=repl(api,
+              'INSERT IGNORE INTO priolens_open14_sessions',
+              'INSERT INTO priolens_open14_sessions',
+              'api insert')
+          api=repl(api,
+              'VALUES (?,?,?,?,?,?,?,?,?,?)");',
+              '''VALUES (?,?,?,?,?,?,?,?,?,?)\n        ON DUPLICATE KEY UPDATE\n          session_schema=VALUES(session_schema),\n          bank_schema=VALUES(bank_schema),\n          planner_schema=VALUES(planner_schema),\n          assigner_schema=VALUES(assigner_schema),\n          seed=VALUES(seed),\n          started_at_client=VALUES(started_at_client),\n          completed_at_client=VALUES(completed_at_client),\n          payload_json=VALUES(payload_json)");''',
+              'api upsert')
+          p.write_text(api)
+
+          # API deploy workflow: deploy and lint progress.php too.
+          p=Path('.github/workflows/deploy-priolens-open14-api.yml')
+          y=p.read_text()
+          y=repl(y,
+              '      - priolens/open14-v02/server/api.php\n',
+              '      - priolens/open14-v02/server/api.php\n      - priolens/open14-v02/server/progress.php\n',
+              'api workflow trigger')
+          y=repl(y,
+              '          php -l priolens/open14-v02/server/api.php\n',
+              '          php -l priolens/open14-v02/server/api.php\n          php -l priolens/open14-v02/server/progress.php\n',
+              'api workflow lint')
+          y=repl(y,
+              'put -O \"$REMOTE_DIR/\" priolens/open14-v02/server/api.php; put -O',
+              'put -O \"$REMOTE_DIR/\" priolens/open14-v02/server/api.php; put -O \"$REMOTE_DIR/\" priolens/open14-v02/server/progress.php; put -O',
+              'api workflow upload')
+          p.write_text(y)
+
+          # Runtime UI + local persistence + server checkpoints.
+          p=Path('priolens/open14-v02/index.html')
+          h=p.read_text()
+          old_css='.scale{display:grid;grid-template-columns:repeat(6,1fr);gap:5px}.scale button{border:1px solid var(--line);background:#fff;border-radius:10px;min-height:38px;font-size:12px;padding:5px}.scale button.on{background:#1d1d1d;color:#fff;border-color:#1d1d1d}.scale button.na{font-size:10px;color:#777}.scale button.na.on{color:#fff}.suffNav{display:flex;justify-content:space-between;gap:8px;margin-top:14px}'
+          new_css='.scale{display:grid;gap:9px}.rangeRow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center}.rangeBox{min-width:0}.rangeBox input[type=range]{width:100%;margin:2px 0 0;accent-color:#1d1d1d}.rangeBox input[type=range].unset{opacity:.48}.rangeLabels{display:flex;justify-content:space-between;gap:10px;font-size:11px;color:#777;margin-top:1px}.scale button.na{border:1px solid var(--line);background:#fff;border-radius:10px;min-height:38px;font-size:11px;color:#666;padding:7px 10px;white-space:nowrap}.scale button.na.on{background:#1d1d1d;color:#fff;border-color:#1d1d1d}.autosaveNote{font-size:11px;color:#777;margin-top:6px}.suffNav{display:flex;justify-content:space-between;gap:8px;margin-top:14px}'
+          h=repl(h,old_css,new_css,'slider css')
+          h=h.replace('@media(max-width:620px){.scale{grid-template-columns:repeat(3,1fr)}}','@media(max-width:620px){.rangeRow{grid-template-columns:1fr}.scale button.na{justify-self:start}}',1)
+
+          h=repl(h,
+              "const API_PATH='/priolens-open14-api/api.php';",
+              "const API_PATH='/priolens-open14-api/api.php';\nconst PROGRESS_PATH='/priolens-open14-api/progress.php';\nconst DRAFT_KEY='priolens.open14.v02.draft';",
+              'progress constants')
+
+          anchor="let bank=null,assignment=null,state=null,t0=0,locked=false,suffIndex=0,lastPointerType=null;"
+          helpers=r'''let bank=null,assignment=null,state=null,t0=0,locked=false,suffIndex=0,lastPointerType=null,progressTimer=null;
+function saveLocalDraft(){if(!state||state.completedAt)return;try{localStorage.setItem(DRAFT_KEY,JSON.stringify(state))}catch(err){console.warn('local draft save failed',err)}}
+function clearLocalDraft(){try{localStorage.removeItem(DRAFT_KEY)}catch(err){console.warn('local draft clear failed',err)}}
+function loadLocalDraft(){try{const raw=localStorage.getItem(DRAFT_KEY);if(!raw)return null;const x=JSON.parse(raw);if(!x||x.schema!=='2rasi.priolens.open14.session-v0.2'||x.completedAt||!Array.isArray(x.choices)||!x.sufficiency)return null;return x}catch(err){return null}}
+async function postProgress(){if(!state||state.completedAt)return;try{await fetch(PROGRESS_PATH,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(state),keepalive:true})}catch(err){console.warn('progress checkpoint failed',err)}}
+function checkpointProgress(){saveLocalDraft();clearTimeout(progressTimer);progressTimer=setTimeout(()=>postProgress(),250)}
+function offerResumeIfAvailable(){const d=loadLocalDraft();if(!d)return;if(bank&&d.bankSchema!==bank.schema){clearLocalDraft();return}$('bankStatus').textContent=`Rasta nebaigta sesija: ${d.choices.length}/14 vaizdinių pasirinkimų. Gali tęsti nuo tos vietos.`;$('start').textContent='Tęsti sesiją';$('start').dataset.resume='1';if(!$('newSession')){const b=document.createElement('button');b.id='newSession';b.className='secondary';b.textContent='Pradėti naują';b.onclick=()=>{clearLocalDraft();$('start').dataset.resume='';$('start').textContent='Pradėti';b.remove();startSession().catch(err=>{alert(String(err));console.error(err)})};$('start').parentElement.appendChild(b)}}
+async function resumeSession(){const d=loadLocalDraft();if(!d)return startSession();const plan=buildOpen14Plan(d.seed);assignment=assignOpen14Exemplars(plan,bank,d.seed);await preload(assignment.trials.flatMap(t=>t.stimuli.map(s=>s.runtimePath)));state=d;if(state.choices.length<14){show('trial');renderTrial();return}const firstIncomplete=DOMAINS.findIndex(dom=>dom.items.some(([k])=>!Object.prototype.hasOwnProperty.call(state.sufficiency,k)));if(firstIncomplete>=0){suffIndex=firstIncomplete;show('suff');renderSuff();return}finish()}'''
+          h=repl(h,anchor,helpers,'persistence helpers')
+
+          h=repl(h,
+              "$('start').disabled=false}catch(err)",
+              "$('start').disabled=false;offerResumeIfAvailable()}catch(err)",
+              'resume offer')
+
+          old_start="async function startSession(){const seed=seedNow(),plan=buildOpen14Plan(seed);assignment=assignOpen14Exemplars(plan,bank,seed);await preload(assignment.trials.flatMap(t=>t.stimuli.map(s=>s.runtimePath)));state={schema:'2rasi.priolens.open14.session-v0.2',sessionUuid:crypto.randomUUID(),startedAt:new Date().toISOString(),seed,planSchema:plan.schema,bankSchema:bank.schema,assignerSchema:assignment.schema,plannerAudit:plan.audit,exemplarAudit:assignment.audit,exemplarPlan:assignment.exemplarPlan,choices:[],sufficiencySchema:'2rasi.priolens.sufficiency-v0.2',sufficiency:{},completedAt:null};suffIndex=0;show('trial');renderTrial()}"
+          new_start="async function startSession(){clearLocalDraft();const seed=seedNow(),plan=buildOpen14Plan(seed);assignment=assignOpen14Exemplars(plan,bank,seed);await preload(assignment.trials.flatMap(t=>t.stimuli.map(s=>s.runtimePath)));state={schema:'2rasi.priolens.open14.session-v0.2',sessionUuid:crypto.randomUUID(),startedAt:new Date().toISOString(),seed,planSchema:plan.schema,bankSchema:bank.schema,assignerSchema:assignment.schema,plannerAudit:plan.audit,exemplarAudit:assignment.audit,exemplarPlan:assignment.exemplarPlan,choices:[],sufficiencySchema:'2rasi.priolens.sufficiency-v0.2',sufficiency:{},completedAt:null};suffIndex=0;checkpointProgress();show('trial');renderTrial()}"
+          h=repl(h,old_start,new_start,'start checkpoint')
+
+          h=repl(h,
+              "pointerType:lastPointerType||null});setTimeout(()=>",
+              "pointerType:lastPointerType||null});checkpointProgress();setTimeout(()=>",
+              'choice checkpoint')
+
+          old_render="function renderSuff(){const d=DOMAINS[suffIndex];$('suffCount').textContent=`${suffIndex+1} / 6`;$('suffBack').disabled=suffIndex===0;$('suffNext').textContent=suffIndex===5?'Pamatyti rezultatą':'Toliau';const mount=$('domainMount');mount.innerHTML='';const card=document.createElement('div');card.className='domainCard';card.innerHTML=`<div class=\"domainTitle\">${d.title}</div>`;d.items.forEach(([key,text])=>{const item=document.createElement('div');item.className='item';item.innerHTML=`<div class=\"statement\">${text}</div><div class=\"scale\"></div>`;const scale=item.querySelector('.scale');[1,2,3,4,5,null].forEach(v=>{const b=document.createElement('button');b.type='button';b.className=v===null?'na':'';b.textContent=v===null?'Sunku pasakyti':String(v);const current=Object.prototype.hasOwnProperty.call(state.sufficiency,key)?state.sufficiency[key]:undefined;if(current===v)b.classList.add('on');b.onclick=()=>{state.sufficiency[key]=v;renderSuff()};scale.appendChild(b)});card.appendChild(item)});mount.appendChild(card)}"
+          new_render=r'''function renderSuff(){const d=DOMAINS[suffIndex];$('suffCount').textContent=`${suffIndex+1} / 6`;$('suffBack').disabled=suffIndex===0;$('suffNext').textContent=suffIndex===5?'Pamatyti rezultatą':'Toliau';const mount=$('domainMount');mount.innerHTML='';const card=document.createElement('div');card.className='domainCard';card.innerHTML=`<div class="domainTitle">${d.title}</div>`;d.items.forEach(([key,text])=>{const item=document.createElement('div');item.className='item';item.innerHTML=`<div class="statement">${text}</div><div class="scale"><div class="rangeRow"><div class="rangeBox"><input type="range" min="1" max="5" step="1" aria-label="Nuo labai trūksta iki pakanka"><div class="rangeLabels"><span>Labai trūksta</span><span>Pakanka</span></div></div><button type="button" class="na">Sunku pasakyti</button></div></div>`;const current=Object.prototype.hasOwnProperty.call(state.sufficiency,key)?state.sufficiency[key]:undefined;const slider=item.querySelector('input[type=range]'),na=item.querySelector('button.na');slider.value=Number.isFinite(current)?current:3;if(!Number.isFinite(current))slider.classList.add('unset');if(current===null)na.classList.add('on');slider.oninput=()=>{slider.classList.remove('unset');na.classList.remove('on');state.sufficiency[key]=Number(slider.value);saveLocalDraft()};slider.onchange=()=>{state.sufficiency[key]=Number(slider.value);checkpointProgress()};na.onclick=()=>{state.sufficiency[key]=null;checkpointProgress();renderSuff()};card.appendChild(item)});const n=document.createElement('div');n.className='autosaveNote';n.textContent='Progresas saugomas automatiškai. Nutrūkus galėsi tęsti šiame įrenginyje.';card.appendChild(n);mount.appendChild(card)}'''
+          h=repl(h,old_render,new_render,'slider render')
+
+          h=repl(h,
+              "state.submission={ok:true,inserted:Boolean(data.inserted),submissionId:data.submissionId||null};el.textContent='Anoniminė tyrimo sesija išsaugota.';",
+              "state.submission={ok:true,inserted:Boolean(data.inserted),submissionId:data.submissionId||null};clearLocalDraft();el.textContent='Anoniminė tyrimo sesija išsaugota.';",
+              'clear final draft')
+
+          h=repl(h,
+              "$('start').onclick=()=>startSession().catch(err=>{alert(String(err));console.error(err)});$('restart').onclick=()=>location.reload();",
+              "$('start').onclick=()=>($('start').dataset.resume==='1'?resumeSession():startSession()).catch(err=>{alert(String(err));console.error(err)});$('restart').onclick=()=>{clearLocalDraft();location.reload()};",
+              'resume click')
+
+          h=repl(h,'\ninit();\n</script>','\nwindow.addEventListener(\'pagehide\',()=>{if(state&&!state.completedAt){saveLocalDraft();try{navigator.sendBeacon(PROGRESS_PATH,new Blob([JSON.stringify(state)],{type:\'application/json\'}))}catch(err){}}});\ninit();\n</script>','pagehide checkpoint')
+          p.write_text(h)
+
+          # Keep the ordinary deployment workflow aware of the new progress endpoint.
+          p=Path('.github/workflows/deploy-priolens-open14-runtime.yml')
+          y=p.read_text()
+          y=repl(y,
+              "for needle in ['sessionUuid:crypto.randomUUID','/priolens-open14-api/api.php','submitSession','90 dienų']:",
+              "for needle in ['sessionUuid:crypto.randomUUID','/priolens-open14-api/api.php','/priolens-open14-api/progress.php','submitSession','DRAFT_KEY','90 dienų']:",
+              'runtime validation needles')
+          y=repl(y,
+              "          grep -q 'priolens-open14-api/api.php' /tmp/index\n",
+              "          grep -q 'priolens-open14-api/api.php' /tmp/index\n          grep -q 'priolens-open14-api/progress.php' /tmp/index\n          grep -q 'Labai trūksta' /tmp/index\n",
+              'runtime smoke needles')
+          p.write_text(y)
+          PY
+
+      - name: Validate patched source
+        shell: bash
+        run: |
+          set -euo pipefail
+          php -l priolens/open14-v02/server/api.php
+          php -l priolens/open14-v02/server/progress.php
+          python - <<'PY'
+          from pathlib import Path
+          h=Path('priolens/open14-v02/index.html').read_text()
+          assert '/priolens-open14-api/progress.php' in h
+          assert 'DRAFT_KEY' in h and 'resumeSession' in h
+          assert 'type="range"' in h and 'Labai trūksta' in h and 'Sunku pasakyti' in h
+          s=h.split('<script type="module">',1)[1].split('</script>',1)[0]
+          Path('/tmp/open14-app.mjs').write_text(s)
+          print('runtime patch source checks pass')
+          PY
+          node --check /tmp/open14-app.mjs
+
+      - name: Commit source changes
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add priolens/open14-v02/index.html priolens/open14-v02/server/api.php priolens/open14-v02/server/progress.php .github/workflows/deploy-priolens-open14-api.yml .github/workflows/deploy-priolens-open14-runtime.yml
+          git commit -m 'feat(priolens): autosave resume and hidden Likert slider'
+          git push origin HEAD:main
+
+      - name: Install FTP client
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq lftp
+
+      - name: Deploy patched runtime and API only
+        shell: bash
+        run: |
+          set -euo pipefail
+          lftp -c "set ftp:ssl-allow no; set net:max-retries 4; set net:timeout 30; open -u \"$FTP_USER\",\"$FTP_PASSWORD\" ftp://$FTP_HOST; put -O \"$RUNTIME_DIR/\" priolens/open14-v02/index.html; put -O \"$API_DIR/\" priolens/open14-v02/server/api.php; put -O \"$API_DIR/\" priolens/open14-v02/server/progress.php"
+
+      - name: Smoke partial checkpoint then final overwrite
+        shell: bash
+        run: |
+          set -euo pipefail
+          base='https://omesg360.eu/priolens-open14-api'
+          code="$(curl -sS -o /tmp/pget -w '%{http_code}' "$base/progress.php")"
+          [[ "$code" == 405 ]]
+          cat > /tmp/partial.json <<'JSON'
+          {"schema":"2rasi.priolens.open14.session-v0.2","sessionUuid":"00000000-0000-4000-8000-000000000002","startedAt":"2026-09-01T00:00:00.000Z","completedAt":null,"seed":"SYSTEM_SMOKE_DO_NOT_ANALYZE","planSchema":"2rasi.priolens.p3.open14.plan-v0.2","bankSchema":"2rasi.priolens.open14.bank-v0.2","assignerSchema":"2rasi.priolens.p3.open14.exemplars-v0.1","choices":[],"sufficiencySchema":"2rasi.priolens.sufficiency-v0.2","sufficiency":{}}
+          JSON
+          curl -fsS -H 'Content-Type: application/json' --data-binary @/tmp/partial.json "$base/progress.php" | tee /tmp/pbody
+          grep -q '"ok":true' /tmp/pbody
+
+          node --input-type=module <<'NODE'
+          import fs from 'fs';
+          import {buildOpen14Plan} from './priolens/open14-v02/p3_open14_planner_v02.mjs';
+          import {assignOpen14Exemplars} from './priolens/open14-v02/p3_open14_exemplar_assigner_v01.mjs';
+          const bank=JSON.parse(fs.readFileSync('./priolens/open14-v02/bank.json','utf8'));
+          const seed='SYSTEM_SMOKE_DO_NOT_ANALYZE';
+          const plan=buildOpen14Plan(seed), a=assignOpen14Exemplars(plan,bank,seed);
+          const choices=a.trials.map((t,i)=>{const s=t.stimuli[0];return {trialId:t.trialId,trialIndex:i+1,designIndex:t.designIndex,positions:t.positions,stimuli:t.stimuli.map(x=>({familyId:x.familyId,macro:x.macro,exemplarId:x.exemplarId,slot:x.slot,runtimePath:x.runtimePath})),choice:{familyId:s.familyId,macro:s.macro,exemplarId:s.exemplarId,slot:s.slot},noClearChoice:false,rtMs:1000,pointerType:'system'}});
+          const suffKeys=['RESTORATION_ENERGY','MATERIAL_RESOURCES','SAFETY_STABILITY','CLARITY_PREDICTABILITY','CONNECTION_BELONGING','CARE_SUPPORT_PRESENT','AUTONOMY_AGENCY','RECOGNITION_ESTEEM','LEARNING_GROWTH','CAPABILITY_MASTERY','MEANING_PURPOSE','CONTRIBUTION'];
+          const suff=Object.fromEntries(suffKeys.map(k=>[k,3]));
+          fs.writeFileSync('/tmp/final.json',JSON.stringify({schema:'2rasi.priolens.open14.session-v0.2',sessionUuid:'00000000-0000-4000-8000-000000000002',startedAt:'2026-09-01T00:00:00.000Z',completedAt:'2026-09-01T00:03:00.000Z',seed,planSchema:plan.schema,bankSchema:bank.schema,assignerSchema:a.schema,choices,sufficiencySchema:'2rasi.priolens.sufficiency-v0.2',sufficiency:suff}));
+          NODE
+          curl -fsS -H 'Content-Type: application/json' --data-binary @/tmp/final.json "$base/api.php" | tee /tmp/fbody
+          grep -q '"ok":true' /tmp/fbody
+          curl -fsS -H 'Content-Type: application/json' --data-binary @/tmp/partial.json "$base/progress.php" | tee /tmp/after
+          grep -q '"completedAlready":true' /tmp/after
+
+      - name: Smoke live runtime markers
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsS --retry 4 --retry-delay 2 'https://omesg360.eu/priolens-open14-v02/' -o /tmp/live
+          grep -q '/priolens-open14-api/progress.php' /tmp/live
+          grep -q 'Labai trūksta' /tmp/live
+          grep -q 'Tęsti sesiją' /tmp/live
+          echo 'PASS: autosave/resume + slider live'
