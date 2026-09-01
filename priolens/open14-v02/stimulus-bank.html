@@ -16,19 +16,18 @@
 <div id="mount">Kraunamas bankas…</div>
 <script>
 const knownFlags={
-  'REST-B':['REPLACE_REQUIRED_WATERMARK','2_WATERMARKS_VISIBLE'],
-  'ORDER-B':['REPLACE_REQUIRED_SEMANTIC_MISMATCH'],
+  'REST-B':['2_WATERMARKS_VISIBLE'],
   'CONNECTION-B':['WATERMARK_REVIEW_REQUIRED']
 };
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const cls=f=>/REPLACE_REQUIRED|REASSIGN_REQUIRED|SEMANTIC_MISMATCH|WATERMARK/.test(f)?'bad':/BOUNDARY|REVIEW/.test(f)?'warn':/ACCEPTED|PASS/.test(f)?'ok':'';
+const cls=f=>/REPLACE_REQUIRED|REASSIGN_REQUIRED|SEMANTIC_MISMATCH|WATERMARK|VISUAL_CREDIBILITY/.test(f)?'bad':/BOUNDARY|REVIEW|HOLD/.test(f)?'warn':/ACCEPTED|PASS/.test(f)?'ok':'';
 async function init(){
   const r=await fetch('./bank.json',{cache:'no-store'}); if(!r.ok) throw new Error('bank.json '+r.status);
   const b=await r.json(); const out=[];
   for(const [fid,fam] of Object.entries(b.families)){
     const cards=fam.exemplars.map(ex=>{
       const meaning=ex.firstImpulseTarget||ex.firstImpulse||'';
-      const flags=[ex.status,ex.geometryStatus,ex.semanticStatus,...(knownFlags[ex.id]||[])].filter(Boolean);
+      const flags=[ex.status,ex.geometryStatus,ex.semanticStatus,ex.visualStatus,...(knownFlags[ex.id]||[])].filter(Boolean);
       const source=ex.sourceRuntimePath?`<div class="label">Originalo šaltinis</div><div class="path">${esc(ex.sourceRuntimePath)}</div>`:'';
       const originalIntent=ex.originalIntent?`<div class="label">Originalus kūrimo tikslas</div><div class="meaning">${esc(ex.originalIntent)}</div>`:'';
       const mechanism=ex.mechanism?`<div class="label">Mechanizmas / ribos</div><div>${esc(ex.mechanism)}</div>`:'';
