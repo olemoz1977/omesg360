@@ -1,0 +1,53 @@
+name: Patch PrioLens CONTROL-A manual upload v01
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/patch-priolens-control-a-manual-v01.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Patch bank
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('priolens/open14-v02/bank.json')
+          bank=json.loads(p.read_text(encoding='utf-8'))
+
+          ca=bank['families']['CONTROL']['exemplars'][0]
+          ca['previousRuntimePath']=ca['runtimePath']
+          ca['sourceRuntimePath']='/priolens-research-assets/Open14-v02/file_00000000dbb881f48b13b7b69cb0ef6f.png'
+          ca['runtimePath']='/priolens-research-assets/Open14-v02/file_00000000dbb881f48b13b7b69cb0ef6f.png'
+          ca['geometryStatus']='OWNER_ACCEPTED_SQUARE_1TO1'
+          ca['status']='OWNER_ACCEPTED_REPLACEMENT_SWITCHED'
+          ca['firstImpulse']='tiesiogiai valdyti / keisti sistemos būseną'
+          ca['risk']='generated industrial joystick replacement; visually credible direct-control mechanism; formative pending external data'
+          ca.pop('visualStatus',None)
+          ca.pop('ownerShortlistDecision',None)
+
+          bb=bank['families']['BELONGING']['exemplars'][1]
+          bb['semanticStatus']='FORMATIVE_BOUNDARY_RETAIN_CURRENT'
+          bb['reserveCandidateRuntimePath']='/priolens-research-assets/Open14-v02/file_000000009a0881f49ae08d6fcc47f9d7.png'
+          bb['risk']='current asymmetric-warmth exemplar retained as formative boundary probe; generated friends-circle image stored as reserve but not switched because it duplicates BELONGING-A social-circle mechanism and risks CONNECTION cross-load'
+
+          oa=bank['families']['OPPORTUNITY']['exemplars'][0]
+          oa['semanticStatus']='FORMATIVE_BOUNDARY_RETAIN_CURRENT'
+          oa['risk']='greenhouse-door direction not adopted because it cross-loads EXPLORATION and duplicates an existing near-identical asset; retain current immediate-available-materials boundary probe for formative pilot'
+
+          p.write_text(json.dumps(bank,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+          PY
+          git config user.name 'olemoz1977'
+          git config user.email 'olemoz1977@gmail.com'
+          git add priolens/open14-v02/bank.json
+          git commit -m 'fix(priolens): finalize CONTROL-A and remaining stimulus holds'
+          git push
