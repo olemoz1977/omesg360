@@ -1,6 +1,6 @@
 {
   "schema": "2rasi.priolens.open14.bank-v0.2",
-  "status": "READY_FOR_OWNER_SMOKE",
+  "status": "PREPILOT_HARDENING",
   "familySetVersion": "open-spectrum-14-v0.2",
   "planner": "cyclic-14x3-diff-1-4-slot-role-v0.2",
   "labelsHiddenDuringChoice": true,
@@ -320,5 +320,5 @@
   ],
   "missingRuntimeAssets": [],
   "startPolicy": "FAIL_CLOSED_IF_ANY_REQUIRED_RUNTIME_PATH_IS_NULL",
-  "assetReviewStatus": "OWNER_FINALIZED_PENDING_FINAL_AUDIT"
+  "assetReviewStatus": "OWNER_FINALIZED_FINAL_AUDIT_PASS"
 }
