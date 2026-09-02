@@ -41,7 +41,8 @@ jobs:
               'Kuris pirmas patraukia?',
               'O kuris iš likusių traukia mažiausiai?',
               'Kas liko antrame plane?',
-              'Kaip pats vertini dabar?',
+              'Antros dalies atsakymus įtraukiame tik tada',
+              'unmatchedLowContext',
               "kind:'DIRECT'",
               "kind:'RELATED'",
               "kind:'NONE'",
@@ -51,6 +52,8 @@ jobs:
               '/priolens-open14-v02/bank.json'
           ]:
               assert needle in s, needle
+          assert 'Kaip pats vertini dabar?' not in s
+          assert 'renderAnswers();' not in s
           a=s.index('<script type="module">')+len('<script type="module">')
           b=s.index('</script>',a)
           Path('/tmp/rank-v02.mjs').write_text(s[a:b])
@@ -82,7 +85,9 @@ jobs:
           curl -fsS --retry 4 --retry-delay 2 "$base" -o /tmp/live
           grep -Fq 'OWNER · Rank v0.2' /tmp/live
           grep -Fq 'Kas liko antrame plane?' /tmp/live
-          grep -Fq 'Kaip pats vertini dabar?' /tmp/live
+          grep -Fq 'Antros dalies atsakymus įtraukiame tik tada' /tmp/live
+          grep -Fq 'unmatchedLowContext' /tmp/live
+          if grep -Fq 'Kaip pats vertini dabar?' /tmp/live; then echo 'stale standalone Channel B block'; exit 1; fi
           grep -Fq '2rasi.priolens.open14.rank-session-v0.2' /tmp/live
           curl -fsS --retry 4 --retry-delay 2 'https://omesg360.eu/priolens-open14-v02/bank.json' -o /dev/null
           curl -fsS --retry 4 --retry-delay 2 'https://omesg360.eu/priolens-open14-v02/p3_open14_planner_v02.mjs' -o /dev/null
@@ -90,5 +95,3 @@ jobs:
 
 # Owner-only protocol experiment. Deliberately does not deploy or modify
 # /priolens-open14-v02/, its API, database, 2rasi landing, or public routing.
-# Trigger checkpoint: workflow existed before this push so this run verifies registration + live deploy.
-# Retry checkpoint after transient Hostinger FTP max-retries failure on run 33677194302.
