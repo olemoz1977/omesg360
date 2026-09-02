@@ -43,6 +43,10 @@ jobs:
               'Kas liko antrame plane?',
               'Antros dalies atsakymus įtraukiame tik tada',
               'unmatchedLowContext',
+              '2rasi.priolens.rank-self-explanation-v0.1',
+              'Norėčiau daugiau to savo gyvenime',
+              'Man tai dabar mažiau aktualu',
+              'Kaip tau atrodo, kodėl būtent šie vaizdai traukė mažiau?',
               "kind:'DIRECT'",
               "kind:'RELATED'",
               "kind:'NONE'",
@@ -87,11 +91,14 @@ jobs:
           grep -Fq 'Kas liko antrame plane?' /tmp/live
           grep -Fq 'Antros dalies atsakymus įtraukiame tik tada' /tmp/live
           grep -Fq 'unmatchedLowContext' /tmp/live
+          grep -Fq '2rasi.priolens.rank-self-explanation-v0.1' /tmp/live
+          grep -Fq 'Norėčiau daugiau to savo gyvenime' /tmp/live
+          grep -Fq 'Kaip tau atrodo, kodėl būtent šie vaizdai traukė mažiau?' /tmp/live
           if grep -Fq 'Kaip pats vertini dabar?' /tmp/live; then echo 'stale standalone Channel B block'; exit 1; fi
           grep -Fq '2rasi.priolens.open14.rank-session-v0.2' /tmp/live
           curl -fsS --retry 4 --retry-delay 2 'https://omesg360.eu/priolens-open14-v02/bank.json' -o /dev/null
           curl -fsS --retry 4 --retry-delay 2 'https://omesg360.eu/priolens-open14-v02/p3_open14_planner_v02.mjs' -o /dev/null
-          echo 'PASS: isolated owner rank v0.2 prototype live; public PrioLens path untouched'
+          echo 'PASS: isolated owner rank v0.2 reflection loop live; public PrioLens path untouched'
 
 # Owner-only protocol experiment. Deliberately does not deploy or modify
 # /priolens-open14-v02/, its API, database, 2rasi landing, or public routing.
