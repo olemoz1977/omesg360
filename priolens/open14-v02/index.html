@@ -9,7 +9,7 @@
 *{box-sizing:border-box}html,body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,sans-serif}body{min-height:100dvh}.wrap{width:min(100%,900px);margin:auto;padding:0 12px;min-height:100dvh}.top{height:48px;display:flex;align-items:center;justify-content:space-between}.brand{font-weight:800}.topRight{display:flex;align-items:center;gap:8px}.exitLink{display:inline-flex;align-items:center;min-height:44px;font-size:13px;color:#555;text-decoration:none;padding:0 4px}.exitLink:hover{text-decoration:underline}.pill{font-size:12px;color:var(--muted);border:1px solid var(--line);padding:6px 9px;border-radius:99px;background:#fff}.screen{display:none}.screen.active{display:block}.intro,.result{padding:6vh 4px 42px}h1{font-size:clamp(36px,10vw,62px);letter-spacing:-.055em;line-height:.96;margin:0 0 18px}.lead{font-size:clamp(18px,4.8vw,25px);line-height:1.3;max-width:720px}.note{font-size:15px;line-height:1.55;color:#5f5f5f;max-width:720px}.card,.row,.domainCard{background:var(--card);border:1px solid var(--line);border-radius:16px}.card{padding:14px 15px;margin:18px 0}.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:16px}button{font:inherit;cursor:pointer}.primary,.secondary{border-radius:14px;padding:12px 15px;font-weight:700;min-height:44px}.primary{border:0;background:#171717;color:#fff}.primary:disabled{opacity:.35;cursor:not-allowed}.secondary{border:1px solid var(--line);background:#fff;color:#181818}.bad{color:#9a3b3b}.ok{color:#3d7045}
 #trial.active{height:calc(100dvh - 48px);display:flex;flex-direction:column;overflow:hidden}.trialhead{height:40px;display:flex;align-items:center;justify-content:space-between}.q{font-size:16px;font-weight:750}.count{font-size:14px;color:#626262}.progress{height:3px;background:#e7e7e2;border-radius:10px;overflow:hidden}.progress i{display:block;height:100%;background:#222;width:0}.stage{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:repeat(3,minmax(0,1fr)) auto;gap:6px;padding:7px 0 10px}.stim{grid-column:1;width:100%;height:100%;border:0;background:transparent;padding:2px 4px;display:flex;align-items:center;justify-content:center}.stim:nth-of-type(1){grid-row:1}.stim:nth-of-type(2){grid-row:2}.stim:nth-of-type(3){grid-row:3}.stim img{display:block;height:100%;width:auto;max-width:100%;max-height:100%;aspect-ratio:1/1;object-fit:contain;border:1px solid #d6d6d1;background:#eee;border-radius:16px}.stage.locked button{pointer-events:none}.none{grid-column:1;grid-row:4;border:1.5px solid #aaa9a3;background:#fff;color:#303030;border-radius:14px;padding:10px 14px;min-height:48px;font-size:15px;font-weight:760;writing-mode:horizontal-tb;transform:none;display:flex;align-items:center;justify-content:center}
 #suff.active{padding:12px 0 40px}.suffHead{padding:18px 4px 8px}.suffHead h2{font-size:28px;margin:0 0 8px}.domainCard{padding:14px;margin:12px 0}.domainTitle{font-size:15px;color:#555;margin-bottom:14px;font-weight:760}.item{padding:10px 0;border-top:1px solid #eeeeea}.item:first-of-type{border-top:0}.statement{font-size:18px;line-height:1.45;margin-bottom:12px}.scale{display:grid;gap:9px}.rangeRow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center}.rangeBox{min-width:0}.rangeBox input[type=range]{width:100%;margin:4px 0 0;accent-color:#1d1d1d;min-height:34px}.rangeBox input[type=range].noValue{accent-color:#8b8b86}.rangeBox input[type=range].noValue::-webkit-slider-thumb{opacity:0}.rangeBox input[type=range].noValue::-moz-range-thumb{opacity:0}.rangeLabels{display:flex;justify-content:space-between;gap:10px;font-size:13px;color:#5f5f5f;margin-top:2px}.scale button.na{border:1px solid #bbb;background:#fff;border-radius:10px;min-height:44px;font-size:14px;color:#444;padding:9px 12px;white-space:nowrap}.scale button.na.on{background:#1d1d1d;color:#fff;border-color:#1d1d1d}.autosaveNote{font-size:13px;color:#666;margin-top:10px}.answerState{font-size:13px;font-weight:700;color:#555;margin-top:5px}.answerState.unsetState{color:#735d00}.item.validationError{margin:6px -8px 0;padding:12px 8px;border:2px solid #b54a4a;border-radius:12px;background:#fff8f8}.suffError{margin:10px 0 0;padding:11px 12px;border:2px solid #b54a4a;border-radius:12px;background:#fff4f4;color:#7d2525;font-size:15px;font-weight:750;line-height:1.4}.suffNav{display:flex;justify-content:space-between;gap:8px;margin-top:14px}
-.result{max-width:760px;margin:0 auto}.result h1{font-size:clamp(38px,8vw,54px);margin-bottom:12px}.resultLead{font-size:17px;line-height:1.55;color:#555;max-width:680px}.resultActions{align-items:stretch;margin-top:28px}.actionLink{display:inline-flex;align-items:center;justify-content:center;text-decoration:none}.perspective{margin:30px 0}.perspectiveLabel{font-size:12px;font-weight:800;letter-spacing:.13em;text-transform:uppercase;color:#777;margin:0 0 6px}.perspective h2{font-size:25px;letter-spacing:-.02em;margin:0 0 13px}.rows{display:grid;gap:9px}.insight{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px 15px}.insightTitle{font-size:17px;font-weight:780;line-height:1.3}.insightState{font-size:14px;font-weight:760;color:#444;margin-top:5px}.insightCue{font-size:14px;line-height:1.5;color:#666;margin-top:5px}.choiceInsight{background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px}.choiceVisuals{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:12px}.choiceVisuals img{display:block;width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:12px;border:1px solid #e4e4df;background:#eee}.choiceMeta{display:flex;align-items:center;justify-content:space-between;gap:10px}.choiceCount{flex:0 0 auto;font-size:13px;font-weight:800;border:1px solid #cfcfca;border-radius:999px;padding:5px 8px;color:#444}.choiceMeaning{font-size:14px;line-height:1.5;color:#5e5e5e;margin-top:7px}.reflectionPerspective{margin-top:42px}.reflectionPerspective .perspectiveLabel{color:#181818}.reflectionHero{background:#181818;color:#fff;border-radius:20px;padding:22px 20px}.reflectionHero .insightCue{color:#d8d8d2;font-size:15px;line-height:1.55;margin:0}.reflectionImages{display:grid;grid-template-columns:repeat(2,minmax(0,120px));gap:8px;margin-bottom:16px}.reflectionImages img{width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:12px;border:1px solid #454545}.reflectionQuestion{font-size:clamp(22px,5vw,29px);font-weight:820;letter-spacing:-.02em;line-height:1.2;margin-top:16px;color:#fff}.resultNote{font-size:14px;line-height:1.55;color:#666;margin:10px 2px 0}.bankCard.ready{display:none}.debug{font-size:12px;color:#777;white-space:pre-wrap;background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px;overflow:auto}.hidden{display:none!important}@media(max-width:620px){.rangeRow{grid-template-columns:1fr}.scale button.na{justify-self:start}.perspective{margin:26px 0}.perspective h2{font-size:23px}}
+.result{max-width:760px;margin:0 auto}.result h1{font-size:clamp(38px,8vw,54px);margin-bottom:12px}.resultLead{font-size:17px;line-height:1.55;color:#555;max-width:680px}.resultActions{align-items:stretch;margin-top:28px}.actionLink{display:inline-flex;align-items:center;justify-content:center;text-decoration:none}.perspective{margin:30px 0}.perspectiveLabel{font-size:12px;font-weight:800;letter-spacing:.13em;text-transform:uppercase;color:#777;margin:0 0 6px}.perspective h2{font-size:25px;letter-spacing:-.02em;margin:0 0 13px}.rows{display:grid;gap:9px}.insight{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px 15px}.insightTitle{font-size:17px;font-weight:780;line-height:1.3}.insightState{font-size:14px;font-weight:760;color:#444;margin-top:5px}.insightCue{font-size:14px;line-height:1.5;color:#666;margin-top:5px}.choiceInsight{background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px}.choiceVisuals{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:12px}.choiceVisuals img{display:block;width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:12px;border:1px solid #e4e4df;background:#eee}.choiceMeta{display:flex;align-items:center;justify-content:space-between;gap:10px}.choiceCount{flex:0 0 auto;font-size:13px;font-weight:800;border:1px solid #cfcfca;border-radius:999px;padding:5px 8px;color:#444}.choiceMeaning{font-size:14px;line-height:1.5;color:#5e5e5e;margin-top:7px}.reflectionPerspective{margin-top:42px}.reflectionPerspective .perspectiveLabel{color:#181818}.reflectionHero{background:#181818;color:#fff;border-radius:20px;padding:22px 20px}.reflectionHero .insightCue{color:#d8d8d2;font-size:15px;line-height:1.55;margin:0}.reflectionImages{display:grid;grid-template-columns:repeat(2,minmax(0,120px));gap:8px;margin-bottom:16px}.reflectionImages img{width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:12px;border:1px solid #454545}.reflectionQuestion{font-size:clamp(22px,5vw,29px);font-weight:820;letter-spacing:-.02em;line-height:1.2;margin-top:16px;color:#fff}.reasonOptions{display:grid;gap:8px;margin-top:16px}.reasonOption{width:100%;text-align:left;border:1px solid #555;background:#242424;color:#fff;border-radius:12px;padding:11px 12px;min-height:44px;font-size:14px;line-height:1.35}.reasonOption:hover{background:#303030}.reasonOption.on{background:#fff;color:#181818;border-color:#fff;font-weight:760}.reasonFeedback{margin-top:16px;padding-top:14px;border-top:1px solid #444;font-size:15px;line-height:1.5;color:#fff}.reasonSave{margin-top:8px;font-size:12px;color:#aaa}.resultNote{font-size:14px;line-height:1.55;color:#666;margin:10px 2px 0}.bankCard.ready{display:none}.debug{font-size:12px;color:#777;white-space:pre-wrap;background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px;overflow:auto}.hidden{display:none!important}@media(max-width:620px){.rangeRow{grid-template-columns:1fr}.scale button.na{justify-self:start}.perspective{margin:26px 0}.perspective h2{font-size:23px}}
 </style>
 </head>
 <body>
@@ -183,6 +183,69 @@ const FAMILY_ITEM_LINKS={
   OPPORTUNITY:{item:'LEARNING_GROWTH',strength:'RELATED'}
 };
 // CARE intentionally has no direct Channel B pair in v0.2.
+const SELF_REASON_OPTIONS={
+  lt:[
+    ['WANT_MORE','Norėčiau daugiau to savo gyvenime'],
+    ['IMPORTANT_NOW','Man tai dabar svarbu'],
+    ['REMINDS_ME','Primena žmogų ar situaciją'],
+    ['LIKE_SCENE','Patinka tai, ką matau'],
+    ['JUST_IMAGE','Tiesiog patraukė pats vaizdas'],
+    ['DONT_KNOW','Nežinau']
+  ],
+  en:[
+    ['WANT_MORE','I would like more of this in my life'],
+    ['IMPORTANT_NOW','This matters to me right now'],
+    ['REMINDS_ME','It reminds me of a person or situation'],
+    ['LIKE_SCENE','I like what I see'],
+    ['JUST_IMAGE','The image itself just caught my eye'],
+    ['DONT_KNOW','I do not know']
+  ]
+};
+const SELF_REASON_COPY={
+  lt:{
+    question:'Kaip tau atrodo, kodėl būtent šie vaizdai tave traukė?',
+    saved:'Tavo atsakymas išsaugotas.',
+    failed:'Nepavyko išsaugoti. Atsakymas lieka šiame ekrane.',
+    feedback:(code,value)=>{
+      if(code==='WANT_MORE'){
+        if(Number.isFinite(value)&&value<=3)return 'Tai sutampa su tuo, ką jau sakei: šioje vietoje tau norėtųsi daugiau.';
+        if(Number.isFinite(value)&&value>=4)return 'Čia atsiranda skirtumas: prieš tai sakei, kad tau pakanka, o dabar sakai, kad vis tiek norėtum daugiau. „Pakanka“ ir „norėčiau daugiau“ nėra tas pats.';
+        return 'Gali būti, kad šie vaizdai priminė tai, ko norėtųsi daugiau.';
+      }
+      if(code==='IMPORTANT_NOW'){
+        if(Number.isFinite(value)&&value<=3)return 'Gali būti, kad ši tema tau ir svarbi, ir jos dabar norėtųsi daugiau.';
+        if(Number.isFinite(value)&&value>=4)return 'Svarbu nebūtinai reiškia, kad trūksta. Gal ši tema tau tiesiog dabar rūpi.';
+        return 'Svarbu nebūtinai reiškia, kad trūksta. Gal ši tema tau tiesiog dabar rūpi.';
+      }
+      if(code==='REMINDS_ME')return 'Tuomet vaizdai galėjo suveikti kaip priminimas apie konkretų žmogų ar situaciją.';
+      if(code==='LIKE_SCENE')return 'Tuomet tave galėjo patraukti pats veiksmas, jausmas ar situacija vaizde.';
+      if(code==='JUST_IMAGE')return 'Tai irgi galimas atsakymas. Kartais vaizdas pagauna akį anksčiau, nei žinome kodėl.';
+      return 'Nežinoti irgi galima. PrioLens čia nebandys atsakyti už tave.';
+    }
+  },
+  en:{
+    question:'Why do you think these particular images pulled you?',
+    saved:'Your answer was saved.',
+    failed:'Could not save it. Your answer remains on this screen.',
+    feedback:(code,value)=>{
+      if(code==='WANT_MORE'){
+        if(Number.isFinite(value)&&value<=3)return 'That matches what you already said: this is something you would like more of right now.';
+        if(Number.isFinite(value)&&value>=4)return 'Here there is a difference: earlier you said you have enough, but now you still say you would like more. “Enough” and “I would like more” are not the same thing.';
+        return 'These images may have reminded you of something you would like more of.';
+      }
+      if(code==='IMPORTANT_NOW'){
+        if(Number.isFinite(value)&&value<=3)return 'This may be both important to you and something you would like more of right now.';
+        if(Number.isFinite(value)&&value>=4)return 'Important does not have to mean lacking. This may simply be something that matters to you right now.';
+        return 'Important does not have to mean lacking. This may simply be something that matters to you right now.';
+      }
+      if(code==='REMINDS_ME')return 'Then the images may have worked as a reminder of a particular person or situation.';
+      if(code==='LIKE_SCENE')return 'Then the action, feeling or situation in the image may have been what pulled you.';
+      if(code==='JUST_IMAGE')return 'That is also a possible answer. Sometimes an image catches the eye before we know why.';
+      return 'Not knowing is also fine. PrioLens will not answer for you.';
+    }
+  }
+};
+const SELF_REASON=SELF_REASON_COPY[LANG];
 const DOMAIN_SETS={
   lt:[
     {id:'REST_RESOURCE',title:'Poilsis ir resursai',families:['REST','RESOURCE'],items:[['RESTORATION_ENERGY','Šiuo metu turiu pakankamai poilsio ir energijos kasdienybei.'],['MATERIAL_RESOURCES','Šiuo metu turiu pakankamai kasdienių resursų tam, ko man realiai reikia.']]},
@@ -220,6 +283,7 @@ function applyStaticLanguage(){
 applyStaticLanguage();
 if(DEBUG_MODE){$('debugDetails').classList.remove('hidden');$('export').classList.remove('hidden');$('exportStatus').classList.remove('hidden')}
 let bank=null,assignment=null,state=null,t0=0,locked=false,suffIndex=0,lastPointerType=null,progressTimer=null,suffValidationShown=false;
+let finalSubmitPromise=Promise.resolve();
 function saveLocalDraft(){if(!state||state.completedAt)return;try{localStorage.setItem(DRAFT_KEY,JSON.stringify(state))}catch(err){console.warn('local draft save failed',err)}}
 function clearLocalDraft(){try{localStorage.removeItem(DRAFT_KEY);if(LANG==='lt')localStorage.removeItem(DRAFT_KEY_BASE)}catch(err){console.warn('local draft clear failed',err)}}
 function loadLocalDraft(){try{let raw=localStorage.getItem(DRAFT_KEY);if(!raw&&LANG==='lt')raw=localStorage.getItem(DRAFT_KEY_BASE);if(!raw)return null;const x=JSON.parse(raw);if(!x||x.schema!=='2rasi.priolens.open14.session-v0.2'||x.completedAt||!Array.isArray(x.choices)||!x.sufficiency)return null;if(x.language&&x.language!==LANG)return null;if(!x.language&&LANG==='en')return null;if(!x.language)x.language='lt';return x}catch(err){return null}}
@@ -234,7 +298,7 @@ function median(xs){const a=[...xs].sort((a,b)=>a-b);if(!a.length)return null;co
 function mean(xs){const a=xs.filter(x=>Number.isFinite(x));return a.length?a.reduce((s,x)=>s+x,0)/a.length:null}
 async function init(){try{bank=await fetch('./bank.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw new Error(`bank ${r.status}`);return r.json()});const missing=listMissingRuntimeAssets(bank);if(missing.length){$('bankTitle').textContent=T.bankIncomplete;$('bankStatus').innerHTML=`<span class="bad">${T.missingAssets(missing.join(', '))}</span>`;return}$('bankTitle').textContent=T.bankReady;$('bankTitle').className='ok';$('bankStatus').textContent=T.assetsReady;$('start').disabled=false;$('bankCard').classList.add('ready');offerResumeIfAvailable()}catch(err){$('bankTitle').textContent=T.bankError;$('bankStatus').textContent=String(err)}}
 async function preload(paths){await Promise.all([...new Set(paths)].map(src=>new Promise((res,rej)=>{const im=new Image();im.onload=res;im.onerror=()=>rej(new Error(`Image load failed: ${src}`));im.src=src})))}
-async function startSession(){clearLocalDraft();const seed=seedNow(),plan=buildOpen14Plan(seed);assignment=assignOpen14Exemplars(plan,bank,seed);await preload(assignment.trials.flatMap(t=>t.stimuli.map(s=>s.runtimePath)));state={schema:'2rasi.priolens.open14.session-v0.2',language:LANG,sessionUuid:crypto.randomUUID(),startedAt:new Date().toISOString(),seed,planSchema:plan.schema,bankSchema:bank.schema,assignerSchema:assignment.schema,plannerAudit:plan.audit,exemplarAudit:assignment.audit,exemplarPlan:assignment.exemplarPlan,choices:[],sufficiencySchema:'2rasi.priolens.sufficiency-v0.2',sufficiency:{},completedAt:null};suffIndex=0;checkpointProgress();show('trial');renderTrial()}
+async function startSession(){clearLocalDraft();const seed=seedNow(),plan=buildOpen14Plan(seed);assignment=assignOpen14Exemplars(plan,bank,seed);await preload(assignment.trials.flatMap(t=>t.stimuli.map(s=>s.runtimePath)));state={schema:'2rasi.priolens.open14.session-v0.2',language:LANG,sessionUuid:crypto.randomUUID(),startedAt:new Date().toISOString(),seed,planSchema:plan.schema,bankSchema:bank.schema,assignerSchema:assignment.schema,plannerAudit:plan.audit,exemplarAudit:assignment.audit,exemplarPlan:assignment.exemplarPlan,choices:[],sufficiencySchema:'2rasi.priolens.sufficiency-v0.2',sufficiency:{},selfExplanation:null,completedAt:null};suffIndex=0;checkpointProgress();show('trial');renderTrial()}
 function renderTrial(){locked=false;$('stage').classList.remove('locked');const i=state.choices.length,trial=assignment.trials[i];$('counter').textContent=`${i+1} / 14`;$('prog').style.width=`${(i/14)*100}%`;trial.stimuli.forEach((s,slot)=>{const img=stimBtns[slot].querySelector('img');img.src=s.runtimePath;img.dataset.exemplar=s.exemplarId;img.alt=''});doublePaint(()=>{t0=performance.now()})}
 function choose(slot){if(locked)return;locked=true;$('stage').classList.add('locked');const i=state.choices.length,trial=assignment.trials[i],rt=Math.round(performance.now()-t0),stim=slot===null?null:trial.stimuli[slot];state.choices.push({trialId:trial.trialId,trialIndex:i+1,designIndex:trial.designIndex,positions:trial.positions,stimuli:trial.stimuli.map(s=>({familyId:s.familyId,macro:s.macro,exemplarId:s.exemplarId,slot:s.slot,runtimePath:s.runtimePath})),choice:stim?{familyId:stim.familyId,macro:stim.macro,exemplarId:stim.exemplarId,slot}:null,noClearChoice:slot===null,rtMs:rt,pointerType:lastPointerType||null});checkpointProgress();setTimeout(()=>{if(state.choices.length<14)renderTrial();else{show('suff');renderSuff()}},120)}
 stimBtns.forEach(b=>{b.addEventListener('pointerdown',e=>lastPointerType=e.pointerType);b.addEventListener('click',()=>choose(Number(b.dataset.slot)))});$('none').addEventListener('pointerdown',e=>lastPointerType=e.pointerType);$('none').addEventListener('click',()=>choose(null));
@@ -246,14 +310,52 @@ function domainCoverage(){return Object.fromEntries(DOMAINS.map(d=>{const vals=d
 function domainStats(){const c=domainCoverage();return Object.fromEntries(DOMAINS.map(d=>[d.id,c[d.id].value]))}
 function macroStats(){const shown={BASIC:0,SOCIAL:0,AGENCY:0,GROWTH:0},chosen={BASIC:0,SOCIAL:0,AGENCY:0,GROWTH:0};for(const c of state.choices){for(const s of c.stimuli)shown[s.macro]++;if(c.choice)chosen[c.choice.macro]++}return Object.fromEntries(Object.keys(shown).map(k=>[k,{shown:shown[k],chosen:chosen[k],rate:shown[k]?chosen[k]/shown[k]:null}]))}
 async function submitSession(){const el=$('saveStatus');try{el.textContent=T.saving;const r=await fetch(API_PATH,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(state)});const data=await r.json().catch(()=>({}));if(!r.ok||!data.ok)throw new Error(data.message||`HTTP ${r.status}`);state.submission={ok:true,inserted:Boolean(data.inserted),submissionId:data.submissionId||null};clearLocalDraft();el.textContent=T.saved;el.className='note ok';$('debug').textContent=JSON.stringify(state,null,2)}catch(err){state.submission={ok:false,error:String(err)};el.textContent=T.saveFailed;el.className='note bad';$('debug').textContent=JSON.stringify(state,null,2);console.error(err)}}
-function finish(){state.completedAt=new Date().toISOString();state.familyStats=familyStats();state.domainCoverage=domainCoverage();state.domainStats=Object.fromEntries(DOMAINS.map(d=>[d.id,state.domainCoverage[d.id].value]));state.macroStats=macroStats();state.rtMedianMs=median(state.choices.map(x=>x.rtMs));state.noClearChoiceCount=state.choices.filter(x=>x.noClearChoice).length;show('result');renderResult();submitSession()}
+function finish(){state.completedAt=new Date().toISOString();state.familyStats=familyStats();state.domainCoverage=domainCoverage();state.domainStats=Object.fromEntries(DOMAINS.map(d=>[d.id,state.domainCoverage[d.id].value]));state.macroStats=macroStats();state.rtMedianMs=median(state.choices.map(x=>x.rtMs));state.noClearChoiceCount=state.choices.filter(x=>x.noClearChoice).length;show('result');renderResult();finalSubmitPromise=submitSession()}
 function addInsight(mount,title,stateText,cue){const r=document.createElement('div');r.className='insight';r.innerHTML=`<div class="insightTitle">${title}</div>${stateText?`<div class="insightState">${stateText}</div>`:''}${cue?`<div class="insightCue">${cue}</div>`:''}`;mount.appendChild(r)}
 function joinNatural(xs){if(!xs.length)return'';if(xs.length===1)return xs[0];const conj=LANG==='en'?' and ':' ir ';return `${xs.slice(0,-1).join(', ')}${conj}${xs.at(-1)}`}
 function chosenImagePaths(id){const seen=new Set(),paths=[];for(const c of state.choices){if(c.choice?.familyId!==id)continue;const stim=c.stimuli.find(x=>x.exemplarId===c.choice.exemplarId);if(stim?.runtimePath&&!seen.has(stim.runtimePath)){seen.add(stim.runtimePath);paths.push(stim.runtimePath)}}return paths}
 function addChoiceInsight(mount,id,x){const r=document.createElement('div');r.className='choiceInsight';const images=chosenImagePaths(id).slice(0,2).map(src=>`<img src="${src}" alt="">`).join('');r.innerHTML=`<div class="choiceVisuals">${images}</div><div class="choiceMeta"><div class="insightTitle">${FAMILY_LABEL[id]}</div><span class="choiceCount">${x.chosen}/3</span></div><div class="choiceMeaning">${FAMILY_MEANING[id]}</div>`;mount.appendChild(r)}
 function countPhrase(n){return LANG==='en'?`${n} out of 3 times`:`${n} iš 3 kartų`}
 function capFirst(x){return x?x.charAt(0).toUpperCase()+x.slice(1):x}
-function addReflection(mount,cue,question,images=[]){const r=document.createElement('div');r.className='reflectionHero';const pics=images.slice(0,2).map(src=>`<img src="${src}" alt="">`).join('');r.innerHTML=`${pics?`<div class="reflectionImages">${pics}</div>`:''}${cue?`<div class="insightCue">${cue}</div>`:''}<div class="reflectionQuestion">${question}</div>`;mount.appendChild(r)}
+async function persistSelfExplanation(statusEl){
+  try{
+    if(statusEl){statusEl.textContent=LANG==='en'?'Saving…':'Išsaugoma…';statusEl.classList.remove('hidden')}
+    await finalSubmitPromise;
+    const payload={...state};delete payload.submission;delete payload.selfExplanationSave;
+    const r=await fetch(API_PATH,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    const data=await r.json().catch(()=>({}));
+    if(!r.ok||!data.ok)throw new Error(data.message||`HTTP ${r.status}`);
+    state.selfExplanationSave={ok:true,at:new Date().toISOString()};
+    if(statusEl)statusEl.textContent=SELF_REASON.saved;
+    $('debug').textContent=JSON.stringify(state,null,2)
+  }catch(err){
+    state.selfExplanationSave={ok:false,error:String(err)};
+    if(statusEl)statusEl.textContent=SELF_REASON.failed;
+    console.error(err)
+  }
+}
+function selfReasonFeedback(code,family){
+  const link=FAMILY_ITEM_LINKS[family];
+  const value=link?state.sufficiency[link.item]:null;
+  return SELF_REASON.feedback(code,value)
+}
+function addReflection(mount,cue,question,images=[],focusFamily=null,scenario=null){
+  const r=document.createElement('div');r.className='reflectionHero';
+  const pics=images.slice(0,2).map(src=>`<img src="${src}" alt="">`).join('');
+  const options=focusFamily?SELF_REASON_OPTIONS[LANG].map(([code,label])=>`<button type="button" class="reasonOption" data-reason="${code}">${label}</button>`).join(''):'';
+  r.innerHTML=`${pics?`<div class="reflectionImages">${pics}</div>`:''}${cue?`<div class="insightCue">${cue}</div>`:''}<div class="reflectionQuestion">${question}</div>${options?`<div class="reasonOptions">${options}</div><div class="reasonFeedback hidden"></div><div class="reasonSave hidden"></div>`:''}`;
+  mount.appendChild(r);
+  if(focusFamily){
+    const feedback=r.querySelector('.reasonFeedback'),save=r.querySelector('.reasonSave');
+    r.querySelectorAll('.reasonOption').forEach(btn=>btn.onclick=()=>{
+      r.querySelectorAll('.reasonOption').forEach(x=>x.classList.toggle('on',x===btn));
+      const code=btn.dataset.reason;
+      state.selfExplanation={schema:'2rasi.priolens.self-explanation-v0.1',familyId:focusFamily,scenario:scenario||'VISUAL_FOCUS',reasonCode:code,answeredAt:new Date().toISOString()};
+      feedback.textContent=selfReasonFeedback(code,focusFamily);feedback.classList.remove('hidden');
+      persistSelfExplanation(save)
+    })
+  }
+}
 function renderResult(){
   const C=LANG==='en'?{
     attentionNote:'This does not mean you lack these things. It only shows which themes pulled your attention more than once.',
@@ -261,13 +363,13 @@ function renderResult(){
     noNeedCue:'From your answers, there was no area you clearly marked as wanting more of right now.',
     noNumericTitle:'Nothing to show here',
     noNumericCue:'You used “Hard to say” for these answers, so PrioLens does not guess for you.',
-    alignedCue:(f,n,item,related)=>`In the images, you chose “${f}” ${countPhrase(n)}. In your answer about ${item}, you marked that you would like more.${related?' These are not the same thing, but they may be related.':''}`,
-    alignedQuestion:'Do these two things feel connected to you?',
-    highCue:(f,n,item,related)=>`In the images, you chose “${f}” ${countPhrase(n)}. In your answer about ${item}, you marked that you have enough right now.${related?' These are not exactly the same thing.':''}`,
+    alignedCue:(f,n,item,related)=>`In the images, you chose “${f}” ${countPhrase(n)}. About ${item}, you said: I would like more right now.${related?' These are not the same thing, but they may be related.':''}`,
+    alignedQuestion:'Do these two things feel connected to you?',reasonQuestion:SELF_REASON_COPY.en.question,
+    highCue:(f,n,item,related)=>`In the images, you chose “${f}” ${countPhrase(n)}. About ${item}, you said: I have enough right now.${related?' These are not exactly the same thing.':''}`,
     highQuestion:'What about those images still caught your attention?',
-    differentCue:(need,f,n)=>`In your own answers, the clearest place where you wanted more was ${need}. In the images, the theme you chose most often was “${f}” (${n}/3). These did not point to the same place.`,
+    differentCue:(need,f,n)=>`You said you would most like more ${need}. In the images, you most often chose “${f}” (${n}/3). These did not point to the same place.`,
     differentQuestion:'Which of these two feels more important to you right now?',
-    visualOnlyCue:(f,n)=>`In the images, you chose “${f}” ${countPhrase(n)}. There is no direct matching question in the second part that PrioLens can safely compare it with.`,
+    visualOnlyCue:(f,n)=>`In the images, you chose “${f}” ${countPhrase(n)}. The second part has no question that exactly matches this theme.`,
     visualOnlyQuestion:'What was it about those images that caught your attention?',
     needOnlyCue:need=>`Your image choices did not repeat around one clear theme. In your own answers, the clearest place where you wanted more was ${need}.`,
     needOnlyQuestion:'What about this matters most to you right now?',
@@ -279,13 +381,13 @@ function renderResult(){
     noNeedCue:'Pagal tavo atsakymus, nebuvo vietos, kur aiškiai pažymėjai, kad dabar norėtųsi daugiau.',
     noNumericTitle:'Čia nieko nerodome',
     noNumericCue:'Pasirinkai „Sunku pasakyti“, todėl PrioLens už tave nespėlioja.',
-    alignedCue:(f,n,item,related)=>`Vaizduose „${f}“ rinkaisi ${countPhrase(n)}. Atsakyme apie ${item} pažymėjai, kad dabar norėtųsi daugiau.${related?' Tai nėra tas pats dalykas, bet jie gali būti susiję.':''}`,
-    alignedQuestion:'Ar tau šie du dalykai atrodo susiję?',
-    highCue:(f,n,item,related)=>`Vaizduose „${f}“ rinkaisi ${countPhrase(n)}. Atsakyme apie ${item} pažymėjai, kad tau dabar pakanka.${related?' Tai nėra visai tas pats dalykas.':''}`,
+    alignedCue:(f,n,item,related)=>`Vaizduose „${f}“ rinkaisi ${countPhrase(n)}. Apie ${item} sakei: dabar norėtųsi daugiau.${related?' Tai nėra tas pats dalykas, bet jie gali būti susiję.':''}`,
+    alignedQuestion:'Ar tau šie du dalykai atrodo susiję?',reasonQuestion:SELF_REASON_COPY.lt.question,
+    highCue:(f,n,item,related)=>`Vaizduose „${f}“ rinkaisi ${countPhrase(n)}. Apie ${item} sakei: man dabar pakanka.${related?' Tai nėra visai tas pats dalykas.':''}`,
     highQuestion:'Kas tuose vaizduose vis tiek patraukė tavo dėmesį?',
-    differentCue:(need,f,n)=>`Savo atsakymuose aiškiausiai parodei, kad norėtųsi daugiau ${need}. O vaizduose dažniausiai rinkaisi „${f}“ (${n}/3). Šie du dalykai nesutapo.`,
+    differentCue:(need,f,n)=>`Sakei, kad dabar labiausiai norėtųsi daugiau ${need}. O vaizduose dažniausiai rinkaisi „${f}“ (${n}/3). Šie du dalykai nesutapo.`,
     differentQuestion:'Kuris iš šių dviejų dalykų tau dabar atrodo svarbesnis?',
-    visualOnlyCue:(f,n)=>`Vaizduose „${f}“ rinkaisi ${countPhrase(n)}. Antroje dalyje nėra tiesiogiai atitinkančio klausimo, su kuriuo PrioLens galėtų tai sąžiningai palyginti.`,
+    visualOnlyCue:(f,n)=>`Vaizduose „${f}“ rinkaisi ${countPhrase(n)}. Antroje dalyje neturime klausimo, kuris tiksliai atitiktų šią temą.`,
     visualOnlyQuestion:'Kas tuose vaizduose patraukė tavo dėmesį?',
     needOnlyCue:need=>`Vaizduose viena tema aiškiai nepasikartojo. O savo atsakymuose aiškiausiai parodei, kad norėtųsi daugiau ${need}.`,
     needOnlyQuestion:'Kas šioje vietoje tau dabar svarbiausia?',
@@ -326,22 +428,22 @@ function renderResult(){
   const cr=$('compareRows');cr.innerHTML='';
   if(lowPairs.length){
     const m=lowPairs[0],related=m.strength==='RELATED';
-    addReflection(cr,C.alignedCue(FAMILY_LABEL[m.family],m.stat.chosen,ITEM_ABOUT_TEXT[m.item],related),C.alignedQuestion,chosenImagePaths(m.family));
+    addReflection(cr,C.alignedCue(FAMILY_LABEL[m.family],m.stat.chosen,ITEM_ABOUT_TEXT[m.item],related),C.reasonQuestion,chosenImagePaths(m.family),m.family,'MATCH_LOW');
   }else if(highPairs.length){
     const m=highPairs[0],related=m.strength==='RELATED';
-    addReflection(cr,C.highCue(FAMILY_LABEL[m.family],m.stat.chosen,ITEM_ABOUT_TEXT[m.item],related),C.highQuestion,chosenImagePaths(m.family));
+    addReflection(cr,C.highCue(FAMILY_LABEL[m.family],m.stat.chosen,ITEM_ABOUT_TEXT[m.item],related),C.reasonQuestion,chosenImagePaths(m.family),m.family,'MATCH_HIGH');
   }else if(lowItems.length&&repeated.length){
     const need=lowItems[0];
     const contrast=repeated.find(([family])=>!(family==='CARE'&&need.key==='CARE_SUPPORT_PRESENT'));
     if(contrast){
       const [family,stat]=contrast;
-      addReflection(cr,C.differentCue(ITEM_RESULT_LABEL[need.key],FAMILY_LABEL[family],stat.chosen),C.differentQuestion,chosenImagePaths(family));
+      addReflection(cr,C.differentCue(ITEM_RESULT_LABEL[need.key],FAMILY_LABEL[family],stat.chosen),C.reasonQuestion,chosenImagePaths(family),family,'DIFFERENT');
     }else{
       addReflection(cr,C.needOnlyCue(ITEM_RESULT_LABEL[need.key]),C.needOnlyQuestion);
     }
   }else if(repeated.length){
     const [family,stat]=repeated[0];
-    addReflection(cr,C.visualOnlyCue(FAMILY_LABEL[family],stat.chosen),C.visualOnlyQuestion,chosenImagePaths(family));
+    addReflection(cr,C.visualOnlyCue(FAMILY_LABEL[family],stat.chosen),C.reasonQuestion,chosenImagePaths(family),family,'VISUAL_ONLY');
   }else if(lowItems.length){
     addReflection(cr,C.needOnlyCue(ITEM_RESULT_LABEL[lowItems[0].key]),C.needOnlyQuestion);
   }else{
