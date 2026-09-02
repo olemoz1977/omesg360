@@ -19,7 +19,11 @@ jobs:
           fetch-depth: 0
 
       - name: Apply human result patch
-        run: python scripts/apply-priolens-human-result-v02.py
+        shell: bash
+        run: |
+          set -euo pipefail
+          sed -i "/'2 iš 3 kartų',/d" scripts/apply-priolens-human-result-v02.py
+          python scripts/apply-priolens-human-result-v02.py
 
       - name: Validate inline module
         shell: bash
