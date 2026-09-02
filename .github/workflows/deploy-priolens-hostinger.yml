@@ -1,11 +1,11 @@
-name: Deploy PrioLens runtime to Hostinger
+name: Deploy PrioLens historical P3 runtime to Hostinger
 
 on:
   push:
     branches:
       - main
     paths:
-      - priolens/**
+      - priolens/index.html
       - .github/workflows/deploy-priolens-hostinger.yml
   workflow_dispatch:
 
@@ -13,7 +13,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: omesg360-priolens-runtime
+  group: omesg360-priolens-historical-p3-runtime
   cancel-in-progress: false
 
 env:
@@ -40,7 +40,7 @@ jobs:
           grep -Fq '/priolens-research-assets/Gallery/S01.webp' priolens/index.html
           grep -Fq '/priolens-research-assets/Gallery/S16.webp' priolens/index.html
           ! grep -Fq '2rasi.priolens.p3.research-v0.3' priolens/index.html
-          echo 'PASS: PrioLens host runtime contract v0.4'
+          echo 'PASS: historical PrioLens host runtime contract v0.4'
 
       - name: Verify FTP secrets
         shell: bash
@@ -92,7 +92,7 @@ jobs:
           grep -Fq '/priolens-research-assets/Gallery/S01.webp' <<<"$body"
           curl -fsS --retry 4 --retry-delay 2 -o /dev/null 'https://omesg360.eu/priolens-research-assets/Gallery/S01.webp'
           curl -fsS --retry 4 --retry-delay 2 -o /dev/null 'https://omesg360.eu/priolens-research-assets/Gallery/S16.webp'
-          echo 'PASS: live PrioLens v0.4 runtime and sibling research assets reachable'
+          echo 'PASS: live historical PrioLens v0.4 runtime and sibling research assets reachable'
 
       - name: Restore previous index if deploy or smoke fails
         if: ${{ failure() && env.BACKUP_READY == '1' }}
