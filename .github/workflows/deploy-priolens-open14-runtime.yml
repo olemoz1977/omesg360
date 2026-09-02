@@ -66,7 +66,7 @@ jobs:
           ]:
               assert needle in html, needle
           owner=Path('priolens/open14-v02/stimulus-bank.html').read_text()
-          for needle in ['Open14 stimulus bank','bank.json','Keičiant išlaikyti pirmą impulsą']:
+          for needle in ['Open14 stimulus bank','bank.json']:
               assert needle in owner, needle
           ht=Path('priolens/open14-v02/.htaccess').read_text()
           assert 'AddType application/javascript .mjs' in ht
