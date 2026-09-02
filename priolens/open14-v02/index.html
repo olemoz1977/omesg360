@@ -9,7 +9,7 @@
 *{box-sizing:border-box}html,body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,sans-serif}body{min-height:100dvh}.wrap{width:min(100%,900px);margin:auto;padding:0 12px;min-height:100dvh}.top{height:48px;display:flex;align-items:center;justify-content:space-between}.brand{font-weight:800}.topRight{display:flex;align-items:center;gap:8px}.exitLink{display:inline-flex;align-items:center;min-height:44px;font-size:13px;color:#555;text-decoration:none;padding:0 4px}.exitLink:hover{text-decoration:underline}.pill{font-size:12px;color:var(--muted);border:1px solid var(--line);padding:6px 9px;border-radius:99px;background:#fff}.screen{display:none}.screen.active{display:block}.intro,.result{padding:6vh 4px 42px}h1{font-size:clamp(36px,10vw,62px);letter-spacing:-.055em;line-height:.96;margin:0 0 18px}.lead{font-size:clamp(18px,4.8vw,25px);line-height:1.3;max-width:720px}.note{font-size:15px;line-height:1.55;color:#5f5f5f;max-width:720px}.card,.row,.domainCard{background:var(--card);border:1px solid var(--line);border-radius:16px}.card{padding:14px 15px;margin:18px 0}.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:16px}button{font:inherit;cursor:pointer}.primary,.secondary{border-radius:14px;padding:12px 15px;font-weight:700;min-height:44px}.primary{border:0;background:#171717;color:#fff}.primary:disabled{opacity:.35;cursor:not-allowed}.secondary{border:1px solid var(--line);background:#fff;color:#181818}.bad{color:#9a3b3b}.ok{color:#3d7045}
 #trial.active{height:calc(100dvh - 48px);display:flex;flex-direction:column;overflow:hidden}.trialhead{height:40px;display:flex;align-items:center;justify-content:space-between}.q{font-size:16px;font-weight:750}.count{font-size:14px;color:#626262}.progress{height:3px;background:#e7e7e2;border-radius:10px;overflow:hidden}.progress i{display:block;height:100%;background:#222;width:0}.stage{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:repeat(3,minmax(0,1fr)) auto;gap:6px;padding:7px 0 10px}.stim{grid-column:1;width:100%;height:100%;border:0;background:transparent;padding:2px 4px;display:flex;align-items:center;justify-content:center}.stim:nth-of-type(1){grid-row:1}.stim:nth-of-type(2){grid-row:2}.stim:nth-of-type(3){grid-row:3}.stim img{display:block;height:100%;width:auto;max-width:100%;max-height:100%;aspect-ratio:1/1;object-fit:contain;border:1px solid #d6d6d1;background:#eee;border-radius:16px}.stage.locked button{pointer-events:none}.none{grid-column:1;grid-row:4;border:1.5px solid #aaa9a3;background:#fff;color:#303030;border-radius:14px;padding:10px 14px;min-height:48px;font-size:15px;font-weight:760;writing-mode:horizontal-tb;transform:none;display:flex;align-items:center;justify-content:center}
 #suff.active{padding:12px 0 40px}.suffHead{padding:18px 4px 8px}.suffHead h2{font-size:28px;margin:0 0 8px}.domainCard{padding:14px;margin:12px 0}.domainTitle{font-size:15px;color:#555;margin-bottom:14px;font-weight:760}.item{padding:10px 0;border-top:1px solid #eeeeea}.item:first-of-type{border-top:0}.statement{font-size:18px;line-height:1.45;margin-bottom:12px}.scale{display:grid;gap:9px}.rangeRow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center}.rangeBox{min-width:0}.rangeBox input[type=range]{width:100%;margin:4px 0 0;accent-color:#1d1d1d;min-height:34px}.rangeBox input[type=range].noValue{accent-color:#8b8b86}.rangeBox input[type=range].noValue::-webkit-slider-thumb{opacity:0}.rangeBox input[type=range].noValue::-moz-range-thumb{opacity:0}.rangeLabels{display:flex;justify-content:space-between;gap:10px;font-size:13px;color:#5f5f5f;margin-top:2px}.scale button.na{border:1px solid #bbb;background:#fff;border-radius:10px;min-height:44px;font-size:14px;color:#444;padding:9px 12px;white-space:nowrap}.scale button.na.on{background:#1d1d1d;color:#fff;border-color:#1d1d1d}.autosaveNote{font-size:13px;color:#666;margin-top:10px}.answerState{font-size:13px;font-weight:700;color:#555;margin-top:5px}.answerState.unsetState{color:#735d00}.item.validationError{margin:6px -8px 0;padding:12px 8px;border:2px solid #b54a4a;border-radius:12px;background:#fff8f8}.suffError{margin:10px 0 0;padding:11px 12px;border:2px solid #b54a4a;border-radius:12px;background:#fff4f4;color:#7d2525;font-size:15px;font-weight:750;line-height:1.4}.suffNav{display:flex;justify-content:space-between;gap:8px;margin-top:14px}
-.result{max-width:760px;margin:0 auto}.result h1{font-size:clamp(38px,8vw,54px);margin-bottom:12px}.resultLead{font-size:17px;line-height:1.55;color:#555;max-width:680px}.resultActions{align-items:stretch;margin-top:28px}.actionLink{display:inline-flex;align-items:center;justify-content:center;text-decoration:none}.perspective{margin:30px 0}.perspectiveLabel{font-size:12px;font-weight:800;letter-spacing:.13em;text-transform:uppercase;color:#777;margin:0 0 6px}.perspective h2{font-size:25px;letter-spacing:-.02em;margin:0 0 13px}.rows{display:grid;gap:9px}.insight{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px 15px}.insightTitle{font-size:17px;font-weight:780;line-height:1.3}.insightState{font-size:14px;font-weight:760;color:#444;margin-top:5px}.insightCue{font-size:14px;line-height:1.5;color:#666;margin-top:5px}.reflectionQuestion{font-size:17px;font-weight:780;line-height:1.45;margin-top:12px;color:#222}.resultNote{font-size:14px;line-height:1.55;color:#666;margin:10px 2px 0}.bankCard.ready{display:none}.debug{font-size:12px;color:#777;white-space:pre-wrap;background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px;overflow:auto}.hidden{display:none!important}@media(max-width:620px){.rangeRow{grid-template-columns:1fr}.scale button.na{justify-self:start}.perspective{margin:26px 0}.perspective h2{font-size:23px}}
+.result{max-width:760px;margin:0 auto}.result h1{font-size:clamp(38px,8vw,54px);margin-bottom:12px}.resultLead{font-size:17px;line-height:1.55;color:#555;max-width:680px}.resultActions{align-items:stretch;margin-top:28px}.actionLink{display:inline-flex;align-items:center;justify-content:center;text-decoration:none}.perspective{margin:30px 0}.perspectiveLabel{font-size:12px;font-weight:800;letter-spacing:.13em;text-transform:uppercase;color:#777;margin:0 0 6px}.perspective h2{font-size:25px;letter-spacing:-.02em;margin:0 0 13px}.rows{display:grid;gap:9px}.insight{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px 15px}.insightTitle{font-size:17px;font-weight:780;line-height:1.3}.insightState{font-size:14px;font-weight:760;color:#444;margin-top:5px}.insightCue{font-size:14px;line-height:1.5;color:#666;margin-top:5px}.choiceInsight{background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px}.choiceVisuals{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:12px}.choiceVisuals img{display:block;width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:12px;border:1px solid #e4e4df;background:#eee}.choiceMeta{display:flex;align-items:center;justify-content:space-between;gap:10px}.choiceCount{flex:0 0 auto;font-size:13px;font-weight:800;border:1px solid #cfcfca;border-radius:999px;padding:5px 8px;color:#444}.choiceMeaning{font-size:14px;line-height:1.5;color:#5e5e5e;margin-top:7px}.reflectionPerspective{margin-top:42px}.reflectionPerspective .perspectiveLabel{color:#181818}.reflectionHero{background:#181818;color:#fff;border-radius:20px;padding:22px 20px}.reflectionHero .insightCue{color:#d8d8d2;font-size:15px;line-height:1.55;margin:0}.reflectionImages{display:grid;grid-template-columns:repeat(2,minmax(0,120px));gap:8px;margin-bottom:16px}.reflectionImages img{width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:12px;border:1px solid #454545}.reflectionQuestion{font-size:clamp(22px,5vw,29px);font-weight:820;letter-spacing:-.02em;line-height:1.2;margin-top:16px;color:#fff}.resultNote{font-size:14px;line-height:1.55;color:#666;margin:10px 2px 0}.bankCard.ready{display:none}.debug{font-size:12px;color:#777;white-space:pre-wrap;background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px;overflow:auto}.hidden{display:none!important}@media(max-width:620px){.rangeRow{grid-template-columns:1fr}.scale button.na{justify-self:start}.perspective{margin:26px 0}.perspective h2{font-size:23px}}
 </style>
 </head>
 <body>
@@ -53,8 +53,8 @@
       <p id="suffResultNote" class="resultNote hidden"></p>
     </div>
 
-    <div class="perspective">
-      <p id="compareLabel" class="perspectiveLabel">Sugretinimas</p>
+    <div class="perspective reflectionPerspective">
+      <p id="compareLabel" class="perspectiveLabel">Svarbiausia</p>
       <h2 id="compareHeading">Pažvelk dar kartą</h2>
       <div id="compareRows" class="rows"></div>
     </div>
@@ -80,7 +80,7 @@ const TXT={
     introTitle:'Kuris pirmas patraukia?',introLead:'Trys vaizdai vienu metu. Nesvarstyk, kuris „geresnis“. Pasirink tą, į kurį pirmiausia krypsta dėmesys.',introNote1:'14 trumpų pasirinkimų · apie 2 min. Po jų į tą pačią situaciją pažvelgsi iš kitos perspektyvos.',introNote2:'Formuojamojo tyrimo prototipas. Sesijos duomenys saugomi tyrimo duomenų bazėje; numatyta saugojimo trukmė – iki 90 dienų. Tai nėra asmenybės testas ar diagnozė.',prototypeLabel:'Tyrimo prototipas',
     bankChecking:'Tikrinamas vaizdų rinkinys…',bankCheckingStatus:'PrioLens startuos, kai bus patvirtinta, kad visi vaizdai pasiekiami.',start:'Pradėti',exit:'Išeiti',trialQuestion:'Kuris pirmas patraukia?',none:'Nė vienas aiškiai',
     suffTitle:'Dabar kita perspektyva.',suffLead:'Įvertink ne tai, kiek tau tai svarbu, o kiek šiuo metu tavo gyvenime to pakanka. Kiekviename teiginyje pasirink skalės vietą arba „Sunku pasakyti“.',validation:'Dar neatsakyta. Pasirink skalės vietą abiem teiginiams arba „Sunku pasakyti“.',back:'Atgal',next:'Toliau',seeResult:'Pamatyti rezultatą',
-    resultTitle:'Pirmas žvilgsnis. Antras atsakymas.',resultLead:'Ne verdiktas, o dvi perspektyvos į tą pačią akimirką.',saveChecking:'Sesijos išsaugojimas tikrinamas…',firstLabel:'Pirma perspektyva',firstHeading:'Kas patraukė tavo dėmesį',secondLabel:'Antra perspektyva',secondHeading:'Kur šiuo metu mažiau pakanka',compareLabel:'Refleksija',compareHeading:'Pažvelk dar kartą',restart:'Atlikti dar kartą',back2rasi:'Grįžti į 2rasi',export:'Eksportuoti JSON',debug:'Tyrimo diagnostika',
+    resultTitle:'Pirmas žvilgsnis. Antras atsakymas.',resultLead:'Ne verdiktas, o dvi perspektyvos į tą pačią akimirką.',saveChecking:'Sesijos išsaugojimas tikrinamas…',firstLabel:'Pirma perspektyva',firstHeading:'Ką rinkaisi dažniausiai',secondLabel:'Antra perspektyva',secondHeading:'Kur dabar ne visai pakanka',compareLabel:'Svarbiausia',compareHeading:'Kas čia verta antro žvilgsnio?',restart:'Atlikti dar kartą',back2rasi:'Grįžti į 2rasi',export:'Eksportuoti JSON',debug:'Tyrimo diagnostika',
     veryLow:'Labai trūksta',enough:'Pakanka',hardToSay:'Sunku pasakyti',unanswered:'Neatsakyta',selected:'Pasirinkta',autoSave:'Progresas saugomas automatiškai. Nutrūkus galėsi tęsti šiame įrenginyje.',rangeAria:'Nuo labai trūksta iki pakanka',
     resumeFound:n=>`Rasta nebaigta sesija: ${n}/14 vaizdinių pasirinkimų. Gali tęsti nuo tos vietos.`,resume:'Tęsti sesiją',newSession:'Pradėti naują',
     bankIncomplete:'Vaizdų rinkinys dar nepilnas',missingAssets:n=>`Trūksta vaizdų: ${n}. Bandyk dar kartą vėliau.`,bankReady:'Vaizdų rinkinys paruoštas',assetsReady:'Visi vaizdai pasiekiami.',bankError:'Vaizdų rinkinio klaida',
@@ -95,7 +95,7 @@ const TXT={
     introTitle:'Which one pulls you first?',introLead:'Three images at a time. Do not decide which one is “better”. Choose the one your attention goes to first.',introNote1:'14 quick choices · about 2 min. After them, you will look at the same moment from a different perspective.',introNote2:'Formative research prototype. Session data is stored in the research database; the intended retention period is up to 90 days. This is not a personality test or diagnosis.',prototypeLabel:'Research prototype',
     bankChecking:'Checking the image set…',bankCheckingStatus:'PrioLens will start after confirming that all images are available.',start:'Start',exit:'Exit',trialQuestion:'Which pulls you first?',none:'None clearly',
     suffTitle:'Now a different perspective.',suffLead:'Rate not how important this is to you, but how much of it you currently have in your life. For each statement, choose a point on the scale or “Hard to say”.',validation:'Still unanswered. Choose a point on the scale for both statements or “Hard to say”.',back:'Back',next:'Next',seeResult:'See result',
-    resultTitle:'First glance. Second answer.',resultLead:'Not a verdict, but two perspectives on the same moment.',saveChecking:'Checking session save…',firstLabel:'First perspective',firstHeading:'What pulled your attention',secondLabel:'Second perspective',secondHeading:'Where less feels sufficient right now',compareLabel:'Reflection',compareHeading:'Look again',restart:'Do it again',back2rasi:'Back to 2rasi',export:'Export JSON',debug:'Research diagnostics',
+    resultTitle:'First glance. Second answer.',resultLead:'Not a verdict, but two perspectives on the same moment.',saveChecking:'Checking session save…',firstLabel:'First perspective',firstHeading:'What you chose most often',secondLabel:'Second perspective',secondHeading:'Where things do not feel quite enough',compareLabel:'Most important',compareHeading:'What deserves a second look?',restart:'Do it again',back2rasi:'Back to 2rasi',export:'Export JSON',debug:'Research diagnostics',
     veryLow:'Far too little',enough:'Enough',hardToSay:'Hard to say',unanswered:'Not answered',selected:'Selected',autoSave:'Progress is saved automatically. If interrupted, you can continue on this device.',rangeAria:'From far too little to enough',
     resumeFound:n=>`An unfinished session was found: ${n}/14 visual choices. You can continue where you left off.`,resume:'Continue session',newSession:'Start new',
     bankIncomplete:'The image set is incomplete',missingAssets:n=>`Missing images: ${n}. Please try again later.`,bankReady:'Image set ready',assetsReady:'All images are available.',bankError:'Image-set error',
@@ -113,6 +113,41 @@ const FAMILY_LABELS={
   en:{REST:'Rest / recovery',RESOURCE:'Resources',SAFETY:'Safety',ORDER:'Order / clarity',CONNECTION:'Connection',BELONGING:'Belonging',CARE:'Caring for others',AUTONOMY:'Autonomy',CONTROL:'Control',RECOGNITION:'Recognition',MASTERY:'Mastery',EXPLORATION:'Exploration',KNOWLEDGE:'Learning / understanding',OPPORTUNITY:'Opportunity'}
 };
 const FAMILY_LABEL=FAMILY_LABELS[LANG];
+const FAMILY_MEANINGS={
+  lt:{
+    REST:'Gali būti susiję su noru atsikvėpti, atgauti jėgas ar turėti daugiau ramybės.',
+    RESOURCE:'Gali būti susiję su tuo, kas tau atrodo vertinga, prieinama ir verta panaudoti.',
+    SAFETY:'Gali būti susiję su saugumu, apsauga ir noru jaustis užtikrinčiau.',
+    ORDER:'Gali būti susiję su aiškumu, tvarka ir noru žinoti, kur kas yra ir ko tikėtis.',
+    CONNECTION:'Gali būti susiję su tiesioginiu ryšiu, abipusiu kontaktu ir buvimu su kitu žmogumi.',
+    BELONGING:'Gali būti susiję su jausmu būti savu tarp kitų, dalyvauti ir priklausyti grupei.',
+    CARE:'Gali būti susiję su polinkiu pastebėti kitą ir pasirūpinti juo.',
+    AUTONOMY:'Gali būti susiję su laisve rinktis savo kryptį ir daryti savaip.',
+    CONTROL:'Gali būti susiję su noru pačiam veikti situaciją, valdyti ar keisti tai, kas vyksta.',
+    RECOGNITION:'Gali būti susiję su tuo, kad tavo indėlis, nuomonė ar gebėjimai būtų pastebėti ir vertinami.',
+    MASTERY:'Gali būti susiję su noru gerai mokėti, tiksliai atlikti ir jausti savo meistriškumą.',
+    EXPLORATION:'Gali būti susiję su smalsumu, atradimu ir noru pažiūrėti, kas dar nežinoma.',
+    KNOWLEDGE:'Gali būti susiję su noru suprasti, išmokti ir susidėlioti, kaip kas veikia.',
+    OPPORTUNITY:'Gali būti susiję su matoma galimybe, kurią norisi pastebėti ir išnaudoti.'
+  },
+  en:{
+    REST:'This may relate to wanting to pause, recover energy or have more calm.',
+    RESOURCE:'This may relate to what feels valuable, available and worth making use of.',
+    SAFETY:'This may relate to safety, protection and wanting to feel more secure.',
+    ORDER:'This may relate to clarity, order and wanting to know where things stand and what to expect.',
+    CONNECTION:'This may relate to direct connection, mutual contact and being with another person.',
+    BELONGING:'This may relate to feeling part of a group, included and at home with others.',
+    CARE:'This may relate to noticing another person and wanting to care for them.',
+    AUTONOMY:'This may relate to freedom to choose your own direction and do things your way.',
+    CONTROL:'This may relate to wanting to influence a situation directly, steer it or change what is happening.',
+    RECOGNITION:'This may relate to having your contribution, opinion or ability noticed and valued.',
+    MASTERY:'This may relate to wanting to do something well, precisely and with a sense of competence.',
+    EXPLORATION:'This may relate to curiosity, discovery and wanting to see what is still unknown.',
+    KNOWLEDGE:'This may relate to wanting to understand, learn and make sense of how something works.',
+    OPPORTUNITY:'This may relate to noticing an opening or possibility that feels worth using.'
+  }
+};
+const FAMILY_MEANING=FAMILY_MEANINGS[LANG];
 const DOMAIN_SETS={
   lt:[
     {id:'REST_RESOURCE',title:'Poilsis ir resursai',families:['REST','RESOURCE'],items:[['RESTORATION_ENERGY','Šiuo metu turiu pakankamai poilsio ir energijos kasdienybei.'],['MATERIAL_RESOURCES','Šiuo metu turiu pakankamai kasdienių resursų tam, ko man realiai reikia.']]},
@@ -179,45 +214,46 @@ async function submitSession(){const el=$('saveStatus');try{el.textContent=T.sav
 function finish(){state.completedAt=new Date().toISOString();state.familyStats=familyStats();state.domainCoverage=domainCoverage();state.domainStats=Object.fromEntries(DOMAINS.map(d=>[d.id,state.domainCoverage[d.id].value]));state.macroStats=macroStats();state.rtMedianMs=median(state.choices.map(x=>x.rtMs));state.noClearChoiceCount=state.choices.filter(x=>x.noClearChoice).length;show('result');renderResult();submitSession()}
 function addInsight(mount,title,stateText,cue){const r=document.createElement('div');r.className='insight';r.innerHTML=`<div class="insightTitle">${title}</div>${stateText?`<div class="insightState">${stateText}</div>`:''}${cue?`<div class="insightCue">${cue}</div>`:''}`;mount.appendChild(r)}
 function joinNatural(xs){if(!xs.length)return'';if(xs.length===1)return xs[0];const conj=LANG==='en'?' and ':' ir ';return `${xs.slice(0,-1).join(', ')}${conj}${xs.at(-1)}`}
-function addReflection(mount,cue,question){const r=document.createElement('div');r.className='insight';r.innerHTML=`${cue?`<div class="insightCue">${cue}</div>`:''}<div class="reflectionQuestion">${question}</div>`;mount.appendChild(r)}
+function chosenImagePaths(id){const seen=new Set(),paths=[];for(const c of state.choices){if(c.choice?.familyId!==id)continue;const stim=c.stimuli.find(x=>x.exemplarId===c.choice.exemplarId);if(stim?.runtimePath&&!seen.has(stim.runtimePath)){seen.add(stim.runtimePath);paths.push(stim.runtimePath)}}return paths}
+function addChoiceInsight(mount,id,x){const r=document.createElement('div');r.className='choiceInsight';const images=chosenImagePaths(id).slice(0,2).map(src=>`<img src="${src}" alt="">`).join('');r.innerHTML=`<div class="choiceVisuals">${images}</div><div class="choiceMeta"><div class="insightTitle">${FAMILY_LABEL[id]}</div><span class="choiceCount">${x.chosen}/3</span></div><div class="choiceMeaning">${FAMILY_MEANING[id]}</div>`;mount.appendChild(r)}
+function countPhrase(n){return LANG==='en'?`${n} out of 3 times`:`${n} iš 3 kartų`}
+function addReflection(mount,cue,question,images=[]){const r=document.createElement('div');r.className='reflectionHero';const pics=images.slice(0,2).map(src=>`<img src="${src}" alt="">`).join('');r.innerHTML=`${pics?`<div class="reflectionImages">${pics}</div>`:''}${cue?`<div class="insightCue">${cue}</div>`:''}<div class="reflectionQuestion">${question}</div>`;mount.appendChild(r)}
 function renderResult(){
   const C=LANG==='en'?{
-    attentionNote:'These choices show what repeatedly pulled your attention in this session. They do not tell us what you lack. Attention can be shaped by current relevance, learned value, prior experience or the image itself; a choice alone cannot tell us why it pulled you.',
-    noLowTitle:'No area stood out as less sufficient right now',
-    noLowCue:'The areas you rated clearly were all on the more sufficient side.',
-    lowCue:(f,d)=>`${f} repeated across different images, while your current rating of the broader area “${d}” is on the less-sufficient side.`,
-    midCue:(f,d)=>`${f} repeated across different images, while your current rating of the broader area “${d}” sits around the middle.`,
-    highCue:(f,d)=>`${f} repeated across different images, even though you currently rate the broader area “${d}” as fairly sufficient.`,
-    linkedQuestion:'Do you see a connection between these two signals, or do they feel unrelated to you?',
-    highQuestion:f=>`What about the ${f.toLowerCase()} images still pulled your attention?`,
-    visualOnlyCue:f=>`${f} repeated across different images. There is no equivalent current-sufficiency area that PrioLens can validly compare it with in this version.`,
-    visualOnlyQuestion:f=>`What about those ${f.toLowerCase()} images may have pulled your attention?`,
-    lowOnlyCue:n=>`In your second answer, ${n} stood out as less sufficient right now.`,
-    lowOnlyQuestion:'Which of these areas feels most worth your attention right now?',
-    quietCue:'This session did not produce a repeated visual theme, and no clearly rated area stood out as less sufficient.',
-    quietQuestion:'Is there anything in this result that still surprised you?'
+    attentionNote:'This does not mean you lack these things. It only shows which themes your attention returned to more than once.',
+    noLowTitle:'Nothing clearly stood out here',
+    noLowCue:'From your answers, these areas currently feel more sufficient than lacking.',
+    lowState:'less sufficient',midState:'somewhere in the middle',highState:'fairly sufficient',
+    mappedCue:(f,n,d,stateText)=>`The theme “${f}” was your choice ${countPhrase(n)}. You currently describe “${d}” as ${stateText}.`,
+    lowQuestion:'Does that repetition feel connected to how things are for you right now, or not at all?',
+    highQuestion:'If this area already feels fairly sufficient, what about those images still caught you?',
+    visualOnlyCue:(f,n)=>`The theme “${f}” was your choice ${countPhrase(n)}. In this version, we cannot directly compare it with the second part without stretching the meaning.`,
+    visualOnlyQuestion:'What was it about those images that caught you?',
+    lowOnlyCue:n=>`No single visual theme repeated, but in your own answers “${n}” stood out as not quite enough right now.`,
+    lowOnlyQuestion:'What about this area matters most to you right now?',
+    quietCue:'This time, neither your image choices nor your answers produced one clearly dominant point.',
+    quietQuestion:'Was there still anything you found yourself thinking about afterwards?'
   }:{
-    attentionNote:'Šie pasirinkimai rodo, kas šioje sesijoje pakartotinai patraukė tavo dėmesį. Jie nepasako, ko tau trūksta. Dėmesį gali veikti dabartinis aktualumas, išmokta vertė, ankstesnė patirtis ar pats vaizdas; vien iš pasirinkimo negalima pasakyti, kodėl jis patraukė.',
-    noLowTitle:'Nė viena sritis neišsiskyrė kaip mažiau pakankama',
-    noLowCue:'Aiškiai įvertintos sritys šiuo metu buvo labiau pakankamoje pusėje.',
-    lowCue:(f,d)=>`${f} kartojosi per skirtingus vaizdus, o platesnę sritį „${d}“ šiuo metu vertini kaip mažiau pakankamą.`,
-    midCue:(f,d)=>`${f} kartojosi per skirtingus vaizdus, o platesnės srities „${d}“ dabartinis įvertinimas yra per vidurį.`,
-    highCue:(f,d)=>`${f} kartojosi per skirtingus vaizdus, nors platesnę sritį „${d}“ šiuo metu vertini kaip gana pakankamą.`,
-    linkedQuestion:'Ar matai tarp šių dviejų signalų ryšį, ar tau jie atrodo nesusiję?',
-    highQuestion:f=>`Kas ${f.toLowerCase()} vaizduose vis tiek patraukė tavo dėmesį?`,
-    visualOnlyCue:f=>`${f} kartojosi per skirtingus vaizdus. Šioje PrioLens versijoje nėra lygiavertės dabartinio pakankamumo srities, su kuria tai būtų galima pagrįstai sugretinti.`,
-    visualOnlyQuestion:f=>`Kas šiuose ${f.toLowerCase()} vaizduose galėjo patraukti tavo dėmesį?`,
-    lowOnlyCue:n=>`Antrame atsakyme kaip mažiau pakankama šiuo metu išsiskyrė ${n}.`,
-    lowOnlyQuestion:'Kuri iš šių sričių šiuo metu labiausiai verta tavo dėmesio?',
-    quietCue:'Šioje sesijoje nepasikartojo viena vizualinė tema ir nė viena aiškiai įvertinta sritis neišsiskyrė kaip mažiau pakankama.',
-    quietQuestion:'Ar šiame rezultate vis tiek yra kas nors, kas tave nustebino?'
+    attentionNote:'Tai nereiškia, kad tau šito trūksta. Tik tiek, kad prie šių temų tavo dėmesys grįžo daugiau nei kartą.',
+    noLowTitle:'Nieko aiškiai neišsiskyrė',
+    noLowCue:'Pagal tavo atsakymus, šiose srityse dabar labiau jauti pakankamumą nei trūkumą.',
+    lowState:'labiau trūksta',midState:'per vidurį',highState:'gana pakankamai',
+    mappedCue:(f,n,d,stateText)=>`Tema „${f}“ buvo tavo pasirinkimas ${countPhrase(n)}. Sritį „${d}“ dabar vertini kaip ${stateText}.`,
+    lowQuestion:'Ar šitas pasikartojimas turi ką nors bendro su tuo, kaip dabar jautiesi šioje srityje, ar visai ne?',
+    highQuestion:'Jei šioje srityje tau gana pakanka, kas tuose vaizduose vis tiek užkabino?',
+    visualOnlyCue:(f,n)=>`Tema „${f}“ buvo tavo pasirinkimas ${countPhrase(n)}. Su antra dalimi jos tiesiogiai lyginti negalime, nepertempdami prasmės.`,
+    visualOnlyQuestion:'Kas tuose vaizduose tave užkabino?',
+    lowOnlyCue:n=>`Vaizduose viena tema nepasikartojo, bet tavo pačio atsakymuose išsiskyrė „${n}“.`,
+    lowOnlyQuestion:'Kas šioje srityje tau dabar labiausiai rūpi?',
+    quietCue:'Šį kartą nei vaizduose, nei tavo atsakymuose viena vieta aiškiai neišsiskyrė.',
+    quietQuestion:'Ar vis tiek buvo kas nors, prie ko norisi grįžti mintimis?'
   };
 
   const coverage=state.domainCoverage||domainCoverage();
   const rep=$('repeatRows');rep.innerHTML='';
   const repeated=Object.entries(state.familyStats).filter(([,x])=>x.chosen>=2&&x.crossExemplar).sort((a,b)=>b[1].chosen-a[1].chosen);
   if(!repeated.length)addInsight(rep,T.noRepeated,'',T.noRepeatedCue);
-  else repeated.forEach(([id,x])=>addInsight(rep,FAMILY_LABEL[id],'',x.chosen===3?T.repeatEvery:T.repeatAcross));
+  else repeated.forEach(([id,x])=>addChoiceInsight(rep,id,x));
   const attentionNote=$('attentionNote');
   if(repeated.length){attentionNote.textContent=C.attentionNote;attentionNote.classList.remove('hidden')}else{attentionNote.textContent='';attentionNote.classList.add('hidden')}
 
@@ -242,20 +278,20 @@ function renderResult(){
   const mapped=[];
   for(const d of DOMAINS){
     if(!d.families.length||!coverage[d.id].complete)continue;
-    const rel=d.families.filter(f=>state.familyStats[f]?.chosen>=2&&state.familyStats[f]?.crossExemplar);
-    if(!rel.length)continue;
-    mapped.push({domain:d,rel,value:coverage[d.id].value,maxChosen:Math.max(...rel.map(f=>state.familyStats[f].chosen))});
+    for(const f of d.families){
+      const stat=state.familyStats[f];
+      if(stat?.chosen>=2&&stat?.crossExemplar)mapped.push({domain:d,family:f,value:coverage[d.id].value,chosen:stat.chosen});
+    }
   }
-  mapped.sort((a,b)=>((a.value<=3?0:1)-(b.value<=3?0:1))||(b.maxChosen-a.maxChosen));
+  mapped.sort((a,b)=>((a.value<=3?0:1)-(b.value<=3?0:1))||(b.chosen-a.chosen));
 
   if(mapped.length){
-    const m=mapped[0],famNames=joinNatural(m.rel.map(f=>FAMILY_LABEL[f]));
-    const cue=m.value<=2.5?C.lowCue(famNames,m.domain.title):m.value<=3?C.midCue(famNames,m.domain.title):C.highCue(famNames,m.domain.title);
-    const question=m.value<=3?C.linkedQuestion:C.highQuestion(famNames);
-    addReflection(cr,cue,question);
+    const m=mapped[0],fName=FAMILY_LABEL[m.family];
+    const stateText=m.value<=2.5?C.lowState:m.value<=3?C.midState:C.highState;
+    addReflection(cr,C.mappedCue(fName,m.chosen,m.domain.title,stateText),m.value<=3?C.lowQuestion:C.highQuestion,chosenImagePaths(m.family));
   }else if(repeated.length){
-    const name=FAMILY_LABEL[repeated[0][0]];
-    addReflection(cr,C.visualOnlyCue(name),C.visualOnlyQuestion(name));
+    const [id,x]=repeated[0],name=FAMILY_LABEL[id];
+    addReflection(cr,C.visualOnlyCue(name,x.chosen),C.visualOnlyQuestion,chosenImagePaths(id));
   }else if(lowDomains.length){
     const names=joinNatural(lowDomains.map(d=>d.title));
     addReflection(cr,C.lowOnlyCue(names),C.lowOnlyQuestion);
