@@ -90,3 +90,4 @@ jobs:
 
 # Owner-only protocol experiment. Deliberately does not deploy or modify
 # /priolens-open14-v02/, its API, database, 2rasi landing, or public routing.
+# Trigger checkpoint: workflow existed before this push so this run verifies registration + live deploy.
