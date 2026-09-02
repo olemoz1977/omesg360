@@ -63,13 +63,15 @@ jobs:
               'Research prototype',
               'Išeiti',
               'Exit',
-              'Ką rinkaisi dažniausiai',
-              'Kur dabar ne visai pakanka',
-              'Kas čia verta antro žvilgsnio?',
+              'Kas tave traukė?',
+              'Ko dabar norėtųsi daugiau?',
+              'Ką matai, kai palygini abu?',
               'This does not mean you lack these things.',
               'const FAMILY_MEANINGS=',
+              'const FAMILY_ITEM_LINKS=',
               'reflectionHero',
-              'const lowDomains=completeDomains.filter(d=>coverage[d.id].value<=3)'
+              'const lowItems=numericItems.filter(x=>x.value<=3)',
+              'Kuris iš šių dviejų dalykų tau dabar atrodo svarbesnis?'
           ]:
               assert needle in html, needle
           owner=Path('priolens/open14-v02/stimulus-bank.html').read_text()
@@ -77,7 +79,7 @@ jobs:
               assert needle in owner, needle
           ht=Path('priolens/open14-v02/.htaccess').read_text()
           assert 'AddType application/javascript .mjs' in ht
-          print('PASS: bilingual participant surface, visual repeated choices, human copy, reflection hero, bank and API hooks present')
+          print('PASS: bilingual participant surface, item-level sufficiency result matrix, visual choices, reflection hero, bank and API hooks present')
           PY
           node -e "import('./priolens/open14-v02/p3_open14_planner_v02.mjs').then(m=>{const p=m.buildOpen14Plan('deploy-smoke'); if(!p.audit) process.exit(2); console.log('planner pass')})"
           node -e "import('./priolens/open14-v02/p3_open14_exemplar_assigner_v01.mjs').then(()=>console.log('assigner import pass'))"
@@ -114,13 +116,15 @@ jobs:
           grep -Fq 'Išeiti' /tmp/index-lt
           grep -Fq 'Hard to say' /tmp/index-lt
           grep -Fq 'Research prototype' /tmp/index-lt
-          grep -Fq 'Ką rinkaisi dažniausiai' /tmp/index-lt
-          grep -Fq 'Kur dabar ne visai pakanka' /tmp/index-lt
-          grep -Fq 'Kas čia verta antro žvilgsnio?' /tmp/index-lt
+          grep -Fq 'Kas tave traukė?' /tmp/index-lt
+          grep -Fq 'Ko dabar norėtųsi daugiau?' /tmp/index-lt
+          grep -Fq 'Ką matai, kai palygini abu?' /tmp/index-lt
           grep -Fq 'This does not mean you lack these things.' /tmp/index-lt
           grep -Fq 'const FAMILY_MEANINGS=' /tmp/index-lt
+          grep -Fq 'const FAMILY_ITEM_LINKS=' /tmp/index-lt
           grep -Fq 'reflectionHero' /tmp/index-lt
-          grep -Fq 'const lowDomains=completeDomains.filter(d=>coverage[d.id].value<=3)' /tmp/index-lt
+          grep -Fq 'const lowItems=numericItems.filter(x=>x.value<=3)' /tmp/index-lt
+          grep -Fq 'Kuris iš šių dviejų dalykų tau dabar atrodo svarbesnis?' /tmp/index-lt
           curl -fsS --retry 4 --retry-delay 2 "$base/stimulus-bank.html" -o /tmp/stimulus-bank
           grep -q 'Open14 stimulus bank' /tmp/stimulus-bank
           curl -fsS --retry 4 --retry-delay 2 "$base/bank.json" -o /tmp/bank
@@ -151,7 +155,7 @@ jobs:
           curl -fsS --retry 4 --retry-delay 2 'https://omesg360.eu/priolens-research-assets/Open14-final-v01/belonging-b_coffee-ritual_v01.webp' -o /dev/null
           curl -fsS --retry 4 --retry-delay 2 'https://omesg360.eu/priolens-research-assets/Open14-final-v01/exploration-b_magnifier-forest_v01.webp' -o /dev/null
           curl -fsS --retry 4 --retry-delay 2 'https://omesg360.eu/priolens-research-assets/Open14-final-v01/opportunity-a_open-market-stall_v01.webp' -o /dev/null
-          echo 'PASS: human visual PrioLens result, modules, bank, API health and final asset set reachable'
+          echo 'PASS: item-level PrioLens result matrix, modules, bank, API health and final asset set reachable'
 
       - name: Historical runtime boundary smoke
         shell: bash
