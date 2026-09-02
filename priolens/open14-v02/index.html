@@ -36,26 +36,26 @@
   </section>
   <section id="result" class="screen result">
     <h1>Pirmas žvilgsnis. Antras atsakymas.</h1>
-    <p id="resultLead" class="resultLead">Ne verdiktas, o dvi perspektyvos į tą pačią akimirką.</p>
+    <p id="resultLead" class="resultLead">Pirmiausia rinkaisi vaizdus. Tada pats įvertinai, ko tavo gyvenime dabar pakanka. Dabar palygink abu.</p>
     <p id="saveStatus" class="note">Sesijos išsaugojimas tikrinamas…</p>
 
     <div class="perspective">
-      <p id="firstLabel" class="perspectiveLabel">Pirma perspektyva</p>
-      <h2 id="firstHeading">Pirmas žvilgsnis</h2>
+      <p id="firstLabel" class="perspectiveLabel">Tavo pasirinkimai</p>
+      <h2 id="firstHeading">Kas tave traukė?</h2>
       <div id="repeatRows" class="rows"></div>
       <p id="attentionNote" class="resultNote hidden"></p>
     </div>
 
     <div class="perspective">
-      <p id="secondLabel" class="perspectiveLabel">Antra perspektyva</p>
-      <h2 id="secondHeading">Antras atsakymas</h2>
+      <p id="secondLabel" class="perspectiveLabel">Tavo atsakymai</p>
+      <h2 id="secondHeading">Ko dabar norėtųsi daugiau?</h2>
       <div id="suffRows" class="rows"></div>
       <p id="suffResultNote" class="resultNote hidden"></p>
     </div>
 
     <div class="perspective reflectionPerspective">
       <p id="compareLabel" class="perspectiveLabel">Svarbiausia</p>
-      <h2 id="compareHeading">Pažvelk dar kartą</h2>
+      <h2 id="compareHeading">Ką matai, kai palygini abu?</h2>
       <div id="compareRows" class="rows"></div>
     </div>
 
@@ -80,7 +80,7 @@ const TXT={
     introTitle:'Kuris pirmas patraukia?',introLead:'Trys vaizdai vienu metu. Nesvarstyk, kuris „geresnis“. Pasirink tą, į kurį pirmiausia krypsta dėmesys.',introNote1:'14 trumpų pasirinkimų · apie 2 min. Po jų į tą pačią situaciją pažvelgsi iš kitos perspektyvos.',introNote2:'Formuojamojo tyrimo prototipas. Sesijos duomenys saugomi tyrimo duomenų bazėje; numatyta saugojimo trukmė – iki 90 dienų. Tai nėra asmenybės testas ar diagnozė.',prototypeLabel:'Tyrimo prototipas',
     bankChecking:'Tikrinamas vaizdų rinkinys…',bankCheckingStatus:'PrioLens startuos, kai bus patvirtinta, kad visi vaizdai pasiekiami.',start:'Pradėti',exit:'Išeiti',trialQuestion:'Kuris pirmas patraukia?',none:'Nė vienas aiškiai',
     suffTitle:'Dabar kita perspektyva.',suffLead:'Įvertink ne tai, kiek tau tai svarbu, o kiek šiuo metu tavo gyvenime to pakanka. Kiekviename teiginyje pasirink skalės vietą arba „Sunku pasakyti“.',validation:'Dar neatsakyta. Pasirink skalės vietą abiem teiginiams arba „Sunku pasakyti“.',back:'Atgal',next:'Toliau',seeResult:'Pamatyti rezultatą',
-    resultTitle:'Pirmas žvilgsnis. Antras atsakymas.',resultLead:'Ne verdiktas, o dvi perspektyvos į tą pačią akimirką.',saveChecking:'Sesijos išsaugojimas tikrinamas…',firstLabel:'Pirma perspektyva',firstHeading:'Ką rinkaisi dažniausiai',secondLabel:'Antra perspektyva',secondHeading:'Kur dabar ne visai pakanka',compareLabel:'Svarbiausia',compareHeading:'Kas čia verta antro žvilgsnio?',restart:'Atlikti dar kartą',back2rasi:'Grįžti į 2rasi',export:'Eksportuoti JSON',debug:'Tyrimo diagnostika',
+    resultTitle:'Pirmas žvilgsnis. Antras atsakymas.',resultLead:'Pirmiausia rinkaisi vaizdus. Tada pats įvertinai, ko tavo gyvenime dabar pakanka. Dabar palygink abu.',saveChecking:'Sesijos išsaugojimas tikrinamas…',firstLabel:'Tavo pasirinkimai',firstHeading:'Kas tave traukė?',secondLabel:'Tavo atsakymai',secondHeading:'Ko dabar norėtųsi daugiau?',compareLabel:'Svarbiausia',compareHeading:'Ką matai, kai palygini abu?',restart:'Atlikti dar kartą',back2rasi:'Grįžti į 2rasi',export:'Eksportuoti JSON',debug:'Tyrimo diagnostika',
     veryLow:'Labai trūksta',enough:'Pakanka',hardToSay:'Sunku pasakyti',unanswered:'Neatsakyta',selected:'Pasirinkta',autoSave:'Progresas saugomas automatiškai. Nutrūkus galėsi tęsti šiame įrenginyje.',rangeAria:'Nuo labai trūksta iki pakanka',
     resumeFound:n=>`Rasta nebaigta sesija: ${n}/14 vaizdinių pasirinkimų. Gali tęsti nuo tos vietos.`,resume:'Tęsti sesiją',newSession:'Pradėti naują',
     bankIncomplete:'Vaizdų rinkinys dar nepilnas',missingAssets:n=>`Trūksta vaizdų: ${n}. Bandyk dar kartą vėliau.`,bankReady:'Vaizdų rinkinys paruoštas',assetsReady:'Visi vaizdai pasiekiami.',bankError:'Vaizdų rinkinio klaida',
@@ -95,7 +95,7 @@ const TXT={
     introTitle:'Which one pulls you first?',introLead:'Three images at a time. Do not decide which one is “better”. Choose the one your attention goes to first.',introNote1:'14 quick choices · about 2 min. After them, you will look at the same moment from a different perspective.',introNote2:'Formative research prototype. Session data is stored in the research database; the intended retention period is up to 90 days. This is not a personality test or diagnosis.',prototypeLabel:'Research prototype',
     bankChecking:'Checking the image set…',bankCheckingStatus:'PrioLens will start after confirming that all images are available.',start:'Start',exit:'Exit',trialQuestion:'Which pulls you first?',none:'None clearly',
     suffTitle:'Now a different perspective.',suffLead:'Rate not how important this is to you, but how much of it you currently have in your life. For each statement, choose a point on the scale or “Hard to say”.',validation:'Still unanswered. Choose a point on the scale for both statements or “Hard to say”.',back:'Back',next:'Next',seeResult:'See result',
-    resultTitle:'First glance. Second answer.',resultLead:'Not a verdict, but two perspectives on the same moment.',saveChecking:'Checking session save…',firstLabel:'First perspective',firstHeading:'What you chose most often',secondLabel:'Second perspective',secondHeading:'Where things do not feel quite enough',compareLabel:'Most important',compareHeading:'What deserves a second look?',restart:'Do it again',back2rasi:'Back to 2rasi',export:'Export JSON',debug:'Research diagnostics',
+    resultTitle:'First glance. Second answer.',resultLead:'First you chose images. Then you rated what feels sufficient in your life right now. Now compare the two.',saveChecking:'Checking session save…',firstLabel:'Your choices',firstHeading:'What pulled you?',secondLabel:'Your answers',secondHeading:'What would you like more of right now?',compareLabel:'Most important',compareHeading:'What do you notice when you compare the two?',restart:'Do it again',back2rasi:'Back to 2rasi',export:'Export JSON',debug:'Research diagnostics',
     veryLow:'Far too little',enough:'Enough',hardToSay:'Hard to say',unanswered:'Not answered',selected:'Selected',autoSave:'Progress is saved automatically. If interrupted, you can continue on this device.',rangeAria:'From far too little to enough',
     resumeFound:n=>`An unfinished session was found: ${n}/14 visual choices. You can continue where you left off.`,resume:'Continue session',newSession:'Start new',
     bankIncomplete:'The image set is incomplete',missingAssets:n=>`Missing images: ${n}. Please try again later.`,bankReady:'Image set ready',assetsReady:'All images are available.',bankError:'Image-set error',
@@ -148,6 +148,41 @@ const FAMILY_MEANINGS={
   }
 };
 const FAMILY_MEANING=FAMILY_MEANINGS[LANG];
+const ITEM_ORDER=['RESTORATION_ENERGY','MATERIAL_RESOURCES','SAFETY_STABILITY','CLARITY_PREDICTABILITY','CONNECTION_BELONGING','CARE_SUPPORT_PRESENT','AUTONOMY_AGENCY','RECOGNITION_ESTEEM','LEARNING_GROWTH','CAPABILITY_MASTERY','MEANING_PURPOSE','CONTRIBUTION'];
+const ITEM_RESULT_LABELS={
+  lt:{
+    RESTORATION_ENERGY:'poilsio ir energijos',MATERIAL_RESOURCES:'kasdienių resursų',SAFETY_STABILITY:'saugumo ir stabilumo',CLARITY_PREDICTABILITY:'aiškumo ir nuspėjamumo',CONNECTION_BELONGING:'artimo ryšio ir priklausymo',CARE_SUPPORT_PRESENT:'rūpesčio, paramos ir žmogiško dėmesio',AUTONOMY_AGENCY:'laisvės pačiam spręsti ir veikti',RECOGNITION_ESTEEM:'jausmo, kad tavo pastangos ir nuomonė yra pastebimos ir vertinamos',LEARNING_GROWTH:'galimybių mokytis, atrasti ir augti',CAPABILITY_MASTERY:'galimybių naudoti ir tobulinti savo gebėjimus',MEANING_PURPOSE:'prasmės tame, ką darai',CONTRIBUTION:'galimybių prisidėti prie kažko svarbaus'
+  },
+  en:{
+    RESTORATION_ENERGY:'rest and energy',MATERIAL_RESOURCES:'everyday resources',SAFETY_STABILITY:'safety and stability',CLARITY_PREDICTABILITY:'clarity and predictability',CONNECTION_BELONGING:'close connection and belonging',CARE_SUPPORT_PRESENT:'care, support and human attention',AUTONOMY_AGENCY:'freedom to decide and act for yourself',RECOGNITION_ESTEEM:'feeling that your effort and opinion are noticed and valued',LEARNING_GROWTH:'opportunities to learn, discover and grow',CAPABILITY_MASTERY:'opportunities to use and improve your abilities',MEANING_PURPOSE:'meaning in what you do',CONTRIBUTION:'opportunities to contribute to something important'
+  }
+};
+const ITEM_ABOUT={
+  lt:{
+    RESTORATION_ENERGY:'poilsį ir energiją',MATERIAL_RESOURCES:'kasdienius resursus',SAFETY_STABILITY:'saugumą ir stabilumą',CLARITY_PREDICTABILITY:'aiškumą ir nuspėjamumą',CONNECTION_BELONGING:'artimą ryšį ir priklausymą',CARE_SUPPORT_PRESENT:'rūpestį, paramą ir žmogišką dėmesį',AUTONOMY_AGENCY:'laisvę pačiam spręsti ir veikti',RECOGNITION_ESTEEM:'tai, ar jautiesi pastebėtas ir vertinamas',LEARNING_GROWTH:'galimybes mokytis, atrasti ir augti',CAPABILITY_MASTERY:'galimybes naudoti ir tobulinti savo gebėjimus',MEANING_PURPOSE:'prasmę tame, ką darai',CONTRIBUTION:'galimybes prisidėti prie kažko svarbaus'
+  },
+  en:{
+    RESTORATION_ENERGY:'rest and energy',MATERIAL_RESOURCES:'everyday resources',SAFETY_STABILITY:'safety and stability',CLARITY_PREDICTABILITY:'clarity and predictability',CONNECTION_BELONGING:'close connection and belonging',CARE_SUPPORT_PRESENT:'care, support and human attention',AUTONOMY_AGENCY:'freedom to decide and act for yourself',RECOGNITION_ESTEEM:'whether you feel noticed and valued',LEARNING_GROWTH:'opportunities to learn, discover and grow',CAPABILITY_MASTERY:'opportunities to use and improve your abilities',MEANING_PURPOSE:'meaning in what you do',CONTRIBUTION:'opportunities to contribute to something important'
+  }
+};
+const ITEM_RESULT_LABEL=ITEM_RESULT_LABELS[LANG];
+const ITEM_ABOUT_TEXT=ITEM_ABOUT[LANG];
+const FAMILY_ITEM_LINKS={
+  REST:{item:'RESTORATION_ENERGY',strength:'DIRECT'},
+  RESOURCE:{item:'MATERIAL_RESOURCES',strength:'DIRECT'},
+  SAFETY:{item:'SAFETY_STABILITY',strength:'DIRECT'},
+  ORDER:{item:'CLARITY_PREDICTABILITY',strength:'DIRECT'},
+  CONNECTION:{item:'CONNECTION_BELONGING',strength:'RELATED'},
+  BELONGING:{item:'CONNECTION_BELONGING',strength:'DIRECT'},
+  AUTONOMY:{item:'AUTONOMY_AGENCY',strength:'DIRECT'},
+  CONTROL:{item:'AUTONOMY_AGENCY',strength:'RELATED'},
+  RECOGNITION:{item:'RECOGNITION_ESTEEM',strength:'DIRECT'},
+  MASTERY:{item:'CAPABILITY_MASTERY',strength:'DIRECT'},
+  EXPLORATION:{item:'LEARNING_GROWTH',strength:'RELATED'},
+  KNOWLEDGE:{item:'LEARNING_GROWTH',strength:'DIRECT'},
+  OPPORTUNITY:{item:'LEARNING_GROWTH',strength:'RELATED'}
+};
+// CARE intentionally has no direct Channel B pair in v0.2.
 const DOMAIN_SETS={
   lt:[
     {id:'REST_RESOURCE',title:'Poilsis ir resursai',families:['REST','RESOURCE'],items:[['RESTORATION_ENERGY','Šiuo metu turiu pakankamai poilsio ir energijos kasdienybei.'],['MATERIAL_RESOURCES','Šiuo metu turiu pakankamai kasdienių resursų tam, ko man realiai reikia.']]},
@@ -217,39 +252,47 @@ function joinNatural(xs){if(!xs.length)return'';if(xs.length===1)return xs[0];co
 function chosenImagePaths(id){const seen=new Set(),paths=[];for(const c of state.choices){if(c.choice?.familyId!==id)continue;const stim=c.stimuli.find(x=>x.exemplarId===c.choice.exemplarId);if(stim?.runtimePath&&!seen.has(stim.runtimePath)){seen.add(stim.runtimePath);paths.push(stim.runtimePath)}}return paths}
 function addChoiceInsight(mount,id,x){const r=document.createElement('div');r.className='choiceInsight';const images=chosenImagePaths(id).slice(0,2).map(src=>`<img src="${src}" alt="">`).join('');r.innerHTML=`<div class="choiceVisuals">${images}</div><div class="choiceMeta"><div class="insightTitle">${FAMILY_LABEL[id]}</div><span class="choiceCount">${x.chosen}/3</span></div><div class="choiceMeaning">${FAMILY_MEANING[id]}</div>`;mount.appendChild(r)}
 function countPhrase(n){return LANG==='en'?`${n} out of 3 times`:`${n} iš 3 kartų`}
+function capFirst(x){return x?x.charAt(0).toUpperCase()+x.slice(1):x}
 function addReflection(mount,cue,question,images=[]){const r=document.createElement('div');r.className='reflectionHero';const pics=images.slice(0,2).map(src=>`<img src="${src}" alt="">`).join('');r.innerHTML=`${pics?`<div class="reflectionImages">${pics}</div>`:''}${cue?`<div class="insightCue">${cue}</div>`:''}<div class="reflectionQuestion">${question}</div>`;mount.appendChild(r)}
 function renderResult(){
   const C=LANG==='en'?{
-    attentionNote:'This does not mean you lack these things. It only shows which themes your attention returned to more than once.',
-    noLowTitle:'Nothing clearly stood out here',
-    noLowCue:'From your answers, these areas currently feel more sufficient than lacking.',
-    lowState:'less sufficient',midState:'somewhere in the middle',highState:'fairly sufficient',
-    mappedCue:(f,n,d,stateText)=>`The theme “${f}” was your choice ${countPhrase(n)}. You currently describe “${d}” as ${stateText}.`,
-    lowQuestion:'Does that repetition feel connected to how things are for you right now, or not at all?',
-    highQuestion:'If this area already feels fairly sufficient, what about those images still caught you?',
-    visualOnlyCue:(f,n)=>`The theme “${f}” was your choice ${countPhrase(n)}. In this version, we cannot directly compare it with the second part without stretching the meaning.`,
-    visualOnlyQuestion:'What was it about those images that caught you?',
-    lowOnlyCue:n=>`No single visual theme repeated, but in your own answers “${n}” stood out as not quite enough right now.`,
-    lowOnlyQuestion:'What about this area matters most to you right now?',
-    quietCue:'This time, neither your image choices nor your answers produced one clearly dominant point.',
+    attentionNote:'This does not mean you lack these things. It only shows which themes pulled your attention more than once.',
+    noNeedTitle:'Nothing clearly stood out',
+    noNeedCue:'From your answers, there was no area you clearly marked as wanting more of right now.',
+    noNumericTitle:'Nothing to show here',
+    noNumericCue:'You used “Hard to say” for these answers, so PrioLens does not guess for you.',
+    alignedCue:(f,n,item,related)=>`In the images, you chose “${f}” ${countPhrase(n)}. In your answer about ${item}, you marked that you would like more.${related?' These are not the same thing, but they may be related.':''}`,
+    alignedQuestion:'Do these two things feel connected to you?',
+    highCue:(f,n,item,related)=>`In the images, you chose “${f}” ${countPhrase(n)}. In your answer about ${item}, you marked that you have enough right now.${related?' These are not exactly the same thing.':''}`,
+    highQuestion:'What about those images still caught your attention?',
+    differentCue:(need,f,n)=>`In your own answers, the clearest place where you wanted more was ${need}. In the images, the theme you chose most often was “${f}” (${n}/3). These did not point to the same place.`,
+    differentQuestion:'Which of these two feels more important to you right now?',
+    visualOnlyCue:(f,n)=>`In the images, you chose “${f}” ${countPhrase(n)}. There is no direct matching question in the second part that PrioLens can safely compare it with.`,
+    visualOnlyQuestion:'What was it about those images that caught your attention?',
+    needOnlyCue:need=>`Your image choices did not repeat around one clear theme. In your own answers, the clearest place where you wanted more was ${need}.`,
+    needOnlyQuestion:'What about this matters most to you right now?',
+    quietCue:'This time, neither the images nor your own answers produced one clear point to focus on.',
     quietQuestion:'Was there still anything you found yourself thinking about afterwards?'
   }:{
     attentionNote:'Tai nereiškia, kad tau šito trūksta. Tik tiek, kad prie šių temų tavo dėmesys grįžo daugiau nei kartą.',
-    noLowTitle:'Nieko aiškiai neišsiskyrė',
-    noLowCue:'Pagal tavo atsakymus, šiose srityse dabar labiau jauti pakankamumą nei trūkumą.',
-    lowState:'labiau trūksta',midState:'per vidurį',highState:'gana pakankamai',
-    mappedCue:(f,n,d,stateText)=>`Tema „${f}“ buvo tavo pasirinkimas ${countPhrase(n)}. Sritį „${d}“ dabar vertini kaip ${stateText}.`,
-    lowQuestion:'Ar šitas pasikartojimas turi ką nors bendro su tuo, kaip dabar jautiesi šioje srityje, ar visai ne?',
-    highQuestion:'Jei šioje srityje tau gana pakanka, kas tuose vaizduose vis tiek užkabino?',
-    visualOnlyCue:(f,n)=>`Tema „${f}“ buvo tavo pasirinkimas ${countPhrase(n)}. Su antra dalimi jos tiesiogiai lyginti negalime, nepertempdami prasmės.`,
-    visualOnlyQuestion:'Kas tuose vaizduose tave užkabino?',
-    lowOnlyCue:n=>`Vaizduose viena tema nepasikartojo, bet tavo pačio atsakymuose išsiskyrė „${n}“.`,
-    lowOnlyQuestion:'Kas šioje srityje tau dabar labiausiai rūpi?',
+    noNeedTitle:'Nieko aiškiai neišsiskyrė',
+    noNeedCue:'Pagal tavo atsakymus, nebuvo vietos, kur aiškiai pažymėjai, kad dabar norėtųsi daugiau.',
+    noNumericTitle:'Čia nieko nerodome',
+    noNumericCue:'Pasirinkai „Sunku pasakyti“, todėl PrioLens už tave nespėlioja.',
+    alignedCue:(f,n,item,related)=>`Vaizduose „${f}“ rinkaisi ${countPhrase(n)}. Atsakyme apie ${item} pažymėjai, kad dabar norėtųsi daugiau.${related?' Tai nėra tas pats dalykas, bet jie gali būti susiję.':''}`,
+    alignedQuestion:'Ar tau šie du dalykai atrodo susiję?',
+    highCue:(f,n,item,related)=>`Vaizduose „${f}“ rinkaisi ${countPhrase(n)}. Atsakyme apie ${item} pažymėjai, kad tau dabar pakanka.${related?' Tai nėra visai tas pats dalykas.':''}`,
+    highQuestion:'Kas tuose vaizduose vis tiek patraukė tavo dėmesį?',
+    differentCue:(need,f,n)=>`Savo atsakymuose aiškiausiai parodei, kad norėtųsi daugiau ${need}. O vaizduose dažniausiai rinkaisi „${f}“ (${n}/3). Šie du dalykai nesutapo.`,
+    differentQuestion:'Kuris iš šių dviejų dalykų tau dabar atrodo svarbesnis?',
+    visualOnlyCue:(f,n)=>`Vaizduose „${f}“ rinkaisi ${countPhrase(n)}. Antroje dalyje nėra tiesiogiai atitinkančio klausimo, su kuriuo PrioLens galėtų tai sąžiningai palyginti.`,
+    visualOnlyQuestion:'Kas tuose vaizduose patraukė tavo dėmesį?',
+    needOnlyCue:need=>`Vaizduose viena tema aiškiai nepasikartojo. O savo atsakymuose aiškiausiai parodei, kad norėtųsi daugiau ${need}.`,
+    needOnlyQuestion:'Kas šioje vietoje tau dabar svarbiausia?',
     quietCue:'Šį kartą nei vaizduose, nei tavo atsakymuose viena vieta aiškiai neišsiskyrė.',
-    quietQuestion:'Ar vis tiek buvo kas nors, prie ko norisi grįžti mintimis?'
+    quietQuestion:'Ar vis tiek liko kas nors, apie ką norisi pagalvoti?'
   };
 
-  const coverage=state.domainCoverage||domainCoverage();
   const rep=$('repeatRows');rep.innerHTML='';
   const repeated=Object.entries(state.familyStats).filter(([,x])=>x.chosen>=2&&x.crossExemplar).sort((a,b)=>b[1].chosen-a[1].chosen);
   if(!repeated.length)addInsight(rep,T.noRepeated,'',T.noRepeatedCue);
@@ -257,44 +300,50 @@ function renderResult(){
   const attentionNote=$('attentionNote');
   if(repeated.length){attentionNote.textContent=C.attentionNote;attentionNote.classList.remove('hidden')}else{attentionNote.textContent='';attentionNote.classList.add('hidden')}
 
+  const numericItems=ITEM_ORDER.map((key,index)=>({key,index,value:state.sufficiency[key]})).filter(x=>Number.isFinite(x.value));
+  const lowItems=numericItems.filter(x=>x.value<=3).sort((a,b)=>(a.value-b.value)||(a.index-b.index));
   const sr=$('suffRows');sr.innerHTML='';
-  const completeDomains=DOMAINS.filter(d=>coverage[d.id].complete);
-  const lowDomains=completeDomains.filter(d=>coverage[d.id].value<=3);
-  const incompleteCount=DOMAINS.length-completeDomains.length;
-  if(!completeDomains.length){
-    addInsight(sr,T.suffNone,'',T.suffNoneCue);
-  }else if(!lowDomains.length){
-    addInsight(sr,C.noLowTitle,'',C.noLowCue);
+  if(!numericItems.length){
+    addInsight(sr,C.noNumericTitle,'',C.noNumericCue);
+  }else if(!lowItems.length){
+    addInsight(sr,C.noNeedTitle,'',C.noNeedCue);
   }else{
-    for(const d of lowDomains){
-      const v=coverage[d.id].value;
-      addInsight(sr,d.title,v<=2.5?T.suffLow:T.suffMid,'');
-    }
+    for(const x of lowItems)addInsight(sr,capFirst(ITEM_RESULT_LABEL[x.key]),'','');
   }
-  const suffNote=$('suffResultNote');
-  if(incompleteCount>0&&completeDomains.length){suffNote.textContent=T.suffIncomplete(incompleteCount);suffNote.classList.remove('hidden')}else{suffNote.textContent='';suffNote.classList.add('hidden')}
+  const suffNote=$('suffResultNote');suffNote.textContent='';suffNote.classList.add('hidden');
+
+  const pairs=[];
+  for(const [family,stat] of repeated){
+    const link=FAMILY_ITEM_LINKS[family];
+    if(!link)continue;
+    const value=state.sufficiency[link.item];
+    if(Number.isFinite(value))pairs.push({family,stat,item:link.item,strength:link.strength,value});
+  }
+  const strengthRank=x=>x==='DIRECT'?0:1;
+  const lowPairs=pairs.filter(x=>x.value<=3).sort((a,b)=>(strengthRank(a.strength)-strengthRank(b.strength))||(b.stat.chosen-a.stat.chosen)||(a.value-b.value));
+  const highPairs=pairs.filter(x=>x.value>=4).sort((a,b)=>(strengthRank(a.strength)-strengthRank(b.strength))||(b.stat.chosen-a.stat.chosen)||(b.value-a.value));
 
   const cr=$('compareRows');cr.innerHTML='';
-  const mapped=[];
-  for(const d of DOMAINS){
-    if(!d.families.length||!coverage[d.id].complete)continue;
-    for(const f of d.families){
-      const stat=state.familyStats[f];
-      if(stat?.chosen>=2&&stat?.crossExemplar)mapped.push({domain:d,family:f,value:coverage[d.id].value,chosen:stat.chosen});
+  if(lowPairs.length){
+    const m=lowPairs[0],related=m.strength==='RELATED';
+    addReflection(cr,C.alignedCue(FAMILY_LABEL[m.family],m.stat.chosen,ITEM_ABOUT_TEXT[m.item],related),C.alignedQuestion,chosenImagePaths(m.family));
+  }else if(highPairs.length){
+    const m=highPairs[0],related=m.strength==='RELATED';
+    addReflection(cr,C.highCue(FAMILY_LABEL[m.family],m.stat.chosen,ITEM_ABOUT_TEXT[m.item],related),C.highQuestion,chosenImagePaths(m.family));
+  }else if(lowItems.length&&repeated.length){
+    const need=lowItems[0];
+    const contrast=repeated.find(([family])=>!(family==='CARE'&&need.key==='CARE_SUPPORT_PRESENT'));
+    if(contrast){
+      const [family,stat]=contrast;
+      addReflection(cr,C.differentCue(ITEM_RESULT_LABEL[need.key],FAMILY_LABEL[family],stat.chosen),C.differentQuestion,chosenImagePaths(family));
+    }else{
+      addReflection(cr,C.needOnlyCue(ITEM_RESULT_LABEL[need.key]),C.needOnlyQuestion);
     }
-  }
-  mapped.sort((a,b)=>((a.value<=3?0:1)-(b.value<=3?0:1))||(b.chosen-a.chosen));
-
-  if(mapped.length){
-    const m=mapped[0],fName=FAMILY_LABEL[m.family];
-    const stateText=m.value<=2.5?C.lowState:m.value<=3?C.midState:C.highState;
-    addReflection(cr,C.mappedCue(fName,m.chosen,m.domain.title,stateText),m.value<=3?C.lowQuestion:C.highQuestion,chosenImagePaths(m.family));
   }else if(repeated.length){
-    const [id,x]=repeated[0],name=FAMILY_LABEL[id];
-    addReflection(cr,C.visualOnlyCue(name,x.chosen),C.visualOnlyQuestion,chosenImagePaths(id));
-  }else if(lowDomains.length){
-    const names=joinNatural(lowDomains.map(d=>d.title));
-    addReflection(cr,C.lowOnlyCue(names),C.lowOnlyQuestion);
+    const [family,stat]=repeated[0];
+    addReflection(cr,C.visualOnlyCue(FAMILY_LABEL[family],stat.chosen),C.visualOnlyQuestion,chosenImagePaths(family));
+  }else if(lowItems.length){
+    addReflection(cr,C.needOnlyCue(ITEM_RESULT_LABEL[lowItems[0].key]),C.needOnlyQuestion);
   }else{
     addReflection(cr,C.quietCue,C.quietQuestion);
   }
