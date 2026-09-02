@@ -1,0 +1,77 @@
+name: Apply PrioLens participant surface v02
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - priolens/open14-v02/tools/patch_participant_surface_v02.py
+      - .github/workflows/apply-priolens-participant-surface-v02.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  FTP_HOST: 46.202.142.134
+  FTP_USER: ${{ secrets.HOSTINGER_FTP_USER }}
+  FTP_PASSWORD: ${{ secrets.HOSTINGER_FTP_PASSWORD }}
+  REMOTE_DIR: /domains/omesg360.eu/public_html/priolens-open14-v02
+
+jobs:
+  patch-deploy-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Apply combined edge patch
+        run: python priolens/open14-v02/tools/patch_participant_surface_v02.py
+
+      - name: Validate runtime source
+        shell: bash
+        run: |
+          set -euo pipefail
+          f='priolens/open14-v02/index.html'
+          grep -q "noCompareNoBoth:'Ši sesija nesukūrė aiškaus dviejų perspektyvų sugretinimo" "$f"
+          grep -q "noCompareNoBoth:'This session did not produce a clear comparison between the two perspectives" "$f"
+          grep -q '!repeated.length&&!completeDomains.length?T.noCompareNoBoth' "$f"
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          h=Path('priolens/open14-v02/index.html').read_text()
+          m=re.search(r'<script type="module">(.*?)</script>', h, re.S)
+          if not m: raise SystemExit('module script not found')
+          Path('/tmp/runtime.mjs').write_text(m.group(1))
+          PY
+          node --check /tmp/runtime.mjs
+
+      - name: Commit runtime patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add priolens/open14-v02/index.html
+          git commit -m 'fix(priolens): explain combined no-comparison edge'
+          git push origin HEAD:main
+
+      - name: Install FTP client
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq lftp
+
+      - name: Publish runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          lftp -c "set ftp:ssl-allow no; set net:max-retries 4; set net:timeout 30; open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; put -O \"$REMOTE_DIR/\" priolens/open14-v02/index.html"
+
+      - name: Live source smoke
+        shell: bash
+        run: |
+          set -euo pipefail
+          url='https://omesg360.eu/priolens-open14-v02/'
+          curl -fsS --retry 5 --retry-delay 2 "$url" -o /tmp/live
+          grep -q 'noCompareNoBoth' /tmp/live
+          grep -q '!repeated.length&&!completeDomains.length?T.noCompareNoBoth' /tmp/live
+          echo 'PASS: combined edge result fix live'
