@@ -49,14 +49,28 @@ jobs:
               for ex in fam['exemplars']:
                   assert ex.get('runtimePath'), ex['id']
           html=Path('priolens/open14-v02/index.html').read_text()
-          for needle in ['sessionUuid:crypto.randomUUID','/priolens-open14-api/api.php','/priolens-open14-api/progress.php','submitSession','DRAFT_KEY','resumeSession','Labai trūksta','90 dienų']:
+          for needle in [
+              '<title>PrioLens · 2rasi</title>',
+              'sessionUuid:crypto.randomUUID',
+              '/priolens-open14-api/api.php',
+              '/priolens-open14-api/progress.php',
+              'DRAFT_KEY',
+              "PARAMS.get('lang')",
+              'Pirmas žvilgsnis. Antras atsakymas.',
+              'Sunku pasakyti',
+              'Hard to say',
+              'Tyrimo prototipas',
+              'Research prototype',
+              'Išeiti',
+              'Exit'
+          ]:
               assert needle in html, needle
           owner=Path('priolens/open14-v02/stimulus-bank.html').read_text()
           for needle in ['Open14 stimulus bank','bank.json','Keičiant išlaikyti pirmą impulsą']:
               assert needle in owner, needle
           ht=Path('priolens/open14-v02/.htaccess').read_text()
           assert 'AddType application/javascript .mjs' in ht
-          print('PASS: bank complete, owner stimulus map, autosave/resume runtime and mjs MIME rule present')
+          print('PASS: current bilingual participant surface, bank, owner map, autosave/API hooks and mjs MIME rule present')
           PY
           node -e "import('./priolens/open14-v02/p3_open14_planner_v02.mjs').then(m=>{const p=m.buildOpen14Plan('deploy-smoke'); if(!p.audit) process.exit(2); console.log('planner pass')})"
           node -e "import('./priolens/open14-v02/p3_open14_exemplar_assigner_v01.mjs').then(()=>console.log('assigner import pass'))"
@@ -78,17 +92,21 @@ jobs:
           lftp -c "set ftp:ssl-allow no; set net:max-retries 4; set net:timeout 30; open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; set cmd:fail-exit no; mkdir -p \"$REMOTE_DIR\"; set cmd:fail-exit yes; put -O \"$REMOTE_DIR/\" priolens/open14-v02/index.html; put -O \"$REMOTE_DIR/\" priolens/open14-v02/bank.json; put -O \"$REMOTE_DIR/\" priolens/open14-v02/stimulus-bank.html; put -O \"$REMOTE_DIR/\" priolens/open14-v02/p3_open14_planner_v02.mjs; put -O \"$REMOTE_DIR/\" priolens/open14-v02/p3_open14_exemplar_assigner_v01.mjs; put -O \"$REMOTE_DIR/\" priolens/open14-v02/.htaccess"
           echo 'Uploaded isolated Open14 runtime only.'
 
-      - name: HTTP smoke runtime and dependencies
+      - name: HTTP smoke current participant surface and dependencies
         shell: bash
         run: |
           set -euo pipefail
           base='https://omesg360.eu/priolens-open14-v02'
-          curl -fsS --retry 4 --retry-delay 2 "$base/" -o /tmp/index
-          grep -q 'PrioLens Open14 v0.2' /tmp/index
-          grep -q 'priolens-open14-api/api.php' /tmp/index
-          grep -q 'priolens-open14-api/progress.php' /tmp/index
-          grep -q 'Labai trūksta' /tmp/index
-          grep -q 'Tęsti sesiją' /tmp/index
+          curl -fsS --retry 4 --retry-delay 2 "$base/?lang=lt&from=lt" -o /tmp/index-lt
+          grep -Fq '<title>PrioLens · 2rasi</title>' /tmp/index-lt
+          grep -Fq 'priolens-open14-api/api.php' /tmp/index-lt
+          grep -Fq 'priolens-open14-api/progress.php' /tmp/index-lt
+          grep -Fq 'Pirmas žvilgsnis. Antras atsakymas.' /tmp/index-lt
+          grep -Fq 'Tyrimo prototipas' /tmp/index-lt
+          grep -Fq 'Sunku pasakyti' /tmp/index-lt
+          grep -Fq 'Išeiti' /tmp/index-lt
+          grep -Fq 'Hard to say' /tmp/index-lt
+          grep -Fq 'Research prototype' /tmp/index-lt
           curl -fsS --retry 4 --retry-delay 2 "$base/stimulus-bank.html" -o /tmp/stimulus-bank
           grep -q 'Open14 stimulus bank' /tmp/stimulus-bank
           curl -fsS --retry 4 --retry-delay 2 "$base/bank.json" -o /tmp/bank
@@ -119,7 +137,7 @@ jobs:
           curl -fsS --retry 4 --retry-delay 2 'https://omesg360.eu/priolens-research-assets/Open14-final-v01/belonging-b_coffee-ritual_v01.webp' -o /dev/null
           curl -fsS --retry 4 --retry-delay 2 'https://omesg360.eu/priolens-research-assets/Open14-final-v01/exploration-b_magnifier-forest_v01.webp' -o /dev/null
           curl -fsS --retry 4 --retry-delay 2 'https://omesg360.eu/priolens-research-assets/Open14-final-v01/opportunity-a_open-market-stall_v01.webp' -o /dev/null
-          echo 'PASS: Open14 runtime, owner stimulus bank, autosave endpoint, JS module MIME, bank, API health and final asset set reachable'
+          echo 'PASS: current PrioLens participant surface, modules, bank, API health and final asset set reachable'
 
       - name: Historical runtime boundary smoke
         shell: bash
