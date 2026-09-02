@@ -57,8 +57,8 @@ jobs:
         run: |
           set -euo pipefail
           code="$(curl -sS --retry 4 --retry-delay 2 -o /tmp/cleanup-http-body -w '%{http_code}' 'https://omesg360.eu/priolens-open14-api/cleanup.php')"
-          [[ "$code" == '404' ]] || { echo "Expected cleanup HTTP 404, got $code" >&2; cat /tmp/cleanup-http-body >&2; exit 1; }
-          echo 'PASS: cleanup endpoint is not web-executable'
+          [[ "$code" == '403' || "$code" == '404' ]] || { echo "Expected cleanup HTTP denial 403/404, got $code" >&2; cat /tmp/cleanup-http-body >&2; exit 1; }
+          echo "PASS: cleanup endpoint is not web-executable (HTTP $code)"
 
       - name: Verify live DB expiry invariant read-only
         shell: bash
