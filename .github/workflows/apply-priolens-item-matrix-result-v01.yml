@@ -1,0 +1,53 @@
+name: Apply PrioLens item matrix result v01
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/apply-priolens-item-matrix-result-v01.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Apply result patch
+        run: python scripts/apply-priolens-item-matrix-result-v01.py
+
+      - name: Validate inline module
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          s=Path('priolens/open14-v02/index.html').read_text()
+          a=s.index('<script type="module">')+len('<script type="module">')
+          b=s.index('</script>',a)
+          Path('/tmp/priolens-runtime.mjs').write_text(s[a:b])
+          for needle in [
+              'FAMILY_ITEM_LINKS',
+              "Ko dabar norėtųsi daugiau?",
+              'Ką matai, kai palygini abu?',
+              'Kuris iš šių dviejų dalykų tau dabar atrodo svarbesnis?',
+              'CARE intentionally has no direct Channel B pair'
+          ]:
+              assert needle in s, needle
+          PY
+          node --check /tmp/priolens-runtime.mjs
+
+      - name: Commit result model
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add priolens/open14-v02/index.html
+          git commit -m 'feat(priolens): compare visual themes with item-level sufficiency'
+          git push origin HEAD:main
