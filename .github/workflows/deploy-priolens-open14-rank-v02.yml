@@ -1,0 +1,92 @@
+name: Deploy PrioLens owner rank v0.2 prototype
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - priolens/open14-rank-v02/index.html
+      - .github/workflows/deploy-priolens-open14-rank-v02.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: omesg360-priolens-open14-rank-v02
+  cancel-in-progress: true
+
+env:
+  FTP_HOST: 46.202.142.134
+  FTP_USER: ${{ secrets.HOSTINGER_FTP_USER }}
+  FTP_PASSWORD: ${{ secrets.HOSTINGER_FTP_PASSWORD }}
+  REMOTE_DIR: /domains/omesg360.eu/public_html/priolens-open14-rank-v02
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate owner prototype
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          s=Path('priolens/open14-rank-v02/index.html').read_text()
+          for needle in [
+              'OWNER · Rank v0.2',
+              '2rasi.priolens.open14.rank-session-v0.2',
+              'Kuris pirmas patraukia?',
+              'O kuris iš likusių traukia mažiausiai?',
+              'Kas liko antrame plane?',
+              'Kaip pats vertini dabar?',
+              "kind:'DIRECT'",
+              "kind:'RELATED'",
+              "kind:'NONE'",
+              "if(v<=2)return'low'",
+              "if(v===3)return'mid'",
+              '/priolens-open14-v02/p3_open14_planner_v02.mjs',
+              '/priolens-open14-v02/bank.json'
+          ]:
+              assert needle in s, needle
+          a=s.index('<script type="module">')+len('<script type="module">')
+          b=s.index('</script>',a)
+          Path('/tmp/rank-v02.mjs').write_text(s[a:b])
+          print('static contract pass')
+          PY
+          node --check /tmp/rank-v02.mjs
+
+      - name: Verify FTP secrets
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ -n "${FTP_USER:-}" ]]
+          [[ -n "${FTP_PASSWORD:-}" ]]
+
+      - name: Install FTP client
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq lftp
+
+      - name: Upload isolated prototype
+        shell: bash
+        run: |
+          set -euo pipefail
+          lftp -c "set ftp:ssl-allow no; set net:max-retries 4; set net:timeout 30; open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; set cmd:fail-exit no; mkdir -p \"$REMOTE_DIR\"; set cmd:fail-exit yes; put -O \"$REMOTE_DIR/\" priolens/open14-rank-v02/index.html"
+
+      - name: Live smoke
+        shell: bash
+        run: |
+          set -euo pipefail
+          base='https://omesg360.eu/priolens-open14-rank-v02/'
+          curl -fsS --retry 4 --retry-delay 2 "$base" -o /tmp/live
+          grep -Fq 'OWNER · Rank v0.2' /tmp/live
+          grep -Fq 'Kas liko antrame plane?' /tmp/live
+          grep -Fq 'Kaip pats vertini dabar?' /tmp/live
+          grep -Fq '2rasi.priolens.open14.rank-session-v0.2' /tmp/live
+          curl -fsS --retry 4 --retry-delay 2 'https://omesg360.eu/priolens-open14-v02/bank.json' -o /dev/null
+          curl -fsS --retry 4 --retry-delay 2 'https://omesg360.eu/priolens-open14-v02/p3_open14_planner_v02.mjs' -o /dev/null
+          echo 'PASS: isolated owner rank v0.2 prototype live; public PrioLens path untouched'
+
+# Owner-only protocol experiment. Deliberately does not deploy or modify
+# /priolens-open14-v02/, its API, database, 2rasi landing, or public routing.
