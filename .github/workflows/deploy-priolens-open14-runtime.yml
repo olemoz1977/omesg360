@@ -62,7 +62,12 @@ jobs:
               'Tyrimo prototipas',
               'Research prototype',
               'Išeiti',
-              'Exit'
+              'Exit',
+              'Kas patraukė tavo dėmesį',
+              'Kur šiuo metu mažiau pakanka',
+              'Ar matai tarp šių dviejų signalų ryšį',
+              'They do not tell us what you lack',
+              'const lowDomains=completeDomains.filter(d=>coverage[d.id].value<=3)'
           ]:
               assert needle in html, needle
           owner=Path('priolens/open14-v02/stimulus-bank.html').read_text()
@@ -70,7 +75,7 @@ jobs:
               assert needle in owner, needle
           ht=Path('priolens/open14-v02/.htaccess').read_text()
           assert 'AddType application/javascript .mjs' in ht
-          print('PASS: current bilingual participant surface, bank, owner map, autosave/API hooks and mjs MIME rule present')
+          print('PASS: current bilingual participant surface, focused result experience, bank, owner map, autosave/API hooks and mjs MIME rule present')
           PY
           node -e "import('./priolens/open14-v02/p3_open14_planner_v02.mjs').then(m=>{const p=m.buildOpen14Plan('deploy-smoke'); if(!p.audit) process.exit(2); console.log('planner pass')})"
           node -e "import('./priolens/open14-v02/p3_open14_exemplar_assigner_v01.mjs').then(()=>console.log('assigner import pass'))"
@@ -107,6 +112,11 @@ jobs:
           grep -Fq 'Išeiti' /tmp/index-lt
           grep -Fq 'Hard to say' /tmp/index-lt
           grep -Fq 'Research prototype' /tmp/index-lt
+          grep -Fq 'Kas patraukė tavo dėmesį' /tmp/index-lt
+          grep -Fq 'Kur šiuo metu mažiau pakanka' /tmp/index-lt
+          grep -Fq 'Ar matai tarp šių dviejų signalų ryšį' /tmp/index-lt
+          grep -Fq 'They do not tell us what you lack' /tmp/index-lt
+          grep -Fq 'const lowDomains=completeDomains.filter(d=>coverage[d.id].value<=3)' /tmp/index-lt
           curl -fsS --retry 4 --retry-delay 2 "$base/stimulus-bank.html" -o /tmp/stimulus-bank
           grep -q 'Open14 stimulus bank' /tmp/stimulus-bank
           curl -fsS --retry 4 --retry-delay 2 "$base/bank.json" -o /tmp/bank
@@ -137,7 +147,7 @@ jobs:
           curl -fsS --retry 4 --retry-delay 2 'https://omesg360.eu/priolens-research-assets/Open14-final-v01/belonging-b_coffee-ritual_v01.webp' -o /dev/null
           curl -fsS --retry 4 --retry-delay 2 'https://omesg360.eu/priolens-research-assets/Open14-final-v01/exploration-b_magnifier-forest_v01.webp' -o /dev/null
           curl -fsS --retry 4 --retry-delay 2 'https://omesg360.eu/priolens-research-assets/Open14-final-v01/opportunity-a_open-market-stall_v01.webp' -o /dev/null
-          echo 'PASS: current PrioLens participant surface, modules, bank, API health and final asset set reachable'
+          echo 'PASS: current PrioLens participant surface, focused result experience, modules, bank, API health and final asset set reachable'
 
       - name: Historical runtime boundary smoke
         shell: bash
