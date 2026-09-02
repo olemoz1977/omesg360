@@ -34,14 +34,14 @@ jobs:
           PY
 
           keep=' deploy-priolens-open14-api.yml deploy-priolens-open14-runtime.yml deploy-priolens-hostinger.yml cleanup-priolens-ci-noise-once.yml '
-          shopt -s nullglob
-          for f in .github/workflows/*priolens*.yml .github/workflows/*open14*.yml; do
+          while IFS= read -r f; do
+            [[ -n "$f" ]] || continue
             b="$(basename "$f")"
             case "$keep" in
               *" $b "*) continue ;;
             esac
             git rm -f -- "$f"
-          done
+          done < <(find .github/workflows -maxdepth 1 -type f \( -name '*priolens*.yml' -o -name '*open14*.yml' \) -print | sort -u)
 
           git add .github/workflows/deploy-priolens-open14-runtime.yml
           git rm -f .github/workflows/cleanup-priolens-ci-noise-once.yml
