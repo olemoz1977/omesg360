@@ -9,7 +9,7 @@
 *{box-sizing:border-box}html,body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,sans-serif}body{min-height:100dvh}.wrap{width:min(100%,900px);margin:auto;padding:0 12px;min-height:100dvh}.top{height:48px;display:flex;align-items:center;justify-content:space-between}.brand{font-weight:800}.topRight{display:flex;align-items:center;gap:8px}.exitLink{display:inline-flex;align-items:center;min-height:44px;font-size:13px;color:#555;text-decoration:none;padding:0 4px}.exitLink:hover{text-decoration:underline}.pill{font-size:12px;color:var(--muted);border:1px solid var(--line);padding:6px 9px;border-radius:99px;background:#fff}.screen{display:none}.screen.active{display:block}.intro,.result{padding:6vh 4px 42px}h1{font-size:clamp(36px,10vw,62px);letter-spacing:-.055em;line-height:.96;margin:0 0 18px}.lead{font-size:clamp(18px,4.8vw,25px);line-height:1.3;max-width:720px}.note{font-size:15px;line-height:1.55;color:#5f5f5f;max-width:720px}.card,.row,.domainCard{background:var(--card);border:1px solid var(--line);border-radius:16px}.card{padding:14px 15px;margin:18px 0}.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:16px}button{font:inherit;cursor:pointer}.primary,.secondary{border-radius:14px;padding:12px 15px;font-weight:700;min-height:44px}.primary{border:0;background:#171717;color:#fff}.primary:disabled{opacity:.35;cursor:not-allowed}.secondary{border:1px solid var(--line);background:#fff;color:#181818}.bad{color:#9a3b3b}.ok{color:#3d7045}
 #trial.active{height:calc(100dvh - 48px);display:flex;flex-direction:column;overflow:hidden}.trialhead{height:40px;display:flex;align-items:center;justify-content:space-between}.q{font-size:16px;font-weight:750}.count{font-size:14px;color:#626262}.progress{height:3px;background:#e7e7e2;border-radius:10px;overflow:hidden}.progress i{display:block;height:100%;background:#222;width:0}.stage{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:repeat(3,minmax(0,1fr)) auto;gap:6px;padding:7px 0 10px}.stim{grid-column:1;width:100%;height:100%;border:0;background:transparent;padding:2px 4px;display:flex;align-items:center;justify-content:center}.stim:nth-of-type(1){grid-row:1}.stim:nth-of-type(2){grid-row:2}.stim:nth-of-type(3){grid-row:3}.stim img{display:block;height:100%;width:auto;max-width:100%;max-height:100%;aspect-ratio:1/1;object-fit:contain;border:1px solid #d6d6d1;background:#eee;border-radius:16px}.stage.locked button{pointer-events:none}.none{grid-column:1;grid-row:4;border:1.5px solid #aaa9a3;background:#fff;color:#303030;border-radius:14px;padding:10px 14px;min-height:48px;font-size:15px;font-weight:760;writing-mode:horizontal-tb;transform:none;display:flex;align-items:center;justify-content:center}
 #suff.active{padding:12px 0 40px}.suffHead{padding:18px 4px 8px}.suffHead h2{font-size:28px;margin:0 0 8px}.domainCard{padding:14px;margin:12px 0}.domainTitle{font-size:15px;color:#555;margin-bottom:14px;font-weight:760}.item{padding:10px 0;border-top:1px solid #eeeeea}.item:first-of-type{border-top:0}.statement{font-size:18px;line-height:1.45;margin-bottom:12px}.scale{display:grid;gap:9px}.rangeRow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center}.rangeBox{min-width:0}.rangeBox input[type=range]{width:100%;margin:4px 0 0;accent-color:#1d1d1d;min-height:34px}.rangeBox input[type=range].noValue{accent-color:#8b8b86}.rangeBox input[type=range].noValue::-webkit-slider-thumb{opacity:0}.rangeBox input[type=range].noValue::-moz-range-thumb{opacity:0}.rangeLabels{display:flex;justify-content:space-between;gap:10px;font-size:13px;color:#5f5f5f;margin-top:2px}.scale button.na{border:1px solid #bbb;background:#fff;border-radius:10px;min-height:44px;font-size:14px;color:#444;padding:9px 12px;white-space:nowrap}.scale button.na.on{background:#1d1d1d;color:#fff;border-color:#1d1d1d}.autosaveNote{font-size:13px;color:#666;margin-top:10px}.answerState{font-size:13px;font-weight:700;color:#555;margin-top:5px}.answerState.unsetState{color:#735d00}.item.validationError{margin:6px -8px 0;padding:12px 8px;border:2px solid #b54a4a;border-radius:12px;background:#fff8f8}.suffError{margin:10px 0 0;padding:11px 12px;border:2px solid #b54a4a;border-radius:12px;background:#fff4f4;color:#7d2525;font-size:15px;font-weight:750;line-height:1.4}.suffNav{display:flex;justify-content:space-between;gap:8px;margin-top:14px}
-.result{max-width:760px;margin:0 auto}.result h1{font-size:clamp(38px,8vw,54px);margin-bottom:12px}.resultLead{font-size:17px;line-height:1.55;color:#555;max-width:680px}.resultActions{align-items:stretch;margin-top:28px}.actionLink{display:inline-flex;align-items:center;justify-content:center;text-decoration:none}.perspective{margin:30px 0}.perspectiveLabel{font-size:12px;font-weight:800;letter-spacing:.13em;text-transform:uppercase;color:#777;margin:0 0 6px}.perspective h2{font-size:25px;letter-spacing:-.02em;margin:0 0 13px}.rows{display:grid;gap:9px}.insight{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px 15px}.insightTitle{font-size:17px;font-weight:780;line-height:1.3}.insightState{font-size:14px;font-weight:760;color:#444;margin-top:5px}.insightCue{font-size:14px;line-height:1.5;color:#666;margin-top:5px}.resultNote{font-size:14px;line-height:1.55;color:#666;margin:10px 2px 0}.bankCard.ready{display:none}.debug{font-size:12px;color:#777;white-space:pre-wrap;background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px;overflow:auto}.hidden{display:none!important}@media(max-width:620px){.rangeRow{grid-template-columns:1fr}.scale button.na{justify-self:start}.perspective{margin:26px 0}.perspective h2{font-size:23px}}
+.result{max-width:760px;margin:0 auto}.result h1{font-size:clamp(38px,8vw,54px);margin-bottom:12px}.resultLead{font-size:17px;line-height:1.55;color:#555;max-width:680px}.resultActions{align-items:stretch;margin-top:28px}.actionLink{display:inline-flex;align-items:center;justify-content:center;text-decoration:none}.perspective{margin:30px 0}.perspectiveLabel{font-size:12px;font-weight:800;letter-spacing:.13em;text-transform:uppercase;color:#777;margin:0 0 6px}.perspective h2{font-size:25px;letter-spacing:-.02em;margin:0 0 13px}.rows{display:grid;gap:9px}.insight{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px 15px}.insightTitle{font-size:17px;font-weight:780;line-height:1.3}.insightState{font-size:14px;font-weight:760;color:#444;margin-top:5px}.insightCue{font-size:14px;line-height:1.5;color:#666;margin-top:5px}.reflectionQuestion{font-size:17px;font-weight:780;line-height:1.45;margin-top:12px;color:#222}.resultNote{font-size:14px;line-height:1.55;color:#666;margin:10px 2px 0}.bankCard.ready{display:none}.debug{font-size:12px;color:#777;white-space:pre-wrap;background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px;overflow:auto}.hidden{display:none!important}@media(max-width:620px){.rangeRow{grid-template-columns:1fr}.scale button.na{justify-self:start}.perspective{margin:26px 0}.perspective h2{font-size:23px}}
 </style>
 </head>
 <body>
@@ -43,6 +43,7 @@
       <p id="firstLabel" class="perspectiveLabel">Pirma perspektyva</p>
       <h2 id="firstHeading">Pirmas žvilgsnis</h2>
       <div id="repeatRows" class="rows"></div>
+      <p id="attentionNote" class="resultNote hidden"></p>
     </div>
 
     <div class="perspective">
@@ -79,7 +80,7 @@ const TXT={
     introTitle:'Kuris pirmas patraukia?',introLead:'Trys vaizdai vienu metu. Nesvarstyk, kuris „geresnis“. Pasirink tą, į kurį pirmiausia krypsta dėmesys.',introNote1:'14 trumpų pasirinkimų · apie 2 min. Po jų į tą pačią situaciją pažvelgsi iš kitos perspektyvos.',introNote2:'Formuojamojo tyrimo prototipas. Sesijos duomenys saugomi tyrimo duomenų bazėje; numatyta saugojimo trukmė – iki 90 dienų. Tai nėra asmenybės testas ar diagnozė.',prototypeLabel:'Tyrimo prototipas',
     bankChecking:'Tikrinamas vaizdų rinkinys…',bankCheckingStatus:'PrioLens startuos, kai bus patvirtinta, kad visi vaizdai pasiekiami.',start:'Pradėti',exit:'Išeiti',trialQuestion:'Kuris pirmas patraukia?',none:'Nė vienas aiškiai',
     suffTitle:'Dabar kita perspektyva.',suffLead:'Įvertink ne tai, kiek tau tai svarbu, o kiek šiuo metu tavo gyvenime to pakanka. Kiekviename teiginyje pasirink skalės vietą arba „Sunku pasakyti“.',validation:'Dar neatsakyta. Pasirink skalės vietą abiem teiginiams arba „Sunku pasakyti“.',back:'Atgal',next:'Toliau',seeResult:'Pamatyti rezultatą',
-    resultTitle:'Pirmas žvilgsnis. Antras atsakymas.',resultLead:'Ne verdiktas, o dvi perspektyvos į tą pačią akimirką.',saveChecking:'Sesijos išsaugojimas tikrinamas…',firstLabel:'Pirma perspektyva',firstHeading:'Pirmas žvilgsnis',secondLabel:'Antra perspektyva',secondHeading:'Antras atsakymas',compareLabel:'Sugretinimas',compareHeading:'Pažvelk dar kartą',restart:'Atlikti dar kartą',back2rasi:'Grįžti į 2rasi',export:'Eksportuoti JSON',debug:'Tyrimo diagnostika',
+    resultTitle:'Pirmas žvilgsnis. Antras atsakymas.',resultLead:'Ne verdiktas, o dvi perspektyvos į tą pačią akimirką.',saveChecking:'Sesijos išsaugojimas tikrinamas…',firstLabel:'Pirma perspektyva',firstHeading:'Kas patraukė tavo dėmesį',secondLabel:'Antra perspektyva',secondHeading:'Kur šiuo metu mažiau pakanka',compareLabel:'Refleksija',compareHeading:'Pažvelk dar kartą',restart:'Atlikti dar kartą',back2rasi:'Grįžti į 2rasi',export:'Eksportuoti JSON',debug:'Tyrimo diagnostika',
     veryLow:'Labai trūksta',enough:'Pakanka',hardToSay:'Sunku pasakyti',unanswered:'Neatsakyta',selected:'Pasirinkta',autoSave:'Progresas saugomas automatiškai. Nutrūkus galėsi tęsti šiame įrenginyje.',rangeAria:'Nuo labai trūksta iki pakanka',
     resumeFound:n=>`Rasta nebaigta sesija: ${n}/14 vaizdinių pasirinkimų. Gali tęsti nuo tos vietos.`,resume:'Tęsti sesiją',newSession:'Pradėti naują',
     bankIncomplete:'Vaizdų rinkinys dar nepilnas',missingAssets:n=>`Trūksta vaizdų: ${n}. Bandyk dar kartą vėliau.`,bankReady:'Vaizdų rinkinys paruoštas',assetsReady:'Visi vaizdai pasiekiami.',bankError:'Vaizdų rinkinio klaida',
@@ -94,7 +95,7 @@ const TXT={
     introTitle:'Which one pulls you first?',introLead:'Three images at a time. Do not decide which one is “better”. Choose the one your attention goes to first.',introNote1:'14 quick choices · about 2 min. After them, you will look at the same moment from a different perspective.',introNote2:'Formative research prototype. Session data is stored in the research database; the intended retention period is up to 90 days. This is not a personality test or diagnosis.',prototypeLabel:'Research prototype',
     bankChecking:'Checking the image set…',bankCheckingStatus:'PrioLens will start after confirming that all images are available.',start:'Start',exit:'Exit',trialQuestion:'Which pulls you first?',none:'None clearly',
     suffTitle:'Now a different perspective.',suffLead:'Rate not how important this is to you, but how much of it you currently have in your life. For each statement, choose a point on the scale or “Hard to say”.',validation:'Still unanswered. Choose a point on the scale for both statements or “Hard to say”.',back:'Back',next:'Next',seeResult:'See result',
-    resultTitle:'First glance. Second answer.',resultLead:'Not a verdict, but two perspectives on the same moment.',saveChecking:'Checking session save…',firstLabel:'First perspective',firstHeading:'First glance',secondLabel:'Second perspective',secondHeading:'Second answer',compareLabel:'Comparison',compareHeading:'Look again',restart:'Do it again',back2rasi:'Back to 2rasi',export:'Export JSON',debug:'Research diagnostics',
+    resultTitle:'First glance. Second answer.',resultLead:'Not a verdict, but two perspectives on the same moment.',saveChecking:'Checking session save…',firstLabel:'First perspective',firstHeading:'What pulled your attention',secondLabel:'Second perspective',secondHeading:'Where less feels sufficient right now',compareLabel:'Reflection',compareHeading:'Look again',restart:'Do it again',back2rasi:'Back to 2rasi',export:'Export JSON',debug:'Research diagnostics',
     veryLow:'Far too little',enough:'Enough',hardToSay:'Hard to say',unanswered:'Not answered',selected:'Selected',autoSave:'Progress is saved automatically. If interrupted, you can continue on this device.',rangeAria:'From far too little to enough',
     resumeFound:n=>`An unfinished session was found: ${n}/14 visual choices. You can continue where you left off.`,resume:'Continue session',newSession:'Start new',
     bankIncomplete:'The image set is incomplete',missingAssets:n=>`Missing images: ${n}. Please try again later.`,bankReady:'Image set ready',assetsReady:'All images are available.',bankError:'Image-set error',
@@ -178,42 +179,89 @@ async function submitSession(){const el=$('saveStatus');try{el.textContent=T.sav
 function finish(){state.completedAt=new Date().toISOString();state.familyStats=familyStats();state.domainCoverage=domainCoverage();state.domainStats=Object.fromEntries(DOMAINS.map(d=>[d.id,state.domainCoverage[d.id].value]));state.macroStats=macroStats();state.rtMedianMs=median(state.choices.map(x=>x.rtMs));state.noClearChoiceCount=state.choices.filter(x=>x.noClearChoice).length;show('result');renderResult();submitSession()}
 function addInsight(mount,title,stateText,cue){const r=document.createElement('div');r.className='insight';r.innerHTML=`<div class="insightTitle">${title}</div>${stateText?`<div class="insightState">${stateText}</div>`:''}${cue?`<div class="insightCue">${cue}</div>`:''}`;mount.appendChild(r)}
 function joinNatural(xs){if(!xs.length)return'';if(xs.length===1)return xs[0];const conj=LANG==='en'?' and ':' ir ';return `${xs.slice(0,-1).join(', ')}${conj}${xs.at(-1)}`}
+function addReflection(mount,cue,question){const r=document.createElement('div');r.className='insight';r.innerHTML=`${cue?`<div class="insightCue">${cue}</div>`:''}<div class="reflectionQuestion">${question}</div>`;mount.appendChild(r)}
 function renderResult(){
+  const C=LANG==='en'?{
+    attentionNote:'These choices show what repeatedly pulled your attention in this session. They do not tell us what you lack. Attention can be shaped by current relevance, learned value, prior experience or the image itself; a choice alone cannot tell us why it pulled you.',
+    noLowTitle:'No area stood out as less sufficient right now',
+    noLowCue:'The areas you rated clearly were all on the more sufficient side.',
+    lowCue:(f,d)=>`${f} repeated across different images, while your current rating of the broader area “${d}” is on the less-sufficient side.`,
+    midCue:(f,d)=>`${f} repeated across different images, while your current rating of the broader area “${d}” sits around the middle.`,
+    highCue:(f,d)=>`${f} repeated across different images, even though you currently rate the broader area “${d}” as fairly sufficient.`,
+    linkedQuestion:'Do you see a connection between these two signals, or do they feel unrelated to you?',
+    highQuestion:f=>`What about the ${f.toLowerCase()} images still pulled your attention?`,
+    visualOnlyCue:f=>`${f} repeated across different images. There is no equivalent current-sufficiency area that PrioLens can validly compare it with in this version.`,
+    visualOnlyQuestion:f=>`What about those ${f.toLowerCase()} images may have pulled your attention?`,
+    lowOnlyCue:n=>`In your second answer, ${n} stood out as less sufficient right now.`,
+    lowOnlyQuestion:'Which of these areas feels most worth your attention right now?',
+    quietCue:'This session did not produce a repeated visual theme, and no clearly rated area stood out as less sufficient.',
+    quietQuestion:'Is there anything in this result that still surprised you?'
+  }:{
+    attentionNote:'Šie pasirinkimai rodo, kas šioje sesijoje pakartotinai patraukė tavo dėmesį. Jie nepasako, ko tau trūksta. Dėmesį gali veikti dabartinis aktualumas, išmokta vertė, ankstesnė patirtis ar pats vaizdas; vien iš pasirinkimo negalima pasakyti, kodėl jis patraukė.',
+    noLowTitle:'Nė viena sritis neišsiskyrė kaip mažiau pakankama',
+    noLowCue:'Aiškiai įvertintos sritys šiuo metu buvo labiau pakankamoje pusėje.',
+    lowCue:(f,d)=>`${f} kartojosi per skirtingus vaizdus, o platesnę sritį „${d}“ šiuo metu vertini kaip mažiau pakankamą.`,
+    midCue:(f,d)=>`${f} kartojosi per skirtingus vaizdus, o platesnės srities „${d}“ dabartinis įvertinimas yra per vidurį.`,
+    highCue:(f,d)=>`${f} kartojosi per skirtingus vaizdus, nors platesnę sritį „${d}“ šiuo metu vertini kaip gana pakankamą.`,
+    linkedQuestion:'Ar matai tarp šių dviejų signalų ryšį, ar tau jie atrodo nesusiję?',
+    highQuestion:f=>`Kas ${f.toLowerCase()} vaizduose vis tiek patraukė tavo dėmesį?`,
+    visualOnlyCue:f=>`${f} kartojosi per skirtingus vaizdus. Šioje PrioLens versijoje nėra lygiavertės dabartinio pakankamumo srities, su kuria tai būtų galima pagrįstai sugretinti.`,
+    visualOnlyQuestion:f=>`Kas šiuose ${f.toLowerCase()} vaizduose galėjo patraukti tavo dėmesį?`,
+    lowOnlyCue:n=>`Antrame atsakyme kaip mažiau pakankama šiuo metu išsiskyrė ${n}.`,
+    lowOnlyQuestion:'Kuri iš šių sričių šiuo metu labiausiai verta tavo dėmesio?',
+    quietCue:'Šioje sesijoje nepasikartojo viena vizualinė tema ir nė viena aiškiai įvertinta sritis neišsiskyrė kaip mažiau pakankama.',
+    quietQuestion:'Ar šiame rezultate vis tiek yra kas nors, kas tave nustebino?'
+  };
+
   const coverage=state.domainCoverage||domainCoverage();
   const rep=$('repeatRows');rep.innerHTML='';
   const repeated=Object.entries(state.familyStats).filter(([,x])=>x.chosen>=2&&x.crossExemplar).sort((a,b)=>b[1].chosen-a[1].chosen);
   if(!repeated.length)addInsight(rep,T.noRepeated,'',T.noRepeatedCue);
   else repeated.forEach(([id,x])=>addInsight(rep,FAMILY_LABEL[id],'',x.chosen===3?T.repeatEvery:T.repeatAcross));
+  const attentionNote=$('attentionNote');
+  if(repeated.length){attentionNote.textContent=C.attentionNote;attentionNote.classList.remove('hidden')}else{attentionNote.textContent='';attentionNote.classList.add('hidden')}
 
   const sr=$('suffRows');sr.innerHTML='';
   const completeDomains=DOMAINS.filter(d=>coverage[d.id].complete);
+  const lowDomains=completeDomains.filter(d=>coverage[d.id].value<=3);
   const incompleteCount=DOMAINS.length-completeDomains.length;
   if(!completeDomains.length){
     addInsight(sr,T.suffNone,'',T.suffNoneCue);
+  }else if(!lowDomains.length){
+    addInsight(sr,C.noLowTitle,'',C.noLowCue);
   }else{
-    for(const d of completeDomains){
+    for(const d of lowDomains){
       const v=coverage[d.id].value;
-      const stateText=v<=2.5?T.suffLow:v>=3.5?T.suffHigh:T.suffMid;
-      addInsight(sr,d.title,stateText,'');
+      addInsight(sr,d.title,v<=2.5?T.suffLow:T.suffMid,'');
     }
   }
   const suffNote=$('suffResultNote');
   if(incompleteCount>0&&completeDomains.length){suffNote.textContent=T.suffIncomplete(incompleteCount);suffNote.classList.remove('hidden')}else{suffNote.textContent='';suffNote.classList.add('hidden')}
 
-  const cr=$('compareRows');cr.innerHTML='';const comps=[];
+  const cr=$('compareRows');cr.innerHTML='';
+  const mapped=[];
   for(const d of DOMAINS){
     if(!d.families.length||!coverage[d.id].complete)continue;
     const rel=d.families.filter(f=>state.familyStats[f]?.chosen>=2&&state.familyStats[f]?.crossExemplar);
     if(!rel.length)continue;
-    const v=state.domainStats[d.id];
-    const famNames=rel.map(f=>FAMILY_LABEL[f]).join(', ');
-    const cue=v<=2.5?T.lowCue(famNames):v>=3.5?T.highCue(famNames):T.midCue(famNames);
-    comps.push({name:d.title,cue});
+    mapped.push({domain:d,rel,value:coverage[d.id].value,maxChosen:Math.max(...rel.map(f=>state.familyStats[f].chosen))});
   }
-  if(!comps.length){
-    const cue=!repeated.length&&!completeDomains.length?T.noCompareNoBoth:!repeated.length?T.noCompareNoRepeat:!completeDomains.length?T.noCompareNoSuff:T.noCompareCue;
-    addInsight(cr,T.noCompare,'',cue);
-  }else comps.slice(0,3).forEach(c=>addInsight(cr,c.name,'',c.cue));
+  mapped.sort((a,b)=>((a.value<=3?0:1)-(b.value<=3?0:1))||(b.maxChosen-a.maxChosen));
+
+  if(mapped.length){
+    const m=mapped[0],famNames=joinNatural(m.rel.map(f=>FAMILY_LABEL[f]));
+    const cue=m.value<=2.5?C.lowCue(famNames,m.domain.title):m.value<=3?C.midCue(famNames,m.domain.title):C.highCue(famNames,m.domain.title);
+    const question=m.value<=3?C.linkedQuestion:C.highQuestion(famNames);
+    addReflection(cr,cue,question);
+  }else if(repeated.length){
+    const name=FAMILY_LABEL[repeated[0][0]];
+    addReflection(cr,C.visualOnlyCue(name),C.visualOnlyQuestion(name));
+  }else if(lowDomains.length){
+    const names=joinNatural(lowDomains.map(d=>d.title));
+    addReflection(cr,C.lowOnlyCue(names),C.lowOnlyQuestion);
+  }else{
+    addReflection(cr,C.quietCue,C.quietQuestion);
+  }
 
   $('debug').textContent=JSON.stringify(state,null,2)
 }
