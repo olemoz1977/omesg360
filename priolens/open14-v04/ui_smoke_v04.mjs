@@ -1,0 +1,138 @@
+import { chromium } from 'playwright';
+import { buildOpen14Plan, FAMILY_SET } from './p3_open14_planner_v02.mjs';
+
+const BASE=process.env.PRIOLENS_V04_BASE||'http://127.0.0.1:8765/';
+const SCHEMA='2rasi.priolens.open14.rank-session-v0.4';
+const BANK='2rasi.priolens.open14.bank-v0.3.1';
+const DRAFT='priolens.open14.v04.rank.draft.lt';
+const svg='<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><rect width="64" height="64" fill="#ddd"/></svg>';
+
+const browser=await chromium.launch({headless:true});
+try{
+  const context=await browser.newContext({viewport:{width:390,height:844}});
+  const page=await context.newPage();
+  const finalPayloads=[];
+  const progressPayloads=[];
+
+  await page.route('**/priolens-research-assets/**',route=>route.fulfill({status:200,contentType:'image/svg+xml',body:svg}));
+  await page.route('**/priolens-open14-v03-api/progress.php',async route=>{
+    const body=JSON.parse(route.request().postData()||'{}');
+    if(body.schema!==SCHEMA)throw new Error('progress schema != v0.4');
+    progressPayloads.push(body);
+    await route.fulfill({status:200,contentType:'application/json',body:'{"ok":true,"saved":true,"submissionId":"V04-LOCAL"}'});
+  });
+  await page.route('**/priolens-open14-v03-api/api.php',async route=>{
+    const body=JSON.parse(route.request().postData()||'{}');
+    if(body.schema!==SCHEMA)throw new Error('final schema != v0.4');
+    finalPayloads.push(body);
+    await route.fulfill({status:200,contentType:'application/json',body:'{"ok":true,"inserted":true,"submissionId":"V04-LOCAL"}'});
+  });
+
+  await page.goto(BASE+'?lang=lt&from=lt',{waitUntil:'networkidle'});
+  await page.waitForFunction(()=>document.querySelector('#start')&&!document.querySelector('#start').disabled);
+  await page.click('#start');
+  await page.waitForSelector('#trial.active');
+
+  const draft0=JSON.parse(await page.evaluate(k=>localStorage.getItem(k),DRAFT));
+  if(!draft0||draft0.schema!==SCHEMA)throw new Error('v0.4 draft missing after start');
+  if(draft0.bankSchema!==BANK)throw new Error('bank identity changed in v0.4 draft');
+  const seed=draft0.seed;
+  const plan=buildOpen14Plan(seed);
+
+  const ids=FAMILY_SET.map(x=>x.id);
+  let targets=null;
+  outer: for(let a=0;a<ids.length;a++)for(let b=a+1;b<ids.length;b++){
+    const x=ids[a],y=ids[b];
+    if(plan.trials.every(t=>!(t.positions.includes(x)&&t.positions.includes(y)))){targets=[x,y];break outer}
+  }
+  if(!targets)throw new Error('could not find non-cooccurring A+ target families');
+  const counts=Object.fromEntries(ids.map(id=>[id,0]));
+
+  for(let i=0;i<14;i++){
+    const positions=plan.trials[i].positions;
+    let mostSlot=positions.findIndex(x=>targets.includes(x));
+    if(mostSlot<0){
+      mostSlot=[0,1,2].sort((a,b)=>counts[positions[a]]-counts[positions[b]])[0];
+    }
+    counts[positions[mostSlot]]++;
+    await page.click(`.stim[data-slot="${mostSlot}"]`);
+    await page.waitForFunction(()=>document.querySelector('#tieLeast')&&!document.querySelector('#tieLeast').classList.contains('hidden'));
+    const leastSlot=[0,1,2].find(x=>x!==mostSlot);
+    await page.click(`.stim[data-slot="${leastSlot}"]`);
+    if(i<13)await page.waitForFunction(n=>document.querySelector('#counter')?.textContent?.trim()===`${n} / 14`,i+2);
+  }
+
+  await page.waitForSelector('#aplus.active');
+  const cards=page.locator('#aPlusMount .clarifyCard');
+  if(await cards.count()<2)throw new Error('A+ did not show multiple candidate groups');
+  const aText=((await page.locator('#aPlusMount').textContent())||'').trim();
+  if(aText)throw new Error('A+ leaked family labels into visual candidate cards: '+aText);
+
+  const draftAtA=JSON.parse(await page.evaluate(k=>localStorage.getItem(k),DRAFT));
+  if(!draftAtA.attentionResolution?.clarifierRequired)throw new Error('A+ unresolved checkpoint missing');
+  if(draftAtA.attentionFocus!==null)throw new Error('focus was forced before A+ answer');
+
+  await page.reload({waitUntil:'networkidle'});
+  await page.waitForFunction(()=>document.querySelector('#start')&&!document.querySelector('#start').disabled);
+  if(await page.locator('#start').getAttribute('data-resume')!=='1')throw new Error('A+ resume offer missing');
+  await page.click('#start');
+  await page.waitForSelector('#aplus.active');
+  await page.locator('#aPlusMount .clarifyCard').first().click();
+  await page.waitForSelector('#suff.active');
+
+  const draftAfterA=JSON.parse(await page.evaluate(k=>localStorage.getItem(k),DRAFT));
+  if(!draftAfterA.attentionClarifier?.selectedFamilyId)throw new Error('A+ answer not persisted');
+  if(!draftAfterA.attentionFocus?.familyId)throw new Error('A+ focus not persisted');
+  if(draftAfterA.attentionFocus.rawMostCount!==3)throw new Error('A+ 3/3 runoff lost raw count');
+
+  for(let d=1;d<=6;d++){
+    const ranges=page.locator('#domainMount input[type="range"]');
+    if(await ranges.count()!==2)throw new Error('Channel B page does not contain two items');
+    for(let i=0;i<2;i++){
+      await ranges.nth(i).evaluate(el=>{
+        el.value='2';
+        el.dispatchEvent(new Event('input',{bubbles:true}));
+        el.dispatchEvent(new Event('change',{bubbles:true}));
+      });
+    }
+    await page.click('#suffNext');
+    if(d<6)await page.waitForFunction(n=>document.querySelector('#suffCount')?.textContent?.trim()===`${n} / 6`,d+1);
+  }
+
+  await page.waitForSelector('#bplus.active');
+  if(await page.locator('#bPlusMount .clarifyNeed').count()!==12)throw new Error('Expected 12 tied B+ minima in synthetic all-2 case');
+  const draftAtB=JSON.parse(await page.evaluate(k=>localStorage.getItem(k),DRAFT));
+  if(!draftAtB.sufficiencyResolution?.clarifierRequired)throw new Error('B+ unresolved checkpoint missing');
+  if(draftAtB.sufficiencyRoute?.itemIds?.length)throw new Error('route forced before B+ answer');
+
+  await page.reload({waitUntil:'networkidle'});
+  await page.waitForFunction(()=>document.querySelector('#start')&&!document.querySelector('#start').disabled);
+  if(await page.locator('#start').getAttribute('data-resume')!=='1')throw new Error('B+ resume offer missing');
+  await page.click('#start');
+  await page.waitForSelector('#bplus.active');
+  await page.locator('#bPlusMount .clarifyNeed').first().click();
+
+  await page.waitForSelector('#result.active');
+  await page.waitForFunction(()=>document.querySelector('#saveStatus')&&!document.querySelector('#saveStatus').textContent.includes('tikrinamas'),null,{timeout:10000});
+  if(!finalPayloads.length)throw new Error('final POST not attempted');
+  const final=finalPayloads.at(-1);
+  if(final.schema!==SCHEMA)throw new Error('final schema wrong');
+  if(final.bankSchema!==BANK)throw new Error('v0.4 changed bank identity');
+  if(final.rankProtocol!=='most+least+a-plus+b-plus-v0.4')throw new Error('rankProtocol wrong');
+  if(final.choices?.length!==14)throw new Error('raw choices != 14');
+  if(!final.attentionClarifier?.selectedFamilyId)throw new Error('final A+ missing');
+  if(!final.attentionFocus?.familyId)throw new Error('final attention focus missing');
+  const rawFocusCount=final.familyStats?.[final.attentionFocus.familyId]?.chosen;
+  if(rawFocusCount!==final.attentionFocus.rawMostCount)throw new Error('A+ mutated raw MOST count');
+  if(!final.sufficiencyClarifier?.selectedItemId)throw new Error('final B+ missing');
+  if(final.sufficiencyRoute?.itemIds?.length!==1)throw new Error('final B+ route should contain one selected endpoint');
+  if(Object.keys(final.sufficiency||{}).length!==12)throw new Error('Channel B item count changed');
+  if(await page.evaluate(k=>localStorage.getItem(k),DRAFT)!==null)throw new Error('v0.4 draft not cleared after successful final save');
+  const keys=await page.evaluate(()=>Object.keys(localStorage));
+  if(keys.some(k=>k.includes('priolens.open14.v031.rank.draft')))throw new Error('v0.3.1 draft namespace leaked into v0.4');
+  if(!progressPayloads.length)throw new Error('no progress checkpoints captured');
+
+  console.log('PASS: v0.4 local 390x844 A+ visual runoff + A+ resume + 12-way B+ + B+ resume + final payload');
+} finally {
+  await browser.close();
+}
