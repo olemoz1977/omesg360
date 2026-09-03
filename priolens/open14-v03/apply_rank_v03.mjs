@@ -47,6 +47,7 @@ html=replaceN(html,'const T=TXT[LANG];',rankCopy,1,'rank bilingual copy');
 html=replaceN(html,
   "$('prototypePill').textContent=T.prototypeLabel;$('bankTitle').textContent=T.bankChecking;$('bankStatus').textContent=T.bankCheckingStatus;$('start').textContent=T.start;$('exit2rasi').textContent=T.exit;",
   "$('prototypePill').textContent=T.prototypeLabel;$('bankTitle').textContent=T.bankChecking;$('bankStatus').textContent=T.bankCheckingStatus;$('start').textContent=T.start;$('exit2rasi').textContent=T.exit;$('noneMost').textContent=R.noneMost;$('tieLeast').textContent=R.tieLeast;$('leastLabel').textContent=R.leastLabel;$('leastHeading').textContent=R.leastHeading;$('leastNote').textContent=R.leastNote;",1,'rank language application');
+html=replaceN(html,"document.querySelector('.trialhead .q').textContent=T.trialQuestion;$('none').textContent=T.none;","$('trialQuestion').textContent=R.mostQ;$('trialHint').textContent=R.mostHint;",1,'rank trial language legacy cleanup');
 html=replaceN(html,'selfExplanation:null,completedAt:null};','selfExplanation:null,pendingMost:null,completedAt:null};',1,'pendingMost');
 
 const trialBlock=[
