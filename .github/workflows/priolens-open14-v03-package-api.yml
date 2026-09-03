@@ -1,0 +1,60 @@
+name: Package PrioLens Open14 v0.3 API
+
+on:
+  push:
+    branches:
+      - feature/priolens-open14-v03
+    paths:
+      - '.github/workflows/priolens-open14-v03-package-api.yml'
+      - 'priolens/open14-v03/server/**'
+  workflow_dispatch:
+
+jobs:
+  package-api:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build API upload package
+        shell: bash
+        run: |
+          set -euo pipefail
+          dir='priolens_open14_v03_api_upload'
+          rm -rf "$dir" priolens_open14_v03_api_upload.zip
+          mkdir -p "$dir"
+          cp priolens/open14-v03/server/api.php "$dir/api.php"
+          cp priolens/open14-v03/server/progress.php "$dir/progress.php"
+          cp priolens/open14-v02/server/.htaccess "$dir/.htaccess"
+          cat > "$dir/README_UPLOAD.txt" <<'EOF'
+          PrioLens Open14 v0.3 API upload package
+
+          TARGET DIRECTORY
+          public_html/priolens-open14-v03-api/
+
+          PACKAGE CONTENTS
+          - api.php
+          - progress.php
+          - .htaccess
+          - README_UPLOAD.txt
+
+          IMPORTANT
+          1. Do NOT overwrite /priolens-open14-api/ (live v0.2 API).
+          2. After extracting this ZIP into /priolens-open14-v03-api/, copy the existing secure config.php from the live v0.2 API directory into the new v0.3 API directory using Hostinger File Manager.
+          3. Do not download/share config.php; it contains DB credentials.
+          4. Keep the new v0.3 endpoint separate until smoke passes.
+
+          EXPECTED PUBLIC ENDPOINTS AFTER SETUP
+          https://omesg360.eu/priolens-open14-v03-api/api.php
+          https://omesg360.eu/priolens-open14-v03-api/progress.php
+
+          A browser GET should return HTTP 405 / JSON "Method not allowed". That confirms the PHP route is executing; POST behavior will be smoke-tested separately.
+          EOF
+          zip -qr priolens_open14_v03_api_upload.zip "$dir"
+          sha256sum priolens_open14_v03_api_upload.zip
+
+      - name: Upload API package
+        uses: actions/upload-artifact@v4
+        with:
+          name: priolens-open14-v03-api-upload
+          path: priolens_open14_v03_api_upload.zip
+          retention-days: 30
