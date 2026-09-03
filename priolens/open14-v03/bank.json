@@ -1,6 +1,6 @@
 {
   "schema": "2rasi.priolens.open14.bank-v0.3",
-  "status": "API_GATE_PASS_READY_FOR_SEPARATE_PREVIEW_DEPLOY",
+  "status": "PARTICIPANT_PREVIEW_DEPLOY_PASS_OWNER_MOBILE_PENDING",
   "runtimeReady": true,
   "familySetVersion": "open-spectrum-14-v0.3-no-repeat",
   "familyPlanner": "cyclic-14x3-diff-1-4-slot-role-v0.2",
@@ -8,7 +8,7 @@
   "sessionSchema": "2rasi.priolens.open14.session-v0.3",
   "labelsHiddenDuringChoice": true,
   "newAssetDirectory": "/priolens-research-assets/Open14-v03/",
-  "startPolicy": "READY_FOR_SEPARATE_V03_PARTICIPANT_PREVIEW_DEPLOY",
+  "startPolicy": "PREVIEW_OPEN_FOR_OWNER_MOBILE_SMOKE_EXTERNAL_RECRUITMENT_CLOSED",
   "families": {
     "REST": {
       "macro": "BASIC",
@@ -324,6 +324,10 @@
     "full42AuditPassed": true,
     "apiDeployed": true,
     "apiSmokePassed": true,
-    "apiSmokeRunId": 33757546461
+    "apiSmokeRunId": 33757546461,
+    "participantPreviewDeployed": true,
+    "participantPreviewStaticSmokePassed": true,
+    "participantPreviewChromiumSmokePassed": true,
+    "ownerMobileVisualSmokePassed": false
   }
 }
