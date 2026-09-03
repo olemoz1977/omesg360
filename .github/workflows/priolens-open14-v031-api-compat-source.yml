@@ -1,0 +1,47 @@
+name: Migrate PrioLens Open14 v0.3.1 API bank compatibility
+
+on:
+  push:
+    branches: [feature/priolens-open14-v03]
+    paths:
+      - 'priolens/open14-v03/migrate_api_bank_v031.mjs'
+      - '.github/workflows/priolens-open14-v031-api-compat-source.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/priolens-open14-v03
+
+      - name: Apply guarded API compatibility migration
+        shell: bash
+        run: |
+          set -euo pipefail
+          node priolens/open14-v03/migrate_api_bank_v031.mjs
+          php -l priolens/open14-v03/server/api.php
+          php -l priolens/open14-v03/server/progress.php
+          grep -Fq "['2rasi.priolens.open14.bank-v0.3','2rasi.priolens.open14.bank-v0.3.1']" priolens/open14-v03/server/api.php
+          grep -Fq "['2rasi.priolens.open14.bank-v0.3','2rasi.priolens.open14.bank-v0.3.1']" priolens/open14-v03/server/progress.php
+          grep -Fq "2rasi.priolens.open14.rank-session-v0.3" priolens/open14-v03/server/api.php
+          grep -Fq "2rasi.priolens.open14.rank-session-v0.3" priolens/open14-v03/server/progress.php
+
+      - name: Commit migrated API sources
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- priolens/open14-v03/server/api.php priolens/open14-v03/server/progress.php; then
+            echo 'API sources already migrated'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add priolens/open14-v03/server/api.php priolens/open14-v03/server/progress.php
+          git commit -m 'PrioLens v0.3.1: accept v0.3 and v0.3.1 bank schemas'
+          git push origin HEAD:feature/priolens-open14-v03
