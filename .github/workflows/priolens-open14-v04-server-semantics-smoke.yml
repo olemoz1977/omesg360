@@ -1,0 +1,27 @@
+name: PrioLens Open14 v0.4 server semantic smoke
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - feature/priolens-open14-v04
+    paths:
+      - 'priolens/open14-v04/server/validation_v04.php'
+      - 'priolens/open14-v04/server/validation_v04.test.php'
+      - '.github/workflows/priolens-open14-v04-server-semantics-smoke.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  php-semantics:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Lint and test v0.4 semantic validator
+        shell: bash
+        run: |
+          set -euo pipefail
+          php -l priolens/open14-v04/server/validation_v04.php
+          php -l priolens/open14-v04/server/validation_v04.test.php
+          php priolens/open14-v04/server/validation_v04.test.php
