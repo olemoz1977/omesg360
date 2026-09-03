@@ -6,6 +6,7 @@ on:
     paths:
       - 'priolens/open14-v03/server/**'
       - 'priolens/open14-v03/apply_rank_v03.mjs'
+      - 'priolens/open14-v03/apply_rank_v03_result.mjs'
       - 'priolens/open14-v03/build_from_v02.mjs'
       - '.github/workflows/priolens-open14-v03-rank-source-smoke.yml'
   workflow_dispatch:
@@ -25,14 +26,19 @@ jobs:
           php -l priolens/open14-v03/server/progress.php
           node priolens/open14-v03/build_from_v02.mjs
           node priolens/open14-v03/apply_rank_v03.mjs
+          node priolens/open14-v03/apply_rank_v03_result.mjs
           grep -q "2rasi.priolens.open14.rank-session-v0.3" priolens/open14-v03/index.html
           grep -q "leastChoice" priolens/open14-v03/index.html
           grep -q "leastTie" priolens/open14-v03/index.html
           grep -q "pendingMost" priolens/open14-v03/index.html
+          grep -q "LOW_LEAST" priolens/open14-v03/index.html
+          grep -q "HIGH_LEAST" priolens/open14-v03/index.html
+          grep -q "data-rank-label" priolens/open14-v03/index.html
           grep -q "2rasi.priolens.open14.rank-session-v0.3" priolens/open14-v03/server/api.php
           grep -q "leastChoice cannot equal choice" priolens/open14-v03/server/api.php
           grep -q "pendingMost" priolens/open14-v03/server/progress.php
           ! grep -q "body\['schema'\] !== '2rasi.priolens.open14.session-v0.3'" priolens/open14-v03/server/api.php
+          ! grep -q "content:'PIRMAS'" priolens/open14-v03/index.html
 
       - name: Build canonical rank payload fixtures
         shell: bash
