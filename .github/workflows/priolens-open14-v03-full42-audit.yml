@@ -1,4 +1,4 @@
-name: Audit PrioLens Open14 v0.3 full 42
+name: Audit PrioLens Open14 v0.3.1 full 42
 
 on:
   push:
@@ -33,6 +33,14 @@ jobs:
 
           root=Path('priolens/open14-v03')
           bank=json.loads((root/'bank.json').read_text())
+          if bank['schema'] != '2rasi.priolens.open14.bank-v0.3.1':
+              raise RuntimeError(f"Expected bank-v0.3.1, got {bank['schema']}")
+          if bank.get('runtimeReady') is not False:
+              raise RuntimeError('v0.3.1 full42 audit must run while bank remains fail-closed')
+          expected_pinned=int(bank.get('audit',{}).get('runtimeShaPinnedCount',0))
+          if expected_pinned != 18:
+              raise RuntimeError(f'Expected 18 SHA-pinned assets, got {expected_pinned}')
+
           base='https://omesg360.eu'
           out=Path('full42-audit')
           out.mkdir(exist_ok=True)
@@ -51,7 +59,7 @@ jobs:
                   ids.append(eid); paths.append(runtime)
                   url=base+runtime
                   local=out/(eid.lower()+Path(runtime).suffix.lower())
-                  req=urllib.request.Request(url, headers={'User-Agent':'PrioLens-v0.3-audit/1.0'})
+                  req=urllib.request.Request(url, headers={'User-Agent':'PrioLens-v0.3.1-audit/1.0','Cache-Control':'no-cache'})
                   with urllib.request.urlopen(req, timeout=60) as r:
                       if r.status != 200:
                           raise RuntimeError(f'{eid}: HTTP {r.status}')
@@ -99,14 +107,18 @@ jobs:
               raise RuntimeError(f'pHash=0 duplicate-like pairs found: {exact_ph[:10]}')
           watches=[{'distance':int(d),'a':a,'b':b} for d,a,b in pairs if d<=12]
 
+          pinned_pass=sum(1 for r in rows if r['expectedShaChecked'])
+          if pinned_pass != expected_pinned:
+              raise RuntimeError(f'SHA-pinned count mismatch: expected {expected_pinned}, audited {pinned_pass}')
+
           report={
-              'schema':'2rasi.priolens.open14.full42-host-audit-v0.3',
+              'schema':'2rasi.priolens.open14.full42-host-audit-v0.3.1',
               'bankSchema':bank['schema'],
               'assetCount':len(rows),
               'uniqueExemplarIds':len(set(ids)),
               'uniqueRuntimePaths':len(set(paths)),
               'uniqueSha256':len(set(hashes.values())),
-              'new15ExactShaPass':sum(1 for r in rows if r['expectedShaChecked']),
+              'shaPinnedPassCount':pinned_pass,
               'allSquare':all(r['width']==r['height'] for r in rows),
               'phashClosestPairs':[{'distance':int(d),'a':a,'b':b} for d,a,b in pairs[:15]],
               'phashWatchLe12':watches,
@@ -119,7 +131,7 @@ jobs:
                   f.write(f"{r['sha256']}  {r['id']}  {r['runtimePath']}\n")
 
           print(f"PASS: HTTP/decode/square/unique exact SHA for {len(rows)}/42 assets")
-          print(f"PASS: canonical expected SHA checked for {report['new15ExactShaPass']}/15 new assets")
+          print(f"PASS: expected SHA checked for {pinned_pass}/{expected_pinned} pinned assets")
           print(f"pHash closest: {report['phashClosestPairs'][:5]}")
           print(f"pHash watches <=12: {len(watches)}")
           print(f"stock-watermark OCR keyword hits: {ocr_hits}")
@@ -131,6 +143,6 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: priolens-open14-v03-full42-audit
+          name: priolens-open14-v031-full42-audit
           path: full42-audit/
           retention-days: 30
