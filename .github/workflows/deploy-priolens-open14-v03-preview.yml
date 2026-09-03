@@ -1,10 +1,11 @@
-name: Deploy PrioLens Open14 v0.3 preview
+name: Deploy PrioLens Open14 v0.3.1 preview
 
 on:
   push:
     branches: [feature/priolens-open14-v03]
     paths:
       - priolens/open14-v03/index.html
+      - priolens/open14-v03/bank.json
       - priolens/open14-v03/stimulus-bank.html
       - .github/workflows/deploy-priolens-open14-v03-preview.yml
   workflow_dispatch:
@@ -31,12 +32,13 @@ jobs:
         with:
           ref: feature/priolens-open14-v03
 
-      - name: Validate isolated v0.3 preview source
+      - name: Validate isolated v0.3.1 preview source and bank
         shell: bash
         run: |
           set -euo pipefail
           f='priolens/open14-v03/index.html'
           grep -Fq '2rasi.priolens.open14.rank-session-v0.3' "$f"
+          grep -Fq "priolens.open14.v031.rank.draft" "$f"
           grep -Fq 'Kas liko antrame plane?' "$f"
           grep -Fq 'repeat(auto-fit,minmax(84px,1fr))' "$f"
           grep -Fq 'const images=chosenImagePaths(id).map' "$f"
@@ -46,7 +48,27 @@ jobs:
             echo 'Legacy two-image result cap is still present' >&2
             exit 1
           fi
-          echo 'PASS: v0.3 all-repeated-exemplar result source'
+          python <<'PY'
+          import json
+          b=json.load(open('priolens/open14-v03/bank.json'))
+          assert b['schema']=='2rasi.priolens.open14.bank-v0.3.1'
+          assert b['runtimeReady'] is True
+          g=b['deploymentGate']
+          assert g['full42AuditPassed'] is True and g['full42AuditRunId']==33790603165
+          assert g['apiDeployed'] is True and g['apiDeployRunId']==33791065786
+          assert g['apiSmokePassed'] is True and g['apiSmokeRunId']==33791193830
+          expected={
+            'REST-01':'/priolens-research-assets/Open14-v03-owner-remediation-v01/rest_01_slippers_640.webp',
+            'RESOURCE-03':'/priolens-research-assets/Open14-v03-owner-remediation-v01/resource_03_food_640.webp',
+            'KNOWLEDGE-02':'/priolens-research-assets/Open14-v03-owner-remediation-v01/knowledge_02_online_learning_640.webp',
+            'OPPORTUNITY-01':'/priolens-research-assets/Open14-v03-owner-remediation-v01/opportunity_01_workbench_640.webp',
+            'RECOGNITION-02':'/priolens-research-assets/Open14-v03-owner-remediation-v01/recognition_02_recrop_640.webp',
+          }
+          by={x['id']:x for n in b['families'].values() for x in n['exemplars']}
+          assert len(by)==42
+          for k,v in expected.items(): assert by[k]['runtimePath']==v,(k,by[k]['runtimePath'])
+          PY
+          echo 'PASS: v0.3.1 index + remediated bank source guards'
 
       - name: Validate owner stimulus bank
         shell: bash
@@ -58,25 +80,23 @@ jobs:
           grep -Fq "'OPPORTUNITY-01'" "$f"
           grep -Fq "fetch('./bank.json'" "$f"
           grep -Fq 'Kopijuoti ID' "$f"
-          echo 'PASS: v0.3 owner stimulus bank source'
+          echo 'PASS: owner stimulus bank source'
 
-      - name: Verify FTP secrets
+      - name: Verify FTP secrets and install client
         shell: bash
         run: |
           set -euo pipefail
           [[ -n "${FTP_USER:-}" ]]
           [[ -n "${FTP_PASSWORD:-}" ]]
+          sudo apt-get update -qq && sudo apt-get install -y -qq lftp >/dev/null
 
-      - name: Install FTP client
-        run: sudo apt-get update -qq && sudo apt-get install -y -qq lftp
-
-      - name: Upload preview index and owner bank
+      - name: Upload v0.3.1 preview index, bank and owner bank
         shell: bash
         run: |
           set -euo pipefail
-          lftp -c "set ftp:ssl-allow no; set net:max-retries 4; set net:timeout 30; open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; put -O \"$REMOTE_DIR/\" priolens/open14-v03/index.html; put -O \"$REMOTE_DIR/\" priolens/open14-v03/stimulus-bank.html"
+          lftp -c "set ftp:ssl-allow no; set net:max-retries 4; set net:timeout 30; open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; put -O \"$REMOTE_DIR/\" priolens/open14-v03/index.html; put -O \"$REMOTE_DIR/\" priolens/open14-v03/bank.json; put -O \"$REMOTE_DIR/\" priolens/open14-v03/stimulus-bank.html"
 
-      - name: Verify live preview bytes and result-image guards
+      - name: Verify live preview index byte-for-byte
         shell: bash
         run: |
           set -euo pipefail
@@ -87,21 +107,41 @@ jobs:
           for i in $(seq 1 12); do
             curl -fsS --retry 2 --retry-delay 1 -H 'Cache-Control: no-cache' "$url&attempt=$i" -o /tmp/live
             live_sha=$(sha256sum /tmp/live | awk '{print $1}')
-            echo "attempt=$i source=$src_sha live=$live_sha"
+            echo "index attempt=$i source=$src_sha live=$live_sha"
             if [[ "$live_sha" == "$src_sha" ]]; then ok=1; break; fi
             sleep 2
           done
           [[ "$ok" == 1 ]]
           grep -Fq '2rasi.priolens.open14.rank-session-v0.3' /tmp/live
-          grep -Fq 'repeat(auto-fit,minmax(84px,1fr))' /tmp/live
-          grep -Fq 'const images=chosenImagePaths(id).map' /tmp/live
-          grep -Fq 'const images=leastImagePaths(id).map' /tmp/live
-          grep -Fq 'const pics=images.map' /tmp/live
-          if grep -Fq 'slice(0,2)' /tmp/live; then
-            echo 'Live preview still contains legacy two-image result cap' >&2
-            exit 1
-          fi
-          echo 'PASS: isolated v0.3 preview FTP deploy byte-for-byte live'
+          grep -Fq 'priolens.open14.v031.rank.draft' /tmp/live
+          ! grep -Fq "priolens.open14.v03.rank.draft'" /tmp/live
+          echo 'PASS: v0.3.1 preview index byte-for-byte live'
+
+      - name: Verify live bank byte-for-byte and v0.3.1 identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          src='priolens/open14-v03/bank.json'
+          url="https://omesg360.eu/priolens-open14-v03/bank.json?deploy=${GITHUB_SHA}"
+          src_sha=$(sha256sum "$src" | awk '{print $1}')
+          ok=0
+          for i in $(seq 1 12); do
+            curl -fsS --retry 2 --retry-delay 1 -H 'Cache-Control: no-cache' "$url&attempt=$i" -o /tmp/live-bank-json
+            live_sha=$(sha256sum /tmp/live-bank-json | awk '{print $1}')
+            echo "bank attempt=$i source=$src_sha live=$live_sha"
+            if [[ "$live_sha" == "$src_sha" ]]; then ok=1; break; fi
+            sleep 2
+          done
+          [[ "$ok" == 1 ]]
+          python <<'PY'
+          import json
+          b=json.load(open('/tmp/live-bank-json'))
+          assert b['schema']=='2rasi.priolens.open14.bank-v0.3.1'
+          assert b['runtimeReady'] is True
+          rows=[x for n in b['families'].values() for x in n['exemplars']]
+          assert len(rows)==42 and len({x['id'] for x in rows})==42 and len({x['runtimePath'] for x in rows})==42
+          PY
+          echo 'PASS: v0.3.1 bank byte-for-byte live'
 
       - name: Verify live owner stimulus bank bytes
         shell: bash
@@ -112,17 +152,15 @@ jobs:
           src_sha=$(sha256sum "$src" | awk '{print $1}')
           ok=0
           for i in $(seq 1 12); do
-            curl -fsS --retry 2 --retry-delay 1 -H 'Cache-Control: no-cache' "$url&attempt=$i" -o /tmp/live-bank
-            live_sha=$(sha256sum /tmp/live-bank | awk '{print $1}')
-            echo "bank attempt=$i source=$src_sha live=$live_sha"
+            curl -fsS --retry 2 --retry-delay 1 -H 'Cache-Control: no-cache' "$url&attempt=$i" -o /tmp/live-owner-bank
+            live_sha=$(sha256sum /tmp/live-owner-bank | awk '{print $1}')
+            echo "owner-bank attempt=$i source=$src_sha live=$live_sha"
             if [[ "$live_sha" == "$src_sha" ]]; then ok=1; break; fi
             sleep 2
           done
           [[ "$ok" == 1 ]]
-          grep -Fq '14 šeimų × 3 exemplarai = 42' /tmp/live-bank
-          grep -Fq "'RECOGNITION-02'" /tmp/live-bank
-          grep -Fq "'OPPORTUNITY-01'" /tmp/live-bank
-          echo 'PASS: v0.3 owner stimulus bank FTP deploy byte-for-byte live'
+          grep -Fq '14 šeimų × 3 exemplarai = 42' /tmp/live-owner-bank
+          echo 'PASS: owner stimulus bank byte-for-byte live'
 
-# Intentionally deploys only the separate v0.3 preview index and owner stimulus-bank page.
-# Does not touch /priolens-open14-v02/, API files, research assets or public routing.
+# Deploys only the isolated /priolens-open14-v03/ owner preview surface.
+# Does not touch /priolens-open14-v02/, APIs, research assets or public routing.
