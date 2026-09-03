@@ -15,13 +15,13 @@ try{
   const progressPayloads=[];
 
   await page.route('**/priolens-research-assets/**',route=>route.fulfill({status:200,contentType:'image/svg+xml',body:svg}));
-  await page.route('**/priolens-open14-v03-api/progress.php',async route=>{
+  await page.route('**/priolens-open14-v04-api/progress.php',async route=>{
     const body=JSON.parse(route.request().postData()||'{}');
     if(body.schema!==SCHEMA)throw new Error('progress schema != v0.4');
     progressPayloads.push(body);
     await route.fulfill({status:200,contentType:'application/json',body:'{"ok":true,"saved":true,"submissionId":"V04-LOCAL"}'});
   });
-  await page.route('**/priolens-open14-v03-api/api.php',async route=>{
+  await page.route('**/priolens-open14-v04-api/api.php',async route=>{
     const body=JSON.parse(route.request().postData()||'{}');
     if(body.schema!==SCHEMA)throw new Error('final schema != v0.4');
     finalPayloads.push(body);
