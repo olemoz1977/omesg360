@@ -46,7 +46,7 @@ html=replaceOnce(html,"const API_PATH='/priolens-open14-v03-api/api.php';","cons
 html=replaceOnce(html,"const PROGRESS_PATH='/priolens-open14-v03-api/progress.php';","const PROGRESS_PATH='/priolens-open14-v04-api/progress.php';",'v0.4 progress path');
 
 const stateNeedle="sufficiencySchema:'2rasi.priolens.sufficiency-v0.2',sufficiency:{},selfExplanation:null,pendingMost:null,completedAt:null";
-const stateReplacement="sufficiencySchema:'2rasi.priolens.sufficiency-v0.2',sufficiency:{},attentionResolution:null,attentionClarifier:null,attentionFocus:null,sufficiencyResolution:null,sufficiencyClarifier:null,sufficiencyRoute:null,selfExplanation:null,pendingMost:null,completedAt:null";
+const stateReplacement="sufficiencySchema:'2rasi.priolens.sufficiency-v0.2',sufficiency:{},attentionResolution:null,attentionClarifier:null,attentionFocus:null,sufficiencyResolution:null,sufficiencyClarifier:null,sufficiencyRoute:null,selfExplanation:null,pendingMost:null,systemSmoke:new URLSearchParams(location.search).get('systemSmoke')==='1',completedAt:null";
 html=replaceOnce(html,stateNeedle,stateReplacement,'startSession state fields');
 
 html=replaceOnce(html,"if(state.choices.length<14)renderTrial();else{show('suff');renderSuff()}","if(state.choices.length<14)renderTrial();else afterChannelA()",'post Channel-A transition');
