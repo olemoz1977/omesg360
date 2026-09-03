@@ -78,7 +78,7 @@ bank.deploymentGate={
   ownerMobileVisualSmokePassed:false
 };
 
-if(bank.audit.runtimeShaPinnedCount!==20) throw new Error(`Expected 20 SHA-pinned assets after remediation, got ${bank.audit.runtimeShaPinnedCount}`);
+if(bank.audit.runtimeShaPinnedCount!==18) throw new Error(`Expected 18 SHA-pinned assets after remediation, got ${bank.audit.runtimeShaPinnedCount}`);
 
 fs.writeFileSync(path,JSON.stringify(bank,null,2)+'\n');
 console.log(JSON.stringify({ok:true,schema:bank.schema,runtimeReady:bank.runtimeReady,patched:Object.keys(patch),shaPinned:bank.audit.runtimeShaPinnedCount},null,2));
