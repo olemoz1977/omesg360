@@ -69,8 +69,10 @@ try{
   if(aText)throw new Error('A+ leaked family labels into visual candidate cards: '+aText);
 
   const draftAtA=JSON.parse(await page.evaluate(k=>localStorage.getItem(k),DRAFT));
-  if(!draftAtA.attentionResolution?.clarifierRequired)throw new Error('A+ unresolved checkpoint missing');
+  if(!draftAtA.attentionResolution?.clarifierRequired)throw new Error('A+ unresolved local checkpoint missing');
   if(draftAtA.attentionFocus!==null)throw new Error('focus was forced before A+ answer');
+  await page.waitForTimeout(400);
+  if(!progressPayloads.some(x=>x.attentionResolution?.clarifierRequired===true&&x.attentionFocus===null))throw new Error('A+ unresolved server checkpoint missing');
 
   await page.reload({waitUntil:'networkidle'});
   await page.waitForFunction(()=>document.querySelector('#start')&&!document.querySelector('#start').disabled);
@@ -102,8 +104,10 @@ try{
   await page.waitForSelector('#bplus.active');
   if(await page.locator('#bPlusMount .clarifyNeed').count()!==12)throw new Error('Expected 12 tied B+ minima in synthetic all-2 case');
   const draftAtB=JSON.parse(await page.evaluate(k=>localStorage.getItem(k),DRAFT));
-  if(!draftAtB.sufficiencyResolution?.clarifierRequired)throw new Error('B+ unresolved checkpoint missing');
+  if(!draftAtB.sufficiencyResolution?.clarifierRequired)throw new Error('B+ unresolved local checkpoint missing');
   if(draftAtB.sufficiencyRoute?.itemIds?.length)throw new Error('route forced before B+ answer');
+  await page.waitForTimeout(400);
+  if(!progressPayloads.some(x=>x.sufficiencyResolution?.clarifierRequired===true&&x.sufficiencyRoute?.itemIds?.length===0))throw new Error('B+ unresolved server checkpoint missing');
 
   await page.reload({waitUntil:'networkidle'});
   await page.waitForFunction(()=>document.querySelector('#start')&&!document.querySelector('#start').disabled);
@@ -130,9 +134,8 @@ try{
   if(await page.evaluate(k=>localStorage.getItem(k),DRAFT)!==null)throw new Error('v0.4 draft not cleared after successful final save');
   const keys=await page.evaluate(()=>Object.keys(localStorage));
   if(keys.some(k=>k.includes('priolens.open14.v031.rank.draft')))throw new Error('v0.3.1 draft namespace leaked into v0.4');
-  if(!progressPayloads.length)throw new Error('no progress checkpoints captured');
 
-  console.log('PASS: v0.4 local 390x844 A+ visual runoff + A+ resume + 12-way B+ + B+ resume + final payload');
+  console.log('PASS: v0.4 local 390x844 A+ visual runoff + A+ local/server checkpoint + A+ resume + 12-way B+ + B+ local/server checkpoint + B+ resume + final payload');
 } finally {
   await browser.close();
 }
