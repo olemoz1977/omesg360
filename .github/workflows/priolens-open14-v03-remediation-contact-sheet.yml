@@ -1,0 +1,97 @@
+name: Build PrioLens v0.3 remediation contact sheet
+
+on:
+  push:
+    branches: [feature/priolens-open14-v03]
+    paths:
+      - '.github/workflows/priolens-open14-v03-remediation-contact-sheet.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  BASE: https://omesg360.eu/priolens-research-assets
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download targeted current and reserve stimuli
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p review
+          get(){ name="$1"; path="$2"; echo "$name <- $path"; curl -fsSL --retry 3 "$BASE/$path" -o "review/$name"; }
+
+          # REST source candidate already documented as slippers.
+          get rest_gallery.png 'Gallery/20260730_233524155.png'
+
+          # RESOURCE current family + plausible general-resource reserve contrasts.
+          get resource_01.png 'Gallery/file_00000000673881f4bc390c5618110a68.png'
+          get resource_02.webp 'Open14-geometry-v01/resource-b_sq_center_v01.webp'
+          get resource_03.webp 'Open14-v03/resource_03_640.webp'
+          get resource_food.webp 'Gallery/S07.webp'
+          get resource_drink.png 'Gallery/20260807_073153688.png'
+
+          # KNOWLEDGE current + prior shortlist alternatives + clearer semantic reserves.
+          get knowledge_01.webp 'Open14-remediation-v01/knowledge-a_sq_top_v01.webp'
+          get knowledge_02_current.webp 'Open14-remediation-v02/knowledge-b_owner-b_sq_bottom_v01.webp'
+          get knowledge_03.webp 'Open14-v03/knowledge_03_640.webp'
+          get knowledge_A.png 'Gallery/20260730_021452636.png'
+          get knowledge_C.png 'Gallery/20260730_233626457.png'
+          get knowledge_D.png 'Gallery/20260731_245233521.png'
+          get knowledge_class.png 'Gallery/20260730_230227381.png'
+          get knowledge_read.png 'Gallery/20260730_231228063.png'
+          get knowledge_library.png 'Gallery/20260730_233054250.png'
+
+          # OPPORTUNITY current family + strongest documented reserve.
+          get opportunity_01_current.webp 'Open14-final-v01/opportunity-a_open-market-stall_v01.webp'
+          get opportunity_02.png 'Gallery/file_00000000c7f0821081be7676884bb00f.png'
+          get opportunity_03.webp 'Open14-v03/opportunity_03_640.webp'
+          get opportunity_workbench.png 'Gallery/file_0000000024fc8210a5fb3823b3d86a9f.png'
+          get opportunity_seedlings.png 'Gallery/file_00000000675c824386b393d66de4b2f4.png'
+
+          # RECOGNITION current family for composition comparison.
+          get recognition_01.webp 'Open14-v02/priolens_recognition-a_v01.webp'
+          get recognition_02.webp 'Open14-v03/recognition_02_640.webp'
+          get recognition_03.webp 'Open14-v03/recognition_03_640.webp'
+
+      - name: Build labelled contact sheets
+        shell: bash
+        run: |
+          python - <<'PY'
+          from PIL import Image, ImageOps, ImageDraw, ImageFont
+          from pathlib import Path
+          root=Path('review')
+          groups={
+            'RESOURCE':['resource_01.png','resource_02.webp','resource_03.webp','resource_food.webp','resource_drink.png'],
+            'KNOWLEDGE':['knowledge_01.webp','knowledge_02_current.webp','knowledge_03.webp','knowledge_A.png','knowledge_C.png','knowledge_D.png','knowledge_class.png','knowledge_read.png','knowledge_library.png'],
+            'OPPORTUNITY':['opportunity_01_current.webp','opportunity_02.png','opportunity_03.webp','opportunity_workbench.png','opportunity_seedlings.png'],
+            'RECOGNITION':['recognition_01.webp','recognition_02.webp','recognition_03.webp'],
+            'REST':['rest_gallery.png'],
+          }
+          font=ImageFont.load_default()
+          def tile(path,label,size=300):
+              im=Image.open(path).convert('RGB')
+              im.thumbnail((size,size))
+              canvas=Image.new('RGB',(size,size+40),'white')
+              x=(size-im.width)//2; y=(size-im.height)//2
+              canvas.paste(im,(x,y))
+              d=ImageDraw.Draw(canvas); d.text((8,size+8),label,fill='black',font=font)
+              return canvas
+          for group,names in groups.items():
+              cols=3
+              ts=[tile(root/n,n) for n in names]
+              rows=(len(ts)+cols-1)//cols
+              sheet=Image.new('RGB',(cols*300,rows*340),(235,235,235))
+              for i,t in enumerate(ts): sheet.paste(t,((i%cols)*300,(i//cols)*340))
+              sheet.save(root/f'{group.lower()}_contact.jpg',quality=92)
+          PY
+      - name: Upload contact sheets and sources
+        uses: actions/upload-artifact@v4
+        with:
+          name: priolens-v03-remediation-contact-sheet
+          path: review/
+          retention-days: 14
