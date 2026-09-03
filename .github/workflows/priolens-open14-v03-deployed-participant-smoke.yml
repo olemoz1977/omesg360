@@ -75,7 +75,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          cat > /tmp/priolens-ui-smoke.mjs <<'NODE'
+          cat > priolens-ui-smoke.mjs <<'NODE'
           import { chromium } from 'playwright';
 
           const BASE='https://omesg360.eu/priolens-open14-v03/';
@@ -119,7 +119,6 @@ jobs:
           await page.click('.stim[data-slot="0"]');
           await page.waitForFunction(()=>document.querySelector('#counter')?.textContent?.trim()==='2 / 14');
 
-          // Reload tests local draft discovery and deterministic resume of the same session.
           await page.reload({waitUntil:'networkidle'});
           await page.waitForFunction(()=>document.querySelector('#start') && !document.querySelector('#start').disabled);
           if(await page.locator('#start').getAttribute('data-resume')!=='1') throw new Error('Resume offer was not restored after reload');
@@ -179,4 +178,4 @@ jobs:
           await browser.close();
           console.log('PASS: deployed participant Chromium smoke');
           NODE
-          node /tmp/priolens-ui-smoke.mjs
+          node priolens-ui-smoke.mjs
