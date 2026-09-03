@@ -22,6 +22,38 @@ html=replaceOne(
   'MOST badge language data'
 );
 
+// v0.3 has three unique exemplars per family. Result visuals must not retain the v0.2 two-image cap.
+html=replaceOne(
+  html,
+  '.choiceVisuals{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:12px}',
+  '.choiceVisuals{display:grid;grid-template-columns:repeat(auto-fit,minmax(84px,1fr));gap:8px;margin-bottom:12px}',
+  'choice result responsive exemplar grid'
+);
+html=replaceOne(
+  html,
+  '.reflectionImages{display:grid;grid-template-columns:repeat(2,minmax(0,120px));gap:8px;margin-bottom:16px}',
+  '.reflectionImages{display:grid;grid-template-columns:repeat(auto-fit,minmax(84px,1fr));gap:8px;margin-bottom:16px;max-width:360px}',
+  'reflection responsive exemplar grid'
+);
+html=replaceOne(
+  html,
+  'const images=chosenImagePaths(id).slice(0,2).map',
+  'const images=chosenImagePaths(id).map',
+  'MOST result all exemplar images'
+);
+html=replaceOne(
+  html,
+  'const images=leastImagePaths(id).slice(0,2).map',
+  'const images=leastImagePaths(id).map',
+  'LEAST result all exemplar images'
+);
+html=replaceOne(
+  html,
+  'const pics=images.slice(0,2).map',
+  'const pics=images.map',
+  'reflection all exemplar images'
+);
+
 // LEAST can become the main comparison when it carries the clearest contrast/alignment signal.
 const oldCompare=`  const pairs=[];
   for(const [family,stat] of repeated){
@@ -93,6 +125,13 @@ for(const token of ["content:'PIRMAS'",'const leastPairs=[]','LOW_LEAST','HIGH_L
     if(html.includes(token)) throw new Error('Hard-coded LT MOST badge remains');
   }else if(!html.includes(token)) throw new Error(`Rank-result build missing required token: ${token}`);
 }
+for(const forbidden of [
+  'chosenImagePaths(id).slice(0,2)',
+  'leastImagePaths(id).slice(0,2)',
+  'images.slice(0,2).map'
+]){
+  if(html.includes(forbidden)) throw new Error(`v0.3 result still contains two-image cap: ${forbidden}`);
+}
 
 fs.writeFileSync(indexPath,html,'utf8');
-console.log(JSON.stringify({ok:true,indexPath,bytes:Buffer.byteLength(html),resultProtocol:'most+least-aware-v0.3'},null,2));
+console.log(JSON.stringify({ok:true,indexPath,bytes:Buffer.byteLength(html),resultProtocol:'most+least-aware-v0.3',resultImagePolicy:'show-all-repeated-exemplars'},null,2));
