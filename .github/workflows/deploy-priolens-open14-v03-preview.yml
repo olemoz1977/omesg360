@@ -5,6 +5,7 @@ on:
     branches: [feature/priolens-open14-v03]
     paths:
       - priolens/open14-v03/index.html
+      - priolens/open14-v03/stimulus-bank.html
       - .github/workflows/deploy-priolens-open14-v03-preview.yml
   workflow_dispatch:
 
@@ -47,6 +48,18 @@ jobs:
           fi
           echo 'PASS: v0.3 all-repeated-exemplar result source'
 
+      - name: Validate owner stimulus bank
+        shell: bash
+        run: |
+          set -euo pipefail
+          f='priolens/open14-v03/stimulus-bank.html'
+          grep -Fq '14 šeimų × 3 exemplarai = 42' "$f"
+          grep -Fq "'RECOGNITION-02'" "$f"
+          grep -Fq "'OPPORTUNITY-01'" "$f"
+          grep -Fq "fetch('./bank.json'" "$f"
+          grep -Fq 'Kopijuoti ID' "$f"
+          echo 'PASS: v0.3 owner stimulus bank source'
+
       - name: Verify FTP secrets
         shell: bash
         run: |
@@ -57,13 +70,13 @@ jobs:
       - name: Install FTP client
         run: sudo apt-get update -qq && sudo apt-get install -y -qq lftp
 
-      - name: Upload preview index only
+      - name: Upload preview index and owner bank
         shell: bash
         run: |
           set -euo pipefail
-          lftp -c "set ftp:ssl-allow no; set net:max-retries 4; set net:timeout 30; open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; put -O \"$REMOTE_DIR/\" priolens/open14-v03/index.html"
+          lftp -c "set ftp:ssl-allow no; set net:max-retries 4; set net:timeout 30; open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; put -O \"$REMOTE_DIR/\" priolens/open14-v03/index.html; put -O \"$REMOTE_DIR/\" priolens/open14-v03/stimulus-bank.html"
 
-      - name: Verify live bytes and result-image guards
+      - name: Verify live preview bytes and result-image guards
         shell: bash
         run: |
           set -euo pipefail
@@ -90,5 +103,26 @@ jobs:
           fi
           echo 'PASS: isolated v0.3 preview FTP deploy byte-for-byte live'
 
-# Intentionally deploys only the separate v0.3 preview index.
+      - name: Verify live owner stimulus bank bytes
+        shell: bash
+        run: |
+          set -euo pipefail
+          src='priolens/open14-v03/stimulus-bank.html'
+          url="https://omesg360.eu/priolens-open14-v03/stimulus-bank.html?deploy=${GITHUB_SHA}"
+          src_sha=$(sha256sum "$src" | awk '{print $1}')
+          ok=0
+          for i in $(seq 1 12); do
+            curl -fsS --retry 2 --retry-delay 1 -H 'Cache-Control: no-cache' "$url&attempt=$i" -o /tmp/live-bank
+            live_sha=$(sha256sum /tmp/live-bank | awk '{print $1}')
+            echo "bank attempt=$i source=$src_sha live=$live_sha"
+            if [[ "$live_sha" == "$src_sha" ]]; then ok=1; break; fi
+            sleep 2
+          done
+          [[ "$ok" == 1 ]]
+          grep -Fq '14 šeimų × 3 exemplarai = 42' /tmp/live-bank
+          grep -Fq "'RECOGNITION-02'" /tmp/live-bank
+          grep -Fq "'OPPORTUNITY-01'" /tmp/live-bank
+          echo 'PASS: v0.3 owner stimulus bank FTP deploy byte-for-byte live'
+
+# Intentionally deploys only the separate v0.3 preview index and owner stimulus-bank page.
 # Does not touch /priolens-open14-v02/, API files, research assets or public routing.
