@@ -1,33 +1,36 @@
-name: Smoke PrioLens Open14 v0.3 deployed MOST+LEAST participant preview
+name: Smoke PrioLens Open14 v0.3.1 deployed MOST+LEAST participant preview
 
 on:
   push:
     branches: [feature/priolens-open14-v03]
     paths:
+      - '.github/workflows/priolens-open14-v03-deployed-participant-smoke.yml'
       - 'priolens/open14-v03/.deployed-smoke-trigger'
   workflow_dispatch:
 
 jobs:
   deployed-participant-smoke:
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 14
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: feature/priolens-open14-v03
 
-      - name: Verify deployed runtime bytes, bank gate and 42 paths
+      - name: Verify deployed v0.3.1 runtime bytes, bank gate and 42 paths
         shell: bash
         run: |
           set -euo pipefail
           BASE='https://omesg360.eu/priolens-open14-v03'
           mkdir -p deployed
           for f in index.html bank.json p3_open14_planner_v02.mjs open14_no_repeat_assigner_v03.mjs; do
-            curl -fsS --retry 3 "$BASE/$f" -o "deployed/$f"
+            curl -fsS --retry 3 -H 'Cache-Control: no-cache' "$BASE/$f?smoke=${GITHUB_SHA}" -o "deployed/$f"
             cmp "priolens/open14-v03/$f" "deployed/$f"
             echo "BYTE PASS $f"
           done
 
-          curl -fsS "$BASE/?lang=lt&from=lt" -o /tmp/lt.html
-          curl -fsS "$BASE/?lang=en&from=com" -o /tmp/en.html
+          curl -fsS "$BASE/?lang=lt&from=lt&smoke=${GITHUB_SHA}" -o /tmp/lt.html
+          curl -fsS "$BASE/?lang=en&from=com&smoke=${GITHUB_SHA}" -o /tmp/en.html
           cmp deployed/index.html /tmp/lt.html
           cmp deployed/index.html /tmp/en.html
 
@@ -41,7 +44,7 @@ jobs:
           python <<'PY'
           import json, urllib.request
           bank=json.load(open('deployed/bank.json'))
-          assert bank['schema']=='2rasi.priolens.open14.bank-v0.3'
+          assert bank['schema']=='2rasi.priolens.open14.bank-v0.3.1'
           assert bank['runtimeReady'] is True
           gate=bank['deploymentGate']
           assert gate['full42AuditPassed'] is True
@@ -51,8 +54,17 @@ jobs:
           assert len(rows)==42
           assert len({x['id'] for x in rows})==42
           assert len({x['runtimePath'] for x in rows})==42
+          by={x['id']:x for x in rows}
+          expected={
+            'REST-01':'/priolens-research-assets/Open14-v03-owner-remediation-v01/rest_01_slippers_640.webp',
+            'RESOURCE-03':'/priolens-research-assets/Open14-v03-owner-remediation-v01/resource_03_food_640.webp',
+            'KNOWLEDGE-02':'/priolens-research-assets/Open14-v03-owner-remediation-v01/knowledge_02_online_learning_640.webp',
+            'OPPORTUNITY-01':'/priolens-research-assets/Open14-v03-owner-remediation-v01/opportunity_01_workbench_640.webp',
+            'RECOGNITION-02':'/priolens-research-assets/Open14-v03-owner-remediation-v01/recognition_02_recrop_640.webp',
+          }
+          for k,v in expected.items(): assert by[k]['runtimePath']==v,(k,by[k]['runtimePath'])
           for i,x in enumerate(rows,1):
-              req=urllib.request.Request('https://omesg360.eu'+x['runtimePath'], method='HEAD', headers={'User-Agent':'PrioLens-v03-rank-deployed-smoke/1.0'})
+              req=urllib.request.Request('https://omesg360.eu'+x['runtimePath'], method='HEAD', headers={'User-Agent':'PrioLens-v031-rank-deployed-smoke/1.0'})
               with urllib.request.urlopen(req, timeout=30) as r:
                   assert r.status==200, (x['id'],r.status)
               print(f"PATH {i:02d}/42 PASS {x['id']}")
@@ -61,12 +73,14 @@ jobs:
           grep -q "const API_PATH='/priolens-open14-v03-api/api.php'" deployed/index.html
           grep -q "const PROGRESS_PATH='/priolens-open14-v03-api/progress.php'" deployed/index.html
           grep -q "2rasi.priolens.open14.rank-session-v0.3" deployed/index.html
+          grep -q "priolens.open14.v031.rank.draft" deployed/index.html
+          ! grep -q "priolens.open14.v03.rank.draft'" deployed/index.html
           grep -q "leastChoice" deployed/index.html
           grep -q "pendingMost" deployed/index.html
           grep -q "LOW_LEAST" deployed/index.html
           grep -q "data-rank-label" deployed/index.html
           grep -q "localStorage.setItem(DRAFT_KEY" deployed/index.html
-          echo 'PASS: deployed bytes/bank/MIME/42-path/static MOST+LEAST integration checks'
+          echo 'PASS: deployed v0.3.1 bytes/bank/MIME/42-path/static MOST+LEAST integration checks'
 
       - name: Install Playwright Chromium
         shell: bash
@@ -74,7 +88,7 @@ jobs:
           npm install --no-save playwright@1.55.0
           npx playwright install --with-deps chromium
 
-      - name: Chromium LT MOST+LEAST + pending resume + 42 no-repeat and EN smoke
+      - name: Chromium LT v0.3.1 MOST+LEAST + pending resume + 42 no-repeat and EN smoke
         shell: bash
         run: |
           set -euo pipefail
@@ -83,6 +97,7 @@ jobs:
 
           const BASE='https://omesg360.eu/priolens-open14-v03/';
           const SCHEMA='2rasi.priolens.open14.rank-session-v0.3';
+          const BANK='2rasi.priolens.open14.bank-v0.3.1';
           const browser=await chromium.launch({headless:true});
           const context=await browser.newContext({viewport:{width:390,height:844}});
           const page=await context.newPage();
@@ -91,19 +106,20 @@ jobs:
           await page.route('**/priolens-open14-v03-api/progress.php', async route=>{
             const body=JSON.parse(route.request().postData()||'{}');
             if(body.schema!==SCHEMA) throw new Error('UI progress used wrong rank session schema');
+            if(body.bankSchema!==BANK) throw new Error('UI progress used wrong v0.3.1 bank schema');
             intercepted.push({kind:'progress',body});
             await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,saved:true,submissionId:'SYSTEM-SMOKE-NOT-PERSISTED',completedAlready:false})});
           });
           await page.route('**/priolens-open14-v03-api/api.php', async route=>{
             const body=JSON.parse(route.request().postData()||'{}');
             if(body.schema!==SCHEMA) throw new Error('UI final used wrong rank session schema');
-            if(body.bankSchema!=='2rasi.priolens.open14.bank-v0.3') throw new Error('UI final used wrong bank schema');
+            if(body.bankSchema!==BANK) throw new Error('UI final used wrong v0.3.1 bank schema');
             if(body.assignerSchema!=='2rasi.priolens.open14.exemplars-v0.3') throw new Error('UI final used wrong assigner schema');
             intercepted.push({kind:'final',body});
             await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,inserted:true,submissionId:'SYSTEM-SMOKE-NOT-PERSISTED'})});
           });
 
-          await page.goto(BASE+'?lang=lt&from=lt',{waitUntil:'networkidle'});
+          await page.goto(BASE+'?lang=lt&from=lt&v031smoke=1',{waitUntil:'networkidle'});
           if(await page.locator('html').getAttribute('lang')!=='lt') throw new Error('LT html lang failed');
           await page.waitForFunction(()=>document.querySelector('#start') && !document.querySelector('#start').disabled);
           if(!(await page.locator('#exit2rasi').getAttribute('href')).startsWith('https://2rasi.lt/')) throw new Error('LT return target failed');
@@ -129,9 +145,12 @@ jobs:
           }
           async function chooseLeast(slot=1){ await page.click(`.stim[data-slot="${slot}"]`); }
 
-          // Trial 1: stop after MOST, reload, resume directly into LEAST phase.
+          // Trial 1: stop after MOST, verify new draft namespace, reload, resume directly into LEAST phase.
           await captureTrial();
           await chooseMost(0);
+          const draftKeys=await page.evaluate(()=>Object.keys(localStorage));
+          if(!draftKeys.some(k=>k.includes('priolens.open14.v031.rank.draft'))) throw new Error('v0.3.1 draft namespace was not written');
+          if(draftKeys.some(k=>k.includes('priolens.open14.v03.rank.draft'))) throw new Error('Old v0.3 rank draft namespace was written');
           await page.reload({waitUntil:'networkidle'});
           await page.waitForFunction(()=>document.querySelector('#start') && !document.querySelector('#start').disabled);
           if(await page.locator('#start').getAttribute('data-resume')!=='1') throw new Error('Pending-MOST resume offer missing after reload');
@@ -181,6 +200,7 @@ jobs:
           if(await page.locator('#leastRows').count()!==1) throw new Error('LEAST result section missing');
           if(!intercepted.some(x=>x.kind==='final')) throw new Error('Final UI POST was not attempted');
           const final=intercepted.find(x=>x.kind==='final').body;
+          if(final.bankSchema!==BANK) throw new Error('Final payload lost v0.3.1 bank identity');
           if(final.choices?.length!==14) throw new Error('Final payload choices != 14');
           const presented=final.choices.flatMap(t=>t.stimuli.map(s=>s.exemplarId));
           if(new Set(presented).size!==42) throw new Error('Final payload does not contain 42 unique exemplars');
@@ -193,12 +213,12 @@ jobs:
             if(!t.leastChoice) throw new Error(`Trial ${i+1}: missing leastChoice`);
             if(t.choice.exemplarId===t.leastChoice.exemplarId) throw new Error(`Trial ${i+1}: MOST equals LEAST`);
           }
-          console.log('LT PASS: MOST+LEAST, pending-MOST reload/resume, tie path, 42 unique exemplars, sufficiency and final rank payload');
+          console.log('LT PASS: v0.3.1 MOST+LEAST, isolated draft, pending reload/resume, tie path, 42 unique exemplars, sufficiency and final payload');
 
           const enContext=await browser.newContext({viewport:{width:390,height:844}});
           const en=await enContext.newPage();
           await en.route('**/priolens-open14-v03-api/**', route=>route.fulfill({status:200,contentType:'application/json',body:'{"ok":true,"saved":true}'}));
-          await en.goto(BASE+'?lang=en&from=com',{waitUntil:'networkidle'});
+          await en.goto(BASE+'?lang=en&from=com&v031smoke=1',{waitUntil:'networkidle'});
           await en.waitForFunction(()=>document.querySelector('#start') && !document.querySelector('#start').disabled);
           if(await en.locator('html').getAttribute('lang')!=='en') throw new Error('EN html lang failed');
           if(!(await en.locator('#exit2rasi').getAttribute('href')).startsWith('https://2rasi.com/')) throw new Error('EN return target failed');
@@ -216,6 +236,6 @@ jobs:
           console.log('EN PASS: language, .com return target, MOST+LEAST intro, FIRST lock and LEAST phase');
 
           await browser.close();
-          console.log('PASS: deployed MOST+LEAST participant Chromium smoke');
+          console.log('PASS: deployed v0.3.1 MOST+LEAST participant Chromium smoke');
           NODE
           node priolens-ui-smoke.mjs
