@@ -1,0 +1,158 @@
+name: Deploy PrioLens Open14 v0.4 owner preview
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - feature/priolens-open14-v04
+    paths:
+      - 'priolens/open14-v04/**'
+      - '.github/workflows/deploy-priolens-open14-v04-owner-preview.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: omesg360-priolens-open14-v04-owner-preview
+  cancel-in-progress: true
+
+env:
+  FTP_HOST: 46.202.142.134
+  FTP_USER: ${{ secrets.HOSTINGER_FTP_USER }}
+  FTP_PASSWORD: ${{ secrets.HOSTINGER_FTP_PASSWORD }}
+  PREVIEW_REMOTE: /domains/omesg360.eu/public_html/priolens-open14-v04
+  API_REMOTE: /domains/omesg360.eu/public_html/priolens-open14-v04-api
+  V03_API_REMOTE: /domains/omesg360.eu/public_html/priolens-open14-v03-api
+
+jobs:
+  deploy-owner-preview:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/priolens-open14-v04
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Build and validate v0.4 UI + API source
+        shell: bash
+        run: |
+          set -euo pipefail
+          node priolens/open14-v04/adaptive_clarifiers_v04.test.mjs
+          node priolens/open14-v04/build_from_v031.mjs
+          node priolens/open14-v04/server/build_endpoints_v04.mjs
+          php -l priolens/open14-v04/server/api.php
+          php -l priolens/open14-v04/server/progress.php
+          php -l priolens/open14-v04/server/validation_v04.php
+          php priolens/open14-v04/server/validation_v04.test.php
+
+          f='priolens/open14-v04/index.html'
+          grep -Fq "2rasi.priolens.open14.rank-session-v0.4" priolens/open14-v04/adaptive_clarifiers_v04.mjs
+          grep -Fq "priolens.open14.v04.rank.draft" priolens/open14-v04/adaptive_clarifiers_v04.mjs
+          grep -Fq "const API_PATH='/priolens-open14-v04-api/api.php'" "$f"
+          grep -Fq "const PROGRESS_PATH='/priolens-open14-v04-api/progress.php'" "$f"
+          grep -Fq "most+least+a-plus+b-plus-v0.4" "$f"
+          grep -Fq 'id="aplus"' "$f"
+          grep -Fq 'id="bplus"' "$f"
+          ! grep -Fq "const API_PATH='/priolens-open14-v03-api/api.php'" "$f"
+          ! grep -Fq "priolens.open14.v031.rank.draft" "$f"
+
+          python <<'PY'
+          import json
+          b=json.load(open('priolens/open14-v04/bank.json'))
+          assert b['schema']=='2rasi.priolens.open14.bank-v0.3.1'
+          assert b['runtimeReady'] is True
+          rows=[x for fam in b['families'].values() for x in fam['exemplars']]
+          assert len(rows)==42
+          assert len({x['id'] for x in rows})==42
+          assert len({x['runtimePath'] for x in rows})==42
+          PY
+          echo 'PASS: v0.4 source build + semantic gates'
+
+      - name: Install FTP client
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ -n "${FTP_USER:-}" ]]
+          [[ -n "${FTP_PASSWORD:-}" ]]
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq lftp >/dev/null
+
+      - name: Copy protected DB config into isolated v0.4 API directory
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/v04-api
+          lftp -c "set ftp:ssl-allow no; set net:max-retries 4; set net:timeout 30; open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; get \"$V03_API_REMOTE/config.php\" -o /tmp/v04-api/config.php"
+          test -s /tmp/v04-api/config.php
+          cp /tmp/v04-api/config.php priolens/open14-v04/server/config.php
+          echo 'PASS: protected config copied without printing contents'
+
+      - name: Deploy isolated v0.4 API
+        shell: bash
+        run: |
+          set -euo pipefail
+          lftp -c "set ftp:ssl-allow no; set net:max-retries 4; set net:timeout 30; open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; mkdir -p \"$API_REMOTE\"; put -O \"$API_REMOTE/\" priolens/open14-v04/server/api.php; put -O \"$API_REMOTE/\" priolens/open14-v04/server/progress.php; put -O \"$API_REMOTE/\" priolens/open14-v04/server/validation_v04.php; put -O \"$API_REMOTE/\" priolens/open14-v04/server/config.php; put -O \"$API_REMOTE/\" priolens/open14-v02/server/.htaccess"
+
+      - name: Verify isolated API remote bytes and route boundaries
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/v04-remote
+          lftp -c "set ftp:ssl-allow no; set net:max-retries 4; set net:timeout 30; open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; get \"$API_REMOTE/api.php\" -o /tmp/v04-remote/api.php; get \"$API_REMOTE/progress.php\" -o /tmp/v04-remote/progress.php; get \"$API_REMOTE/validation_v04.php\" -o /tmp/v04-remote/validation_v04.php; get \"$API_REMOTE/config.php\" -o /tmp/v04-remote/config.php"
+          cmp priolens/open14-v04/server/api.php /tmp/v04-remote/api.php
+          cmp priolens/open14-v04/server/progress.php /tmp/v04-remote/progress.php
+          cmp priolens/open14-v04/server/validation_v04.php /tmp/v04-remote/validation_v04.php
+          cmp /tmp/v04-api/config.php /tmp/v04-remote/config.php
+
+          API='https://omesg360.eu/priolens-open14-v04-api/api.php'
+          PROGRESS='https://omesg360.eu/priolens-open14-v04-api/progress.php'
+          CONFIG='https://omesg360.eu/priolens-open14-v04-api/config.php'
+          code=$(curl -sS -o /tmp/api-get -w '%{http_code}' "$API"); test "$code" = 405; grep -q 'Method not allowed' /tmp/api-get
+          code=$(curl -sS -o /tmp/progress-get -w '%{http_code}' "$PROGRESS"); test "$code" = 405; grep -q 'Method not allowed' /tmp/progress-get
+          code=$(curl -sS -o /tmp/config-get -w '%{http_code}' "$CONFIG"); test "$code" = 403
+          echo 'PASS: isolated v0.4 API deployed; config protected'
+
+      - name: Deploy isolated v0.4 owner preview
+        shell: bash
+        run: |
+          set -euo pipefail
+          lftp -c "set ftp:ssl-allow no; set net:max-retries 4; set net:timeout 30; open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; mkdir -p \"$PREVIEW_REMOTE\"; put -O \"$PREVIEW_REMOTE/\" priolens/open14-v04/index.html; put -O \"$PREVIEW_REMOTE/\" priolens/open14-v04/bank.json; put -O \"$PREVIEW_REMOTE/\" priolens/open14-v04/adaptive_clarifiers_v04.mjs; put -O \"$PREVIEW_REMOTE/\" priolens/open14-v04/p3_open14_planner_v02.mjs; put -O \"$PREVIEW_REMOTE/\" priolens/open14-v04/open14_no_repeat_assigner_v03.mjs; put -O \"$PREVIEW_REMOTE/\" priolens/open14-v04/stimulus-bank.html"
+
+      - name: Verify live owner preview bytes and module MIME
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE='https://omesg360.eu/priolens-open14-v04'
+          for f in index.html bank.json adaptive_clarifiers_v04.mjs p3_open14_planner_v02.mjs open14_no_repeat_assigner_v03.mjs stimulus-bank.html; do
+            curl -fsS --retry 3 -H 'Cache-Control: no-cache' "$BASE/$f?deploy=${GITHUB_SHA}" -o "/tmp/live-${f//\//_}"
+            cmp "priolens/open14-v04/$f" "/tmp/live-${f//\//_}"
+            echo "BYTE PASS $f"
+          done
+          ctype=$(curl -fsSI "$BASE/adaptive_clarifiers_v04.mjs?deploy=${GITHUB_SHA}" | tr -d '\r' | awk -F': ' 'tolower($1)=="content-type"{print tolower($2)}' | tail -1)
+          case "$ctype" in
+            *javascript*|*ecmascript*) ;;
+            *) echo "Unexpected adaptive module MIME: $ctype" >&2; exit 1;;
+          esac
+          grep -Fq "const API_PATH='/priolens-open14-v04-api/api.php'" /tmp/live-index.html
+          grep -Fq 'id="aplus"' /tmp/live-index.html
+          grep -Fq 'id="bplus"' /tmp/live-index.html
+          echo 'PASS: v0.4 owner preview live and byte-identical'
+
+      - name: Install Playwright Chromium
+        shell: bash
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+
+      - name: Real deployed 390x844 owner-flow + API save smoke
+        shell: bash
+        env:
+          PRIOLENS_V04_BASE: https://omesg360.eu/priolens-open14-v04/
+        run: node priolens/open14-v04/deployed_real_smoke_v04.mjs
+
+# Isolated owner preview only.
+# Does not touch /priolens-open14-v02/, /priolens-open14-v03/, or /priolens-open14-v03-api/.
