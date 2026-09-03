@@ -1,0 +1,129 @@
+name: Finalize PrioLens Open14 v0.3.1 deployed technical preview gate
+
+on:
+  push:
+    branches: [feature/priolens-open14-v03]
+    paths:
+      - '.github/workflows/priolens-open14-v031-finalize-preview-gate.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: omesg360-priolens-open14-v031-finalize-preview
+  cancel-in-progress: true
+
+env:
+  FTP_HOST: 46.202.142.134
+  FTP_USER: ${{ secrets.HOSTINGER_FTP_USER }}
+  FTP_PASSWORD: ${{ secrets.HOSTINGER_FTP_PASSWORD }}
+  REMOTE_DIR: /domains/omesg360.eu/public_html/priolens-open14-v03
+  PREVIEW_DEPLOY_RUN: 33791409529
+  CHROMIUM_SMOKE_RUN: 33791582358
+
+jobs:
+  finalize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/priolens-open14-v03
+
+      - name: Guard referenced deployment runs are successful
+        shell: bash
+        run: |
+          set -euo pipefail
+          for run in "$PREVIEW_DEPLOY_RUN" "$CHROMIUM_SMOKE_RUN"; do
+            curl -fsS "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/runs/$run" -o "/tmp/run-$run.json"
+            python - "$run" <<'PY'
+          import json,sys
+          run=sys.argv[1]
+          x=json.load(open(f'/tmp/run-{run}.json'))
+          assert x['status']=='completed',x['status']
+          assert x['conclusion']=='success',x['conclusion']
+          print(f"PASS run {run}: completed/success")
+          PY
+          done
+
+      - name: Mark v0.3.1 technical preview gate in bank metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+          python <<'PY'
+          import json,os
+          from pathlib import Path
+          p=Path('priolens/open14-v03/bank.json')
+          b=json.loads(p.read_text())
+          assert b['schema']=='2rasi.priolens.open14.bank-v0.3.1'
+          assert b['runtimeReady'] is True
+          g=b['deploymentGate']
+          assert g['full42AuditPassed'] is True
+          assert g['apiDeployed'] is True
+          assert g['apiSmokePassed'] is True
+          b['status']='V031_DEPLOYED_TECHNICAL_PASS_OWNER_MOBILE_RETEST_PENDING'
+          b['startPolicy']='OWNER_PREVIEW_TECHNICAL_PASS_EXTERNAL_RECRUITMENT_CLOSED'
+          g['participantPreviewDeployed']=True
+          g['participantPreviewDeployRunId']=int(os.environ['PREVIEW_DEPLOY_RUN'])
+          g['participantPreviewStaticSmokePassed']=True
+          g['participantPreviewStaticSmokeRunId']=int(os.environ['GITHUB_RUN_ID'])
+          g['participantPreviewChromiumSmokePassed']=True
+          g['participantPreviewChromiumSmokeRunId']=int(os.environ['CHROMIUM_SMOKE_RUN'])
+          g['ownerMobileVisualSmokePassed']=False
+          p.write_text(json.dumps(b,indent=2,ensure_ascii=False)+'\n')
+          PY
+          grep -q '"status": "V031_DEPLOYED_TECHNICAL_PASS_OWNER_MOBILE_RETEST_PENDING"' priolens/open14-v03/bank.json
+          grep -q '"participantPreviewChromiumSmokePassed": true' priolens/open14-v03/bank.json
+          grep -q '"ownerMobileVisualSmokePassed": false' priolens/open14-v03/bank.json
+
+      - name: Install FTP client and sync bank metadata to isolated preview
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ -n "${FTP_USER:-}" ]]
+          [[ -n "${FTP_PASSWORD:-}" ]]
+          sudo apt-get update -qq && sudo apt-get install -y -qq lftp >/dev/null
+          lftp -c "set ftp:ssl-allow no; set net:max-retries 4; set net:timeout 30; open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; put -O \"$REMOTE_DIR/\" priolens/open14-v03/bank.json"
+
+      - name: Verify finalized live bank bytes and identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          src='priolens/open14-v03/bank.json'
+          src_sha=$(sha256sum "$src" | awk '{print $1}')
+          ok=0
+          for i in $(seq 1 12); do
+            curl -fsS --retry 2 --retry-delay 1 -H 'Cache-Control: no-cache' "https://omesg360.eu/priolens-open14-v03/bank.json?finalize=${GITHUB_RUN_ID}&attempt=$i" -o /tmp/live-bank
+            live_sha=$(sha256sum /tmp/live-bank | awk '{print $1}')
+            echo "attempt=$i source=$src_sha live=$live_sha"
+            if [[ "$live_sha" == "$src_sha" ]]; then ok=1; break; fi
+            sleep 2
+          done
+          [[ "$ok" == 1 ]]
+          python <<'PY'
+          import json
+          b=json.load(open('/tmp/live-bank'))
+          assert b['schema']=='2rasi.priolens.open14.bank-v0.3.1'
+          assert b['runtimeReady'] is True
+          assert b['deploymentGate']['participantPreviewChromiumSmokePassed'] is True
+          assert b['deploymentGate']['ownerMobileVisualSmokePassed'] is False
+          PY
+          echo 'PASS: finalized v0.3.1 bank metadata byte-for-byte live'
+
+      - name: Commit finalized bank metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add priolens/open14-v03/bank.json
+          if git diff --cached --quiet; then
+            echo 'No bank metadata change needed.'
+            exit 0
+          fi
+          git commit -m 'PrioLens v0.3.1: record deployed technical gate pass'
+          git push origin HEAD:feature/priolens-open14-v03
+
+# Owner mobile visual/UX gate remains explicitly false.
+# External recruitment remains closed; live v0.2 is not touched.
