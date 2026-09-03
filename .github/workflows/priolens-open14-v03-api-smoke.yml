@@ -1,9 +1,10 @@
-name: Smoke PrioLens Open14 v0.3 deployed MOST+LEAST API
+name: Smoke PrioLens Open14 v0.3.1 deployed MOST+LEAST API
 
 on:
   push:
     branches: [feature/priolens-open14-v03]
     paths:
+      - '.github/workflows/priolens-open14-v03-api-smoke.yml'
       - 'priolens/open14-v03/.api-rank-smoke-trigger'
   workflow_dispatch:
 
@@ -12,8 +13,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: feature/priolens-open14-v03
 
-      - name: Build canonical rank smoke payloads
+      - name: Build canonical v0.3.1 rank smoke payloads
         shell: bash
         run: |
           set -euo pipefail
@@ -24,11 +27,11 @@ jobs:
           import { assignOpen14ThreeExemplars } from './priolens/open14-v03/open14_no_repeat_assigner_v03.mjs';
 
           const bank=JSON.parse(fs.readFileSync('./priolens/open14-v03/bank.json','utf8'));
-          if(bank.schema!=='2rasi.priolens.open14.bank-v0.3') throw new Error('Unexpected bank schema');
-          if(bank.runtimeReady!==true) throw new Error('Rank API smoke requires runtime-ready v0.3 bank');
-          if(!bank.deploymentGate?.full42AuditPassed) throw new Error('Full42 asset gate must pass before rank API smoke');
+          if(bank.schema!=='2rasi.priolens.open14.bank-v0.3.1') throw new Error('Unexpected bank schema');
+          if(bank.runtimeReady!==false) throw new Error('API smoke must run while v0.3.1 preview is still fail-closed');
+          if(!bank.deploymentGate?.full42AuditPassed) throw new Error('Full42 asset gate must pass before API smoke');
 
-          const seed=`SYSTEM_SMOKE_DO_NOT_ANALYZE::open14-v03-rank-api::${Date.now()}`;
+          const seed=`SYSTEM_SMOKE_DO_NOT_ANALYZE::open14-v031-rank-api::${Date.now()}`;
           const sessionUuid=crypto.randomUUID();
           const startedAt=new Date().toISOString();
           const plan=buildOpen14Plan(seed);
@@ -67,13 +70,17 @@ jobs:
           const oldPositive={...final,schema:'2rasi.priolens.open14.session-v0.3'};
           const sameLeast=structuredClone(final);sameLeast.choices[0].leastChoice={...sameLeast.choices[0].choice};
 
-          for(const [name,obj] of Object.entries({progress,final,oldPositive,sameLeast})) fs.writeFileSync(`${name}.json`,JSON.stringify(obj));
-          fs.writeFileSync('smoke_identity.txt',`seed=${seed}\nsessionUuid=${sessionUuid}\n`);
-          console.log(`Smoke session: ${sessionUuid}`);
-          console.log(`Smoke seed: ${seed}`);
+          const legacySeed=`SYSTEM_SMOKE_DO_NOT_ANALYZE::open14-v03-compat::${Date.now()}`;
+          const legacySessionUuid=crypto.randomUUID();
+          const legacyProgress={...progress,sessionUuid:legacySessionUuid,seed:legacySeed,bankSchema:'2rasi.priolens.open14.bank-v0.3'};
+
+          for(const [name,obj] of Object.entries({progress,final,oldPositive,sameLeast,legacyProgress})) fs.writeFileSync(`${name}.json`,JSON.stringify(obj));
+          fs.writeFileSync('smoke_identity.txt',`seed=${seed}\nsessionUuid=${sessionUuid}\nlegacySeed=${legacySeed}\nlegacySessionUuid=${legacySessionUuid}\n`);
+          console.log(`v0.3.1 smoke session: ${sessionUuid}`);
+          console.log(`legacy v0.3 compatibility session: ${legacySessionUuid}`);
           NODE
 
-      - name: Smoke public rank API routes and persistence
+      - name: Smoke public v0.3.1 rank API routes, compatibility and persistence
         shell: bash
         run: |
           set -euo pipefail
@@ -87,7 +94,7 @@ jobs:
           code=$(curl -sS -o get-config.body -w '%{http_code}' "$CONFIG"); echo "GET config.php -> $code"; test "$code" = '403'
 
           code=$(curl -sS -o old-positive.body -w '%{http_code}' -H "Origin: $ORIGIN" -H 'Content-Type: application/json' --data-binary @oldPositive.json "$API")
-          echo "POST old positive-only v0.3 -> $code $(cat old-positive.body)"; test "$code" = '400'; grep -q 'Unsupported session schema' old-positive.body
+          echo "POST old positive-only session -> $code $(cat old-positive.body)"; test "$code" = '400'; grep -q 'Unsupported session schema' old-positive.body
 
           code=$(curl -sS -o same-least.body -w '%{http_code}' -H "Origin: $ORIGIN" -H 'Content-Type: application/json' --data-binary @sameLeast.json "$API")
           echo "POST MOST=LEAST -> $code $(cat same-least.body)"; test "$code" = '400'; grep -q 'leastChoice cannot equal choice' same-least.body
@@ -95,25 +102,32 @@ jobs:
           code=$(curl -sS -o bad-origin.body -w '%{http_code}' -H 'Origin: https://example.invalid' -H 'Content-Type: application/json' --data-binary @progress.json "$PROGRESS")
           echo "POST forbidden origin -> $code $(cat bad-origin.body)"; test "$code" = '403'; grep -q 'Origin not allowed' bad-origin.body
 
+          code=$(curl -sS -o legacy-progress.body -w '%{http_code}' -H "Origin: $ORIGIN" -H 'Content-Type: application/json' --data-binary @legacyProgress.json "$PROGRESS")
+          echo "POST legacy bank-v0.3 progress -> $code $(cat legacy-progress.body)"; test "$code" = '200'
+          python - <<'PY'
+          import json
+          x=json.load(open('legacy-progress.body')); assert x.get('ok') is True and x.get('saved') is True, x
+          PY
+
           code=$(curl -sS -o progress.body -w '%{http_code}' -H "Origin: $ORIGIN" -H 'Content-Type: application/json' --data-binary @progress.json "$PROGRESS")
-          echo "POST rank progress+pendingMost -> $code $(cat progress.body)"; test "$code" = '200'
+          echo "POST v0.3.1 rank progress+pendingMost -> $code $(cat progress.body)"; test "$code" = '200'
           python - <<'PY'
           import json
           x=json.load(open('progress.body')); assert x.get('ok') is True and x.get('saved') is True, x; assert x.get('completedAlready') is False, x
           PY
 
           code=$(curl -sS -o final.body -w '%{http_code}' -H "Origin: $ORIGIN" -H 'Content-Type: application/json' --data-binary @final.json "$API")
-          echo "POST rank final -> $code $(cat final.body)"; test "$code" = '200'
+          echo "POST v0.3.1 rank final -> $code $(cat final.body)"; test "$code" = '200'
           python - <<'PY'
           import json
           x=json.load(open('final.body')); assert x.get('ok') is True and x.get('submissionId'), x
           PY
 
           code=$(curl -sS -o progress-after-final.body -w '%{http_code}' -H "Origin: $ORIGIN" -H 'Content-Type: application/json' --data-binary @progress.json "$PROGRESS")
-          echo "POST rank progress after final -> $code $(cat progress-after-final.body)"; test "$code" = '200'
+          echo "POST v0.3.1 progress after final -> $code $(cat progress-after-final.body)"; test "$code" = '200'
           python - <<'PY'
           import json
           x=json.load(open('progress-after-final.body')); assert x.get('ok') is True and x.get('saved') is True, x; assert x.get('completedAlready') is True, x
           PY
 
-          echo 'PASS: deployed v0.3 MOST+LEAST API route/security/schema/progress/final persistence smoke'
+          echo 'PASS: deployed v0.3.1 MOST+LEAST API plus legacy bank-v0.3 compatibility'
