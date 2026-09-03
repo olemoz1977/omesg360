@@ -1,6 +1,6 @@
 {
   "schema": "2rasi.priolens.open14.bank-v0.3.1",
-  "status": "OWNER_REMEDIATION_ASSETS_HTTP_HASH_PASS_FULL42_AUDIT_PENDING",
+  "status": "V031_FULL42_ASSET_GATE_PASS_API_PENDING_FAIL_CLOSED",
   "runtimeReady": false,
   "familySetVersion": "open-spectrum-14-v0.3-no-repeat",
   "familyPlanner": "cyclic-14x3-diff-1-4-slot-role-v0.2",
@@ -8,7 +8,7 @@
   "sessionSchema": "2rasi.priolens.open14.rank-session-v0.3",
   "labelsHiddenDuringChoice": true,
   "newAssetDirectory": "/priolens-research-assets/Open14-v03/",
-  "startPolicy": "FAIL_CLOSED_UNTIL_V031_FULL42_AUDIT_AND_DEPLOY_SMOKE_PASS",
+  "startPolicy": "FAIL_CLOSED_UNTIL_V031_API_AND_PREVIEW_GATES_PASS",
   "families": {
     "REST": {
       "macro": "BASIC",
@@ -326,13 +326,14 @@
     "ownerRemediationAssetsReachabilityPassed": true,
     "ownerRemediationAssetsHashPassed": true,
     "ownerRemediationAssetRunId": 33785859324,
-    "full42AuditPassed": false,
+    "full42AuditPassed": true,
     "apiDeployed": false,
     "apiSmokePassed": false,
     "participantPreviewDeployed": false,
     "participantPreviewStaticSmokePassed": false,
     "participantPreviewChromiumSmokePassed": false,
-    "ownerMobileVisualSmokePassed": false
+    "ownerMobileVisualSmokePassed": false,
+    "full42AuditRunId": 33790603165
   },
   "remediationAssetDirectory": "/priolens-research-assets/Open14-v03-owner-remediation-v01/"
 }
