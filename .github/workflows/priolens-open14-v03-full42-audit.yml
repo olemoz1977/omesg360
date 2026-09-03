@@ -1,0 +1,135 @@
+name: Audit PrioLens Open14 v0.3 full 42
+
+on:
+  push:
+    branches:
+      - feature/priolens-open14-v03
+    paths:
+      - '.github/workflows/priolens-open14-v03-full42-audit.yml'
+      - 'priolens/open14-v03/bank.json'
+  workflow_dispatch:
+
+jobs:
+  audit-full42:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install image audit tools
+        run: |
+          python -m pip install --quiet pillow imagehash
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq tesseract-ocr >/dev/null
+
+      - name: Download and audit all 42 runtime assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          python <<'PY'
+          import hashlib, json, os, re, subprocess, urllib.request
+          from pathlib import Path
+          from PIL import Image
+          import imagehash
+
+          root=Path('priolens/open14-v03')
+          bank=json.loads((root/'bank.json').read_text())
+          base='https://omesg360.eu'
+          out=Path('full42-audit')
+          out.mkdir(exist_ok=True)
+
+          rows=[]
+          ids=[]
+          paths=[]
+          hashes={}
+          phashes={}
+          ocr_hits=[]
+          keywords=re.compile(r'(shutterstock|istock|adobe\s*stock|dreamstime|alamy|getty\s*images?|depositphotos|envato|freepik|pexels|pixabay)',re.I)
+
+          for family,node in bank['families'].items():
+              for ex in node['exemplars']:
+                  eid=ex['id']; runtime=ex['runtimePath']
+                  ids.append(eid); paths.append(runtime)
+                  url=base+runtime
+                  local=out/(eid.lower()+Path(runtime).suffix.lower())
+                  req=urllib.request.Request(url, headers={'User-Agent':'PrioLens-v0.3-audit/1.0'})
+                  with urllib.request.urlopen(req, timeout=60) as r:
+                      if r.status != 200:
+                          raise RuntimeError(f'{eid}: HTTP {r.status}')
+                      data=r.read()
+                  local.write_bytes(data)
+                  sha=hashlib.sha256(data).hexdigest()
+                  hashes[eid]=sha
+                  expected=ex.get('runtimeSha256Expected')
+                  if expected and sha != expected:
+                      raise RuntimeError(f'{eid}: SHA mismatch expected={expected} actual={sha}')
+                  with Image.open(local) as im:
+                      im.load()
+                      size=im.size
+                      fmt=im.format
+                      if size[0] != size[1]:
+                          raise RuntimeError(f'{eid}: non-square runtime {size}')
+                      ph=str(imagehash.phash(im.convert('RGB')))
+                      phashes[eid]=imagehash.hex_to_hash(ph)
+                  try:
+                      txt=subprocess.check_output(['tesseract',str(local),'stdout','--psm','11'],text=True,stderr=subprocess.DEVNULL,timeout=30)
+                  except Exception:
+                      txt=''
+                  hit=keywords.search(txt or '')
+                  if hit:
+                      ocr_hits.append({'id':eid,'keyword':hit.group(0),'text':' '.join(txt.split())[:220]})
+                  rows.append({'id':eid,'family':family,'runtimePath':runtime,'bytes':len(data),'sha256':sha,'width':size[0],'height':size[1],'format':fmt,'phash':ph,'expectedShaChecked':bool(expected)})
+
+          if len(ids)!=42 or len(set(ids))!=42:
+              raise RuntimeError(f'Expected 42 unique exemplar IDs, got {len(ids)}/{len(set(ids))}')
+          if len(paths)!=42 or len(set(paths))!=42:
+              raise RuntimeError(f'Expected 42 unique runtime paths, got {len(paths)}/{len(set(paths))}')
+          dup_sha={sha:es for sha in set(hashes.values()) if len(es:=[e for e,s in hashes.items() if s==sha])>1}
+          if dup_sha:
+              raise RuntimeError(f'Exact binary duplicates found: {dup_sha}')
+
+          pairs=[]
+          eids=sorted(phashes)
+          for i,a in enumerate(eids):
+              for b in eids[i+1:]:
+                  d=phashes[a]-phashes[b]
+                  pairs.append((d,a,b))
+          pairs.sort()
+          exact_ph=[p for p in pairs if p[0]==0]
+          if exact_ph:
+              raise RuntimeError(f'pHash=0 duplicate-like pairs found: {exact_ph[:10]}')
+          watches=[{'distance':d,'a':a,'b':b} for d,a,b in pairs if d<=12]
+
+          report={
+              'schema':'2rasi.priolens.open14.full42-host-audit-v0.3',
+              'bankSchema':bank['schema'],
+              'assetCount':len(rows),
+              'uniqueExemplarIds':len(set(ids)),
+              'uniqueRuntimePaths':len(set(paths)),
+              'uniqueSha256':len(set(hashes.values())),
+              'new15ExactShaPass':sum(1 for r in rows if r['expectedShaChecked']),
+              'allSquare':all(r['width']==r['height'] for r in rows),
+              'phashClosestPairs':[{'distance':d,'a':a,'b':b} for d,a,b in pairs[:15]],
+              'phashWatchLe12':watches,
+              'stockWatermarkKeywordOcrHits':ocr_hits,
+              'assets':rows,
+          }
+          (out/'FULL42_AUDIT.json').write_text(json.dumps(report,indent=2,ensure_ascii=False))
+          with (out/'SHA256SUMS.txt').open('w') as f:
+              for r in rows:
+                  f.write(f"{r['sha256']}  {r['id']}  {r['runtimePath']}\n")
+
+          print(f"PASS: HTTP/decode/square/unique exact SHA for {len(rows)}/42 assets")
+          print(f"PASS: canonical expected SHA checked for {report['new15ExactShaPass']}/15 new assets")
+          print(f"pHash closest: {report['phashClosestPairs'][:5]}")
+          print(f"pHash watches <=12: {len(watches)}")
+          print(f"stock-watermark OCR keyword hits: {ocr_hits}")
+          if ocr_hits:
+              raise RuntimeError('Stock-watermark keyword OCR hits require manual review')
+          PY
+
+      - name: Upload full42 audit report
+        uses: actions/upload-artifact@v4
+        with:
+          name: priolens-open14-v03-full42-audit
+          path: full42-audit/
+          retention-days: 30
