@@ -38,7 +38,7 @@ foreach ($requiredTop as $field) if (!array_key_exists($field, $body)) fail_json
 if (array_key_exists('language', $body) && !in_array($body['language'], ['lt','en'], true)) fail_json(400, 'Invalid language');
 if ($body['schema'] !== '2rasi.priolens.open14.rank-session-v0.3') fail_json(400, 'Unsupported session schema');
 if ($body['sufficiencySchema'] !== '2rasi.priolens.sufficiency-v0.2') fail_json(400, 'Unsupported sufficiency schema');
-if ($body['bankSchema'] !== '2rasi.priolens.open14.bank-v0.3') fail_json(400, 'Unexpected bank schema');
+if (!in_array($body['bankSchema'], ['2rasi.priolens.open14.bank-v0.3','2rasi.priolens.open14.bank-v0.3.1'], true)) fail_json(400, 'Unexpected bank schema');
 if ($body['planSchema'] !== '2rasi.priolens.p3.open14.plan-v0.2') fail_json(400, 'Unexpected family-plan schema');
 if ($body['assignerSchema'] !== '2rasi.priolens.open14.exemplars-v0.3') fail_json(400, 'Unexpected exemplar-assigner schema');
 if (array_key_exists('pendingMost', $body) && $body['pendingMost'] !== null) fail_json(400, 'Completed session cannot contain pendingMost');
