@@ -1,4 +1,4 @@
-name: Mark PrioLens Open14 v0.3 asset gate pass
+name: Mark PrioLens Open14 v0.3.1 asset gate pass
 
 on:
   push:
@@ -19,7 +19,7 @@ jobs:
         with:
           ref: feature/priolens-open14-v03
 
-      - name: Update bank gate metadata without enabling runtime
+      - name: Update v0.3.1 bank gate metadata without enabling runtime
         shell: bash
         run: |
           set -euo pipefail
@@ -28,23 +28,33 @@ jobs:
           from pathlib import Path
           p=Path('priolens/open14-v03/bank.json')
           bank=json.loads(p.read_text())
-          if bank.get('schema')!='2rasi.priolens.open14.bank-v0.3':
+          if bank.get('schema')!='2rasi.priolens.open14.bank-v0.3.1':
               raise SystemExit('Unexpected bank schema')
           if bank.get('runtimeReady') is not False:
-              raise SystemExit('Refusing: runtimeReady must still be false before API gate')
-          bank['status']='ASSET_GATE_PASS_API_PENDING_FAIL_CLOSED'
+              raise SystemExit('Refusing: runtimeReady must remain false before API and preview gates')
+          bank['status']='V031_FULL42_ASSET_GATE_PASS_API_PENDING_FAIL_CLOSED'
           gate=bank.setdefault('deploymentGate',{})
-          gate['new15Uploaded']=True
-          gate['new15ReachabilityPassed']=True
-          gate['new15HashPassed']=True
+          gate['ownerRemediationAssetsUploaded']=True
+          gate['ownerRemediationAssetsReachabilityPassed']=True
+          gate['ownerRemediationAssetsHashPassed']=True
+          gate['ownerRemediationAssetRunId']=33785859324
           gate['full42AuditPassed']=True
-          bank['startPolicy']='FAIL_CLOSED_UNTIL_API_GATE_PASS_AND_RUNTIME_READY_TRUE'
+          gate['full42AuditRunId']=33790603165
+          gate['apiDeployed']=False
+          gate['apiSmokePassed']=False
+          gate['participantPreviewDeployed']=False
+          gate['participantPreviewStaticSmokePassed']=False
+          gate['participantPreviewChromiumSmokePassed']=False
+          gate['ownerMobileVisualSmokePassed']=False
+          bank['startPolicy']='FAIL_CLOSED_UNTIL_V031_API_AND_PREVIEW_GATES_PASS'
           p.write_text(json.dumps(bank,indent=2,ensure_ascii=False)+'\n')
           PY
+          grep -q '"schema": "2rasi.priolens.open14.bank-v0.3.1"' priolens/open14-v03/bank.json
           grep -q '"runtimeReady": false' priolens/open14-v03/bank.json
           grep -q '"full42AuditPassed": true' priolens/open14-v03/bank.json
+          grep -q '"full42AuditRunId": 33790603165' priolens/open14-v03/bank.json
 
-      - name: Commit gate metadata
+      - name: Commit v0.3.1 gate metadata
         shell: bash
         run: |
           set -euo pipefail
@@ -55,5 +65,5 @@ jobs:
             echo 'No bank metadata change needed.'
             exit 0
           fi
-          git commit -m 'PrioLens v0.3: mark hosted asset gate pass'
+          git commit -m 'PrioLens v0.3.1: mark full42 asset gate pass'
           git push origin HEAD:feature/priolens-open14-v03
