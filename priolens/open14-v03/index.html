@@ -81,7 +81,7 @@ const PARAMS=new URLSearchParams(location.search);
 const FROM_2RASI=PARAMS.get('from');
 const LANG=(PARAMS.get('lang')==='en'||(!PARAMS.has('lang')&&FROM_2RASI==='com'))?'en':'lt';
 const DEBUG_MODE=PARAMS.get('debug')==='1';
-const DRAFT_KEY_BASE='priolens.open14.v03.rank.draft';
+const DRAFT_KEY_BASE='priolens.open14.v031.rank.draft';
 const DRAFT_KEY=`${DRAFT_KEY_BASE}.${LANG}`;
 const TXT={
   lt:{
