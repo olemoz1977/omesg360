@@ -1,0 +1,79 @@
+name: Build PrioLens Open14 v0.3 runtime draft
+
+on:
+  push:
+    branches:
+      - feature/priolens-open14-v03
+    paths:
+      - 'priolens/open14-v03/build_from_v02.mjs'
+      - 'priolens/open14-v03/.build-trigger'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/priolens-open14-v03
+
+      - name: Build guarded v0.3 index from live v0.2 source
+        run: node priolens/open14-v03/build_from_v02.mjs
+
+      - name: Smoke actual v0.3 bank and assigner
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          import { buildOpen14Plan } from './priolens/open14-v03/p3_open14_planner_v02.mjs';
+          import { assignOpen14ThreeExemplars, listThreeExemplarBankProblems } from './priolens/open14-v03/open14_no_repeat_assigner_v03.mjs';
+
+          const bank=JSON.parse(fs.readFileSync('./priolens/open14-v03/bank.json','utf8'));
+          if(bank.runtimeReady!==false) throw new Error('Draft bank must remain fail-closed before Hostinger asset checks');
+          const problems=listThreeExemplarBankProblems(bank);
+          if(problems.length) throw new Error(`Bank problems: ${problems.join(', ')}`);
+
+          const ids=new Set();
+          const paths=new Set();
+          for(const family of Object.values(bank.families)){
+            for(const ex of family.exemplars){ ids.add(ex.id); paths.add(ex.runtimePath); }
+          }
+          if(ids.size!==42) throw new Error(`Expected 42 unique IDs, got ${ids.size}`);
+          if(paths.size!==42) throw new Error(`Expected 42 unique paths, got ${paths.size}`);
+
+          for(let i=0;i<1000;i++){
+            const seed=`runtime-v03-smoke-${i}`;
+            const plan=buildOpen14Plan(seed);
+            const assigned=assignOpen14ThreeExemplars(plan,bank,seed);
+            if(assigned.audit.exposures!==42) throw new Error(`Seed ${i}: exposures`);
+            if(assigned.audit.uniqueExemplarIds!==42) throw new Error(`Seed ${i}: IDs`);
+            if(assigned.audit.exactImageRepeats!==0) throw new Error(`Seed ${i}: repeat`);
+          }
+          console.log(JSON.stringify({passed:true,seeds:1000,uniqueIds:ids.size,uniquePaths:paths.size,runtimeReady:bank.runtimeReady},null,2));
+          NODE
+
+      - name: Verify generated index identity guards
+        shell: bash
+        run: |
+          grep -q "2rasi.priolens.open14.session-v0.3" priolens/open14-v03/index.html
+          grep -q "assignOpen14ThreeExemplars" priolens/open14-v03/index.html
+          grep -q "bank.runtimeReady!==true" priolens/open14-v03/index.html
+          grep -q "chosenExemplarIds.length>=2" priolens/open14-v03/index.html
+          ! grep -q "priolens.open14.v02.draft" priolens/open14-v03/index.html
+          ! grep -q "assignOpen14Exemplars" priolens/open14-v03/index.html
+
+      - name: Commit generated index if changed
+        shell: bash
+        run: |
+          if git diff --quiet -- priolens/open14-v03/index.html && git ls-files --error-unmatch priolens/open14-v03/index.html >/dev/null 2>&1; then
+            echo "Generated index unchanged"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add priolens/open14-v03/index.html
+          git commit -m "PrioLens v0.3: generate guarded runtime index [skip ci]"
+          git push origin HEAD:feature/priolens-open14-v03
