@@ -1,0 +1,79 @@
+name: Package PrioLens Open14 v0.3 participant preview
+
+on:
+  push:
+    branches:
+      - feature/priolens-open14-v03
+    paths:
+      - '.github/workflows/priolens-open14-v03-package-participant.yml'
+  workflow_dispatch:
+
+jobs:
+  package-participant:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Guard preview readiness and build upload ZIP
+        shell: bash
+        run: |
+          set -euo pipefail
+          python <<'PY'
+          import json
+          bank=json.load(open('priolens/open14-v03/bank.json'))
+          assert bank['schema']=='2rasi.priolens.open14.bank-v0.3'
+          assert bank['status']=='API_GATE_PASS_READY_FOR_SEPARATE_PREVIEW_DEPLOY'
+          assert bank['runtimeReady'] is True
+          gate=bank['deploymentGate']
+          assert gate['full42AuditPassed'] is True
+          assert gate['apiDeployed'] is True
+          assert gate['apiSmokePassed'] is True
+          PY
+
+          dir='priolens_open14_v03_participant_upload'
+          rm -rf "$dir" priolens_open14_v03_participant_upload.zip
+          mkdir -p "$dir"
+          cp priolens/open14-v03/index.html "$dir/index.html"
+          cp priolens/open14-v03/bank.json "$dir/bank.json"
+          cp priolens/open14-v03/p3_open14_planner_v02.mjs "$dir/p3_open14_planner_v02.mjs"
+          cp priolens/open14-v03/open14_no_repeat_assigner_v03.mjs "$dir/open14_no_repeat_assigner_v03.mjs"
+          cp priolens/open14-v02/.htaccess "$dir/.htaccess"
+
+          cat > "$dir/README_UPLOAD.txt" <<'EOF'
+          PrioLens Open14 v0.3 participant preview upload
+
+          TARGET DIRECTORY
+          public_html/priolens-open14-v03/
+
+          PACKAGE CONTENTS
+          - index.html
+          - bank.json
+          - p3_open14_planner_v02.mjs
+          - open14_no_repeat_assigner_v03.mjs
+          - .htaccess
+          - README_UPLOAD.txt
+
+          IMPORTANT
+          1. Extract into a NEW directory /priolens-open14-v03/.
+          2. Do NOT overwrite /priolens-open14-v02/.
+          3. Do NOT copy API files here. The separate API is /priolens-open14-v03-api/.
+          4. Do NOT copy the 42 images here. Runtime paths point to persistent /priolens-research-assets/.
+          5. This is a private/pre-pilot preview surface. External recruitment remains closed.
+
+          EXPECTED PREVIEW URL
+          https://omesg360.eu/priolens-open14-v03/?lang=lt&from=lt
+
+          After upload, automated deployed-runtime smoke must pass before any live replacement is considered.
+          EOF
+
+          zip -qr priolens_open14_v03_participant_upload.zip "$dir"
+          sha256sum priolens_open14_v03_participant_upload.zip | tee participant_zip_sha256.txt
+
+      - name: Upload participant preview package
+        uses: actions/upload-artifact@v4
+        with:
+          name: priolens-open14-v03-participant-upload
+          path: |
+            priolens_open14_v03_participant_upload.zip
+            participant_zip_sha256.txt
+          retention-days: 30
