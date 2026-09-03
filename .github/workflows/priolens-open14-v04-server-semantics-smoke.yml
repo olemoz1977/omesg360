@@ -25,3 +25,4 @@ jobs:
           php -l priolens/open14-v04/server/validation_v04.php
           php -l priolens/open14-v04/server/validation_v04.test.php
           php priolens/open14-v04/server/validation_v04.test.php
+          echo 'v0.4 server semantic gate: PASS'
