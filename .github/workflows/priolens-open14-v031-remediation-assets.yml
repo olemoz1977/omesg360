@@ -57,28 +57,23 @@ jobs:
               im.convert('RGB').resize((640,640),R).save(p,'WEBP',quality=92,method=6)
               return p
 
-          # REST-01: owner-selected Pexels 7937987, crop removes the rocking horse and keeps only slippers + floor.
           im=Image.open(src/'rest_7937987.jpg').convert('RGB')
           assert im.size==(3268,4895), im.size
           save(im.crop((350,1650,2918,4218)),'rest_01_slippers_640.webp')
 
-          # RESOURCE-03: prepared food, a broadly recognizable immediately usable/rewarding resource.
           im=Image.open(src/'resource_s07.webp').convert('RGB')
           im=ImageOps.fit(im,(640,640),method=R,centering=(0.5,0.5))
           im.save(out/'resource_03_food_640.webp','WEBP',quality=92,method=6)
 
-          # KNOWLEDGE-02: active online lesson + handwritten notes; materially distinct from library and textbook study.
           im=Image.open(src/'knowledge_5905716.jpg').convert('RGB')
-          assert im.size==(5920,3935), im.size
+          assert im.size==(5902,3935), im.size
           im=ImageOps.fit(im,(640,640),method=R,centering=(0.5,0.5))
           im.save(out/'knowledge_02_online_learning_640.webp','WEBP',quality=92,method=6)
 
-          # OPPORTUNITY-01: prepared useful materials plus open work surface = available possibility to use/develop.
           im=Image.open(src/'opportunity_workbench.png').convert('RGB')
           im=ImageOps.fit(im,(640,640),method=R,centering=(0.5,0.5))
           im.save(out/'opportunity_01_workbench_640.webp','WEBP',quality=92,method=6)
 
-          # RECOGNITION-02: retain teacher/student high-five mechanism; recrop left to reduce empty-wall asymmetry.
           im=Image.open(src/'recognition_8520508.jpg').convert('RGB')
           assert im.size==(6000,4000), im.size
           save(im.crop((500,0,4500,4000)),'recognition_02_recrop_640.webp')
@@ -100,20 +95,14 @@ jobs:
               p=out/name
               b=p.read_bytes(); im=Image.open(p)
               assert im.size==(640,640)
-              manifest['assets'].append({
-                'id':eid,'file':name,'source':source,'geometry':geometry,
-                'bytes':len(b),'sha256':hashlib.sha256(b).hexdigest()
-              })
+              manifest['assets'].append({'id':eid,'file':name,'source':source,'geometry':geometry,'bytes':len(b),'sha256':hashlib.sha256(b).hexdigest()})
           (out/'OWNER_REMEDIATION_PROVENANCE_v0.3.1.json').write_text(json.dumps(manifest,ensure_ascii=False,indent=2),encoding='utf-8')
 
-          # compact owner contact sheet
-          font=ImageFont.load_default()
-          tiles=[]
+          font=ImageFont.load_default(); tiles=[]
           for a in manifest['assets']:
               im=Image.open(out/a['file']).convert('RGB').resize((260,260),R)
               c=Image.new('RGB',(280,305),'white'); c.paste(im,(10,10))
-              ImageDraw.Draw(c).text((10,277),a['id'],fill='black',font=font)
-              tiles.append(c)
+              ImageDraw.Draw(c).text((10,277),a['id'],fill='black',font=font); tiles.append(c)
           sheet=Image.new('RGB',(840,610),(235,235,235))
           for i,t in enumerate(tiles): sheet.paste(t,((i%3)*280,(i//3)*305))
           sheet.save(out/'owner_remediation_contact.jpg',quality=92)
