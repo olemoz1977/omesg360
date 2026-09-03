@@ -1,0 +1,89 @@
+name: Smoke PrioLens Open14 v0.3 MOST+LEAST source contract
+
+on:
+  push:
+    branches: [feature/priolens-open14-v03]
+    paths:
+      - 'priolens/open14-v03/server/**'
+      - 'priolens/open14-v03/apply_rank_v03.mjs'
+      - 'priolens/open14-v03/build_from_v02.mjs'
+      - '.github/workflows/priolens-open14-v03-rank-source-smoke.yml'
+  workflow_dispatch:
+
+jobs:
+  source-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: PHP syntax and generated runtime guards
+        shell: bash
+        run: |
+          set -euo pipefail
+          php -l priolens/open14-v03/server/api.php
+          php -l priolens/open14-v03/server/progress.php
+          node priolens/open14-v03/build_from_v02.mjs
+          node priolens/open14-v03/apply_rank_v03.mjs
+          grep -q "2rasi.priolens.open14.rank-session-v0.3" priolens/open14-v03/index.html
+          grep -q "leastChoice" priolens/open14-v03/index.html
+          grep -q "leastTie" priolens/open14-v03/index.html
+          grep -q "pendingMost" priolens/open14-v03/index.html
+          grep -q "2rasi.priolens.open14.rank-session-v0.3" priolens/open14-v03/server/api.php
+          grep -q "leastChoice cannot equal choice" priolens/open14-v03/server/api.php
+          grep -q "pendingMost" priolens/open14-v03/server/progress.php
+          ! grep -q "body\['schema'\] !== '2rasi.priolens.open14.session-v0.3'" priolens/open14-v03/server/api.php
+
+      - name: Build canonical rank payload fixtures
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          import crypto from 'node:crypto';
+          import { buildOpen14Plan } from './priolens/open14-v03/p3_open14_planner_v02.mjs';
+          import { assignOpen14ThreeExemplars } from './priolens/open14-v03/open14_no_repeat_assigner_v03.mjs';
+
+          const bank=JSON.parse(fs.readFileSync('./priolens/open14-v03/bank.json','utf8'));
+          const seed='SYSTEM_SMOKE_DO_NOT_ANALYZE::rank-source-contract';
+          const plan=buildOpen14Plan(seed);
+          const assigned=assignOpen14ThreeExemplars(plan,bank,seed);
+          const sessionUuid=crypto.randomUUID();
+          const startedAt=new Date().toISOString();
+          const sufficiency={
+            RESTORATION_ENERGY:3,MATERIAL_RESOURCES:3,SAFETY_STABILITY:3,CLARITY_PREDICTABILITY:3,
+            CONNECTION_BELONGING:3,CARE_SUPPORT_PRESENT:3,AUTONOMY_AGENCY:3,RECOGNITION_ESTEEM:3,
+            LEARNING_GROWTH:3,CAPABILITY_MASTERY:3,MEANING_PURPOSE:3,CONTRIBUTION:3,
+          };
+          const choices=assigned.trials.map((t,i)=>{
+            const stimuli=t.stimuli.map(s=>({familyId:s.familyId,exemplarId:s.exemplarId,slot:s.slot}));
+            const most=stimuli[i%3];
+            const least=stimuli[(i+1)%3];
+            return {trialId:t.trialId,stimuli,choice:{...most},noClearChoice:false,rtMs:320+i,leastChoice:{...least},leastTie:false,leastRtMs:210+i};
+          });
+          const common={schema:'2rasi.priolens.open14.rank-session-v0.3',language:'lt',sessionUuid,startedAt,seed,planSchema:plan.schema,bankSchema:bank.schema,assignerSchema:assigned.schema,sufficiencySchema:'2rasi.priolens.sufficiency-v0.2'};
+          const final={...common,completedAt:new Date().toISOString(),pendingMost:null,choices,sufficiency};
+          const progress={...common,completedAt:null,pendingMost:{...assigned.trials[1].stimuli[0],rtMs:275,pointerType:'mouse'},choices:[choices[0]],sufficiency:{}};
+          const oldSchema={...final,schema:'2rasi.priolens.open14.session-v0.3'};
+          const sameLeast=structuredClone(final);sameLeast.choices[0].leastChoice={...sameLeast.choices[0].choice};
+          const badPending=structuredClone(progress);badPending.pendingMost.slot=9;
+          for(const [name,obj] of Object.entries({final,progress,oldSchema,sameLeast,badPending})) fs.writeFileSync(`${name}.json`,JSON.stringify(obj));
+          NODE
+
+      - name: Exercise validator boundary before DB configuration
+        shell: bash
+        run: |
+          set -euo pipefail
+          php -S 127.0.0.1:8765 -t priolens/open14-v03/server >/tmp/php-server.log 2>&1 &
+          pid=$!
+          trap 'kill $pid || true' EXIT
+          sleep 1
+
+          post(){ curl -sS -o "$2.body" -w '%{http_code}' -H 'Content-Type: application/json' --data-binary "@$2.json" "http://127.0.0.1:8765/$1"; }
+
+          code=$(post api.php final); echo "valid final -> $code $(cat final.body)"; test "$code" = 503; grep -q 'Backend not configured' final.body
+          code=$(post progress.php progress); echo "valid progress+pendingMost -> $code $(cat progress.body)"; test "$code" = 503; grep -q 'Backend not configured' progress.body
+          code=$(post api.php oldSchema); echo "old positive-only schema -> $code $(cat oldSchema.body)"; test "$code" = 400; grep -q 'Unsupported session schema' oldSchema.body
+          code=$(post api.php sameLeast); echo "least equals most -> $code $(cat sameLeast.body)"; test "$code" = 400; grep -q 'leastChoice cannot equal choice' sameLeast.body
+          code=$(post progress.php badPending); echo "bad pendingMost -> $code $(cat badPending.body)"; test "$code" = 400; grep -q 'Invalid pendingMost slot' badPending.body
+          echo 'PASS: rank source/API validation boundary'
