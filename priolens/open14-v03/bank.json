@@ -1,6 +1,6 @@
 {
   "schema": "2rasi.priolens.open14.bank-v0.3.1",
-  "status": "V031_API_GATE_PASS_READY_FOR_PREVIEW_BUILD_DEPLOY",
+  "status": "V031_DEPLOYED_TECHNICAL_PASS_OWNER_MOBILE_RETEST_PENDING",
   "runtimeReady": true,
   "familySetVersion": "open-spectrum-14-v0.3-no-repeat",
   "familyPlanner": "cyclic-14x3-diff-1-4-slot-role-v0.2",
@@ -8,7 +8,7 @@
   "sessionSchema": "2rasi.priolens.open14.rank-session-v0.3",
   "labelsHiddenDuringChoice": true,
   "newAssetDirectory": "/priolens-research-assets/Open14-v03/",
-  "startPolicy": "READY_FOR_SEPARATE_V031_PARTICIPANT_PREVIEW_BUILD_DEPLOY",
+  "startPolicy": "OWNER_PREVIEW_TECHNICAL_PASS_EXTERNAL_RECRUITMENT_CLOSED",
   "families": {
     "REST": {
       "macro": "BASIC",
@@ -329,13 +329,16 @@
     "full42AuditPassed": true,
     "apiDeployed": true,
     "apiSmokePassed": true,
-    "participantPreviewDeployed": false,
-    "participantPreviewStaticSmokePassed": false,
-    "participantPreviewChromiumSmokePassed": false,
+    "participantPreviewDeployed": true,
+    "participantPreviewStaticSmokePassed": true,
+    "participantPreviewChromiumSmokePassed": true,
     "ownerMobileVisualSmokePassed": false,
     "full42AuditRunId": 33790603165,
     "apiDeployRunId": 33791065786,
-    "apiSmokeRunId": 33791193830
+    "apiSmokeRunId": 33791193830,
+    "participantPreviewDeployRunId": 33791409529,
+    "participantPreviewStaticSmokeRunId": 33791761554,
+    "participantPreviewChromiumSmokeRunId": 33791582358
   },
   "remediationAssetDirectory": "/priolens-research-assets/Open14-v03-owner-remediation-v01/"
 }
