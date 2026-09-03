@@ -127,7 +127,7 @@ jobs:
         run: |
           set -euo pipefail
           BASE='https://omesg360.eu/priolens-open14-v04'
-          for f in index.html bank.json adaptive_clarifiers_v04.mjs p3_open14_planner_v02.mjs open14_no_repeat_assigner_v03.mjs stimulus-bank.html .htaccess; do
+          for f in index.html bank.json adaptive_clarifiers_v04.mjs p3_open14_planner_v02.mjs open14_no_repeat_assigner_v03.mjs stimulus-bank.html; do
             curl -fsS --retry 3 -H 'Cache-Control: no-cache' "$BASE/$f?deploy=${GITHUB_SHA}" -o "/tmp/live-${f//\//_}"
             cmp "priolens/open14-v04/$f" "/tmp/live-${f//\//_}"
             echo "BYTE PASS $f"
