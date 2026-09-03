@@ -67,6 +67,9 @@ export function listThreeExemplarBankProblems(bank,{requireRuntimePaths=true}={}
 }
 
 function makeBalancedSlotPatterns(rng){
+  // Pattern maps screen slot 0/1/2 -> exemplar index 0/1/2.
+  // Three cyclic rotations are distributed across 14 families as 5/5/4.
+  // The base exemplar order, short group and family membership all vary by seed.
   const base=shuffle([0,1,2],rng);
   const patterns=[
     [base[0],base[1],base[2]],
