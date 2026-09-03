@@ -26,14 +26,15 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          lftp -c "set ftp:ssl-allow no; set net:max-retries 3; set net:timeout 30; open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; cls -1 -R /domains/omesg360.eu/public_html/priolens-research-assets" > remote-assets.txt
+          root='/domains/omesg360.eu/public_html/priolens-research-assets'
+          lftp -c "set ftp:ssl-allow no; set net:max-retries 3; set net:timeout 30; open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; find \"$root\"" > remote-assets.txt
           grep -Ei '(^|/)(4967|4928)([^/]*$)' remote-assets.txt > owner-source-matches.txt || true
           echo '--- matches ---'
           cat owner-source-matches.txt
+          echo "match_count=$(wc -l < owner-source-matches.txt)"
       - name: Upload search result
         uses: actions/upload-artifact@v4
         with:
           name: priolens-v03-owner-source-search
-          path: |
-            owner-source-matches.txt
+          path: owner-source-matches.txt
           retention-days: 7
