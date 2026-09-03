@@ -1,11 +1,10 @@
-name: Smoke PrioLens Open14 v0.3 deployed API
+name: Smoke PrioLens Open14 v0.3 deployed MOST+LEAST API
 
 on:
   push:
-    branches:
-      - feature/priolens-open14-v03
+    branches: [feature/priolens-open14-v03]
     paths:
-      - '.github/workflows/priolens-open14-v03-api-smoke.yml'
+      - 'priolens/open14-v03/.api-rank-smoke-trigger'
   workflow_dispatch:
 
 jobs:
@@ -14,7 +13,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Build canonical v0.3 smoke payloads
+      - name: Build canonical rank smoke payloads
         shell: bash
         run: |
           set -euo pipefail
@@ -26,10 +25,10 @@ jobs:
 
           const bank=JSON.parse(fs.readFileSync('./priolens/open14-v03/bank.json','utf8'));
           if(bank.schema!=='2rasi.priolens.open14.bank-v0.3') throw new Error('Unexpected bank schema');
-          if(bank.runtimeReady!==false) throw new Error('API smoke expects bank to remain fail-closed until gate pass is recorded');
-          if(!bank.deploymentGate?.full42AuditPassed) throw new Error('Full42 asset gate must pass before API smoke');
+          if(bank.runtimeReady!==true) throw new Error('Rank API smoke requires runtime-ready v0.3 bank');
+          if(!bank.deploymentGate?.full42AuditPassed) throw new Error('Full42 asset gate must pass before rank API smoke');
 
-          const seed=`SYSTEM_SMOKE_DO_NOT_ANALYZE::open14-v03-api::${Date.now()}`;
+          const seed=`SYSTEM_SMOKE_DO_NOT_ANALYZE::open14-v03-rank-api::${Date.now()}`;
           const sessionUuid=crypto.randomUUID();
           const startedAt=new Date().toISOString();
           const plan=buildOpen14Plan(seed);
@@ -37,58 +36,44 @@ jobs:
 
           const allChoices=assigned.trials.map((t,index)=>{
             const stimuli=t.stimuli.map(s=>({familyId:s.familyId,exemplarId:s.exemplarId,slot:s.slot}));
-            const picked=stimuli[index%3];
+            const most=stimuli[index%3];
+            const least=stimuli[(index+1)%3];
             return {
               trialId:t.trialId,
               stimuli,
-              choice:{...picked},
+              choice:{...most},
               noClearChoice:false,
               rtMs:300+index,
+              leastChoice:{...least},
+              leastTie:false,
+              leastRtMs:210+index,
             };
           });
 
           const sufficiency={
-            RESTORATION_ENERGY:3,
-            MATERIAL_RESOURCES:3,
-            SAFETY_STABILITY:3,
-            CLARITY_PREDICTABILITY:3,
-            CONNECTION_BELONGING:3,
-            CARE_SUPPORT_PRESENT:3,
-            AUTONOMY_AGENCY:3,
-            RECOGNITION_ESTEEM:3,
-            LEARNING_GROWTH:3,
-            CAPABILITY_MASTERY:3,
-            MEANING_PURPOSE:3,
-            CONTRIBUTION:3,
+            RESTORATION_ENERGY:3,MATERIAL_RESOURCES:3,SAFETY_STABILITY:3,CLARITY_PREDICTABILITY:3,
+            CONNECTION_BELONGING:3,CARE_SUPPORT_PRESENT:3,AUTONOMY_AGENCY:3,RECOGNITION_ESTEEM:3,
+            LEARNING_GROWTH:3,CAPABILITY_MASTERY:3,MEANING_PURPOSE:3,CONTRIBUTION:3,
           };
 
           const common={
-            schema:'2rasi.priolens.open14.session-v0.3',
-            sessionUuid,
-            startedAt,
-            seed,
-            planSchema:plan.schema,
-            bankSchema:bank.schema,
-            assignerSchema:assigned.schema,
-            sufficiencySchema:'2rasi.priolens.sufficiency-v0.2',
-            language:'lt',
+            schema:'2rasi.priolens.open14.rank-session-v0.3',
+            sessionUuid,startedAt,seed,planSchema:plan.schema,bankSchema:bank.schema,
+            assignerSchema:assigned.schema,sufficiencySchema:'2rasi.priolens.sufficiency-v0.2',language:'lt',
           };
 
-          const progress={...common,completedAt:null,choices:[allChoices[0]],sufficiency:{RESTORATION_ENERGY:3}};
-          const final={...common,completedAt:new Date().toISOString(),choices:allChoices,sufficiency};
-          const legacy={...final,schema:'2rasi.priolens.open14.session-v0.2'};
+          const progress={...common,completedAt:null,choices:[allChoices[0]],pendingMost:{...assigned.trials[1].stimuli[0],rtMs:275,pointerType:'mouse'},sufficiency:{RESTORATION_ENERGY:3}};
+          const final={...common,completedAt:new Date().toISOString(),choices:allChoices,pendingMost:null,sufficiency};
+          const oldPositive={...final,schema:'2rasi.priolens.open14.session-v0.3'};
+          const sameLeast=structuredClone(final);sameLeast.choices[0].leastChoice={...sameLeast.choices[0].choice};
 
-          fs.writeFileSync('progress.json',JSON.stringify(progress));
-          fs.writeFileSync('final.json',JSON.stringify(final));
-          fs.writeFileSync('legacy.json',JSON.stringify(legacy));
+          for(const [name,obj] of Object.entries({progress,final,oldPositive,sameLeast})) fs.writeFileSync(`${name}.json`,JSON.stringify(obj));
           fs.writeFileSync('smoke_identity.txt',`seed=${seed}\nsessionUuid=${sessionUuid}\n`);
-
           console.log(`Smoke session: ${sessionUuid}`);
           console.log(`Smoke seed: ${seed}`);
-          console.log(`Assigned audit: ${JSON.stringify(assigned.audit)}`);
           NODE
 
-      - name: Smoke public API routes and persistence
+      - name: Smoke public rank API routes and persistence
         shell: bash
         run: |
           set -euo pipefail
@@ -97,67 +82,38 @@ jobs:
           CONFIG='https://omesg360.eu/priolens-open14-v03-api/config.php'
           ORIGIN='https://omesg360.eu'
 
-          code=$(curl -sS -o get-api.body -w '%{http_code}' "$API")
-          echo "GET api.php -> $code $(cat get-api.body)"
-          test "$code" = '405'
-          grep -q 'Method not allowed' get-api.body
+          code=$(curl -sS -o get-api.body -w '%{http_code}' "$API"); echo "GET api.php -> $code $(cat get-api.body)"; test "$code" = '405'; grep -q 'Method not allowed' get-api.body
+          code=$(curl -sS -o get-progress.body -w '%{http_code}' "$PROGRESS"); echo "GET progress.php -> $code $(cat get-progress.body)"; test "$code" = '405'; grep -q 'Method not allowed' get-progress.body
+          code=$(curl -sS -o get-config.body -w '%{http_code}' "$CONFIG"); echo "GET config.php -> $code"; test "$code" = '403'
 
-          code=$(curl -sS -o get-progress.body -w '%{http_code}' "$PROGRESS")
-          echo "GET progress.php -> $code $(cat get-progress.body)"
-          test "$code" = '405'
-          grep -q 'Method not allowed' get-progress.body
+          code=$(curl -sS -o old-positive.body -w '%{http_code}' -H "Origin: $ORIGIN" -H 'Content-Type: application/json' --data-binary @oldPositive.json "$API")
+          echo "POST old positive-only v0.3 -> $code $(cat old-positive.body)"; test "$code" = '400'; grep -q 'Unsupported session schema' old-positive.body
 
-          code=$(curl -sS -o get-config.body -w '%{http_code}' "$CONFIG")
-          echo "GET config.php -> $code"
-          test "$code" = '403'
+          code=$(curl -sS -o same-least.body -w '%{http_code}' -H "Origin: $ORIGIN" -H 'Content-Type: application/json' --data-binary @sameLeast.json "$API")
+          echo "POST MOST=LEAST -> $code $(cat same-least.body)"; test "$code" = '400'; grep -q 'leastChoice cannot equal choice' same-least.body
 
-          code=$(curl -sS -o legacy.body -w '%{http_code}' \
-            -H "Origin: $ORIGIN" -H 'Content-Type: application/json' \
-            --data-binary @legacy.json "$API")
-          echo "POST legacy v0.2 -> $code $(cat legacy.body)"
-          test "$code" = '400'
-          grep -q 'Unsupported session schema' legacy.body
+          code=$(curl -sS -o bad-origin.body -w '%{http_code}' -H 'Origin: https://example.invalid' -H 'Content-Type: application/json' --data-binary @progress.json "$PROGRESS")
+          echo "POST forbidden origin -> $code $(cat bad-origin.body)"; test "$code" = '403'; grep -q 'Origin not allowed' bad-origin.body
 
-          code=$(curl -sS -o bad-origin.body -w '%{http_code}' \
-            -H 'Origin: https://example.invalid' -H 'Content-Type: application/json' \
-            --data-binary @progress.json "$PROGRESS")
-          echo "POST forbidden origin -> $code $(cat bad-origin.body)"
-          test "$code" = '403'
-          grep -q 'Origin not allowed' bad-origin.body
-
-          code=$(curl -sS -o progress.body -w '%{http_code}' \
-            -H "Origin: $ORIGIN" -H 'Content-Type: application/json' \
-            --data-binary @progress.json "$PROGRESS")
-          echo "POST progress -> $code $(cat progress.body)"
-          test "$code" = '200'
+          code=$(curl -sS -o progress.body -w '%{http_code}' -H "Origin: $ORIGIN" -H 'Content-Type: application/json' --data-binary @progress.json "$PROGRESS")
+          echo "POST rank progress+pendingMost -> $code $(cat progress.body)"; test "$code" = '200'
           python - <<'PY'
           import json
-          x=json.load(open('progress.body'))
-          assert x.get('ok') is True and x.get('saved') is True, x
-          assert x.get('completedAlready') is False, x
+          x=json.load(open('progress.body')); assert x.get('ok') is True and x.get('saved') is True, x; assert x.get('completedAlready') is False, x
           PY
 
-          code=$(curl -sS -o final.body -w '%{http_code}' \
-            -H "Origin: $ORIGIN" -H 'Content-Type: application/json' \
-            --data-binary @final.json "$API")
-          echo "POST final -> $code $(cat final.body)"
-          test "$code" = '200'
+          code=$(curl -sS -o final.body -w '%{http_code}' -H "Origin: $ORIGIN" -H 'Content-Type: application/json' --data-binary @final.json "$API")
+          echo "POST rank final -> $code $(cat final.body)"; test "$code" = '200'
           python - <<'PY'
           import json
-          x=json.load(open('final.body'))
-          assert x.get('ok') is True and x.get('submissionId'), x
+          x=json.load(open('final.body')); assert x.get('ok') is True and x.get('submissionId'), x
           PY
 
-          code=$(curl -sS -o progress-after-final.body -w '%{http_code}' \
-            -H "Origin: $ORIGIN" -H 'Content-Type: application/json' \
-            --data-binary @progress.json "$PROGRESS")
-          echo "POST progress after final -> $code $(cat progress-after-final.body)"
-          test "$code" = '200'
+          code=$(curl -sS -o progress-after-final.body -w '%{http_code}' -H "Origin: $ORIGIN" -H 'Content-Type: application/json' --data-binary @progress.json "$PROGRESS")
+          echo "POST rank progress after final -> $code $(cat progress-after-final.body)"; test "$code" = '200'
           python - <<'PY'
           import json
-          x=json.load(open('progress-after-final.body'))
-          assert x.get('ok') is True and x.get('saved') is True, x
-          assert x.get('completedAlready') is True, x
+          x=json.load(open('progress-after-final.body')); assert x.get('ok') is True and x.get('saved') is True, x; assert x.get('completedAlready') is True, x
           PY
 
-          echo 'PASS: deployed v0.3 API route/security/schema/progress/final persistence smoke'
+          echo 'PASS: deployed v0.3 MOST+LEAST API route/security/schema/progress/final persistence smoke'
