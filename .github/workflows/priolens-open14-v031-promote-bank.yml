@@ -1,0 +1,63 @@
+name: Promote PrioLens Open14 bank to v0.3.1
+
+on:
+  push:
+    branches: [feature/priolens-open14-v03]
+    paths:
+      - 'priolens/open14-v03/promote_bank_v031.mjs'
+      - '.github/workflows/priolens-open14-v031-promote-bank.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/priolens-open14-v03
+
+      - name: Promote bank revision fail-closed
+        shell: bash
+        run: |
+          set -euo pipefail
+          node priolens/open14-v03/promote_bank_v031.mjs
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          import { buildOpen14Plan } from './priolens/open14-v03/p3_open14_planner_v02.mjs';
+          import { assignOpen14ThreeExemplars, listThreeExemplarBankProblems } from './priolens/open14-v03/open14_no_repeat_assigner_v03.mjs';
+          const bank=JSON.parse(fs.readFileSync('./priolens/open14-v03/bank.json','utf8'));
+          if(bank.schema!=='2rasi.priolens.open14.bank-v0.3.1') throw new Error('wrong bank schema');
+          if(bank.runtimeReady!==false) throw new Error('v0.3.1 must remain fail-closed before full42 audit');
+          const problems=listThreeExemplarBankProblems(bank);
+          if(problems.length) throw new Error(problems.join('; '));
+          const ids=[]; const paths=[];
+          for(const n of Object.values(bank.families)) for(const x of n.exemplars){ids.push(x.id);paths.push(x.runtimePath)}
+          if(ids.length!==42||new Set(ids).size!==42) throw new Error('42 unique IDs invariant failed');
+          if(paths.length!==42||new Set(paths).size!==42) throw new Error('42 unique paths invariant failed');
+          for(let i=0;i<1000;i++){
+            const seed=`V031_PROMOTION_SMOKE_${i}`;
+            const plan=buildOpen14Plan(seed);
+            const a=assignOpen14ThreeExemplars(plan,bank,seed);
+            const shown=a.trials.flatMap(t=>t.stimuli.map(s=>s.exemplarId));
+            if(shown.length!==42||new Set(shown).size!==42) throw new Error(`seed ${i}: repeat/exposure invariant failed`);
+          }
+          console.log('PASS: v0.3.1 bank structure + 1000-seed no-repeat smoke');
+          NODE
+
+      - name: Commit promoted bank
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- priolens/open14-v03/bank.json; then
+            echo 'bank.json already promoted; nothing to commit'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add priolens/open14-v03/bank.json
+          git commit -m 'PrioLens v0.3.1: promote remediated bank fail-closed'
+          git push origin HEAD:feature/priolens-open14-v03
