@@ -8,6 +8,7 @@ on:
     paths:
       - 'priolens/open14-v04/adaptive_clarifiers_v04.mjs'
       - 'priolens/open14-v04/adaptive_clarifiers_v04.test.mjs'
+      - 'priolens/open14-v04/build_from_v031.mjs'
       - '.github/workflows/priolens-open14-v04-logic-smoke.yml'
 
 permissions:
@@ -23,3 +24,24 @@ jobs:
           node-version: '22'
       - name: Run deterministic A+ and B+ resolver tests
         run: node priolens/open14-v04/adaptive_clarifiers_v04.test.mjs
+      - name: Build v0.4 participant source from v0.3.1 baseline
+        run: node priolens/open14-v04/build_from_v031.mjs
+      - name: Verify v0.4 generated protocol anchors
+        shell: bash
+        run: |
+          set -euo pipefail
+          f=priolens/open14-v04/index.html
+          grep -q "SESSION_SCHEMA_V04" "$f"
+          grep -q "DRAFT_KEY_BASE_V04" "$f"
+          grep -q "id=\"aplus\"" "$f"
+          grep -q "id=\"bplus\"" "$f"
+          grep -q "afterChannelA" "$f"
+          grep -q "afterChannelB" "$f"
+          grep -q "most+least+a-plus+b-plus-v0.4" "$f"
+          grep -q "attentionResolution" "$f"
+          grep -q "sufficiencyResolution" "$f"
+          if grep -q "priolens.open14.v031.rank.draft" "$f"; then
+            echo "old v031 draft key leaked into v0.4 index" >&2
+            exit 1
+          fi
+          echo "v0.4 generated anchors: PASS"
