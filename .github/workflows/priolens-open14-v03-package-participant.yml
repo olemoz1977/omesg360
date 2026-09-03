@@ -34,6 +34,10 @@ jobs:
           grep -q "pendingMost" priolens/open14-v03/index.html
           grep -q "LOW_LEAST" priolens/open14-v03/index.html
           grep -q "data-rank-label" priolens/open14-v03/index.html
+          grep -q "repeat(auto-fit,minmax(84px,1fr))" priolens/open14-v03/index.html
+          ! grep -q "chosenImagePaths(id).slice(0,2)" priolens/open14-v03/index.html
+          ! grep -q "leastImagePaths(id).slice(0,2)" priolens/open14-v03/index.html
+          ! grep -q "images.slice(0,2).map" priolens/open14-v03/index.html
 
           dir='priolens_open14_v03_participant_upload'
           rm -rf "$dir" priolens_open14_v03_participant_upload.zip
@@ -63,8 +67,9 @@ jobs:
           2. Do NOT overwrite /priolens-open14-v02/.
           3. Do NOT copy API files here. The separate API remains /priolens-open14-v03-api/.
           4. Do NOT copy the 42 images here. Runtime paths point to persistent /priolens-research-assets/.
-          5. This package changes the preview interaction from positive-only to MOST+LEAST and uses session schema 2rasi.priolens.open14.rank-session-v0.3.
-          6. External recruitment remains closed until deployed API + participant smoke and owner mobile visual smoke pass.
+          5. This package uses MOST+LEAST session schema 2rasi.priolens.open14.rank-session-v0.3.
+          6. Repeated-family result visuals show every distinct exemplar that produced the displayed 2/3 or 3/3 count; 3/3 therefore shows all three images.
+          7. External recruitment remains closed until owner mobile visual smoke passes.
 
           EXPECTED PREVIEW URL
           https://omesg360.eu/priolens-open14-v03/?lang=lt&from=lt
