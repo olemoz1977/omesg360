@@ -1,4 +1,4 @@
-name: Build PrioLens Open14 v0.3 MOST+LEAST preview
+name: Build PrioLens Open14 v0.3.1 MOST+LEAST preview
 
 on:
   push:
@@ -8,7 +8,9 @@ on:
       - 'priolens/open14-v03/build_from_v02.mjs'
       - 'priolens/open14-v03/apply_rank_v03.mjs'
       - 'priolens/open14-v03/apply_rank_v03_result.mjs'
+      - 'priolens/open14-v03/apply_bank_revision_v031.mjs'
       - 'priolens/open14-v03/.build-trigger'
+      - '.github/workflows/priolens-open14-v03-build.yml'
   workflow_dispatch:
 
 permissions:
@@ -22,7 +24,7 @@ jobs:
         with:
           ref: feature/priolens-open14-v03
 
-      - name: Build guarded v0.3 index from live v0.2 source
+      - name: Build guarded base index from live v0.2 source
         run: node priolens/open14-v03/build_from_v02.mjs
 
       - name: Apply guarded MOST+LEAST protocol layer
@@ -31,7 +33,10 @@ jobs:
       - name: Apply LEAST-aware result layer
         run: node priolens/open14-v03/apply_rank_v03_result.mjs
 
-      - name: Smoke actual v0.3 bank and assigner
+      - name: Apply v0.3.1 bank revision draft isolation
+        run: node priolens/open14-v03/apply_bank_revision_v031.mjs
+
+      - name: Smoke actual v0.3.1 bank and assigner
         shell: bash
         run: |
           node --input-type=module <<'NODE'
@@ -40,9 +45,11 @@ jobs:
           import { assignOpen14ThreeExemplars, listThreeExemplarBankProblems } from './priolens/open14-v03/open14_no_repeat_assigner_v03.mjs';
 
           const bank=JSON.parse(fs.readFileSync('./priolens/open14-v03/bank.json','utf8'));
-          if(bank.runtimeReady!==true) throw new Error('v0.3 preview bank must be runtime-ready before rank build');
-          if(!bank.deploymentGate?.full42AuditPassed) throw new Error('Full42 asset gate must be PASS');
-          if(!bank.deploymentGate?.apiSmokePassed) throw new Error('Existing v0.3 API gate must be PASS before protocol migration work');
+          if(bank.schema!=='2rasi.priolens.open14.bank-v0.3.1') throw new Error('Expected v0.3.1 bank');
+          if(bank.runtimeReady!==true) throw new Error('v0.3.1 source bank must be runtime-ready before preview build');
+          if(!bank.deploymentGate?.full42AuditPassed) throw new Error('v0.3.1 full42 asset gate must be PASS');
+          if(!bank.deploymentGate?.apiDeployed) throw new Error('v0.3.1 compatible API must be deployed');
+          if(!bank.deploymentGate?.apiSmokePassed) throw new Error('v0.3.1 API smoke gate must be PASS');
           const problems=listThreeExemplarBankProblems(bank);
           if(problems.length) throw new Error(`Bank problems: ${problems.join(', ')}`);
 
@@ -55,17 +62,17 @@ jobs:
           if(paths.size!==42) throw new Error(`Expected 42 unique paths, got ${paths.size}`);
 
           for(let i=0;i<1000;i++){
-            const seed=`runtime-v03-rank-smoke-${i}`;
+            const seed=`runtime-v031-rank-smoke-${i}`;
             const plan=buildOpen14Plan(seed);
             const assigned=assignOpen14ThreeExemplars(plan,bank,seed);
             if(assigned.audit.exposures!==42) throw new Error(`Seed ${i}: exposures`);
             if(assigned.audit.uniqueExemplarIds!==42) throw new Error(`Seed ${i}: IDs`);
             if(assigned.audit.exactImageRepeats!==0) throw new Error(`Seed ${i}: repeat`);
           }
-          console.log(JSON.stringify({passed:true,seeds:1000,uniqueIds:ids.size,uniquePaths:paths.size,runtimeReady:bank.runtimeReady,protocol:'most+least-v0.3'},null,2));
+          console.log(JSON.stringify({passed:true,seeds:1000,bankSchema:bank.schema,uniqueIds:ids.size,uniquePaths:paths.size,runtimeReady:bank.runtimeReady,protocol:'most+least-v0.3',draft:'priolens.open14.v031.rank.draft'},null,2));
           NODE
 
-      - name: Verify generated rank identity guards
+      - name: Verify generated v0.3.1 rank identity guards
         shell: bash
         run: |
           set -euo pipefail
@@ -80,15 +87,18 @@ jobs:
           grep -q "LOW_LEAST" priolens/open14-v03/index.html
           grep -q "HIGH_LEAST" priolens/open14-v03/index.html
           grep -q "data-rank-label" priolens/open14-v03/index.html
+          grep -q "priolens.open14.v031.rank.draft" priolens/open14-v03/index.html
           ! grep -q "priolens.open14.v02.draft" priolens/open14-v03/index.html
           ! grep -q "priolens.open14.v03.draft'" priolens/open14-v03/index.html
+          ! grep -q "priolens.open14.v03.rank.draft'" priolens/open14-v03/index.html
           ! grep -q "2rasi.priolens.open14.session-v0.3" priolens/open14-v03/index.html
           ! grep -q "assignOpen14Exemplars" priolens/open14-v03/index.html
           ! grep -q "content:'PIRMAS'" priolens/open14-v03/index.html
           node --check priolens/open14-v03/apply_rank_v03.mjs
           node --check priolens/open14-v03/apply_rank_v03_result.mjs
+          node --check priolens/open14-v03/apply_bank_revision_v031.mjs
 
-      - name: Commit generated index if changed
+      - name: Commit generated v0.3.1 index if changed
         shell: bash
         run: |
           if git diff --quiet -- priolens/open14-v03/index.html && git ls-files --error-unmatch priolens/open14-v03/index.html >/dev/null 2>&1; then
@@ -98,5 +108,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add priolens/open14-v03/index.html
-          git commit -m "PrioLens v0.3: generate MOST+LEAST preview index [skip ci]"
+          git commit -m "PrioLens v0.3.1: generate remediated MOST+LEAST preview index [skip ci]"
           git push origin HEAD:feature/priolens-open14-v03
