@@ -7,6 +7,7 @@ on:
     paths:
       - 'priolens/open14-v03/build_from_v02.mjs'
       - 'priolens/open14-v03/apply_rank_v03.mjs'
+      - 'priolens/open14-v03/apply_rank_v03_result.mjs'
       - 'priolens/open14-v03/.build-trigger'
   workflow_dispatch:
 
@@ -26,6 +27,9 @@ jobs:
 
       - name: Apply guarded MOST+LEAST protocol layer
         run: node priolens/open14-v03/apply_rank_v03.mjs
+
+      - name: Apply LEAST-aware result layer
+        run: node priolens/open14-v03/apply_rank_v03_result.mjs
 
       - name: Smoke actual v0.3 bank and assigner
         shell: bash
@@ -73,11 +77,16 @@ jobs:
           grep -q 'id="tieLeast"' priolens/open14-v03/index.html
           grep -q 'id="leastRows"' priolens/open14-v03/index.html
           grep -q "rankProtocol='most+least-v0.3'" priolens/open14-v03/index.html
+          grep -q "LOW_LEAST" priolens/open14-v03/index.html
+          grep -q "HIGH_LEAST" priolens/open14-v03/index.html
+          grep -q "data-rank-label" priolens/open14-v03/index.html
           ! grep -q "priolens.open14.v02.draft" priolens/open14-v03/index.html
           ! grep -q "priolens.open14.v03.draft'" priolens/open14-v03/index.html
           ! grep -q "2rasi.priolens.open14.session-v0.3" priolens/open14-v03/index.html
           ! grep -q "assignOpen14Exemplars" priolens/open14-v03/index.html
+          ! grep -q "content:'PIRMAS'" priolens/open14-v03/index.html
           node --check priolens/open14-v03/apply_rank_v03.mjs
+          node --check priolens/open14-v03/apply_rank_v03_result.mjs
 
       - name: Commit generated index if changed
         shell: bash
