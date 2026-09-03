@@ -1,0 +1,176 @@
+name: Materialize PrioLens Open14 v0.3.1 remediation assets
+
+on:
+  push:
+    branches: [feature/priolens-open14-v03]
+    paths:
+      - '.github/workflows/priolens-open14-v031-remediation-assets.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  FTP_HOST: 46.202.142.134
+  FTP_USER: ${{ secrets.HOSTINGER_FTP_USER }}
+  FTP_PASSWORD: ${{ secrets.HOSTINGER_FTP_PASSWORD }}
+  REMOTE_DIR: /domains/omesg360.eu/public_html/priolens-research-assets/Open14-v03-owner-remediation-v01
+  PUBLIC_BASE: https://omesg360.eu/priolens-research-assets/Open14-v03-owner-remediation-v01
+
+jobs:
+  build-upload-verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install tools
+        run: |
+          python -m pip install --quiet pillow ImageHash
+          sudo apt-get update -qq && sudo apt-get install -y -qq lftp
+
+      - name: Fetch immutable source material
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p src out
+          curl -fsSL --retry 3 'https://images.pexels.com/photos/7937987/pexels-photo-7937987.jpeg' -o src/rest_7937987.jpg
+          curl -fsSL --retry 3 'https://omesg360.eu/priolens-research-assets/Gallery/S07.webp' -o src/resource_s07.webp
+          curl -fsSL --retry 3 'https://images.pexels.com/photos/5905716/pexels-photo-5905716.jpeg' -o src/knowledge_5905716.jpg
+          curl -fsSL --retry 3 'https://omesg360.eu/priolens-research-assets/Gallery/file_0000000024fc8210a5fb3823b3d86a9f.png' -o src/opportunity_workbench.png
+          curl -fsSL --retry 3 'https://images.pexels.com/photos/8520508/pexels-photo-8520508.jpeg' -o src/recognition_8520508.jpg
+          sha256sum src/* | sort | tee source_sha256.txt
+
+      - name: Render exact 640x640 remediation assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from PIL import Image, ImageOps, ImageDraw, ImageFont
+          from pathlib import Path
+          import hashlib, json
+
+          src=Path('src'); out=Path('out')
+          R=Image.Resampling.LANCZOS
+
+          def save(im,name):
+              p=out/name
+              im.convert('RGB').resize((640,640),R).save(p,'WEBP',quality=92,method=6)
+              return p
+
+          # REST-01: owner-selected Pexels 7937987, crop removes the rocking horse and keeps only slippers + floor.
+          im=Image.open(src/'rest_7937987.jpg').convert('RGB')
+          assert im.size==(3268,4895), im.size
+          save(im.crop((350,1650,2918,4218)),'rest_01_slippers_640.webp')
+
+          # RESOURCE-03: prepared food, a broadly recognizable immediately usable/rewarding resource.
+          im=Image.open(src/'resource_s07.webp').convert('RGB')
+          im=ImageOps.fit(im,(640,640),method=R,centering=(0.5,0.5))
+          im.save(out/'resource_03_food_640.webp','WEBP',quality=92,method=6)
+
+          # KNOWLEDGE-02: active online lesson + handwritten notes; materially distinct from library and textbook study.
+          im=Image.open(src/'knowledge_5905716.jpg').convert('RGB')
+          assert im.size==(5920,3935), im.size
+          im=ImageOps.fit(im,(640,640),method=R,centering=(0.5,0.5))
+          im.save(out/'knowledge_02_online_learning_640.webp','WEBP',quality=92,method=6)
+
+          # OPPORTUNITY-01: prepared useful materials plus open work surface = available possibility to use/develop.
+          im=Image.open(src/'opportunity_workbench.png').convert('RGB')
+          im=ImageOps.fit(im,(640,640),method=R,centering=(0.5,0.5))
+          im.save(out/'opportunity_01_workbench_640.webp','WEBP',quality=92,method=6)
+
+          # RECOGNITION-02: retain teacher/student high-five mechanism; recrop left to reduce empty-wall asymmetry.
+          im=Image.open(src/'recognition_8520508.jpg').convert('RGB')
+          assert im.size==(6000,4000), im.size
+          save(im.crop((500,0,4500,4000)),'recognition_02_recrop_640.webp')
+
+          files=[
+            ('REST-01','rest_01_slippers_640.webp','Pexels 7937987','crop [350,1650,2918,4218]'),
+            ('RESOURCE-03','resource_03_food_640.webp','existing Gallery/S07.webp','square fit'),
+            ('KNOWLEDGE-02','knowledge_02_online_learning_640.webp','Pexels 5905716','center square fit'),
+            ('OPPORTUNITY-01','opportunity_01_workbench_640.webp','existing Gallery/file_0000000024fc8210a5fb3823b3d86a9f.png','center square fit'),
+            ('RECOGNITION-02','recognition_02_recrop_640.webp','Pexels 8520508','crop [500,0,4500,4000]'),
+          ]
+          manifest={
+            'schema':'2rasi.priolens.open14.owner-remediation-assets-v0.3.1',
+            'revision':'owner-remediation-v01',
+            'render':{'format':'WEBP','width':640,'height':640,'quality':92,'resampling':'LANCZOS'},
+            'assets':[]
+          }
+          for eid,name,source,geometry in files:
+              p=out/name
+              b=p.read_bytes(); im=Image.open(p)
+              assert im.size==(640,640)
+              manifest['assets'].append({
+                'id':eid,'file':name,'source':source,'geometry':geometry,
+                'bytes':len(b),'sha256':hashlib.sha256(b).hexdigest()
+              })
+          (out/'OWNER_REMEDIATION_PROVENANCE_v0.3.1.json').write_text(json.dumps(manifest,ensure_ascii=False,indent=2),encoding='utf-8')
+
+          # compact owner contact sheet
+          font=ImageFont.load_default()
+          tiles=[]
+          for a in manifest['assets']:
+              im=Image.open(out/a['file']).convert('RGB').resize((260,260),R)
+              c=Image.new('RGB',(280,305),'white'); c.paste(im,(10,10))
+              ImageDraw.Draw(c).text((10,277),a['id'],fill='black',font=font)
+              tiles.append(c)
+          sheet=Image.new('RGB',(840,610),(235,235,235))
+          for i,t in enumerate(tiles): sheet.paste(t,((i%3)*280,(i//3)*305))
+          sheet.save(out/'owner_remediation_contact.jpg',quality=92)
+          print(json.dumps(manifest,ensure_ascii=False,indent=2))
+          PY
+          sha256sum out/*.webp | sort | tee remediation_sha256.txt
+
+      - name: Guard five exact unique outputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(find out -maxdepth 1 -name '*.webp' | wc -l)" = 5
+          test "$(cut -d' ' -f1 remediation_sha256.txt | sort -u | wc -l)" = 5
+          python - <<'PY'
+          import json
+          m=json.load(open('out/OWNER_REMEDIATION_PROVENANCE_v0.3.1.json'))
+          assert [a['id'] for a in m['assets']]==['REST-01','RESOURCE-03','KNOWLEDGE-02','OPPORTUNITY-01','RECOGNITION-02']
+          assert len({a['sha256'] for a in m['assets']})==5
+          PY
+
+      - name: Upload to isolated Hostinger remediation directory
+        shell: bash
+        run: |
+          set -euo pipefail
+          lftp -c "set ftp:ssl-allow no; set net:max-retries 4; set net:timeout 30; open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; mkdir -p \"$REMOTE_DIR\"; mirror -R --only-newer --parallel=2 out/ \"$REMOTE_DIR/\""
+
+      - name: Verify live bytes SHA-256
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import hashlib,json,subprocess,time
+          m=json.load(open('out/OWNER_REMEDIATION_PROVENANCE_v0.3.1.json'))
+          base='https://omesg360.eu/priolens-research-assets/Open14-v03-owner-remediation-v01'
+          rows=[]
+          for a in m['assets']:
+              ok=False
+              for attempt in range(1,9):
+                  p=f"/tmp/{a['file']}"
+                  r=subprocess.run(['curl','-fsS','--retry','2','--retry-delay','1','-H','Cache-Control: no-cache',f"{base}/{a['file']}?v={attempt}",'-o',p])
+                  if r.returncode==0:
+                      sha=hashlib.sha256(open(p,'rb').read()).hexdigest()
+                      if sha==a['sha256']:
+                          ok=True; rows.append({'id':a['id'],'url':f"{base}/{a['file']}",'sha256':sha,'http':200}); break
+                  time.sleep(2)
+              assert ok, f"live hash mismatch/unreachable: {a['id']}"
+          open('live_remediation_verify.json','w').write(json.dumps({'passed':True,'assets':rows},indent=2))
+          print(json.dumps({'passed':True,'assets':rows},indent=2))
+          PY
+
+      - name: Upload remediation artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: priolens-open14-v031-owner-remediation-assets
+          path: |
+            out/
+            source_sha256.txt
+            remediation_sha256.txt
+            live_remediation_verify.json
+          retention-days: 30
