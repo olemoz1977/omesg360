@@ -1,0 +1,53 @@
+name: Mark PrioLens Open14 v0.3 API gate pass
+
+on:
+  push:
+    branches:
+      - feature/priolens-open14-v03
+    paths:
+      - '.github/workflows/priolens-open14-v03-mark-api-gate.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  mark-api-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/priolens-open14-v03
+
+      - name: Guard and mark runtime ready for separate preview deploy
+        shell: bash
+        run: |
+          set -euo pipefail
+          python <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('priolens/open14-v03/bank.json')
+          bank=json.loads(p.read_text())
+          assert bank['schema']=='2rasi.priolens.open14.bank-v0.3'
+          assert bank['status']=='ASSET_GATE_PASS_API_PENDING_FAIL_CLOSED'
+          assert bank['runtimeReady'] is False
+          gate=bank['deploymentGate']
+          assert gate['new15Uploaded'] is True
+          assert gate['new15ReachabilityPassed'] is True
+          assert gate['new15HashPassed'] is True
+          assert gate['full42AuditPassed'] is True
+          bank['status']='API_GATE_PASS_READY_FOR_SEPARATE_PREVIEW_DEPLOY'
+          bank['runtimeReady']=True
+          bank['startPolicy']='READY_FOR_SEPARATE_V03_PARTICIPANT_PREVIEW_DEPLOY'
+          gate['apiDeployed']=True
+          gate['apiSmokePassed']=True
+          gate['apiSmokeRunId']=33757546461
+          p.write_text(json.dumps(bank,indent=2,ensure_ascii=False)+'\n')
+          PY
+
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add priolens/open14-v03/bank.json
+          git diff --cached --exit-code && { echo 'No bank change'; exit 1; } || true
+          git commit -m 'PrioLens v0.3: mark API gate pass and preview ready'
+          git push origin HEAD:feature/priolens-open14-v03
