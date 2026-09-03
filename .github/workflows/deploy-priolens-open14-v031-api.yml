@@ -1,0 +1,83 @@
+name: Deploy PrioLens Open14 v0.3.1 compatible API
+
+on:
+  push:
+    branches: [feature/priolens-open14-v03]
+    paths:
+      - '.github/workflows/deploy-priolens-open14-v031-api.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: omesg360-priolens-open14-v031-api
+  cancel-in-progress: true
+
+env:
+  FTP_HOST: 46.202.142.134
+  FTP_USER: ${{ secrets.HOSTINGER_FTP_USER }}
+  FTP_PASSWORD: ${{ secrets.HOSTINGER_FTP_PASSWORD }}
+  REMOTE_DIR: /domains/omesg360.eu/public_html/priolens-open14-v03-api
+
+jobs:
+  deploy-api:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/priolens-open14-v03
+
+      - name: Validate v0.3.1 compatible rank API source
+        shell: bash
+        run: |
+          set -euo pipefail
+          php -l priolens/open14-v03/server/api.php
+          php -l priolens/open14-v03/server/progress.php
+          for f in priolens/open14-v03/server/api.php priolens/open14-v03/server/progress.php; do
+            grep -Fq "2rasi.priolens.open14.rank-session-v0.3" "$f"
+            grep -Fq "2rasi.priolens.open14.bank-v0.3.1" "$f"
+            grep -Fq "2rasi.priolens.open14.bank-v0.3" "$f"
+          done
+          grep -Fq "leastChoice cannot equal choice" priolens/open14-v03/server/api.php
+          grep -Fq "pendingMost" priolens/open14-v03/server/progress.php
+
+      - name: Verify FTP secrets and install client
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ -n "${FTP_USER:-}" ]]
+          [[ -n "${FTP_PASSWORD:-}" ]]
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq lftp >/dev/null
+
+      - name: Upload only isolated API sources
+        shell: bash
+        run: |
+          set -euo pipefail
+          lftp -c "set ftp:ssl-allow no; set net:max-retries 4; set net:timeout 30; open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; mkdir -p \"$REMOTE_DIR\"; put -O \"$REMOTE_DIR/\" priolens/open14-v03/server/api.php; put -O \"$REMOTE_DIR/\" priolens/open14-v03/server/progress.php; put -O \"$REMOTE_DIR/\" priolens/open14-v02/server/.htaccess"
+
+      - name: Verify remote PHP bytes via FTP without touching config
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/v031-api-remote
+          lftp -c "set ftp:ssl-allow no; set net:max-retries 4; set net:timeout 30; open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; get \"$REMOTE_DIR/api.php\" -o /tmp/v031-api-remote/api.php; get \"$REMOTE_DIR/progress.php\" -o /tmp/v031-api-remote/progress.php"
+          cmp priolens/open14-v03/server/api.php /tmp/v031-api-remote/api.php
+          cmp priolens/open14-v03/server/progress.php /tmp/v031-api-remote/progress.php
+          echo 'PASS: remote v0.3.1 API PHP bytes match source'
+
+      - name: Public route boundary smoke
+        shell: bash
+        run: |
+          set -euo pipefail
+          API='https://omesg360.eu/priolens-open14-v03-api/api.php'
+          PROGRESS='https://omesg360.eu/priolens-open14-v03-api/progress.php'
+          CONFIG='https://omesg360.eu/priolens-open14-v03-api/config.php'
+          code=$(curl -sS -o /tmp/api-get -w '%{http_code}' "$API"); test "$code" = 405; grep -q 'Method not allowed' /tmp/api-get
+          code=$(curl -sS -o /tmp/progress-get -w '%{http_code}' "$PROGRESS"); test "$code" = 405; grep -q 'Method not allowed' /tmp/progress-get
+          code=$(curl -sS -o /tmp/config-get -w '%{http_code}' "$CONFIG"); test "$code" = 403
+          echo 'PASS: isolated public API routes alive; config remains protected'
+
+# Does not deploy or modify /priolens-open14-api/ (v0.2), participant preview, assets, or config.php.
