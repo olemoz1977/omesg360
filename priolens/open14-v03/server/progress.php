@@ -1,5 +1,5 @@
 <?php
-// PrioLens Open14 v0.3 partial-session checkpoint API source.
+// PrioLens Open14 v0.3 MOST+LEAST partial-session checkpoint API source.
 // Intended deploy target: /priolens-open14-v03-api/progress.php
 
 header('Content-Type: application/json; charset=utf-8');
@@ -30,7 +30,7 @@ $requiredTop = ['schema','sessionUuid','startedAt','completedAt','seed','planSch
 foreach ($requiredTop as $field) if (!array_key_exists($field, $body)) fail_json(400, 'Missing: '.$field);
 
 if (array_key_exists('language', $body) && !in_array($body['language'], ['lt','en'], true)) fail_json(400, 'Invalid language');
-if ($body['schema'] !== '2rasi.priolens.open14.session-v0.3') fail_json(400, 'Unsupported session schema');
+if ($body['schema'] !== '2rasi.priolens.open14.rank-session-v0.3') fail_json(400, 'Unsupported session schema');
 if ($body['sufficiencySchema'] !== '2rasi.priolens.sufficiency-v0.2') fail_json(400, 'Unsupported sufficiency schema');
 if ($body['bankSchema'] !== '2rasi.priolens.open14.bank-v0.3') fail_json(400, 'Unexpected bank schema');
 if ($body['planSchema'] !== '2rasi.priolens.p3.open14.plan-v0.2') fail_json(400, 'Unexpected family-plan schema');
@@ -70,15 +70,46 @@ foreach ($body['choices'] as $i => $trial) {
     $noClear = !empty($trial['noClearChoice']);
     if ($noClear) {
         if (array_key_exists('choice',$trial) && $trial['choice'] !== null) fail_json(400, 'noClearChoice conflicts with choice');
+        if (array_key_exists('leastChoice',$trial) && $trial['leastChoice'] !== null) fail_json(400, 'noClearChoice conflicts with leastChoice');
+        if (array_key_exists('leastTie',$trial) && $trial['leastTie'] !== null) fail_json(400, 'noClearChoice conflicts with leastTie');
+        if (array_key_exists('leastRtMs',$trial) && $trial['leastRtMs'] !== null) fail_json(400, 'noClearChoice conflicts with leastRtMs');
     } else {
         if (!isset($trial['choice']) || !is_array($trial['choice'])) fail_json(400, 'Missing choice');
         $c=$trial['choice'];
         if (!isset($c['familyId'],$c['exemplarId'],$c['slot'])) fail_json(400, 'Invalid choice');
-        $key=(string)$c['familyId'].'|'.(string)$c['exemplarId'].'|'.(int)$c['slot'];
-        if (!isset($presented[$key])) fail_json(400, 'Choice was not presented');
+        $choiceKey=(string)$c['familyId'].'|'.(string)$c['exemplarId'].'|'.(int)$c['slot'];
+        if (!isset($presented[$choiceKey])) fail_json(400, 'Choice was not presented');
+
+        if (!array_key_exists('leastTie',$trial) || !is_bool($trial['leastTie'])) fail_json(400, 'Missing least decision');
+        if ($trial['leastTie']) {
+            if (array_key_exists('leastChoice',$trial) && $trial['leastChoice'] !== null) fail_json(400, 'leastTie conflicts with leastChoice');
+        } else {
+            if (!isset($trial['leastChoice']) || !is_array($trial['leastChoice'])) fail_json(400, 'Missing leastChoice');
+            $lc=$trial['leastChoice'];
+            if (!isset($lc['familyId'],$lc['exemplarId'],$lc['slot'])) fail_json(400, 'Invalid leastChoice');
+            $leastKey=(string)$lc['familyId'].'|'.(string)$lc['exemplarId'].'|'.(int)$lc['slot'];
+            if (!isset($presented[$leastKey])) fail_json(400, 'leastChoice was not presented');
+            if ($leastKey === $choiceKey) fail_json(400, 'leastChoice cannot equal choice');
+        }
+        if (!array_key_exists('leastRtMs',$trial) || $trial['leastRtMs'] === null) fail_json(400, 'Missing leastRtMs');
+        $leastRt=(int)$trial['leastRtMs']; if ($leastRt < 0 || $leastRt > 600000) fail_json(400, 'Invalid leastRtMs');
     }
     if (isset($trial['rtMs']) && $trial['rtMs'] !== null) {
         $rt=(int)$trial['rtMs']; if ($rt < 0 || $rt > 600000) fail_json(400, 'Invalid rtMs');
+    }
+}
+
+if (array_key_exists('pendingMost', $body) && $body['pendingMost'] !== null) {
+    if (count($body['choices']) >= 14) fail_json(400, 'pendingMost not allowed after 14 completed choices');
+    if (!is_array($body['pendingMost'])) fail_json(400, 'Invalid pendingMost');
+    $pm=$body['pendingMost'];
+    if (!isset($pm['familyId'],$pm['exemplarId'],$pm['slot'])) fail_json(400, 'Invalid pendingMost');
+    $family=(string)$pm['familyId']; $exemplar=(string)$pm['exemplarId']; $slot=(int)$pm['slot'];
+    if (!isset($familySet[$family])) fail_json(400, 'Unknown pendingMost family');
+    if ($slot < 0 || $slot > 2) fail_json(400, 'Invalid pendingMost slot');
+    if (!in_array($exemplar, [$family.'-01',$family.'-02',$family.'-03'], true)) fail_json(400, 'Invalid pendingMost exemplar');
+    if (isset($pm['rtMs']) && $pm['rtMs'] !== null) {
+        $rt=(int)$pm['rtMs']; if ($rt < 0 || $rt > 600000) fail_json(400, 'Invalid pendingMost rtMs');
     }
 }
 
@@ -128,6 +159,6 @@ try {
     if (!$row) fail_json(500, 'Checkpoint lookup failed');
     echo json_encode(['ok'=>true,'saved'=>true,'submissionId'=>$row['submission_id'],'completedAlready'=>(bool)$row['completed']]);
 } catch (PDOException $e) {
-    error_log('PrioLens Open14 v0.3 progress API error: '.$e->getMessage());
+    error_log('PrioLens Open14 v0.3 rank progress API error: '.$e->getMessage());
     fail_json(500, 'Database error');
 }
