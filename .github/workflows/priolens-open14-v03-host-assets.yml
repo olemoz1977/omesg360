@@ -1,0 +1,58 @@
+name: Verify PrioLens Open14 v0.3 host assets
+
+on:
+  push:
+    branches:
+      - feature/priolens-open14-v03
+    paths:
+      - '.github/workflows/priolens-open14-v03-host-assets.yml'
+      - 'priolens/open14-v03/bank.json'
+  workflow_dispatch:
+
+jobs:
+  verify-new15:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify HTTP reachability and SHA-256 for new 15
+        shell: bash
+        run: |
+          set -euo pipefail
+          base='https://omesg360.eu/priolens-research-assets/Open14-v03'
+          tmp="$(mktemp -d)"
+          trap 'rm -rf "$tmp"' EXIT
+
+          cat > "$tmp/expected.tsv" <<'EOF'
+          rest_03_640.webp 47365b81492e9328a854da21400cc3755608826e2685f7b2fb4a247ea13f0e54
+          resource_03_640.webp 463070f164600e9dd1c2952469f4d0fc4377c053f29eb96da9ca8fe81dcd98c5
+          safety_03_640.webp 023e965b221d10327f90ad3876ecc2b1fba315b27349dd136c3fa190c4e7ec39
+          order_03_640.webp ad7384e7f7b2468ca358c069cbb2290c2e73422237c0650cb46481823fc2de7b
+          connection_03_640.webp 0cd63a71fa23625fd0ae054cad8195c6628c0dc37824b035fa88c5b2578d42a1
+          belonging_03_640.webp 5506a4a3a754683b077fc2f853a22d4d7189df7d727e1cfa14441c6786a606f6
+          care_03_640.webp fa69899211f3ae297d8d18302105c7d8716e169a424d8ad888dd3b83103ea673
+          autonomy_03_640.webp 2511883b2b4e458f5f0451d68258bb3ad021b7c89072ea4aa257798241ffe54a
+          control_03_640.webp 65f9844186a144616b26004c4276ad00fa4c244d0bb725afb1d353ffdb664b4c
+          recognition_02_640.webp 99e34a92ea838015c93b76bcc9c4321795750290349d4532c0f019dee4309831
+          recognition_03_640.webp 7aaef13579f2bced74e66e139146d5be1df417f26d420c74714d5a4fcde3e08e
+          mastery_03_640.webp d3ff407d59274aaa5bad7376ccdaf764107bdb7aff203d9c04bfae38718f3c73
+          exploration_03_640.webp 924890821cddab00165cc2d26f43788bad1fb3f3f252d3dc4776bdad6f683a93
+          knowledge_03_640.webp e8acaeedc9fe8e3a4844e020bda01716cd85aa6effeea1385deb2284cce8a0d5
+          opportunity_03_640.webp ee85b4cde98717259052fb941fa7bb3e788c44f40c3c47fdb5450cb061d42326
+          EOF
+
+          pass=0
+          while read -r file expected; do
+            url="$base/$file"
+            out="$tmp/$file"
+            code="$(curl --fail-with-body --location --silent --show-error \
+              --connect-timeout 15 --max-time 60 \
+              --output "$out" --write-out '%{http_code}' "$url")"
+            test "$code" = '200'
+            actual="$(sha256sum "$out" | awk '{print $1}')"
+            bytes="$(stat -c '%s' "$out")"
+            printf '%-32s HTTP=%s bytes=%s sha256=%s\n' "$file" "$code" "$bytes" "$actual"
+            test "$actual" = "$expected"
+            pass=$((pass+1))
+          done < "$tmp/expected.tsv"
+
+          test "$pass" -eq 15
+          echo "PASS: $pass/15 public assets reachable and byte-identical to canonical geometry outputs."
