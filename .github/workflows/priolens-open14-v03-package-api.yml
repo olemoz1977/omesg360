@@ -1,4 +1,4 @@
-name: Package PrioLens Open14 v0.3 API
+name: Package PrioLens Open14 v0.3 MOST+LEAST API
 
 on:
   push:
@@ -15,10 +15,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Build API upload package
+      - name: Guard rank API source and build upload ZIP
         shell: bash
         run: |
           set -euo pipefail
+          php -l priolens/open14-v03/server/api.php
+          php -l priolens/open14-v03/server/progress.php
+          grep -q "2rasi.priolens.open14.rank-session-v0.3" priolens/open14-v03/server/api.php
+          grep -q "leastChoice cannot equal choice" priolens/open14-v03/server/api.php
+          grep -q "pendingMost" priolens/open14-v03/server/progress.php
+
           dir='priolens_open14_v03_api_upload'
           rm -rf "$dir" priolens_open14_v03_api_upload.zip
           mkdir -p "$dir"
@@ -26,7 +32,7 @@ jobs:
           cp priolens/open14-v03/server/progress.php "$dir/progress.php"
           cp priolens/open14-v02/server/.htaccess "$dir/.htaccess"
           cat > "$dir/README_UPLOAD.txt" <<'EOF'
-          PrioLens Open14 v0.3 API upload package
+          PrioLens Open14 v0.3 MOST+LEAST API upload package
 
           TARGET DIRECTORY
           public_html/priolens-open14-v03-api/
@@ -38,23 +44,26 @@ jobs:
           - README_UPLOAD.txt
 
           IMPORTANT
-          1. Do NOT overwrite /priolens-open14-api/ (live v0.2 API).
-          2. After extracting this ZIP into /priolens-open14-v03-api/, copy the existing secure config.php from the live v0.2 API directory into the new v0.3 API directory using Hostinger File Manager.
-          3. Do not download/share config.php; it contains DB credentials.
-          4. Keep the new v0.3 endpoint separate until smoke passes.
+          1. Extract into the EXISTING /priolens-open14-v03-api/ directory and overwrite api.php/progress.php/.htaccess.
+          2. Do NOT overwrite /priolens-open14-api/ (live v0.2 API).
+          3. Keep the existing secure config.php in /priolens-open14-v03-api/ unchanged. It is intentionally not included in this ZIP.
+          4. The API now accepts session schema 2rasi.priolens.open14.rank-session-v0.3 and rejects the previous positive-only v0.3 session schema.
+          5. Final sessions require MOST+LEAST consistency. Progress checkpoints support pendingMost so reload between the two decisions can resume correctly.
 
-          EXPECTED PUBLIC ENDPOINTS AFTER SETUP
+          EXPECTED PUBLIC ENDPOINTS
           https://omesg360.eu/priolens-open14-v03-api/api.php
           https://omesg360.eu/priolens-open14-v03-api/progress.php
 
-          A browser GET should return HTTP 405 / JSON "Method not allowed". That confirms the PHP route is executing; POST behavior will be smoke-tested separately.
+          After upload, run the dedicated deployed MOST+LEAST API smoke before participant smoke.
           EOF
           zip -qr priolens_open14_v03_api_upload.zip "$dir"
-          sha256sum priolens_open14_v03_api_upload.zip
+          sha256sum priolens_open14_v03_api_upload.zip | tee api_zip_sha256.txt
 
       - name: Upload API package
         uses: actions/upload-artifact@v4
         with:
           name: priolens-open14-v03-api-upload
-          path: priolens_open14_v03_api_upload.zip
+          path: |
+            priolens_open14_v03_api_upload.zip
+            api_zip_sha256.txt
           retention-days: 30
