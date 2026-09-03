@@ -1,0 +1,182 @@
+name: Smoke PrioLens Open14 v0.3 deployed participant preview
+
+on:
+  push:
+    branches: [feature/priolens-open14-v03]
+    paths:
+      - '.github/workflows/priolens-open14-v03-deployed-participant-smoke.yml'
+  workflow_dispatch:
+
+jobs:
+  deployed-participant-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify deployed runtime bytes, bank gate and 42 paths
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE='https://omesg360.eu/priolens-open14-v03'
+          mkdir -p deployed
+          for f in index.html bank.json p3_open14_planner_v02.mjs open14_no_repeat_assigner_v03.mjs; do
+            curl -fsS --retry 3 "$BASE/$f" -o "deployed/$f"
+            cmp "priolens/open14-v03/$f" "deployed/$f"
+            echo "BYTE PASS $f"
+          done
+
+          curl -fsS "$BASE/?lang=lt&from=lt" -o /tmp/lt.html
+          curl -fsS "$BASE/?lang=en&from=com" -o /tmp/en.html
+          cmp deployed/index.html /tmp/lt.html
+          cmp deployed/index.html /tmp/en.html
+
+          ctype=$(curl -fsSI "$BASE/p3_open14_planner_v02.mjs" | tr -d '\r' | awk -F': ' 'tolower($1)=="content-type"{print tolower($2)}' | tail -1)
+          echo "MJS content-type: $ctype"
+          case "$ctype" in
+            *javascript*|*ecmascript*) ;;
+            *) echo "Unexpected .mjs content type: $ctype" >&2; exit 1;;
+          esac
+
+          python <<'PY'
+          import json, urllib.request
+          bank=json.load(open('deployed/bank.json'))
+          assert bank['schema']=='2rasi.priolens.open14.bank-v0.3'
+          assert bank['runtimeReady'] is True
+          assert bank['status']=='API_GATE_PASS_READY_FOR_SEPARATE_PREVIEW_DEPLOY'
+          gate=bank['deploymentGate']
+          assert gate['full42AuditPassed'] is True
+          assert gate['apiDeployed'] is True
+          assert gate['apiSmokePassed'] is True
+          rows=[x for f in bank['families'].values() for x in f['exemplars']]
+          assert len(rows)==42
+          assert len({x['id'] for x in rows})==42
+          assert len({x['runtimePath'] for x in rows})==42
+          for i,x in enumerate(rows,1):
+              req=urllib.request.Request('https://omesg360.eu'+x['runtimePath'], method='HEAD', headers={'User-Agent':'PrioLens-v03-deployed-smoke/1.0'})
+              with urllib.request.urlopen(req, timeout=30) as r:
+                  assert r.status==200, (x['id'],r.status)
+              print(f"PATH {i:02d}/42 PASS {x['id']}")
+          PY
+
+          grep -q "const API_PATH='/priolens-open14-v03-api/api.php'" deployed/index.html
+          grep -q "const PROGRESS_PATH='/priolens-open14-v03-api/progress.php'" deployed/index.html
+          grep -q "2rasi.priolens.open14.session-v0.3" deployed/index.html
+          grep -q "localStorage.setItem(DRAFT_KEY" deployed/index.html
+          echo 'PASS: deployed bytes/bank/MIME/42-path/static integration checks'
+
+      - name: Install Playwright Chromium
+        shell: bash
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+
+      - name: Chromium LT full UI + resume + 42 no-repeat and EN surface smoke
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > /tmp/priolens-ui-smoke.mjs <<'NODE'
+          import { chromium } from 'playwright';
+
+          const BASE='https://omesg360.eu/priolens-open14-v03/';
+          const browser=await chromium.launch({headless:true});
+          const context=await browser.newContext({viewport:{width:390,height:844}});
+          const page=await context.newPage();
+          const intercepted=[];
+
+          await page.route('**/priolens-open14-v03-api/progress.php', async route=>{
+            const req=route.request();
+            const body=JSON.parse(req.postData()||'{}');
+            if(body.schema!=='2rasi.priolens.open14.session-v0.3') throw new Error('UI progress used wrong session schema');
+            intercepted.push({kind:'progress',body});
+            await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,saved:true,submissionId:'SYSTEM-SMOKE-NOT-PERSISTED',completedAlready:false})});
+          });
+          await page.route('**/priolens-open14-v03-api/api.php', async route=>{
+            const req=route.request();
+            const body=JSON.parse(req.postData()||'{}');
+            if(body.schema!=='2rasi.priolens.open14.session-v0.3') throw new Error('UI final used wrong session schema');
+            if(body.bankSchema!=='2rasi.priolens.open14.bank-v0.3') throw new Error('UI final used wrong bank schema');
+            if(body.assignerSchema!=='2rasi.priolens.open14.exemplars-v0.3') throw new Error('UI final used wrong assigner schema');
+            intercepted.push({kind:'final',body});
+            await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,inserted:true,submissionId:'SYSTEM-SMOKE-NOT-PERSISTED'})});
+          });
+
+          await page.goto(BASE+'?lang=lt&from=lt',{waitUntil:'networkidle'});
+          if(await page.locator('html').getAttribute('lang')!=='lt') throw new Error('LT html lang failed');
+          await page.waitForFunction(()=>document.querySelector('#start') && !document.querySelector('#start').disabled);
+          if(!(await page.locator('#exit2rasi').getAttribute('href')).startsWith('https://2rasi.lt/')) throw new Error('LT return target failed');
+
+          await page.click('#start');
+          await page.waitForSelector('#trial.active');
+          const seen=new Set();
+          async function captureTrial(){
+            const ids=await page.locator('.stim img').evaluateAll(imgs=>imgs.map(x=>x.dataset.exemplar));
+            if(ids.length!==3 || ids.some(x=>!x)) throw new Error('Missing exemplar ids on trial');
+            for(const id of ids){ if(seen.has(id)) throw new Error('Exact exemplar repeated in deployed UI: '+id); seen.add(id); }
+          }
+
+          await captureTrial();
+          await page.click('.stim[data-slot="0"]');
+          await page.waitForFunction(()=>document.querySelector('#counter')?.textContent?.trim()==='2 / 14');
+
+          // Reload tests local draft discovery and deterministic resume of the same session.
+          await page.reload({waitUntil:'networkidle'});
+          await page.waitForFunction(()=>document.querySelector('#start') && !document.querySelector('#start').disabled);
+          if(await page.locator('#start').getAttribute('data-resume')!=='1') throw new Error('Resume offer was not restored after reload');
+          await page.click('#start');
+          await page.waitForSelector('#trial.active');
+          await page.waitForFunction(()=>document.querySelector('#counter')?.textContent?.trim()==='2 / 14');
+
+          for(let trial=2; trial<=14; trial++){
+            await captureTrial();
+            await page.click('.stim[data-slot="0"]');
+            if(trial<14){
+              const next=`${trial+1} / 14`;
+              await page.waitForFunction(next=>document.querySelector('#counter')?.textContent?.trim()===next,next);
+            }
+          }
+          if(seen.size!==42) throw new Error('Expected 42 unique deployed UI exemplars, got '+seen.size);
+          await page.waitForSelector('#suff.active');
+
+          for(let d=1; d<=6; d++){
+            const ranges=page.locator('#domainMount input[type="range"]');
+            if(await ranges.count()!==2) throw new Error(`Expected 2 sufficiency ranges on page ${d}`);
+            for(let i=0;i<2;i++){
+              await ranges.nth(i).evaluate(el=>{
+                el.value='3';
+                el.dispatchEvent(new Event('input',{bubbles:true}));
+                el.dispatchEvent(new Event('change',{bubbles:true}));
+              });
+            }
+            await page.click('#suffNext');
+            if(d<6) await page.waitForFunction(n=>document.querySelector('#suffCount')?.textContent?.trim()===`${n} / 6`,d+1);
+          }
+          await page.waitForSelector('#result.active');
+          await page.waitForFunction(()=>document.querySelector('#saveStatus') && !document.querySelector('#saveStatus').textContent.includes('tikrinamas'),null,{timeout:10000});
+          if(!intercepted.some(x=>x.kind==='final')) throw new Error('Final UI POST was not attempted');
+          const final=intercepted.find(x=>x.kind==='final').body;
+          if(final.choices?.length!==14) throw new Error('Final payload choices != 14');
+          const presented=final.choices.flatMap(t=>t.stimuli.map(s=>s.exemplarId));
+          if(new Set(presented).size!==42) throw new Error('Final payload does not contain 42 unique exemplars');
+          if(Object.keys(final.sufficiency||{}).length!==12) throw new Error('Final payload sufficiency != 12');
+          console.log('LT PASS: full participant UI, autosave/reload/resume, 42 unique exemplar presentation, 6 sufficiency screens, final v0.3 POST attempt');
+
+          const enContext=await browser.newContext({viewport:{width:390,height:844}});
+          const en=await enContext.newPage();
+          await en.route('**/priolens-open14-v03-api/**', route=>route.fulfill({status:200,contentType:'application/json',body:'{"ok":true,"saved":true}'}));
+          await en.goto(BASE+'?lang=en&from=com',{waitUntil:'networkidle'});
+          await en.waitForFunction(()=>document.querySelector('#start') && !document.querySelector('#start').disabled);
+          if(await en.locator('html').getAttribute('lang')!=='en') throw new Error('EN html lang failed');
+          if(!(await en.locator('#exit2rasi').getAttribute('href')).startsWith('https://2rasi.com/')) throw new Error('EN return target failed');
+          const lead=(await en.locator('#intro .lead').textContent())||'';
+          if(!/Three images|Choose|attention/i.test(lead)) throw new Error('EN intro copy not applied');
+          await en.click('#start');
+          await en.waitForSelector('#trial.active');
+          const enIds=await en.locator('.stim img').evaluateAll(imgs=>imgs.map(x=>x.dataset.exemplar));
+          if(enIds.length!==3 || new Set(enIds).size!==3) throw new Error('EN first trial invalid');
+          console.log('EN PASS: language, .com return target, bank ready, participant start, first deployed triad');
+
+          await browser.close();
+          console.log('PASS: deployed participant Chromium smoke');
+          NODE
+          node /tmp/priolens-ui-smoke.mjs
