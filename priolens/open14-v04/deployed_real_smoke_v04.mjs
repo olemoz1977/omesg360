@@ -50,6 +50,7 @@ try{
   await page.waitForSelector('#shipCard');
   await page.waitForSelector('#mapCard');
   await page.waitForSelector('.resultScene');
+  if(await page.locator('.worldRenderError').count()) throw new Error('result error boundary is visible');
   const continents=await page.locator('#needsMapStage .continent').count();
   if(continents!==6) throw new Error('needs map must render 6 continents, got: '+continents);
   const needNodes=await page.locator('#needsMapStage .needNode').count();
@@ -61,13 +62,15 @@ try{
   if(await page.locator('#needsMapStage .routeTarget').count()!==0) throw new Error('all-5 Channel B must not mark route targets');
   const resultText=((await page.locator('#result').textContent())||'');
   if(resultText.includes('Ką matai, kai palygini abu?')) throw new Error('legacy automatic A/B comparison still visible');
-  await page.click('#shipCard');
-  if(await page.locator('#attentionDetail').evaluate(el=>el.classList.contains('hidden'))) throw new Error('ship detail did not open');
-  await page.click('#mapCard');
-  if(await page.locator('#suffDetail').evaluate(el=>el.classList.contains('hidden'))) throw new Error('map detail did not open');
+  await page.locator('#shipCard').focus();
+  await page.keyboard.press('Enter');
+  if(await page.locator('#attentionDetail').evaluate(el=>el.classList.contains('hidden'))) throw new Error('ship detail did not open from keyboard');
+  await page.locator('#mapCard').focus();
+  await page.keyboard.press('Space');
+  if(await page.locator('#suffDetail').evaluate(el=>el.classList.contains('hidden'))) throw new Error('map detail did not open from keyboard');
   const draftKeys=await page.evaluate(()=>Object.keys(localStorage).filter(k=>k.includes('priolens.open14.v04.rank.draft')));
   if(draftKeys.length) throw new Error('v0.4 draft not cleared after successful live save');
-  console.log('PASS: deployed v0.4 unified ship-water-map scene + 6x12 needs map + details + isolated live API');
+  console.log('PASS: deployed v0.4 hardened scene + 6x12 needs map + keyboard details + isolated live API');
 } finally {
   await browser.close();
 }
