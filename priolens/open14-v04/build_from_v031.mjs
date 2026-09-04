@@ -137,7 +137,6 @@ html=replaceOnce(html,localDraftClearAnchor,localDraftClearAnchor+'\n'+completed
 html=replaceOnce(html,"$('start').disabled=false;$('bankCard').classList.add('ready');offerResumeIfAvailable()","$('start').disabled=false;$('bankCard').classList.add('ready');if(!restoreLastResultIfAvailable())offerResumeIfAvailable()",'restore completed result on init');
 html=replaceOnce(html,"state.submission={ok:true,inserted:Boolean(data.inserted),submissionId:data.submissionId||null};clearLocalDraft();","state.submission={ok:true,inserted:Boolean(data.inserted),submissionId:data.submissionId||null};saveLocalResult();clearLocalDraft();",'completed result after submit success');
 html=replaceOnce(html,"state.submission={ok:false,error:String(err)};el.textContent=T.saveFailed;","state.submission={ok:false,error:String(err)};saveLocalResult();el.textContent=T.saveFailed;",'completed result after submit failure');
-html=replaceOnce(html,"state.rankProtocol='most+least+a-plus+b-plus-v0.4';show('result');renderResult();finalSubmitPromise=submitSession()","state.rankProtocol='most+least+a-plus+b-plus-v0.4';saveLocalResult();show('result');renderResult();finalSubmitPromise=submitSession()",'snapshot completed result before submit');
 html=replaceOnce(html,"state.selfExplanationSave={ok:true,at:new Date().toISOString()};","state.selfExplanationSave={ok:true,at:new Date().toISOString()};saveLocalResult();",'persist restored self explanation success');
 html=replaceOnce(html,"state.selfExplanationSave={ok:false,error:String(err)};","state.selfExplanationSave={ok:false,error:String(err)};saveLocalResult();",'persist restored self explanation failure');
 html=replaceOnce(html,"$('restart').onclick=()=>{clearLocalDraft();location.reload()}","$('restart').onclick=()=>{clearLocalDraft();clearLocalResult();location.reload()}",'restart clears completed result');
@@ -146,6 +145,7 @@ html=replaceOnce(html,"$('restart').onclick=()=>{clearLocalDraft();location.relo
 html=replaceOnce(html,"if(state.choices.length<14)renderTrial();else{show('suff');renderSuff()}","if(state.choices.length<14)renderTrial();else afterChannelA()",'post Channel-A transition');
 html=replaceOnce(html,"if(suffIndex<5){suffIndex++;renderSuff()}else finish()","if(suffIndex<5){suffIndex++;renderSuff()}else afterChannelB()",'post Channel-B transition');
 html=replaceOnce(html,"state.rankProtocol='most+least-v0.3';","state.rankProtocol='most+least+a-plus+b-plus-v0.4';",'rank protocol');
+html=replaceOnce(html,"state.rankProtocol='most+least+a-plus+b-plus-v0.4';show('result');renderResult();finalSubmitPromise=submitSession()","state.rankProtocol='most+least+a-plus+b-plus-v0.4';saveLocalResult();show('result');renderResult();finalSubmitPromise=submitSession()",'snapshot completed result before submit');
 
 const resumeStart=html.indexOf('async function resumeSession(){');
 const resumeEnd=html.indexOf('function show(id){',resumeStart);
