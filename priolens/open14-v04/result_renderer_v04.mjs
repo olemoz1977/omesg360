@@ -258,7 +258,7 @@ export function renderResultWorldV04({state,lang='lt',familyLabels,itemLabels,re
     :'';
   q('attentionNote').classList.toggle('hidden',!q('attentionNote').textContent);
 
-  q('leastLabel').textContent=lang==='en'?'Channel A detail':'Channel A detalė';
+  q('leastLabel').textContent='';q('leastLabel').classList.add('hidden');
   q('leastHeading').textContent=C.leastTitle;
   q('leastNote').textContent=C.leastNote;
   const lm=q('leastRows');lm.innerHTML='';
