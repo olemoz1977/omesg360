@@ -5,6 +5,7 @@ const BASE=process.env.PRIOLENS_V04_BASE||'http://127.0.0.1:8765/';
 const SCHEMA='2rasi.priolens.open14.rank-session-v0.4';
 const BANK='2rasi.priolens.open14.bank-v0.3.1';
 const DRAFT='priolens.open14.v04.rank.draft.lt';
+const RESULT='priolens.open14.v04.last-result.lt';
 const svg='<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><rect width="64" height="64" fill="#ddd"/></svg>';
 
 const browser=await chromium.launch({headless:true});
@@ -155,10 +156,28 @@ try{
   await page.waitForFunction(()=>!new URLSearchParams(location.search).has('detail'));
 
   if(await page.evaluate(k=>localStorage.getItem(k),DRAFT)!==null)throw new Error('v0.4 draft not cleared after successful final save');
+  const storedResult=JSON.parse(await page.evaluate(k=>localStorage.getItem(k),RESULT));
+  if(!storedResult?.completedAt||storedResult?.submission?.ok!==true)throw new Error('completed result snapshot missing after successful final save');
+  const finalPostCountBeforeReload=finalPayloads.length;
+  const focusBeforeReload=((await page.locator('#shipFocus').textContent())||'').trim();
+  const routeBeforeReload=((await page.locator('#mapRoute').textContent())||'').trim();
+
+  await page.reload({waitUntil:'networkidle'});
+  await page.waitForSelector('#result.active');
+  const restoredStatus=((await page.locator('#saveStatus').textContent())||'').trim();
+  if(!restoredStatus.includes('atkurta'))throw new Error('completed result was not identified as restored after reload: '+restoredStatus);
+  if(((await page.locator('#shipFocus').textContent())||'').trim()!==focusBeforeReload)throw new Error('restored focus changed after reload');
+  if(((await page.locator('#mapRoute').textContent())||'').trim()!==routeBeforeReload)throw new Error('restored route changed after reload');
+  if(finalPayloads.length!==finalPostCountBeforeReload)throw new Error('restoring a completed result must not POST the final session again');
+
+  await page.click('#restart');
+  await page.waitForSelector('#intro.active');
+  if(await page.evaluate(k=>localStorage.getItem(k),RESULT)!==null)throw new Error('Atlikti dar kartą did not clear completed result snapshot');
+
   const keys=await page.evaluate(()=>Object.keys(localStorage));
   if(keys.some(k=>k.includes('priolens.open14.v031.rank.draft')))throw new Error('v0.3.1 draft namespace leaked into v0.4');
 
-  console.log('PASS: v0.4 local 390x844 enlarged A+ runoff + adaptive resume + one-land result map + clean attention detail + sufficiency bottom sheet + final payload');
+  console.log('PASS: v0.4 local 390x844 enlarged A+ runoff + adaptive resume + one-land result map + clean details + completed-result reload restore + restart clear + final payload');
 } finally {
   await browser.close();
 }
