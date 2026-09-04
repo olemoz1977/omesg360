@@ -122,7 +122,7 @@ function drawNeedsMapRoutes(stage){
   const width=Math.max(1,stage.clientWidth||0),height=Math.max(1,stage.clientHeight||0);
   svg.setAttribute('viewBox','0 0 '+width+' '+height);
   const stageRect=stage.getBoundingClientRect();
-  const targets=[...stage.querySelectorAll('.needNode.routeTarget')];
+  const targets=[...stage.querySelectorAll('.mapPin')];
   if(!targets.length)return;
   const ns='http://www.w3.org/2000/svg';
   const originX=Math.max(16,width*0.18),originY=height+4;
@@ -152,23 +152,45 @@ function scheduleNeedsMapRoutes(stage){
 }
 const LAND_SHAPES=[
   {
-    coast:'M18 78 C21 52 41 35 68 31 C82 13 114 14 132 27 C151 18 180 20 194 36 C224 37 239 55 234 77 C245 94 227 111 205 112 C190 133 157 137 132 127 C105 143 71 136 60 119 C35 121 13 103 18 78 Z',
-    detail:'M47 59 C68 45 91 43 111 46 M159 39 C177 42 194 49 207 61 M72 112 C92 119 111 118 127 112'
+    coast:'M27 85 C18 69 30 50 52 46 C55 29 77 20 94 27 C108 12 137 17 148 31 C165 22 189 25 198 42 C219 40 235 55 230 74 C244 87 233 105 213 108 C204 127 180 134 160 126 C144 140 116 137 104 124 C84 137 60 127 57 111 C37 111 23 100 27 85 Z',
+    detail:'M52 54 C68 47 83 49 96 56 M155 42 C169 45 183 52 193 62 M79 111 C92 117 105 116 116 111',
+    mountain:'M61 102 L78 79 L88 92 L98 72 L113 101 M161 109 L178 86 L187 98 L198 80 L211 109',
+    river:'M116 39 C120 56 114 68 122 81 C128 92 124 104 132 117',
+    lake:'M94 104 C103 97 116 98 121 105 C118 113 105 117 96 113 C91 110 91 106 94 104 Z',
+    grove:'M48 90 C53 83 59 81 64 85 C69 78 77 78 80 84 C84 83 89 87 88 92 C79 96 57 97 48 90 Z M176 58 C181 51 188 50 192 55 C197 49 204 51 206 57 C212 56 216 61 214 66 C203 69 185 68 176 58 Z',
+    islets:'M16 101 C11 94 14 86 22 84 C29 86 31 94 27 100 C23 104 19 104 16 101 Z M226 112 C221 105 224 98 231 97 C238 99 240 106 236 112 C233 116 229 116 226 112 Z'
   },
   {
-    coast:'M21 63 C34 42 55 38 77 38 C89 18 120 18 137 32 C156 20 184 25 194 42 C218 39 237 57 232 78 C244 95 227 113 204 111 C192 133 159 137 139 126 C117 143 88 138 76 122 C50 126 27 113 29 93 C14 85 11 73 21 63 Z',
-    detail:'M54 50 C75 46 91 49 106 57 M148 39 C164 43 179 51 189 62 M93 122 C113 126 128 124 142 118'
+    coast:'M25 70 C29 50 49 41 67 42 C78 23 104 21 119 34 C136 23 159 28 168 44 C188 41 208 54 210 71 C227 80 224 98 210 107 C206 124 184 132 166 126 C151 140 126 138 111 126 C92 139 68 132 61 118 C42 120 26 108 29 92 C18 86 16 77 25 70 Z',
+    detail:'M51 60 C68 55 82 57 94 64 M142 46 C157 50 170 56 180 67 M88 119 C103 124 117 123 129 117',
+    mountain:'M54 101 L69 82 L79 93 L91 73 L106 101 M148 105 L161 89 L171 97 L181 82 L196 106',
+    river:'M112 44 C109 58 117 69 113 82 C109 94 116 105 123 117',
+    lake:'M77 101 C84 95 96 96 101 102 C98 110 86 113 79 110 C75 108 75 104 77 101 Z',
+    grove:'M45 82 C49 76 55 74 59 78 C65 71 72 73 75 79 C80 79 84 83 83 88 C73 91 54 91 45 82 Z M163 64 C168 57 175 57 179 61 C184 55 191 57 193 63 C198 63 202 67 201 72 C191 75 171 74 163 64 Z',
+    islets:'M20 112 C15 106 18 100 24 99 C30 101 32 107 29 112 C26 115 22 115 20 112 Z M215 51 C211 45 214 39 220 38 C226 40 228 46 225 51 C222 54 218 54 215 51 Z'
   },
   {
-    coast:'M17 83 C13 63 30 48 53 45 C61 24 91 17 111 29 C128 14 160 18 173 34 C198 28 222 40 226 59 C242 69 238 91 222 101 C221 123 193 135 170 127 C150 143 121 141 102 126 C77 138 50 128 44 111 C23 110 10 98 17 83 Z',
-    detail:'M44 59 C61 52 78 53 94 59 M139 34 C157 35 174 42 187 52 M120 124 C137 129 152 128 166 121'
+    coast:'M22 88 C17 69 32 54 51 50 C57 31 81 24 98 34 C113 20 139 23 151 38 C171 31 192 41 196 58 C214 65 214 83 201 94 C204 113 185 127 166 124 C151 139 126 138 111 126 C91 138 68 128 63 114 C44 115 27 105 22 88 Z',
+    detail:'M47 63 C62 57 77 58 89 64 M136 43 C150 46 163 52 173 61 M91 118 C106 123 119 122 130 117',
+    mountain:'M49 105 L63 87 L73 96 L84 78 L99 105 M145 109 L158 91 L168 100 L179 84 L194 109',
+    river:'M101 43 C110 56 105 69 113 80 C121 91 118 105 128 118',
+    lake:'M83 102 C91 95 103 97 108 103 C105 111 94 114 85 111 C81 109 80 105 83 102 Z',
+    grove:'M39 88 C44 82 50 80 54 84 C59 77 66 78 69 84 C74 83 79 87 78 92 C68 95 49 96 39 88 Z M160 60 C165 53 172 53 176 58 C181 52 188 54 190 60 C195 60 199 64 198 69 C188 72 169 71 160 60 Z',
+    islets:'M15 70 C10 64 13 58 19 57 C25 59 27 65 24 70 C21 73 17 73 15 70 Z M206 112 C201 106 204 100 210 99 C216 101 218 107 215 112 C212 115 208 115 206 112 Z'
   }
 ];
 function landShapeHtml(index){
   const shape=LAND_SHAPES[index%LAND_SHAPES.length];
   return '<svg class="landShape" viewBox="0 0 250 150" preserveAspectRatio="none" aria-hidden="true">'+
+    '<path class="landShoreHaloOuter" d="'+shape.coast+'"></path>'+
+    '<path class="landShoreHaloInner" d="'+shape.coast+'"></path>'+
     '<path class="landFill" d="'+shape.coast+'"></path>'+
+    '<path class="landIslet" d="'+shape.islets+'"></path>'+
     '<path class="landCoastDetail" d="'+shape.detail+'"></path>'+
+    '<path class="landTerrain" d="'+shape.mountain+'"></path>'+
+    '<path class="landTerrain" d="'+shape.river+'"></path>'+
+    '<path class="landWater" d="'+shape.lake+'"></path>'+
+    '<path class="landTerrainFill" d="'+shape.grove+'"></path>'+
     '</svg>';
 }
 function renderNeedsMap(stage,lang,routeIds,itemLabels,emptyText){
@@ -189,10 +211,10 @@ function renderNeedsMap(stage,lang,routeIds,itemLabels,emptyText){
   stage.appendChild(svg);
   lands.forEach((land,index)=>{
     const continent=document.createElement('span');
-    continent.className='continent';
+    continent.className='continent'+(land.items.length>1?' multiTargets':'');
     continent.innerHTML=landShapeHtml(index)+
       '<span class="continentTitle">'+escapeHtml(land.title)+'</span>'+
-      land.items.map(id=>'<span class="needNode routeTarget" data-need-id="'+escapeHtml(id)+'">'+escapeHtml(capFirst(itemLabels[id]||id))+'</span>').join('');
+      land.items.map(id=>'<span class="needNode routeTarget" data-need-id="'+escapeHtml(id)+'"><span class="mapPin" aria-hidden="true"></span><span class="needText">'+escapeHtml(capFirst(itemLabels[id]||id))+'</span></span>').join('');
     stage.appendChild(continent);
   });
   scheduleNeedsMapRoutes(stage);
