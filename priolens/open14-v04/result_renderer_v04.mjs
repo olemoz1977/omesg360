@@ -31,7 +31,7 @@ const COPY={
     bHard:'Kelios sritys turėjo tą patį žemiausią įvertinimą, bet B+ vienos krypties neišskyrei. Todėl maršrutas nebrėžiamas.',
     bNoLow:'Pagal tavo atsakymus aiški mažesnio pakankamumo kryptis neišsiskyrė. Žemėlapis jos neforsuoja.',
     bNoNumeric:'Pakankamai aiškių skaitinių atsakymų maršrutui nėra.',
-    routePrefix:'Maršrutas',
+    routePrefix:'Maršrutas',backToResult:'← Grįžti į rezultatą',
     separate:'Laivas rodo pirmo žvilgsnio fokusą. Žemėlapis remiasi tik tavo pakankamumo atsakymais.'
   },
   en:{
@@ -60,7 +60,7 @@ const COPY={
     bHard:'Several areas had the same lowest rating, but in B+ you did not single out one. No route is drawn.',
     bNoLow:'Your answers did not produce a clear lower-sufficiency direction. The map does not force one.',
     bNoNumeric:'There were not enough clear numeric answers to draw a route.',
-    routePrefix:'Route',
+    routePrefix:'Route',backToResult:'← Back to result',
     separate:'The ship shows the first-glance focus. The map is based only on your sufficiency answers.'
   }
 };
@@ -134,9 +134,33 @@ function routeExplanation(b,C){
   if(b.source==='B_NO_LOW_ROUTE')return C.bNoLow;
   return C.bNoNumeric;
 }
-function setExpanded(button,detail,open){
-  detail.classList.toggle('hidden',!open);
-  button.setAttribute('aria-expanded',open?'true':'false');
+function detailRoute(){
+  const x=new URLSearchParams(location.search).get('detail');
+  return x==='attention'||x==='sufficiency'?x:null;
+}
+function applyDetailRoute(){
+  const kind=detailRoute();
+  const result=q('result');
+  const a=q('attentionDetail'),b=q('suffDetail');
+  const aButton=q('shipDetailsButton'),bButton=q('mapDetailsButton');
+  result.classList.toggle('detailMode',Boolean(kind));
+  a.classList.toggle('hidden',kind!=='attention');
+  b.classList.toggle('hidden',kind!=='sufficiency');
+  aButton.setAttribute('aria-expanded',kind==='attention'?'true':'false');
+  bButton.setAttribute('aria-expanded',kind==='sufficiency'?'true':'false');
+  if(kind)scrollTo(0,0);
+}
+function openDetailRoute(kind){
+  const url=new URL(location.href);
+  url.searchParams.set('detail',kind);
+  history.pushState({priolensDetail:kind},'',url);
+  applyDetailRoute();
+}
+function closeDetailRoute(){
+  const url=new URL(location.href);
+  url.searchParams.delete('detail');
+  history.pushState({priolensDetail:null},'',url);
+  applyDetailRoute();
 }
 function imagesHtml(paths,klass='worldDetailImages'){
   if(!paths.length)return '';
@@ -166,15 +190,19 @@ export function renderResultWorldV04({state,lang='lt',familyLabels,itemLabels,re
   renderNeedsMap(q('needsMapStage'),lang,model.sufficiency.itemIds,itemLabels);
   q('worldSeparationNote').textContent=C.separate;
 
-  const ship=q('shipCard'),aDetail=q('attentionDetail');
-  ship.setAttribute('aria-expanded','false');
-  ship.setAttribute('aria-label',C.aLabel+': '+shipLabel+'. '+C.shipTap);
-  ship.onclick=()=>setExpanded(ship,aDetail,aDetail.classList.contains('hidden'));
-
-  const map=q('mapCard'),bDetail=q('suffDetail');
-  map.setAttribute('aria-expanded','false');
-  map.setAttribute('aria-label',C.bLabel+': '+(routeLabels.length?routeLabels.join(', '):C.noRoute)+'. '+C.mapTap);
-  map.onclick=()=>setExpanded(map,bDetail,bDetail.classList.contains('hidden'));
+  const aDetail=q('attentionDetail'),bDetail=q('suffDetail');
+  const shipButton=q('shipDetailsButton'),mapButton=q('mapDetailsButton');
+  shipButton.setAttribute('aria-expanded','false');
+  shipButton.setAttribute('aria-label',C.aLabel+': '+shipLabel+'. '+C.shipTap);
+  shipButton.onclick=()=>openDetailRoute('attention');
+  mapButton.setAttribute('aria-expanded','false');
+  mapButton.setAttribute('aria-label',C.bLabel+': '+(routeLabels.length?routeLabels.join(', '):C.noRoute)+'. '+C.mapTap);
+  mapButton.onclick=()=>openDetailRoute('sufficiency');
+  q('attentionBack').textContent=C.backToResult;
+  q('suffBack').textContent=C.backToResult;
+  q('attentionBack').onclick=closeDetailRoute;
+  q('suffBack').onclick=closeDetailRoute;
+  window.onpopstate=applyDetailRoute;
 
   q('attentionDetailTitle').textContent=C.aDetail;
   const rep=q('repeatRows');rep.innerHTML='';
@@ -239,5 +267,6 @@ export function renderResultWorldV04({state,lang='lt',familyLabels,itemLabels,re
     :'Šis maršrutas remiasi tik Channel B pakankamumo atsakymais ir B+ patikslinimu.';
   q('suffResultNote').classList.remove('hidden');
 
+  applyDetailRoute();
   return model;
 }
