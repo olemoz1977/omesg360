@@ -141,6 +141,10 @@ try{
   await page.waitForFunction(()=>document.querySelectorAll('#needsMapStage .routePath').length===1);
   if(await page.locator('#needsMapStage .routeOrigin').count())throw new Error('cartographic route must enter from the lower map edge without a visible origin marker');
   if(await page.locator('#needsMapStage .landShape .landFill').count()!==1)throw new Error('single route-relevant land must render one irregular coastline SVG');
+  if(await page.locator('#needsMapStage .landShoreHaloOuter').count()!==1)throw new Error('illustrated map should render one outer shoreline halo');
+  if(await page.locator('#needsMapStage .landTerrain').count()<2)throw new Error('illustrated map should carry restrained interior terrain cues');
+  if(await page.locator('#needsMapStage .landWater').count()!==1)throw new Error('illustrated map should carry one subtle inland-water cue');
+  if(await page.locator('#needsMapStage .mapPin').count()!==1)throw new Error('single route should render one map-location pin');
   const routeD=await page.locator('#needsMapStage .routePath').getAttribute('d');
   if(!routeD||!routeD.includes(' C '))throw new Error('single route must use a curved cubic path: '+routeD);
   if(await page.locator('.shipVisual svg').count()!==1)throw new Error('final minimalist ship SVG missing');
@@ -236,7 +240,7 @@ try{
   const keys=await page.evaluate(()=>Object.keys(localStorage));
   if(keys.some(k=>k.includes('priolens.open14.v031.rank.draft')))throw new Error('v0.3.1 draft namespace leaked into v0.4');
 
-  console.log('PASS: v0.4 local 390x844 frozen IA + minimalist ship + cartographic coastlines + curved lower-edge routes for single/same-land-2/cross-land-3 + clean details + restore');
+  console.log('PASS: v0.4 local 390x844 frozen IA + illustrated island target + map pins + curved lower-edge routes for single/same-land-2/cross-land-3 + clean details + restore');
 } finally {
   await browser.close();
 }
