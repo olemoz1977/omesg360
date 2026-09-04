@@ -1,6 +1,6 @@
 import { buildResultWorldModel } from './result_world_v04.mjs?v=scene3';
 
-function q(id){return document.getElementById(id)}
+function q(id){const el=document.getElementById(id);if(!el)throw new Error('PrioLens result DOM missing #'+id);return el}
 function capFirst(x){return x?x.charAt(0).toUpperCase()+x.slice(1):x}
 function escapeHtml(x){return String(x??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]))}
 
@@ -67,30 +67,30 @@ const COPY={
 
 const NEED_MAP={
   lt:[
-    {title:'Poilsis ir resursai',items:[['RESTORATION_ENERGY','Poilsis / energija'],['MATERIAL_RESOURCES','Resursai']]},
-    {title:'Saugumas ir stabilumas',items:[['SAFETY_STABILITY','Saugumas'],['CLARITY_PREDICTABILITY','Aiškumas']]},
-    {title:'Ryšys ir parama',items:[['CONNECTION_BELONGING','Ryšys / priklausymas'],['CARE_SUPPORT_PRESENT','Rūpestis / parama']]},
-    {title:'Autonomija ir pripažinimas',items:[['AUTONOMY_AGENCY','Autonomija'],['RECOGNITION_ESTEEM','Pripažinimas']]},
-    {title:'Augimas ir gebėjimai',items:[['LEARNING_GROWTH','Mokymasis / augimas'],['CAPABILITY_MASTERY','Gebėjimai']]},
-    {title:'Prasmė ir indėlis',items:[['MEANING_PURPOSE','Prasmė'],['CONTRIBUTION','Indėlis']]}
+    {title:'Poilsis ir resursai',items:['RESTORATION_ENERGY','MATERIAL_RESOURCES']},
+    {title:'Saugumas ir stabilumas',items:['SAFETY_STABILITY','CLARITY_PREDICTABILITY']},
+    {title:'Ryšys ir parama',items:['CONNECTION_BELONGING','CARE_SUPPORT_PRESENT']},
+    {title:'Autonomija ir pripažinimas',items:['AUTONOMY_AGENCY','RECOGNITION_ESTEEM']},
+    {title:'Augimas ir gebėjimai',items:['LEARNING_GROWTH','CAPABILITY_MASTERY']},
+    {title:'Prasmė ir indėlis',items:['MEANING_PURPOSE','CONTRIBUTION']}
   ],
   en:[
-    {title:'Rest and resources',items:[['RESTORATION_ENERGY','Rest / energy'],['MATERIAL_RESOURCES','Resources']]},
-    {title:'Safety and stability',items:[['SAFETY_STABILITY','Safety'],['CLARITY_PREDICTABILITY','Clarity']]},
-    {title:'Connection and support',items:[['CONNECTION_BELONGING','Connection / belonging'],['CARE_SUPPORT_PRESENT','Care / support']]},
-    {title:'Autonomy and recognition',items:[['AUTONOMY_AGENCY','Autonomy'],['RECOGNITION_ESTEEM','Recognition']]},
-    {title:'Growth and capability',items:[['LEARNING_GROWTH','Learning / growth'],['CAPABILITY_MASTERY','Capability']]},
-    {title:'Meaning and contribution',items:[['MEANING_PURPOSE','Meaning'],['CONTRIBUTION','Contribution']]}
+    {title:'Rest and resources',items:['RESTORATION_ENERGY','MATERIAL_RESOURCES']},
+    {title:'Safety and stability',items:['SAFETY_STABILITY','CLARITY_PREDICTABILITY']},
+    {title:'Connection and support',items:['CONNECTION_BELONGING','CARE_SUPPORT_PRESENT']},
+    {title:'Autonomy and recognition',items:['AUTONOMY_AGENCY','RECOGNITION_ESTEEM']},
+    {title:'Growth and capability',items:['LEARNING_GROWTH','CAPABILITY_MASTERY']},
+    {title:'Meaning and contribution',items:['MEANING_PURPOSE','CONTRIBUTION']}
   ]
 };
-function renderNeedsMap(stage,lang,routeIds){
+function renderNeedsMap(stage,lang,routeIds,itemLabels){
   const routeSet=new Set(routeIds);
   stage.innerHTML='';
   for(const land of NEED_MAP[lang]||NEED_MAP.lt){
     const continent=document.createElement('span');
     continent.className='continent';
     continent.innerHTML='<span class="continentTitle">'+escapeHtml(land.title)+'</span>'+
-      land.items.map(([id,label])=>'<span class="needNode '+(routeSet.has(id)?'routeTarget':'')+'" data-need-id="'+escapeHtml(id)+'">'+escapeHtml(label)+'</span>').join('');
+      land.items.map(id=>'<span class="needNode '+(routeSet.has(id)?'routeTarget':'')+'" data-need-id="'+escapeHtml(id)+'">'+escapeHtml(capFirst(itemLabels[id]||id))+'</span>').join('');
     stage.appendChild(continent);
   }
 }
@@ -163,15 +163,17 @@ export function renderResultWorldV04({state,lang='lt',familyLabels,itemLabels,re
   q('mapPlaceholder').textContent=C.map;
   q('mapRoute').textContent=routeLabels.length===1?routeLabels[0]:(routeLabels.length>1?C.multiRoute:C.noRoute);
   q('mapTap').textContent=C.mapTap;
-  renderNeedsMap(q('needsMapStage'),lang,model.sufficiency.itemIds);
+  renderNeedsMap(q('needsMapStage'),lang,model.sufficiency.itemIds,itemLabels);
   q('worldSeparationNote').textContent=C.separate;
 
   const ship=q('shipCard'),aDetail=q('attentionDetail');
   ship.setAttribute('aria-expanded','false');
+  ship.setAttribute('aria-label',C.aLabel+': '+shipLabel+'. '+C.shipTap);
   ship.onclick=()=>setExpanded(ship,aDetail,aDetail.classList.contains('hidden'));
 
   const map=q('mapCard'),bDetail=q('suffDetail');
   map.setAttribute('aria-expanded','false');
+  map.setAttribute('aria-label',C.bLabel+': '+(routeLabels.length?routeLabels.join(', '):C.noRoute)+'. '+C.mapTap);
   map.onclick=()=>setExpanded(map,bDetail,bDetail.classList.contains('hidden'));
 
   q('attentionDetailTitle').textContent=C.aDetail;
