@@ -65,6 +65,8 @@ try{
   await page.waitForSelector('#aplus.active');
   const cards=page.locator('#aPlusMount .clarifyCard');
   if(await cards.count()<2)throw new Error('A+ did not show multiple candidate groups');
+  const firstCardBox=await cards.first().boundingBox();
+  if(!firstCardBox||firstCardBox.width<300)throw new Error('A+ mobile candidate group is still too narrow: '+(firstCardBox?.width||0));
   const aText=((await page.locator('#aPlusMount').textContent())||'').trim();
   if(aText)throw new Error('A+ leaked family labels into visual candidate cards: '+aText);
 
@@ -131,11 +133,32 @@ try{
   if(!final.sufficiencyClarifier?.selectedItemId)throw new Error('final B+ missing');
   if(final.sufficiencyRoute?.itemIds?.length!==1)throw new Error('final B+ route should contain one selected endpoint');
   if(Object.keys(final.sufficiency||{}).length!==12)throw new Error('Channel B item count changed');
+  const routeContinents=await page.locator('#needsMapStage .continent').count();
+  const routeNodes=await page.locator('#needsMapStage .needNode').count();
+  if(routeContinents!==1)throw new Error('single B+ endpoint should render one route-relevant continent, got '+routeContinents);
+  if(routeNodes!==1)throw new Error('single B+ endpoint should render one need node, got '+routeNodes);
+
+  await page.click('#shipDetailsButton');
+  await page.waitForFunction(()=>new URLSearchParams(location.search).get('detail')==='attention');
+  const attentionText=(await page.locator('#attentionDetail').textContent())||'';
+  if(/\bMOST\b|\bLEAST\b|\bA\+\b/.test(attentionText))throw new Error('technical A terminology leaked into participant detail: '+attentionText);
+  await page.click('#attentionBack');
+  await page.waitForFunction(()=>!new URLSearchParams(location.search).has('detail'));
+
+  await page.click('#mapDetailsButton');
+  await page.waitForFunction(()=>new URLSearchParams(location.search).get('detail')==='sufficiency');
+  if(await page.locator('#suffDetail').evaluate(el=>el.classList.contains('hidden')))throw new Error('sufficiency bottom sheet hidden');
+  if(await page.locator('#result').evaluate(el=>el.classList.contains('detailMode')))throw new Error('sufficiency bottom sheet must not replace the result scene');
+  const suffText=(await page.locator('#suffDetail').textContent())||'';
+  if(/\bB\+\b|Channel B/.test(suffText))throw new Error('technical B terminology leaked into participant detail: '+suffText);
+  await page.click('#suffDetailClose');
+  await page.waitForFunction(()=>!new URLSearchParams(location.search).has('detail'));
+
   if(await page.evaluate(k=>localStorage.getItem(k),DRAFT)!==null)throw new Error('v0.4 draft not cleared after successful final save');
   const keys=await page.evaluate(()=>Object.keys(localStorage));
   if(keys.some(k=>k.includes('priolens.open14.v031.rank.draft')))throw new Error('v0.3.1 draft namespace leaked into v0.4');
 
-  console.log('PASS: v0.4 local 390x844 A+ visual runoff + A+ local/server checkpoint + A+ resume + 12-way B+ + B+ local/server checkpoint + B+ resume + final payload');
+  console.log('PASS: v0.4 local 390x844 enlarged A+ runoff + adaptive resume + one-land result map + clean attention detail + sufficiency bottom sheet + final payload');
 } finally {
   await browser.close();
 }
