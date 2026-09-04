@@ -9,6 +9,8 @@ on:
       - 'priolens/open14-v04/ui_smoke_v04.mjs'
       - 'priolens/open14-v04/adaptive_clarifiers_v04.mjs'
       - 'priolens/open14-v04/build_from_v031.mjs'
+      - 'priolens/open14-v04/result_shell_v04.mjs'
+      - 'priolens/open14-v04/result_renderer_v04.mjs'
       - '.github/workflows/priolens-open14-v04-ui-smoke-v2.yml'
 
 permissions:
