@@ -139,7 +139,10 @@ try{
   if(routeContinents!==1)throw new Error('single B+ endpoint should render one route-relevant continent, got '+routeContinents);
   if(routeNodes!==1)throw new Error('single B+ endpoint should render one need node, got '+routeNodes);
   await page.waitForFunction(()=>document.querySelectorAll('#needsMapStage .routePath').length===1);
-  if(await page.locator('#needsMapStage .routeOrigin').count()!==1)throw new Error('single route should render one neutral lower-map origin');
+  if(await page.locator('#needsMapStage .routeOrigin').count())throw new Error('cartographic route must enter from the lower map edge without a visible origin marker');
+  if(await page.locator('#needsMapStage .landShape .landFill').count()!==1)throw new Error('single route-relevant land must render one irregular coastline SVG');
+  const routeD=await page.locator('#needsMapStage .routePath').getAttribute('d');
+  if(!routeD||!routeD.includes(' C '))throw new Error('single route must use a curved cubic path: '+routeD);
   if(await page.locator('.shipVisual svg').count()!==1)throw new Error('final minimalist ship SVG missing');
   if(await page.locator('.shipGhost,.shipHull,.shipMast,.shipSail').count())throw new Error('dashed prototype ship classes still present');
   if(!await page.locator('#mapRoute').evaluate(el=>el.classList.contains('hidden')))throw new Error('single route summary should be hidden to avoid duplicating the need label above the land');
@@ -209,6 +212,7 @@ try{
   await page.reload({waitUntil:'networkidle'});
   await page.waitForSelector('#result.active');
   if(await page.locator('#needsMapStage .continent').count()!==1)throw new Error('two tied endpoints in one need group should share one land');
+  if(await page.locator('#needsMapStage .landShape .landFill').count()!==1)throw new Error('two same-group endpoints should still share one coastline');
   if(await page.locator('#needsMapStage .needNode').count()!==2)throw new Error('two tied endpoints in one group should render two need nodes');
   await page.waitForFunction(()=>document.querySelectorAll('#needsMapStage .routePath').length===2);
 
@@ -220,6 +224,7 @@ try{
   await page.reload({waitUntil:'networkidle'});
   await page.waitForSelector('#result.active');
   if(await page.locator('#needsMapStage .continent').count()!==3)throw new Error('three valid tied endpoints across groups must render three lands without truncation');
+  if(await page.locator('#needsMapStage .landShape .landFill').count()!==3)throw new Error('three route-relevant groups must render three coastlines');
   if(await page.locator('#needsMapStage .needNode').count()!==3)throw new Error('three valid tied endpoints must render all three need nodes');
   await page.waitForFunction(()=>document.querySelectorAll('#needsMapStage .routePath').length===3);
   if(finalPayloads.length!==finalPostCountBeforeReload)throw new Error('visual restore-state checks must not POST final session again');
@@ -231,7 +236,7 @@ try{
   const keys=await page.evaluate(()=>Object.keys(localStorage));
   if(keys.some(k=>k.includes('priolens.open14.v031.rank.draft')))throw new Error('v0.3.1 draft namespace leaked into v0.4');
 
-  console.log('PASS: v0.4 local 390x844 frozen IA + minimalist ship + route geometry for single/same-land-2/cross-land-3 + clean details + completed-result restore');
+  console.log('PASS: v0.4 local 390x844 frozen IA + minimalist ship + cartographic coastlines + curved lower-edge routes for single/same-land-2/cross-land-3 + clean details + restore');
 } finally {
   await browser.close();
 }
