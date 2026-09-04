@@ -125,23 +125,21 @@ function drawNeedsMapRoutes(stage){
   const targets=[...stage.querySelectorAll('.needNode.routeTarget')];
   if(!targets.length)return;
   const ns='http://www.w3.org/2000/svg';
-  const originX=width/2,originY=Math.max(12,height-12);
-  for(const target of targets){
+  const originX=Math.max(16,width*0.18),originY=height+4;
+  targets.forEach((target,index)=>{
     const r=target.getBoundingClientRect();
     const x=r.left-stageRect.left+r.width/2;
     const y=r.top-stageRect.top+r.height/2;
-    const midY=originY-(originY-y)*0.5;
+    const spread=(index-(targets.length-1)/2)*18;
+    const c1x=originX+width*0.08+spread;
+    const c1y=height*0.78;
+    const c2x=x-width*0.12+spread*0.35;
+    const c2y=y+Math.max(28,(originY-y)*0.28);
     const path=document.createElementNS(ns,'path');
     path.setAttribute('class','routePath');
-    path.setAttribute('d','M '+originX+' '+originY+' Q '+originX+' '+midY+' '+x+' '+y);
+    path.setAttribute('d','M '+originX+' '+originY+' C '+c1x+' '+c1y+' '+c2x+' '+c2y+' '+x+' '+y);
     svg.appendChild(path);
-  }
-  const origin=document.createElementNS(ns,'circle');
-  origin.setAttribute('class','routeOrigin');
-  origin.setAttribute('cx',String(originX));
-  origin.setAttribute('cy',String(originY));
-  origin.setAttribute('r','3.4');
-  svg.appendChild(origin);
+  });
 }
 function scheduleNeedsMapRoutes(stage){
   routeResizeStage=stage;
@@ -151,6 +149,27 @@ function scheduleNeedsMapRoutes(stage){
     routeResizeBound=true;
     window.addEventListener('resize',()=>{if(routeResizeStage)scheduleNeedsMapRoutes(routeResizeStage)},{passive:true});
   }
+}
+const LAND_SHAPES=[
+  {
+    coast:'M18 78 C21 52 41 35 68 31 C82 13 114 14 132 27 C151 18 180 20 194 36 C224 37 239 55 234 77 C245 94 227 111 205 112 C190 133 157 137 132 127 C105 143 71 136 60 119 C35 121 13 103 18 78 Z',
+    detail:'M47 59 C68 45 91 43 111 46 M159 39 C177 42 194 49 207 61 M72 112 C92 119 111 118 127 112'
+  },
+  {
+    coast:'M21 63 C34 42 55 38 77 38 C89 18 120 18 137 32 C156 20 184 25 194 42 C218 39 237 57 232 78 C244 95 227 113 204 111 C192 133 159 137 139 126 C117 143 88 138 76 122 C50 126 27 113 29 93 C14 85 11 73 21 63 Z',
+    detail:'M54 50 C75 46 91 49 106 57 M148 39 C164 43 179 51 189 62 M93 122 C113 126 128 124 142 118'
+  },
+  {
+    coast:'M17 83 C13 63 30 48 53 45 C61 24 91 17 111 29 C128 14 160 18 173 34 C198 28 222 40 226 59 C242 69 238 91 222 101 C221 123 193 135 170 127 C150 143 121 141 102 126 C77 138 50 128 44 111 C23 110 10 98 17 83 Z',
+    detail:'M44 59 C61 52 78 53 94 59 M139 34 C157 35 174 42 187 52 M120 124 C137 129 152 128 166 121'
+  }
+];
+function landShapeHtml(index){
+  const shape=LAND_SHAPES[index%LAND_SHAPES.length];
+  return '<svg class="landShape" viewBox="0 0 250 150" preserveAspectRatio="none" aria-hidden="true">'+
+    '<path class="landFill" d="'+shape.coast+'"></path>'+
+    '<path class="landCoastDetail" d="'+shape.detail+'"></path>'+
+    '</svg>';
 }
 function renderNeedsMap(stage,lang,routeIds,itemLabels,emptyText){
   const routeSet=new Set(routeIds);
@@ -168,13 +187,14 @@ function renderNeedsMap(stage,lang,routeIds,itemLabels,emptyText){
   svg.setAttribute('class','mapRoutes');
   svg.setAttribute('aria-hidden','true');
   stage.appendChild(svg);
-  for(const land of lands){
+  lands.forEach((land,index)=>{
     const continent=document.createElement('span');
     continent.className='continent';
-    continent.innerHTML='<span class="continentTitle">'+escapeHtml(land.title)+'</span>'+
+    continent.innerHTML=landShapeHtml(index)+
+      '<span class="continentTitle">'+escapeHtml(land.title)+'</span>'+
       land.items.map(id=>'<span class="needNode routeTarget" data-need-id="'+escapeHtml(id)+'">'+escapeHtml(capFirst(itemLabels[id]||id))+'</span>').join('');
     stage.appendChild(continent);
-  }
+  });
   scheduleNeedsMapRoutes(stage);
 }
 function chosenPaths(state,familyId){
