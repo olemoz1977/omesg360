@@ -7,10 +7,10 @@ function escapeHtml(x){return String(x??'').replace(/[&<>"']/g,ch=>({'&':'&amp;'
 const COPY={
   lt:{
     title:'Pirmas žvilgsnis. Antras atsakymas.',
-    lead:'Dvi perspektyvos rodomos atskirai. Paspausk laivą ar žemėlapį, jei nori pamatyti, iš ko rezultatas susidėjo.',
-    aLabel:'Pirmas žvilgsnis',aHeading:'Kas iškilo?',ship:'LAIVAS',shipTap:'Paspausk detales',
+    lead:'Tas pats momentas iš dviejų perspektyvų. Paspausk sceną, jei nori pamatyti detales.',
+    aLabel:'Pirmas žvilgsnis',aHeading:'Kas iškilo?',ship:'LAIVAS',shipTap:'Detalės',
     noAFocus:'Viena kryptis aiškiai neišsiskyrė',
-    bLabel:'Antras atsakymas',bHeading:'Kur dabar mažiausiai pakanka?',map:'ŽEMĖLAPIS',mapTap:'Paspausk detales',
+    bLabel:'Antras atsakymas',bHeading:'Kur dabar mažiausiai pakanka?',map:'ŽEMĖLAPIS',mapTap:'Detalės',
     noRoute:'Aiškaus maršruto nėra',multiRoute:'Kelios kryptys',
     aDetail:'Pirmo žvilgsnio detalės',bDetail:'Antro atsakymo detalės',
     aDirect3:'Šią kryptį pasirinkai kiekvieną kartą, kai ji pasirodė: 3 iš 3.',
@@ -32,14 +32,14 @@ const COPY={
     bNoLow:'Pagal tavo atsakymus aiški mažesnio pakankamumo kryptis neišsiskyrė. Žemėlapis jos neforsuoja.',
     bNoNumeric:'Pakankamai aiškių skaitinių atsakymų maršrutui nėra.',
     routePrefix:'Maršrutas',
-    separate:'Laivas ir žemėlapis nėra automatiškai sujungiami. Jie rodo dvi skirtingas perspektyvas.'
+    separate:'Laivas rodo pirmo žvilgsnio fokusą. Žemėlapis remiasi tik tavo pakankamumo atsakymais.'
   },
   en:{
     title:'First glance. Second answer.',
-    lead:'The two perspectives are shown separately. Tap the ship or the map to see what each result is based on.',
-    aLabel:'First glance',aHeading:'What surfaced?',ship:'SHIP',shipTap:'Tap for details',
+    lead:'The same moment from two perspectives. Tap the scene to see the details.',
+    aLabel:'First glance',aHeading:'What surfaced?',ship:'SHIP',shipTap:'Details',
     noAFocus:'No single direction clearly stood out',
-    bLabel:'Second answer',bHeading:'Where does sufficiency feel lowest now?',map:'MAP',mapTap:'Tap for details',
+    bLabel:'Second answer',bHeading:'Where does sufficiency feel lowest now?',map:'MAP',mapTap:'Details',
     noRoute:'No clear route',multiRoute:'Several directions',
     aDetail:'First-glance details',bDetail:'Second-answer details',
     aDirect3:'You chose this direction every time it appeared: 3 out of 3.',
@@ -61,10 +61,39 @@ const COPY={
     bNoLow:'Your answers did not produce a clear lower-sufficiency direction. The map does not force one.',
     bNoNumeric:'There were not enough clear numeric answers to draw a route.',
     routePrefix:'Route',
-    separate:'The ship and the map are not automatically linked. They show two different perspectives.'
+    separate:'The ship shows the first-glance focus. The map is based only on your sufficiency answers.'
   }
 };
 
+const NEED_MAP={
+  lt:[
+    {title:'Poilsis ir resursai',items:[['RESTORATION_ENERGY','Poilsis / energija'],['MATERIAL_RESOURCES','Resursai']]},
+    {title:'Saugumas ir stabilumas',items:[['SAFETY_STABILITY','Saugumas'],['CLARITY_PREDICTABILITY','Aiškumas']]},
+    {title:'Ryšys ir parama',items:[['CONNECTION_BELONGING','Ryšys / priklausymas'],['CARE_SUPPORT_PRESENT','Rūpestis / parama']]},
+    {title:'Autonomija ir pripažinimas',items:[['AUTONOMY_AGENCY','Autonomija'],['RECOGNITION_ESTEEM','Pripažinimas']]},
+    {title:'Augimas ir gebėjimai',items:[['LEARNING_GROWTH','Mokymasis / augimas'],['CAPABILITY_MASTERY','Gebėjimai']]},
+    {title:'Prasmė ir indėlis',items:[['MEANING_PURPOSE','Prasmė'],['CONTRIBUTION','Indėlis']]}
+  ],
+  en:[
+    {title:'Rest and resources',items:[['RESTORATION_ENERGY','Rest / energy'],['MATERIAL_RESOURCES','Resources']]},
+    {title:'Safety and stability',items:[['SAFETY_STABILITY','Safety'],['CLARITY_PREDICTABILITY','Clarity']]},
+    {title:'Connection and support',items:[['CONNECTION_BELONGING','Connection / belonging'],['CARE_SUPPORT_PRESENT','Care / support']]},
+    {title:'Autonomy and recognition',items:[['AUTONOMY_AGENCY','Autonomy'],['RECOGNITION_ESTEEM','Recognition']]},
+    {title:'Growth and capability',items:[['LEARNING_GROWTH','Learning / growth'],['CAPABILITY_MASTERY','Capability']]},
+    {title:'Meaning and contribution',items:[['MEANING_PURPOSE','Meaning'],['CONTRIBUTION','Contribution']]}
+  ]
+};
+function renderNeedsMap(stage,lang,routeIds){
+  const routeSet=new Set(routeIds);
+  stage.innerHTML='';
+  for(const land of NEED_MAP[lang]||NEED_MAP.lt){
+    const continent=document.createElement('span');
+    continent.className='continent';
+    continent.innerHTML='<span class="continentTitle">'+escapeHtml(land.title)+'</span>'+
+      land.items.map(([id,label])=>'<span class="needNode '+(routeSet.has(id)?'routeTarget':'')+'" data-need-id="'+escapeHtml(id)+'">'+escapeHtml(label)+'</span>').join('');
+    stage.appendChild(continent);
+  }
+}
 function chosenPaths(state,familyId){
   const seen=new Set(),out=[];
   for(const c of state.choices||[]){
@@ -132,8 +161,9 @@ export function renderResultWorldV04({state,lang='lt',familyLabels,itemLabels,re
 
   const routeLabels=model.sufficiency.itemIds.map(id=>capFirst(itemLabels[id]||id));
   q('mapPlaceholder').textContent=C.map;
-  q('mapRoute').textContent=routeLabels.length===1?routeLabels[0]:(routeLabels.length>1?C.multiRoute+': '+routeLabels.join(' · '):C.noRoute);
+  q('mapRoute').textContent=routeLabels.length===1?routeLabels[0]:(routeLabels.length>1?C.multiRoute:C.noRoute);
   q('mapTap').textContent=C.mapTap;
+  renderNeedsMap(q('needsMapStage'),lang,model.sufficiency.itemIds);
   q('worldSeparationNote').textContent=C.separate;
 
   const ship=q('shipCard'),aDetail=q('attentionDetail');
