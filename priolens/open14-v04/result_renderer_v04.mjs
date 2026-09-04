@@ -1,4 +1,4 @@
-import { buildResultWorldModel } from './result_world_v04.mjs?v=scene3';
+import { buildResultWorldModel } from './result_world_v04.mjs?v=scene4';
 
 function q(id){const el=document.getElementById(id);if(!el)throw new Error('PrioLens result DOM missing #'+id);return el}
 function capFirst(x){return x?x.charAt(0).toUpperCase()+x.slice(1):x}
@@ -15,23 +15,23 @@ const COPY={
     aDetail:'Pirmo žvilgsnio detalės',bDetail:'Antro atsakymo detalės',
     aDirect3:'Šią kryptį pasirinkai kiekvieną kartą, kai ji pasirodė: 3 iš 3.',
     aDirect2:'Ši kryptis kartojosi 2 iš 3 pasirodymų ir buvo vienintelė taip pasikartojusi.',
-    aPlus3:'Šią kryptį pasirinkai 3 iš 3 kartų. Kadangi tokių krypčių buvo kelios, ją dar pasirinkai papildomame A+ palyginime.',
-    aPlus2:'Ši kryptis kartojosi 2 iš 3 pasirodymų. Tarp kitų taip pat pasikartojusių krypčių ją pasirinkai papildomame A+ palyginime.',
-    aNoClear:'Papildomame A+ palyginime vienos krypties neišskyrei.',
+    aPlus3:'Šią kryptį pasirinkai 3 iš 3 kartų. Kadangi tokių krypčių buvo kelios, papildomame palyginime išskyrei būtent šią.',
+    aPlus2:'Ši kryptis kartojosi 2 iš 3 pasirodymų. Tarp kitų taip pat pasikartojusių krypčių papildomame palyginime išskyrei būtent šią.',
+    aNoClear:'Papildomame palyginime vienos krypties neišskyrei.',
     aNoRepeated:'Šį kartą nė viena kryptis nepasikartojo pakankamai, kad būtų išskirta viena fokusinė kryptis.',
-    leastTitle:'Kas liko antrame plane?',leastNone:'Nė viena kryptis bent 2 kartus nepateko tarp mažiausiai traukusių vaizdų.',
+    leastTitle:'Kas liko antrame plane?',leastNone:'Aiškios krypties, kuri nuosekliai liko antrame plane, nebuvo.',
     leastNote:'Tai nereiškia, kad šios kryptys tau nesvarbios. Čia rodomas tik santykinis pasirinkimas tarp konkrečių vaizdų.',
     reflectionTitle:'Pažiūrėk atidžiau',
     reflectionQ:'Kas, tavo manymu, galėjo traukti šiuose vaizduose?',
     reflectionNote:'Šis atsakymas yra tavo paaiškinimas apie vaizdus. Jis nekeičia antroje dalyje pateikto pakankamumo įvertinimo.',
     selected:'Pasirinkta.',
     bDirect:'Tai vienintelė sritis, kurią savo atsakymuose įvertinai žemiausiai pagal dabartinį pakankamumą.',
-    bSelected:'Kelios sritys turėjo tą patį žemiausią įvertinimą. Papildomame B+ klausime išskyrei šią.',
-    bSimilar:'Kelios sritys turėjo tą patį žemiausią įvertinimą ir B+ pažymėjai, kad jos dabar panašios.',
-    bHard:'Kelios sritys turėjo tą patį žemiausią įvertinimą, bet B+ vienos krypties neišskyrei. Todėl maršrutas nebrėžiamas.',
+    bSelected:'Kelios sritys turėjo tą patį žemiausią įvertinimą. Papildomame klausime išskyrei šią.',
+    bSimilar:'Kelios sritys turėjo tą patį žemiausią įvertinimą ir papildomame klausime pažymėjai, kad jos dabar panašios.',
+    bHard:'Kelios sritys turėjo tą patį žemiausią įvertinimą, bet papildomame klausime vienos krypties neišskyrei. Todėl maršrutas nebrėžiamas.',
     bNoLow:'Pagal tavo atsakymus aiški mažesnio pakankamumo kryptis neišsiskyrė. Žemėlapis jos neforsuoja.',
     bNoNumeric:'Pakankamai aiškių skaitinių atsakymų maršrutui nėra.',
-    routePrefix:'Maršrutas',backToResult:'← Grįžti į rezultatą',
+    routePrefix:'Maršrutas',backToResult:'← Grįžti į rezultatą',close:'Uždaryti',why:'Kodėl ši kryptis?',whyMany:'Kodėl šios kryptys?',suffMethod:'Tai rodo santykinį dabartinių atsakymų prioritetą, ne poreikio stiprumą.',answerLabel:'Tavo atsakymas',
     separate:'Laivas rodo pirmo žvilgsnio fokusą. Žemėlapis remiasi tik tavo pakankamumo atsakymais.'
   },
   en:{
@@ -44,23 +44,23 @@ const COPY={
     aDetail:'First-glance details',bDetail:'Second-answer details',
     aDirect3:'You chose this direction every time it appeared: 3 out of 3.',
     aDirect2:'This direction repeated 2 out of 3 times and was the only direction to repeat that often.',
-    aPlus3:'You chose this direction 3 out of 3 times. Because several directions did so, you selected this one again in the A+ comparison.',
-    aPlus2:'This direction repeated 2 out of 3 times. Among the other repeated directions, you selected this one in the A+ comparison.',
-    aNoClear:'In the A+ comparison, you did not single out one direction.',
+    aPlus3:'You chose this direction 3 out of 3 times. Because several directions did so, you singled out this one in an additional comparison.',
+    aPlus2:'This direction repeated 2 out of 3 times. Among the other repeated directions, you singled out this one in an additional comparison.',
+    aNoClear:'In the additional comparison, you did not single out one direction.',
     aNoRepeated:'No direction repeated enough this time to produce one focus direction.',
-    leastTitle:'What stayed in the background?',leastNone:'No direction appeared among the least-pulling images at least twice.',
+    leastTitle:'What stayed in the background?',leastNone:'No direction consistently stayed in the background.',
     leastNote:'This does not mean these directions are unimportant to you. It only reflects relative choices among the specific images shown.',
     reflectionTitle:'Look closer',
     reflectionQ:'What, in your view, may have been pulling you in these images?',
     reflectionNote:'This is your explanation of the images. It does not change the sufficiency rating you gave in the second part.',
     selected:'Selected.',
     bDirect:'This was the only area you rated lowest for current sufficiency.',
-    bSelected:'Several areas had the same lowest rating. In B+, you singled out this one.',
-    bSimilar:'Several areas had the same lowest rating and in B+ you said they feel similar right now.',
-    bHard:'Several areas had the same lowest rating, but in B+ you did not single out one. No route is drawn.',
+    bSelected:'Several areas had the same lowest rating. In the additional question, you singled out this one.',
+    bSimilar:'Several areas had the same lowest rating and in the additional question you said they feel similar right now.',
+    bHard:'Several areas had the same lowest rating, but in the additional question you did not single out one. No route is drawn.',
     bNoLow:'Your answers did not produce a clear lower-sufficiency direction. The map does not force one.',
     bNoNumeric:'There were not enough clear numeric answers to draw a route.',
-    routePrefix:'Route',backToResult:'← Back to result',
+    routePrefix:'Route',backToResult:'← Back to result',close:'Close',why:'Why this direction?',whyMany:'Why these directions?',suffMethod:'This shows the relative priority in your current answers, not the strength of a need.',answerLabel:'Your answer',
     separate:'The ship shows the first-glance focus. The map is based only on your sufficiency answers.'
   }
 };
@@ -83,14 +83,52 @@ const NEED_MAP={
     {title:'Meaning and contribution',items:['MEANING_PURPOSE','CONTRIBUTION']}
   ]
 };
-function renderNeedsMap(stage,lang,routeIds,itemLabels){
+const ITEM_DETAIL={
+  lt:{
+    RESTORATION_ENERGY:'Poilsio ir energijos kasdienybei.',
+    MATERIAL_RESOURCES:'Kasdienių resursų tam, ko realiai reikia.',
+    SAFETY_STABILITY:'Saugumo ir stabilumo.',
+    CLARITY_PREDICTABILITY:'Aiškumo ir nuspėjamumo kasdienybėje.',
+    CONNECTION_BELONGING:'Artimo ryšio ir priklausymo.',
+    CARE_SUPPORT_PRESENT:'Rūpesčio, paramos ir žmogiško dėmesio.',
+    AUTONOMY_AGENCY:'Laisvės pačiam spręsti ir veikti.',
+    RECOGNITION_ESTEEM:'Jausmo, kad tavo pastangos, nuomonė ar indėlis pastebimi ir vertinami.',
+    LEARNING_GROWTH:'Galimybių mokytis, atrasti ir augti.',
+    CAPABILITY_MASTERY:'Galimybių naudoti ir tobulinti savo gebėjimus.',
+    MEANING_PURPOSE:'Prasmės tame, ką darai.',
+    CONTRIBUTION:'Galimybių prisidėti prie kažko svarbaus ne tik sau.'
+  },
+  en:{
+    RESTORATION_ENERGY:'Rest and energy for everyday life.',
+    MATERIAL_RESOURCES:'Everyday resources for what you realistically need.',
+    SAFETY_STABILITY:'Safety and stability.',
+    CLARITY_PREDICTABILITY:'Clarity and predictability in everyday life.',
+    CONNECTION_BELONGING:'Close connection and a sense of belonging.',
+    CARE_SUPPORT_PRESENT:'Care, support and human attention.',
+    AUTONOMY_AGENCY:'Freedom to decide and act for yourself.',
+    RECOGNITION_ESTEEM:'A sense that your efforts, opinions or contribution are noticed and valued.',
+    LEARNING_GROWTH:'Opportunities to learn, discover and grow.',
+    CAPABILITY_MASTERY:'Opportunities to use and develop your abilities.',
+    MEANING_PURPOSE:'Meaning in what you do.',
+    CONTRIBUTION:'Opportunities to contribute to something important beyond yourself.'
+  }
+};
+function renderNeedsMap(stage,lang,routeIds,itemLabels,emptyText){
   const routeSet=new Set(routeIds);
+  const lands=(NEED_MAP[lang]||NEED_MAP.lt)
+    .map(land=>({...land,items:land.items.filter(id=>routeSet.has(id))}))
+    .filter(land=>land.items.length);
   stage.innerHTML='';
-  for(const land of NEED_MAP[lang]||NEED_MAP.lt){
+  stage.className='mapStage '+(lands.length===0?'routeLands0':lands.length===1?'routeLands1':lands.length===2?'routeLands2':'routeLandsMany');
+  if(!lands.length){
+    stage.innerHTML='<span class="mapEmpty">'+escapeHtml(emptyText)+'</span>';
+    return;
+  }
+  for(const land of lands){
     const continent=document.createElement('span');
     continent.className='continent';
     continent.innerHTML='<span class="continentTitle">'+escapeHtml(land.title)+'</span>'+
-      land.items.map(id=>'<span class="needNode '+(routeSet.has(id)?'routeTarget':'')+'" data-need-id="'+escapeHtml(id)+'">'+escapeHtml(capFirst(itemLabels[id]||id))+'</span>').join('');
+      land.items.map(id=>'<span class="needNode routeTarget" data-need-id="'+escapeHtml(id)+'">'+escapeHtml(capFirst(itemLabels[id]||id))+'</span>').join('');
     stage.appendChild(continent);
   }
 }
@@ -113,7 +151,7 @@ function leastRows(state){
     const s=c.stimuli?.find(x=>x.exemplarId===c.leastChoice.exemplarId);
     if(s?.runtimePath){if(!paths[f])paths[f]=[];if(!paths[f].includes(s.runtimePath))paths[f].push(s.runtimePath)}
   }
-  return Object.entries(counts).filter(([,n])=>n>=2).sort((a,b)=>b[1]-a[1]).map(([familyId,count])=>({familyId,count,paths:paths[familyId]||[]}));
+  return Object.entries(counts).filter(([,n])=>n===3).sort((a,b)=>a[0].localeCompare(b[0])).map(([familyId,count])=>({familyId,count,paths:paths[familyId]||[]}));
 }
 
 function attentionExplanation(a,C){
@@ -143,12 +181,14 @@ function applyDetailRoute(){
   const result=q('result');
   const a=q('attentionDetail'),b=q('suffDetail');
   const aButton=q('shipDetailsButton'),bButton=q('mapDetailsButton');
-  result.classList.toggle('detailMode',Boolean(kind));
-  a.classList.toggle('hidden',kind!=='attention');
-  b.classList.toggle('hidden',kind!=='sufficiency');
-  aButton.setAttribute('aria-expanded',kind==='attention'?'true':'false');
-  bButton.setAttribute('aria-expanded',kind==='sufficiency'?'true':'false');
-  if(kind)scrollTo(0,0);
+  const attention=kind==='attention',sufficiency=kind==='sufficiency';
+  result.classList.toggle('detailMode',attention);
+  a.classList.toggle('hidden',!attention);
+  b.classList.toggle('hidden',!sufficiency);
+  document.body.classList.toggle('suffSheetOpen',sufficiency);
+  aButton.setAttribute('aria-expanded',attention?'true':'false');
+  bButton.setAttribute('aria-expanded',sufficiency?'true':'false');
+  if(attention)scrollTo(0,0);
 }
 function openDetailRoute(kind){
   const url=new URL(location.href);
@@ -188,7 +228,7 @@ export function renderResultWorldV04({state,lang='lt',familyLabels,itemLabels,re
   q('mapPlaceholder').textContent=C.map;
   q('mapRoute').textContent=routeLabels.length===1?routeLabels[0]:(routeLabels.length>1?C.multiRoute:C.noRoute);
   q('mapTap').textContent=C.mapTap;
-  renderNeedsMap(q('needsMapStage'),lang,model.sufficiency.itemIds,itemLabels);
+  renderNeedsMap(q('needsMapStage'),lang,model.sufficiency.itemIds,itemLabels,C.noRoute);
   q('worldSeparationNote').textContent=C.separate;
 
   const aDetail=q('attentionDetail'),bDetail=q('suffDetail');
@@ -200,10 +240,12 @@ export function renderResultWorldV04({state,lang='lt',familyLabels,itemLabels,re
   mapButton.setAttribute('aria-label',C.bLabel+': '+(routeLabels.length?routeLabels.join(', '):C.noRoute)+'. '+C.mapTap);
   mapButton.onclick=()=>openDetailRoute('sufficiency');
   q('attentionBack').textContent=C.backToResult;
-  q('suffBack').textContent=C.backToResult;
+  q('suffDetailClose').textContent=C.close;
   q('attentionBack').onclick=closeDetailRoute;
-  q('suffBack').onclick=closeDetailRoute;
+  q('suffDetailClose').onclick=closeDetailRoute;
+  q('suffDetail').onclick=e=>{if(e.target===q('suffDetail'))closeDetailRoute()};
   window.onpopstate=applyDetailRoute;
+  window.onkeydown=e=>{if(e.key==='Escape'&&detailRoute()==='sufficiency')closeDetailRoute()};
 
   q('attentionDetailTitle').textContent=C.aDetail;
   const rep=q('repeatRows');rep.innerHTML='';
@@ -212,7 +254,7 @@ export function renderResultWorldV04({state,lang='lt',familyLabels,itemLabels,re
   if(model.attention.hasFocus)aBox.insertAdjacentHTML('afterbegin',imagesHtml(chosenPaths(state,model.attention.familyId)));
   rep.appendChild(aBox);
   q('attentionNote').textContent=model.attention.hasFocus
-    ?(lang==='en'?'The number is shown only here in the detail layer. It describes repeated MOST choices, not need strength.':'Skaičius rodomas tik detalėse. Jis aprašo pasikartojusius MOST pasirinkimus, ne poreikio stiprumą.')
+    ?(lang==='en'?'The number is shown only here in the detail layer. It describes how often this direction repeated in the first choice, not need strength.':'Skaičius rodomas tik detalėse. Jis aprašo, kiek kartų ši kryptis pasikartojo pirmajame pasirinkime, ne poreikio stiprumą.')
     :'';
   q('attentionNote').classList.toggle('hidden',!q('attentionNote').textContent);
 
@@ -226,7 +268,7 @@ export function renderResultWorldV04({state,lang='lt',familyLabels,itemLabels,re
   }else{
     for(const row of least){
       const d=document.createElement('div');d.className='worldDetailBlock';
-      d.innerHTML=imagesHtml(row.paths)+'<div class="worldDetailName">'+escapeHtml(familyLabels[row.familyId]||row.familyId)+'</div><div class="worldDetailText">'+row.count+'/3 LEAST</div>';
+      d.innerHTML=imagesHtml(row.paths)+'<div class="worldDetailName">'+escapeHtml(familyLabels[row.familyId]||row.familyId)+'</div><div class="worldDetailText">'+escapeHtml(lang==='en'?'This direction stayed in the background all 3 times.':'Ši kryptis visus 3 kartus liko antrame plane.')+'</div>';
       lm.appendChild(d);
     }
   }
@@ -241,15 +283,28 @@ export function renderResultWorldV04({state,lang='lt',familyLabels,itemLabels,re
       '<div class="reasonOptions">'+reasonOptions.map(([code,label])=>'<button type="button" class="reasonOption" data-reason="'+escapeHtml(code)+'">'+escapeHtml(label)+'</button>').join('')+'</div>'+
       '<div class="reasonFeedback hidden">'+escapeHtml(C.reflectionNote)+'</div><div class="reasonSave hidden"></div>';
     cr.appendChild(reflection);
-    const feedback=reflection.querySelector('.reasonFeedback'),save=reflection.querySelector('.reasonSave');
-    reflection.querySelectorAll('.reasonOption').forEach(btn=>btn.onclick=async()=>{
-      reflection.querySelectorAll('.reasonOption').forEach(x=>x.classList.toggle('on',x===btn));
+    const options=reflection.querySelector('.reasonOptions'),feedback=reflection.querySelector('.reasonFeedback'),save=reflection.querySelector('.reasonSave');
+    const showSelected=code=>{
+      const hit=reasonOptions.find(([x])=>x===code);
+      if(!hit)return;
+      options.innerHTML='<div class="reflectionAnswer"><div class="reflectionAnswerLabel">'+escapeHtml(C.answerLabel)+'</div><div class="reflectionAnswerValue">'+escapeHtml(hit[1])+'</div></div>';
       feedback.textContent=C.reflectionNote;feedback.classList.remove('hidden');
-      save.textContent=C.selected;save.classList.remove('hidden');
-      if(typeof onSelfExplanation==='function'){
-        await onSelfExplanation({familyId:model.attention.familyId,reasonCode:btn.dataset.reason,statusEl:save});
-      }
-    });
+      save.classList.add('hidden');
+    };
+    const existing=state.selfExplanation?.familyId===model.attention.familyId&&state.selfExplanation?.scenario==='ATTENTION_DETAIL_V04'
+      ?state.selfExplanation.reasonCode:null;
+    if(existing){
+      showSelected(existing);
+    }else{
+      reflection.querySelectorAll('.reasonOption').forEach(btn=>btn.onclick=async()=>{
+        const code=btn.dataset.reason;
+        reflection.querySelectorAll('.reasonOption').forEach(x=>{x.disabled=true;x.classList.toggle('on',x===btn)});
+        if(typeof onSelfExplanation==='function'){
+          await onSelfExplanation({familyId:model.attention.familyId,reasonCode:code,statusEl:save});
+        }
+        showSelected(code);
+      });
+    }
   }else{
     cr.innerHTML='<div class="worldDetailBlock"><div class="worldDetailText">'+escapeHtml(attentionExplanation(model.attention,C))+'</div></div>';
   }
@@ -258,14 +313,21 @@ export function renderResultWorldV04({state,lang='lt',familyLabels,itemLabels,re
   const sr=q('suffRows');sr.innerHTML='';
   const bBox=document.createElement('div');bBox.className='worldDetailBlock';
   if(routeLabels.length){
-    bBox.innerHTML='<div class="worldDetailName">'+escapeHtml(C.routePrefix)+': '+routeLabels.map(escapeHtml).join(' · ')+'</div><div class="worldDetailText">'+escapeHtml(routeExplanation(model.sufficiency,C))+'</div>';
+    if(routeLabels.length===1){
+      const id=model.sufficiency.itemIds[0];
+      bBox.innerHTML='<div class="worldDetailName">'+escapeHtml(routeLabels[0])+'</div>'+
+        '<div class="worldDetailText">'+escapeHtml((ITEM_DETAIL[lang]||ITEM_DETAIL.lt)[id]||'')+'</div>'+
+        '<div class="worldDetailText detailWhy"><strong>'+escapeHtml(C.why)+'</strong><br>'+escapeHtml(routeExplanation(model.sufficiency,C))+'</div>';
+    }else{
+      bBox.innerHTML='<div class="worldDetailName">'+escapeHtml(C.multiRoute)+'</div>'+
+        model.sufficiency.itemIds.map((id,i)=>'<div class="worldDetailText"><strong>'+escapeHtml(routeLabels[i])+'</strong><br>'+escapeHtml((ITEM_DETAIL[lang]||ITEM_DETAIL.lt)[id]||'')+'</div>').join('')+
+        '<div class="worldDetailText detailWhy"><strong>'+escapeHtml(C.whyMany)+'</strong><br>'+escapeHtml(routeExplanation(model.sufficiency,C))+'</div>';
+    }
   }else{
     bBox.innerHTML='<div class="worldDetailName">'+escapeHtml(C.noRoute)+'</div><div class="worldDetailText">'+escapeHtml(routeExplanation(model.sufficiency,C))+'</div>';
   }
   sr.appendChild(bBox);
-  q('suffResultNote').textContent=lang==='en'
-    ?'This route comes only from your Channel-B sufficiency answers and B+ clarification.'
-    :'Šis maršrutas remiasi tik Channel B pakankamumo atsakymais ir B+ patikslinimu.';
+  q('suffResultNote').textContent=C.suffMethod;
   q('suffResultNote').classList.remove('hidden');
 
   applyDetailRoute();
