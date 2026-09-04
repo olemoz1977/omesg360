@@ -138,6 +138,10 @@ try{
   const routeNodes=await page.locator('#needsMapStage .needNode').count();
   if(routeContinents!==1)throw new Error('single B+ endpoint should render one route-relevant continent, got '+routeContinents);
   if(routeNodes!==1)throw new Error('single B+ endpoint should render one need node, got '+routeNodes);
+  await page.waitForFunction(()=>document.querySelectorAll('#needsMapStage .routePath').length===1);
+  if(await page.locator('#needsMapStage .routeOrigin').count()!==1)throw new Error('single route should render one neutral lower-map origin');
+  if(await page.locator('.shipVisual svg').count()!==1)throw new Error('final minimalist ship SVG missing');
+  if(await page.locator('.shipGhost,.shipHull,.shipMast,.shipSail').count())throw new Error('dashed prototype ship classes still present');
   if(!await page.locator('#mapRoute').evaluate(el=>el.classList.contains('hidden')))throw new Error('single route summary should be hidden to avoid duplicating the need label above the land');
   if(((await page.locator('#mapRoute').textContent())||'').trim())throw new Error('single route summary should be empty when the land already carries the endpoint label');
 
@@ -203,7 +207,7 @@ try{
   const keys=await page.evaluate(()=>Object.keys(localStorage));
   if(keys.some(k=>k.includes('priolens.open14.v031.rank.draft')))throw new Error('v0.3.1 draft namespace leaked into v0.4');
 
-  console.log('PASS: v0.4 local 390x844 final IA candidate: no duplicate focus images + need-area wording + reflection hierarchy + route-only map + completed-result restore');
+  console.log('PASS: v0.4 local 390x844 frozen IA + minimalist ship SVG + lower-map-only dotted route + clean details + completed-result restore');
 } finally {
   await browser.close();
 }
