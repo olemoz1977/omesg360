@@ -181,7 +181,7 @@ const LAND_SHAPES=[
 ];
 function landShapeHtml(index){
   const shape=LAND_SHAPES[index%LAND_SHAPES.length];
-  return '<svg class="landShape" viewBox="0 0 250 150" preserveAspectRatio="none" aria-hidden="true">'+
+  return '<svg class="landShape" viewBox="0 0 250 150" preserveAspectRatio="xMidYMid meet" aria-hidden="true">'+
     '<path class="landShoreHaloOuter" d="'+shape.coast+'"></path>'+
     '<path class="landShoreHaloInner" d="'+shape.coast+'"></path>'+
     '<path class="landFill" d="'+shape.coast+'"></path>'+
