@@ -59,6 +59,9 @@ try{
   const needNodes=await page.locator('#needsMapStage .needNode').count();
   if(needNodes!==0) throw new Error('no-route map should not render inactive need locations, got: '+needNodes);
   if(await page.locator('#needsMapStage .mapEmpty').count()!==1) throw new Error('no-route map should render one compact empty-state message');
+  if(await page.locator('#needsMapStage .mapRoutes,#needsMapStage .routePath,#needsMapStage .routeOrigin').count()) throw new Error('no-route state must not render dotted route geometry');
+  if(await page.locator('.shipVisual svg').count()!==1) throw new Error('live minimalist ship SVG missing');
+  if(await page.locator('.shipGhost,.shipHull,.shipMast,.shipSail').count()) throw new Error('live dashed prototype ship classes still present');
   const shipFocus=((await page.locator('#shipFocus').textContent())||'').trim();
   const mapRoute=((await page.locator('#mapRoute').textContent())||'').trim();
   if(!shipFocus) throw new Error('ship focus summary is empty');
@@ -123,7 +126,7 @@ try{
   const restoredStatus=((await page.locator('#saveStatus').textContent())||'').trim();
   if(!restoredStatus.includes('atkurta')) throw new Error('live result did not restore after reload: '+restoredStatus);
 
-  console.log('PASS: deployed v0.4 final IA candidate + no duplicate focus images + need-area wording + reflection hierarchy + reload restore + isolated live API');
+  console.log('PASS: deployed v0.4 frozen IA + minimalist ship + no-route geometry guard + clean details + reload restore + isolated live API');
 } finally {
   await browser.close();
 }
