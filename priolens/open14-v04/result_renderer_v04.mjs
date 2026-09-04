@@ -113,6 +113,45 @@ const ITEM_DETAIL={
     CONTRIBUTION:'Opportunities to contribute to something important beyond yourself.'
   }
 };
+let routeResizeStage=null;
+let routeResizeBound=false;
+function drawNeedsMapRoutes(stage){
+  const svg=stage?.querySelector?.('.mapRoutes');
+  if(!svg)return;
+  while(svg.firstChild)svg.removeChild(svg.firstChild);
+  const width=Math.max(1,stage.clientWidth||0),height=Math.max(1,stage.clientHeight||0);
+  svg.setAttribute('viewBox','0 0 '+width+' '+height);
+  const stageRect=stage.getBoundingClientRect();
+  const targets=[...stage.querySelectorAll('.needNode.routeTarget')];
+  if(!targets.length)return;
+  const ns='http://www.w3.org/2000/svg';
+  const originX=width/2,originY=Math.max(12,height-12);
+  for(const target of targets){
+    const r=target.getBoundingClientRect();
+    const x=r.left-stageRect.left+r.width/2;
+    const y=r.top-stageRect.top+r.height/2;
+    const midY=originY-(originY-y)*0.5;
+    const path=document.createElementNS(ns,'path');
+    path.setAttribute('class','routePath');
+    path.setAttribute('d','M '+originX+' '+originY+' Q '+originX+' '+midY+' '+x+' '+y);
+    svg.appendChild(path);
+  }
+  const origin=document.createElementNS(ns,'circle');
+  origin.setAttribute('class','routeOrigin');
+  origin.setAttribute('cx',String(originX));
+  origin.setAttribute('cy',String(originY));
+  origin.setAttribute('r','3.4');
+  svg.appendChild(origin);
+}
+function scheduleNeedsMapRoutes(stage){
+  routeResizeStage=stage;
+  const run=()=>drawNeedsMapRoutes(stage);
+  if(typeof requestAnimationFrame==='function')requestAnimationFrame(run);else run();
+  if(!routeResizeBound&&typeof window!=='undefined'){
+    routeResizeBound=true;
+    window.addEventListener('resize',()=>{if(routeResizeStage)scheduleNeedsMapRoutes(routeResizeStage)},{passive:true});
+  }
+}
 function renderNeedsMap(stage,lang,routeIds,itemLabels,emptyText){
   const routeSet=new Set(routeIds);
   const lands=(NEED_MAP[lang]||NEED_MAP.lt)
@@ -122,8 +161,13 @@ function renderNeedsMap(stage,lang,routeIds,itemLabels,emptyText){
   stage.className='mapStage '+(lands.length===0?'routeLands0':lands.length===1?'routeLands1':lands.length===2?'routeLands2':'routeLandsMany');
   if(!lands.length){
     stage.innerHTML='<span class="mapEmpty">'+escapeHtml(emptyText)+'</span>';
+    routeResizeStage=null;
     return;
   }
+  const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+  svg.setAttribute('class','mapRoutes');
+  svg.setAttribute('aria-hidden','true');
+  stage.appendChild(svg);
   for(const land of lands){
     const continent=document.createElement('span');
     continent.className='continent';
@@ -131,6 +175,7 @@ function renderNeedsMap(stage,lang,routeIds,itemLabels,emptyText){
       land.items.map(id=>'<span class="needNode routeTarget" data-need-id="'+escapeHtml(id)+'">'+escapeHtml(capFirst(itemLabels[id]||id))+'</span>').join('');
     stage.appendChild(continent);
   }
+  scheduleNeedsMapRoutes(stage);
 }
 function chosenPaths(state,familyId){
   const seen=new Set(),out=[];
