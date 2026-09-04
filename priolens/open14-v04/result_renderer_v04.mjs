@@ -1,4 +1,4 @@
-import { buildResultWorldModel } from './result_world_v04.mjs';
+import { buildResultWorldModel } from './result_world_v04.mjs?v=scene3';
 
 function q(id){return document.getElementById(id)}
 function capFirst(x){return x?x.charAt(0).toUpperCase()+x.slice(1):x}
