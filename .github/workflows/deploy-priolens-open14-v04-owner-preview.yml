@@ -91,8 +91,17 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p /tmp/v04-api
-          lftp -c "set ftp:ssl-allow no; set net:max-retries 4; set net:timeout 30; open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; get \"$V03_API_REMOTE/config.php\" -o /tmp/v04-api/config.php"
-          test -s /tmp/v04-api/config.php
+          ok=0
+          for attempt in 1 2 3; do
+            rm -f /tmp/v04-api/config.php
+            if lftp -c "set ftp:ssl-allow no; set net:max-retries 4; set net:timeout 30; set net:reconnect-interval-base 3; open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; get \"$V03_API_REMOTE/config.php\" -o /tmp/v04-api/config.php" && test -s /tmp/v04-api/config.php; then
+              ok=1
+              break
+            fi
+            echo "protected config fetch attempt $attempt failed; retrying" >&2
+            sleep $((attempt*5))
+          done
+          test "$ok" = 1
           cp /tmp/v04-api/config.php priolens/open14-v04/server/config.php
           echo 'PASS: protected config copied without printing contents'
 
