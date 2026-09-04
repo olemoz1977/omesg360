@@ -49,10 +49,16 @@ try{
   await page.waitForFunction(()=>document.querySelector('#saveStatus')?.classList.contains('ok'),null,{timeout:15000});
   await page.waitForSelector('#shipCard');
   await page.waitForSelector('#mapCard');
+  await page.waitForSelector('.resultScene');
+  const continents=await page.locator('#needsMapStage .continent').count();
+  if(continents!==6) throw new Error('needs map must render 6 continents, got: '+continents);
+  const needNodes=await page.locator('#needsMapStage .needNode').count();
+  if(needNodes!==12) throw new Error('needs map must render 12 need locations, got: '+needNodes);
   const shipFocus=((await page.locator('#shipFocus').textContent())||'').trim();
   const mapRoute=((await page.locator('#mapRoute').textContent())||'').trim();
   if(!shipFocus) throw new Error('ship focus summary is empty');
   if(mapRoute!=='Aiškaus maršruto nėra') throw new Error('all-5 Channel B should render no route, got: '+mapRoute);
+  if(await page.locator('#needsMapStage .routeTarget').count()!==0) throw new Error('all-5 Channel B must not mark route targets');
   const resultText=((await page.locator('#result').textContent())||'');
   if(resultText.includes('Ką matai, kai palygini abu?')) throw new Error('legacy automatic A/B comparison still visible');
   await page.click('#shipCard');
@@ -61,7 +67,7 @@ try{
   if(await page.locator('#suffDetail').evaluate(el=>el.classList.contains('hidden'))) throw new Error('map detail did not open');
   const draftKeys=await page.evaluate(()=>Object.keys(localStorage).filter(k=>k.includes('priolens.open14.v04.rank.draft')));
   if(draftKeys.length) throw new Error('v0.4 draft not cleared after successful live save');
-  console.log('PASS: deployed v0.4 owner preview + ship/map/detail architecture + isolated live API');
+  console.log('PASS: deployed v0.4 unified ship-water-map scene + 6x12 needs map + details + isolated live API');
 } finally {
   await browser.close();
 }
