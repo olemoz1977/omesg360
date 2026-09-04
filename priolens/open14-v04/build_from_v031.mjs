@@ -48,7 +48,7 @@ html=html.slice(0,resultStart)+resultHtml+html.slice(resultEnd+'  </section>\n'.
 
 
 const importAnchor="import { assignOpen14ThreeExemplars, listThreeExemplarBankProblems } from './open14_no_repeat_assigner_v03.mjs';";
-html=replaceOnce(html,importAnchor,importAnchor+"\nimport { SESSION_SCHEMA_V04, DRAFT_KEY_BASE_V04, resolveAttentionFromChoices, applyAttentionClarifier, resolveSufficiencyRoute, applySufficiencyClarifier } from './adaptive_clarifiers_v04.mjs';\nimport { renderResultWorldV04 } from './result_renderer_v04.mjs?v=scene7';",'assigner import');
+html=replaceOnce(html,importAnchor,importAnchor+"\nimport { SESSION_SCHEMA_V04, DRAFT_KEY_BASE_V04, resolveAttentionFromChoices, applyAttentionClarifier, resolveSufficiencyRoute, applySufficiencyClarifier } from './adaptive_clarifiers_v04.mjs';\nimport { renderResultWorldV04 } from './result_renderer_v04.mjs?v=scene8';",'assigner import');
 html=replaceOnce(html,"const DRAFT_KEY_BASE='priolens.open14.v031.rank.draft';","const DRAFT_KEY_BASE=DRAFT_KEY_BASE_V04;",'draft key');
 html=replaceOnce(html,'const DRAFT_KEY=`${DRAFT_KEY_BASE}.${LANG}`;','const DRAFT_KEY=`${DRAFT_KEY_BASE}.${LANG}`;\nconst RESULT_KEY_BASE=\'priolens.open14.v04.last-result\';\nconst RESULT_KEY=`${RESULT_KEY_BASE}.${LANG}`;\nconst RESULT_MAX_AGE_MS=90*24*60*60*1000;','completed result key');
 html=html.replaceAll("'2rasi.priolens.open14.rank-session-v0.3'","SESSION_SCHEMA_V04");
