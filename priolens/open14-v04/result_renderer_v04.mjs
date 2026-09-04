@@ -226,7 +226,8 @@ export function renderResultWorldV04({state,lang='lt',familyLabels,itemLabels,re
 
   const routeLabels=model.sufficiency.itemIds.map(id=>capFirst(itemLabels[id]||id));
   q('mapPlaceholder').textContent=C.map;
-  q('mapRoute').textContent=routeLabels.length===1?routeLabels[0]:(routeLabels.length>1?C.multiRoute:C.noRoute);
+  q('mapRoute').textContent=routeLabels.length===1?'':(routeLabels.length>1?C.multiRoute:C.noRoute);
+  q('mapRoute').classList.toggle('hidden',routeLabels.length===1);
   q('mapTap').textContent=C.mapTap;
   renderNeedsMap(q('needsMapStage'),lang,model.sufficiency.itemIds,itemLabels,C.noRoute);
   q('worldSeparationNote').textContent=C.separate;
@@ -279,7 +280,6 @@ export function renderResultWorldV04({state,lang='lt',familyLabels,itemLabels,re
   if(model.attention.hasFocus){
     const reflection=document.createElement('div');reflection.className='reflectionHero compactReflection';
     reflection.innerHTML=imagesHtml(chosenPaths(state,model.attention.familyId),'reflectionImages')+
-      '<div class="reflectionQuestion">'+escapeHtml(C.reflectionQ)+'</div>'+
       '<div class="reasonOptions">'+reasonOptions.map(([code,label])=>'<button type="button" class="reasonOption" data-reason="'+escapeHtml(code)+'">'+escapeHtml(label)+'</button>').join('')+'</div>'+
       '<div class="reasonFeedback hidden">'+escapeHtml(C.reflectionNote)+'</div><div class="reasonSave hidden"></div>';
     cr.appendChild(reflection);
