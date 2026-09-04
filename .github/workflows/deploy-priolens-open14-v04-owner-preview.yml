@@ -42,6 +42,7 @@ jobs:
         run: |
           set -euo pipefail
           node priolens/open14-v04/adaptive_clarifiers_v04.test.mjs
+          node priolens/open14-v04/result_world_v04.test.mjs
           node priolens/open14-v04/build_from_v031.mjs
           node priolens/open14-v04/server/build_endpoints_v04.mjs
           php -l priolens/open14-v04/server/api.php
@@ -57,6 +58,10 @@ jobs:
           grep -Fq "most+least+a-plus+b-plus-v0.4" "$f"
           grep -Fq 'id="aplus"' "$f"
           grep -Fq 'id="bplus"' "$f"
+          grep -Fq 'id="shipCard"' "$f"
+          grep -Fq 'id="mapCard"' "$f"
+          grep -Fq "renderResultWorldV04" "$f"
+          ! grep -Fq 'Ką matai, kai palygini abu?' "$f"
           ! grep -Fq "const API_PATH='/priolens-open14-v03-api/api.php'" "$f"
           ! grep -Fq "priolens.open14.v031.rank.draft" "$f"
 
@@ -120,14 +125,14 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          lftp -c "set ftp:ssl-allow no; set net:max-retries 4; set net:timeout 30; open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; mkdir -p \"$PREVIEW_REMOTE\"; put -O \"$PREVIEW_REMOTE/\" priolens/open14-v04/index.html; put -O \"$PREVIEW_REMOTE/\" priolens/open14-v04/bank.json; put -O \"$PREVIEW_REMOTE/\" priolens/open14-v04/adaptive_clarifiers_v04.mjs; put -O \"$PREVIEW_REMOTE/\" priolens/open14-v04/p3_open14_planner_v02.mjs; put -O \"$PREVIEW_REMOTE/\" priolens/open14-v04/open14_no_repeat_assigner_v03.mjs; put -O \"$PREVIEW_REMOTE/\" priolens/open14-v04/stimulus-bank.html; put -O \"$PREVIEW_REMOTE/\" priolens/open14-v04/.htaccess"
+          lftp -c "set ftp:ssl-allow no; set net:max-retries 4; set net:timeout 30; open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; mkdir -p \"$PREVIEW_REMOTE\"; put -O \"$PREVIEW_REMOTE/\" priolens/open14-v04/index.html; put -O \"$PREVIEW_REMOTE/\" priolens/open14-v04/bank.json; put -O \"$PREVIEW_REMOTE/\" priolens/open14-v04/adaptive_clarifiers_v04.mjs; put -O \"$PREVIEW_REMOTE/\" priolens/open14-v04/p3_open14_planner_v02.mjs; put -O \"$PREVIEW_REMOTE/\" priolens/open14-v04/open14_no_repeat_assigner_v03.mjs; put -O \"$PREVIEW_REMOTE/\" priolens/open14-v04/stimulus-bank.html; put -O \"$PREVIEW_REMOTE/\" priolens/open14-v04/result_world_v04.mjs; put -O \"$PREVIEW_REMOTE/\" priolens/open14-v04/result_renderer_v04.mjs; put -O \"$PREVIEW_REMOTE/\" priolens/open14-v04/.htaccess"
 
       - name: Verify live owner preview bytes and module MIME
         shell: bash
         run: |
           set -euo pipefail
           BASE='https://omesg360.eu/priolens-open14-v04'
-          for f in index.html bank.json adaptive_clarifiers_v04.mjs p3_open14_planner_v02.mjs open14_no_repeat_assigner_v03.mjs stimulus-bank.html; do
+          for f in index.html bank.json adaptive_clarifiers_v04.mjs result_world_v04.mjs result_renderer_v04.mjs p3_open14_planner_v02.mjs open14_no_repeat_assigner_v03.mjs stimulus-bank.html; do
             curl -fsS --retry 3 -H 'Cache-Control: no-cache' "$BASE/$f?deploy=${GITHUB_SHA}" -o "/tmp/live-${f//\//_}"
             cmp "priolens/open14-v04/$f" "/tmp/live-${f//\//_}"
             echo "BYTE PASS $f"
@@ -136,6 +141,11 @@ jobs:
           case "$ctype" in
             *javascript*|*ecmascript*) ;;
             *) echo "Unexpected adaptive module MIME: $ctype" >&2; exit 1;;
+          esac
+          ctype=$(curl -fsSI "$BASE/result_renderer_v04.mjs?deploy=${GITHUB_SHA}" | tr -d '\r' | awk -F': ' 'tolower($1)=="content-type"{print tolower($2)}' | tail -1)
+          case "$ctype" in
+            *javascript*|*ecmascript*) ;;
+            *) echo "Unexpected result renderer MIME: $ctype" >&2; exit 1;;
           esac
           grep -Fq "const API_PATH='/priolens-open14-v04-api/api.php'" /tmp/live-index.html
           grep -Fq 'id="aplus"' /tmp/live-index.html
