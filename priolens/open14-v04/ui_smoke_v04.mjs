@@ -145,6 +145,8 @@ try{
   await page.waitForFunction(()=>new URLSearchParams(location.search).get('detail')==='attention');
   const attentionText=(await page.locator('#attentionDetail').textContent())||'';
   if(/\bMOST\b|\bLEAST\b|\bA\+\b/.test(attentionText))throw new Error('technical A terminology leaked into participant detail: '+attentionText);
+  if(await page.locator('#repeatRows img').count())throw new Error('focus exemplars should not be duplicated in the summary block');
+  if(await page.locator('#compareRows .reflectionImages img').count()!==3)throw new Error('3/3 focus exemplars must remain visible in the reflection block');
   const reflectionQuestion='Kas, tavo manymu, galėjo traukti šiuose vaizduose?';
   const reflectionQuestionCount=attentionText.split(reflectionQuestion).length-1;
   if(reflectionQuestionCount!==1)throw new Error('reflection question must appear exactly once, got '+reflectionQuestionCount);
@@ -173,6 +175,9 @@ try{
   if(await page.locator('#result').evaluate(el=>el.classList.contains('detailMode')))throw new Error('sufficiency bottom sheet must not replace the result scene');
   const suffText=(await page.locator('#suffDetail').textContent())||'';
   if(/\bB\+\b|Channel B/.test(suffText))throw new Error('technical B terminology leaked into participant detail: '+suffText);
+  if(!suffText.includes('Kaip ši poreikio sritis buvo išskirta?'))throw new Error('need-area provenance heading missing: '+suffText);
+  if(suffText.includes('Kodėl ši kryptis?'))throw new Error('old direction wording remains in sufficiency detail');
+  if(!suffText.includes('mažiausiai pakankama'))throw new Error('single-route sufficiency-method note is not explicit enough');
   await page.click('#suffDetailClose');
   await page.waitForFunction(()=>!new URLSearchParams(location.search).has('detail'));
 
@@ -198,7 +203,7 @@ try{
   const keys=await page.evaluate(()=>Object.keys(localStorage));
   if(keys.some(k=>k.includes('priolens.open14.v031.rank.draft')))throw new Error('v0.3.1 draft namespace leaked into v0.4');
 
-  console.log('PASS: v0.4 local 390x844 enlarged A+ runoff + adaptive resume + non-duplicated single-land map + reflection-before-background detail + visible collapsed answer + completed-result reload restore + restart clear + final payload');
+  console.log('PASS: v0.4 local 390x844 final IA candidate: no duplicate focus images + need-area wording + reflection hierarchy + route-only map + completed-result restore');
 } finally {
   await browser.close();
 }
