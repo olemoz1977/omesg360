@@ -120,6 +120,7 @@ html=html.slice(0,resultStart)+resultHtml+html.slice(resultEnd+'  </section>\n'.
 const importAnchor="import { assignOpen14ThreeExemplars, listThreeExemplarBankProblems } from './open14_no_repeat_assigner_v03.mjs';";
 html=replaceOnce(html,importAnchor,importAnchor+"\nimport { SESSION_SCHEMA_V04, DRAFT_KEY_BASE_V04, resolveAttentionFromChoices, applyAttentionClarifier, resolveSufficiencyRoute, applySufficiencyClarifier } from './adaptive_clarifiers_v04.mjs';\nimport { renderResultWorldV04 } from './result_renderer_v04.mjs?v=scene4';",'assigner import');
 html=replaceOnce(html,"const DRAFT_KEY_BASE='priolens.open14.v031.rank.draft';","const DRAFT_KEY_BASE=DRAFT_KEY_BASE_V04;",'draft key');
+html=replaceOnce(html,'const DRAFT_KEY=`${DRAFT_KEY_BASE}.${LANG}`;','const DRAFT_KEY=`${DRAFT_KEY_BASE}.${LANG}`;\nconst RESULT_KEY_BASE=\'priolens.open14.v04.last-result\';\nconst RESULT_KEY=`${RESULT_KEY_BASE}.${LANG}`;\nconst RESULT_MAX_AGE_MS=90*24*60*60*1000;','completed result key');
 html=html.replaceAll("'2rasi.priolens.open14.rank-session-v0.3'","SESSION_SCHEMA_V04");
 html=replaceOnce(html,"const API_PATH='/priolens-open14-v03-api/api.php';","const API_PATH='/priolens-open14-v04-api/api.php';",'v0.4 API path');
 html=replaceOnce(html,"const PROGRESS_PATH='/priolens-open14-v03-api/progress.php';","const PROGRESS_PATH='/priolens-open14-v04-api/progress.php';",'v0.4 progress path');
@@ -127,6 +128,20 @@ html=replaceOnce(html,"const PROGRESS_PATH='/priolens-open14-v03-api/progress.ph
 const stateNeedle="sufficiencySchema:'2rasi.priolens.sufficiency-v0.2',sufficiency:{},selfExplanation:null,pendingMost:null,completedAt:null";
 const stateReplacement="sufficiencySchema:'2rasi.priolens.sufficiency-v0.2',sufficiency:{},attentionResolution:null,attentionClarifier:null,attentionFocus:null,sufficiencyResolution:null,sufficiencyClarifier:null,sufficiencyRoute:null,selfExplanation:null,pendingMost:null,systemSmoke:new URLSearchParams(location.search).get('systemSmoke')==='1',completedAt:null";
 html=replaceOnce(html,stateNeedle,stateReplacement,'startSession state fields');
+const localDraftClearAnchor="function clearLocalDraft(){try{localStorage.removeItem(DRAFT_KEY);if(LANG==='lt')localStorage.removeItem(DRAFT_KEY_BASE)}catch(err){console.warn('local draft clear failed',err)}}";
+const completedResultHelpers=`function saveLocalResult(){if(!state?.completedAt)return;try{localStorage.setItem(RESULT_KEY,JSON.stringify(state))}catch(err){console.warn('local result save failed',err)}}
+function clearLocalResult(){try{localStorage.removeItem(RESULT_KEY)}catch(err){console.warn('local result clear failed',err)}}
+function loadLocalResult(){try{const raw=localStorage.getItem(RESULT_KEY);if(!raw)return null;const x=JSON.parse(raw);if(!x||x.schema!==SESSION_SCHEMA_V04||!x.completedAt||!Array.isArray(x.choices)||x.choices.length!==14||!x.sufficiency){clearLocalResult();return null}if(x.language&&x.language!==LANG)return null;if(bank&&x.bankSchema!==bank.schema){clearLocalResult();return null}const completedAt=Date.parse(x.completedAt);if(!Number.isFinite(completedAt)||Date.now()-completedAt>RESULT_MAX_AGE_MS){clearLocalResult();return null}return x}catch(err){console.warn('local result load failed',err);return null}}
+function restoreLastResultIfAvailable(){if(loadLocalDraft())return false;const x=loadLocalResult();if(!x)return false;state=x;ensureV04StateFields();show('result');renderResult();const el=$('saveStatus');if(state.submission?.ok===true){el.textContent=LANG==='en'?'Previous anonymous research session restored.':'Ankstesnė anoniminė tyrimo sesija atkurta.';el.className='note ok'}else if(state.submission?.ok===false){el.textContent=LANG==='en'?'Result restored. The previous automatic save failed.':'Rezultatas atkurtas. Ankstesnis automatinis išsaugojimas nepavyko.';el.className='note bad'}else{el.textContent=LANG==='en'?'Previous result restored on this device.':'Ankstesnis rezultatas atkurtas šiame įrenginyje.';el.className='note'}return true}`;
+html=replaceOnce(html,localDraftClearAnchor,localDraftClearAnchor+'\n'+completedResultHelpers,'completed result storage');
+html=replaceOnce(html,"$('start').disabled=false;$('bankCard').classList.add('ready');offerResumeIfAvailable()","$('start').disabled=false;$('bankCard').classList.add('ready');if(!restoreLastResultIfAvailable())offerResumeIfAvailable()",'restore completed result on init');
+html=replaceOnce(html,"state.submission={ok:true,inserted:Boolean(data.inserted),submissionId:data.submissionId||null};clearLocalDraft();","state.submission={ok:true,inserted:Boolean(data.inserted),submissionId:data.submissionId||null};saveLocalResult();clearLocalDraft();",'completed result after submit success');
+html=replaceOnce(html,"state.submission={ok:false,error:String(err)};el.textContent=T.saveFailed;","state.submission={ok:false,error:String(err)};saveLocalResult();el.textContent=T.saveFailed;",'completed result after submit failure');
+html=replaceOnce(html,"state.rankProtocol='most+least+a-plus+b-plus-v0.4';show('result');renderResult();finalSubmitPromise=submitSession()","state.rankProtocol='most+least+a-plus+b-plus-v0.4';saveLocalResult();show('result');renderResult();finalSubmitPromise=submitSession()",'snapshot completed result before submit');
+html=replaceOnce(html,"state.selfExplanationSave={ok:true,at:new Date().toISOString()};","state.selfExplanationSave={ok:true,at:new Date().toISOString()};saveLocalResult();",'persist restored self explanation success');
+html=replaceOnce(html,"state.selfExplanationSave={ok:false,error:String(err)};","state.selfExplanationSave={ok:false,error:String(err)};saveLocalResult();",'persist restored self explanation failure');
+html=replaceOnce(html,"$('restart').onclick=()=>{clearLocalDraft();location.reload()}","$('restart').onclick=()=>{clearLocalDraft();clearLocalResult();location.reload()}",'restart clears completed result');
+
 
 html=replaceOnce(html,"if(state.choices.length<14)renderTrial();else{show('suff');renderSuff()}","if(state.choices.length<14)renderTrial();else afterChannelA()",'post Channel-A transition');
 html=replaceOnce(html,"if(suffIndex<5){suffIndex++;renderSuff()}else finish()","if(suffIndex<5){suffIndex++;renderSuff()}else afterChannelB()",'post Channel-B transition');
@@ -230,6 +245,7 @@ const renderResultV04=`function renderResult(){
       reasonOptions:SELF_REASON_OPTIONS[LANG],
       onSelfExplanation:async ({familyId,reasonCode,statusEl})=>{
         state.selfExplanation={schema:'2rasi.priolens.self-explanation-v0.1',familyId,scenario:'ATTENTION_DETAIL_V04',reasonCode,answeredAt:new Date().toISOString()};
+        saveLocalResult();
         await persistSelfExplanation(statusEl);
       }
     });
