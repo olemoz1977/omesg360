@@ -54,9 +54,10 @@ try{
   await page.waitForSelector('.resultScene');
   if(await page.locator('.worldRenderError').count()) throw new Error('result error boundary is visible');
   const continents=await page.locator('#needsMapStage .continent').count();
-  if(continents!==6) throw new Error('needs map must render 6 continents, got: '+continents);
+  if(continents!==0) throw new Error('no-route map should not render inactive continents, got: '+continents);
   const needNodes=await page.locator('#needsMapStage .needNode').count();
-  if(needNodes!==12) throw new Error('needs map must render 12 need locations, got: '+needNodes);
+  if(needNodes!==0) throw new Error('no-route map should not render inactive need locations, got: '+needNodes);
+  if(await page.locator('#needsMapStage .mapEmpty').count()!==1) throw new Error('no-route map should render one compact empty-state message');
   const shipFocus=((await page.locator('#shipFocus').textContent())||'').trim();
   const mapRoute=((await page.locator('#mapRoute').textContent())||'').trim();
   if(!shipFocus) throw new Error('ship focus summary is empty');
@@ -77,13 +78,17 @@ try{
   await page.locator('#mapDetailsButton').focus();
   await page.keyboard.press('Space');
   await page.waitForFunction(()=>new URLSearchParams(location.search).get('detail')==='sufficiency');
-  if(await page.locator('#suffDetail').evaluate(el=>el.classList.contains('hidden'))) throw new Error('sufficiency detail route hidden');
+  if(await page.locator('#suffDetail').evaluate(el=>el.classList.contains('hidden'))) throw new Error('sufficiency bottom sheet hidden');
+  if(await page.locator('#result').evaluate(el=>el.classList.contains('detailMode'))) throw new Error('sufficiency detail must not replace the main result scene');
+  if(await page.locator('.resultScene').evaluate(el=>getComputedStyle(el).display==='none')) throw new Error('main result scene hidden behind sufficiency bottom sheet');
+  const suffText=(await page.locator('#suffDetail').textContent())||'';
+  if(/\bB\+\b|Channel B/.test(suffText)) throw new Error('technical B terminology leaked into participant detail');
   await page.goBack();
   await page.waitForFunction(()=>!new URLSearchParams(location.search).has('detail'));
   if(await page.locator('#result').evaluate(el=>el.classList.contains('detailMode'))) throw new Error('browser Back did not restore result scene');
   const draftKeys=await page.evaluate(()=>Object.keys(localStorage).filter(k=>k.includes('priolens.open14.v04.rank.draft')));
   if(draftKeys.length) throw new Error('v0.4 draft not cleared after successful live save');
-  console.log('PASS: deployed v0.4 compact scene + routed detail pages + browser Back + isolated live API');
+  console.log('PASS: deployed v0.4 compact scene + attention detail route + sufficiency bottom sheet + browser Back + isolated live API');
 } finally {
   await browser.close();
 }
