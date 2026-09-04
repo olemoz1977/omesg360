@@ -49,6 +49,8 @@ try{
   await page.waitForFunction(()=>document.querySelector('#saveStatus')?.classList.contains('ok'),null,{timeout:15000});
   await page.waitForSelector('#shipCard');
   await page.waitForSelector('#mapCard');
+  await page.waitForSelector('#shipDetailsButton');
+  await page.waitForSelector('#mapDetailsButton');
   await page.waitForSelector('.resultScene');
   if(await page.locator('.worldRenderError').count()) throw new Error('result error boundary is visible');
   const continents=await page.locator('#needsMapStage .continent').count();
@@ -62,15 +64,26 @@ try{
   if(await page.locator('#needsMapStage .routeTarget').count()!==0) throw new Error('all-5 Channel B must not mark route targets');
   const resultText=((await page.locator('#result').textContent())||'');
   if(resultText.includes('Ką matai, kai palygini abu?')) throw new Error('legacy automatic A/B comparison still visible');
-  await page.locator('#shipCard').focus();
+  await page.locator('#shipDetailsButton').focus();
   await page.keyboard.press('Enter');
-  if(await page.locator('#attentionDetail').evaluate(el=>el.classList.contains('hidden'))) throw new Error('ship detail did not open from keyboard');
-  await page.locator('#mapCard').focus();
+  await page.waitForFunction(()=>new URLSearchParams(location.search).get('detail')==='attention');
+  if(!(await page.locator('#result').evaluate(el=>el.classList.contains('detailMode')))) throw new Error('attention detail route did not enter detail mode');
+  if(await page.locator('#attentionDetail').evaluate(el=>el.classList.contains('hidden'))) throw new Error('attention detail route hidden');
+  if(!(await page.locator('.resultScene').evaluate(el=>getComputedStyle(el).display==='none'))) throw new Error('main scene still visible on attention detail route');
+  await page.click('#attentionBack');
+  await page.waitForFunction(()=>!new URLSearchParams(location.search).has('detail'));
+  if(await page.locator('#result').evaluate(el=>el.classList.contains('detailMode'))) throw new Error('attention back did not restore result scene');
+
+  await page.locator('#mapDetailsButton').focus();
   await page.keyboard.press('Space');
-  if(await page.locator('#suffDetail').evaluate(el=>el.classList.contains('hidden'))) throw new Error('map detail did not open from keyboard');
+  await page.waitForFunction(()=>new URLSearchParams(location.search).get('detail')==='sufficiency');
+  if(await page.locator('#suffDetail').evaluate(el=>el.classList.contains('hidden'))) throw new Error('sufficiency detail route hidden');
+  await page.goBack();
+  await page.waitForFunction(()=>!new URLSearchParams(location.search).has('detail'));
+  if(await page.locator('#result').evaluate(el=>el.classList.contains('detailMode'))) throw new Error('browser Back did not restore result scene');
   const draftKeys=await page.evaluate(()=>Object.keys(localStorage).filter(k=>k.includes('priolens.open14.v04.rank.draft')));
   if(draftKeys.length) throw new Error('v0.4 draft not cleared after successful live save');
-  console.log('PASS: deployed v0.4 hardened scene + 6x12 needs map + keyboard details + isolated live API');
+  console.log('PASS: deployed v0.4 compact scene + routed detail pages + browser Back + isolated live API');
 } finally {
   await browser.close();
 }
