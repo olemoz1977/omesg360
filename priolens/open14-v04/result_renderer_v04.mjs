@@ -157,9 +157,10 @@ function openDetailRoute(kind){
   applyDetailRoute();
 }
 function closeDetailRoute(){
+  if(history.state?.priolensDetail){history.back();return}
   const url=new URL(location.href);
   url.searchParams.delete('detail');
-  history.pushState({priolensDetail:null},'',url);
+  history.replaceState({priolensDetail:null},'',url);
   applyDetailRoute();
 }
 function imagesHtml(paths,klass='worldDetailImages'){
