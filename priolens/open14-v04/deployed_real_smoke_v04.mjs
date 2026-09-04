@@ -72,6 +72,24 @@ try{
   if(!(await page.locator('#result').evaluate(el=>el.classList.contains('detailMode')))) throw new Error('attention detail route did not enter detail mode');
   if(await page.locator('#attentionDetail').evaluate(el=>el.classList.contains('hidden'))) throw new Error('attention detail route hidden');
   if(!(await page.locator('.resultScene').evaluate(el=>getComputedStyle(el).display==='none'))) throw new Error('main scene still visible on attention detail route');
+  const attentionText=((await page.locator('#attentionDetail').textContent())||'');
+  const reflectionQuestion='Kas, tavo manymu, galėjo traukti šiuose vaizduose?';
+  if(attentionText.split(reflectionQuestion).length-1!==1) throw new Error('live reflection question is duplicated');
+  const reflectionBeforeBackground=await page.evaluate(()=>{
+    const a=document.getElementById('compareHeading'),b=document.getElementById('leastHeading');
+    return Boolean(a.compareDocumentPosition(b)&Node.DOCUMENT_POSITION_FOLLOWING);
+  });
+  if(!reflectionBeforeBackground) throw new Error('live background detail appears before the reflection block');
+  const firstReason=page.locator('#compareRows .reasonOption').first();
+  if(await firstReason.count()){
+    const expected=((await firstReason.textContent())||'').trim();
+    await firstReason.click();
+    await page.waitForSelector('#compareRows .reflectionAnswerValue');
+    const actual=((await page.locator('#compareRows .reflectionAnswerValue').textContent())||'').trim();
+    if(actual!==expected) throw new Error('live collapsed reflection answer missing: '+actual);
+    const color=await page.locator('#compareRows .reflectionAnswerValue').evaluate(el=>getComputedStyle(el).color);
+    if(color==='rgb(255, 255, 255)'||color==='white') throw new Error('live collapsed reflection answer is white on white');
+  }
   await page.click('#attentionBack');
   await page.waitForFunction(()=>!new URLSearchParams(location.search).has('detail'));
   if(await page.locator('#result').evaluate(el=>el.classList.contains('detailMode'))) throw new Error('attention back did not restore result scene');
@@ -101,7 +119,7 @@ try{
   const restoredStatus=((await page.locator('#saveStatus').textContent())||'').trim();
   if(!restoredStatus.includes('atkurta')) throw new Error('live result did not restore after reload: '+restoredStatus);
 
-  console.log('PASS: deployed v0.4 compact scene + details + browser Back + completed-result reload restore + isolated live API');
+  console.log('PASS: deployed v0.4 compact scene + non-duplicated reflection hierarchy + visible collapsed answer + browser Back + completed-result reload restore + isolated live API');
 } finally {
   await browser.close();
 }
