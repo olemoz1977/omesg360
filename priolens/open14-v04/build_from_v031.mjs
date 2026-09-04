@@ -19,6 +19,8 @@ let html=read('index.html');
 
 const css=`
 .clarify{padding:18px 4px 42px;max-width:760px;margin:0 auto}.clarifyHead h2{font-size:28px;margin:0 0 8px}.clarifyGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:18px 0}.clarifyCard{border:1px solid var(--line);background:#fff;border-radius:16px;padding:8px;min-height:44px}.clarifyCard.on{outline:3px solid #181818}.clarifyPics{display:grid;gap:5px}.clarifyPics.two{grid-template-columns:repeat(2,minmax(0,1fr))}.clarifyPics.three{grid-template-columns:repeat(3,minmax(0,1fr))}.clarifyPics img{display:block;width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:10px;background:#eee}.clarifyNeed{width:100%;text-align:left;border:1px solid var(--line);background:#fff;border-radius:14px;padding:13px 14px;min-height:48px;font-weight:720;line-height:1.35}.clarifyActions{display:grid;gap:8px;margin-top:14px}.clarifyMeta{font-size:13px;color:#666;line-height:1.5}@media(max-width:420px){.clarifyGrid{gap:8px}.clarifyCard{padding:6px}}
+.resultWorld{display:grid;gap:28px;margin-top:24px}.worldSection{display:grid;gap:9px}.worldSection .perspectiveLabel{margin:0}.worldSection h2{font-size:25px;letter-spacing:-.02em;margin:0 0 3px}.worldCard{width:100%;border:1px solid var(--line);background:#fff;color:#181818;border-radius:20px;padding:12px;text-align:left;min-height:230px;display:flex;flex-direction:column;gap:10px}.worldCard:focus-visible{outline:3px solid #181818;outline-offset:2px}.worldPlaceholder{min-height:128px;border:1.5px dashed #b8b8b2;border-radius:15px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:850;letter-spacing:.16em;color:#888;background:#fafaf8}.worldFocus{font-size:25px;font-weight:850;letter-spacing:-.025em;line-height:1.08}.worldTap{font-size:13px;color:#6b6b67;font-weight:680}.worldDetail{border-left:2px solid #d7d7d1;padding:4px 0 2px 12px;margin-top:3px}.worldDetail h3{font-size:20px;margin:10px 0 10px}.worldDetailBlock{background:#fff;border:1px solid var(--line);border-radius:15px;padding:12px;margin:8px 0}.worldDetailName{font-size:17px;font-weight:800;line-height:1.3}.worldDetailText{font-size:14px;line-height:1.5;color:#5f5f5f;margin-top:5px}.worldDetailImages{display:grid;grid-template-columns:repeat(auto-fit,minmax(78px,1fr));gap:7px;margin-bottom:10px;max-width:360px}.worldDetailImages img{display:block;width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:11px;border:1px solid #e2e2dd}.worldSeparation{font-size:13px;line-height:1.5;color:#686864;border-top:1px solid var(--line);padding-top:14px;margin-top:2px}.compactReflection{margin-top:8px}.compactReflection .reflectionQuestion{margin-top:8px}.worldDetail .perspectiveLabel{margin-top:18px}@media(max-width:420px){.worldCard{min-height:210px}.worldPlaceholder{min-height:112px}.worldFocus{font-size:23px}}
+
 `;
 html=replaceOnce(html,'</style>',css+'</style>','style close');
 
@@ -38,8 +40,68 @@ const bPlusHtml=`  <section id="bplus" class="screen clarify">
 `;
 html=replaceOnce(html,'  <section id="result" class="screen result">',bPlusHtml+'  <section id="result" class="screen result">','result section');
 
+const resultHtml=`  <section id="result" class="screen result">
+    <h1>Pirmas žvilgsnis. Antras atsakymas.</h1>
+    <p id="resultLead" class="resultLead"></p>
+    <p id="saveStatus" class="note">Sesijos išsaugojimas tikrinamas…</p>
+
+    <div class="resultWorld">
+      <div class="worldSection">
+        <p id="firstLabel" class="perspectiveLabel">Pirmas žvilgsnis</p>
+        <h2 id="firstHeading">Kas iškilo?</h2>
+        <button id="shipCard" class="worldCard" type="button" aria-controls="attentionDetail" aria-expanded="false">
+          <div id="shipPlaceholder" class="worldPlaceholder">LAIVAS</div>
+          <div id="shipFocus" class="worldFocus"></div>
+          <div id="shipTap" class="worldTap"></div>
+        </button>
+        <div id="attentionDetail" class="worldDetail hidden">
+          <h3 id="attentionDetailTitle"></h3>
+          <div id="repeatRows" class="rows"></div>
+          <p id="attentionNote" class="resultNote hidden"></p>
+
+          <p id="leastLabel" class="perspectiveLabel">Channel A detalė</p>
+          <h3 id="leastHeading">Kas liko antrame plane?</h3>
+          <div id="leastRows" class="rows"></div>
+          <p id="leastNote" class="rankLeastNote"></p>
+
+          <p id="compareLabel" class="perspectiveLabel">Pažiūrėk atidžiau</p>
+          <h3 id="compareHeading"></h3>
+          <div id="compareRows" class="rows"></div>
+        </div>
+      </div>
+
+      <div class="worldSection">
+        <p id="secondLabel" class="perspectiveLabel">Antras atsakymas</p>
+        <h2 id="secondHeading">Kur dabar mažiausiai pakanka?</h2>
+        <button id="mapCard" class="worldCard" type="button" aria-controls="suffDetail" aria-expanded="false">
+          <div id="mapPlaceholder" class="worldPlaceholder">ŽEMĖLAPIS</div>
+          <div id="mapRoute" class="worldFocus"></div>
+          <div id="mapTap" class="worldTap"></div>
+        </button>
+        <div id="suffDetail" class="worldDetail hidden">
+          <h3 id="suffDetailTitle"></h3>
+          <div id="suffRows" class="rows"></div>
+          <p id="suffResultNote" class="resultNote hidden"></p>
+        </div>
+      </div>
+
+      <p id="worldSeparationNote" class="worldSeparation"></p>
+    </div>
+
+    <div class="actions resultActions"><button id="restart" class="primary">Atlikti dar kartą</button><a id="back2rasi" class="secondary actionLink" href="https://2rasi.lt/#experiments">Grįžti į 2rasi</a><button id="export" class="secondary hidden">Eksportuoti JSON</button></div>
+    <p id="exportStatus" class="note hidden"></p>
+    <details id="debugDetails" class="perspective hidden"><summary>Tyrimo diagnostika</summary><pre id="debug" class="debug"></pre></details>
+  </section>
+`;
+const resultStart=html.indexOf('  <section id="result" class="screen result">');
+const resultEndMarker='  </section>\n</div>\n<script type="module">';
+const resultEnd=html.indexOf(resultEndMarker,resultStart);
+if(resultStart<0||resultEnd<0)throw new Error('result section anchors missing');
+html=html.slice(0,resultStart)+resultHtml+html.slice(resultEnd+'  </section>\n'.length);
+
+
 const importAnchor="import { assignOpen14ThreeExemplars, listThreeExemplarBankProblems } from './open14_no_repeat_assigner_v03.mjs';";
-html=replaceOnce(html,importAnchor,importAnchor+"\nimport { SESSION_SCHEMA_V04, DRAFT_KEY_BASE_V04, resolveAttentionFromChoices, applyAttentionClarifier, resolveSufficiencyRoute, applySufficiencyClarifier } from './adaptive_clarifiers_v04.mjs';",'assigner import');
+html=replaceOnce(html,importAnchor,importAnchor+"\nimport { SESSION_SCHEMA_V04, DRAFT_KEY_BASE_V04, resolveAttentionFromChoices, applyAttentionClarifier, resolveSufficiencyRoute, applySufficiencyClarifier } from './adaptive_clarifiers_v04.mjs';\nimport { renderResultWorldV04 } from './result_renderer_v04.mjs';",'assigner import');
 html=replaceOnce(html,"const DRAFT_KEY_BASE='priolens.open14.v031.rank.draft';","const DRAFT_KEY_BASE=DRAFT_KEY_BASE_V04;",'draft key');
 html=html.replaceAll("'2rasi.priolens.open14.rank-session-v0.3'","SESSION_SCHEMA_V04");
 html=replaceOnce(html,"const API_PATH='/priolens-open14-v03-api/api.php';","const API_PATH='/priolens-open14-v04-api/api.php';",'v0.4 API path');
@@ -138,6 +200,28 @@ function completeBPlus(answer){
 `;
 html=replaceOnce(html,helperAnchor,helperCode+helperAnchor,'renderSuff helper insertion');
 
+const oldRenderStart=html.indexOf('function renderResult(){');
+const oldRenderEnd=html.indexOf("$('start').onclick=",oldRenderStart);
+if(oldRenderStart<0||oldRenderEnd<0)throw new Error('renderResult anchors missing');
+const renderResultV04=`function renderResult(){
+  renderResultWorldV04({
+    state,
+    lang:LANG,
+    familyLabels:FAMILY_LABEL,
+    itemLabels:ITEM_RESULT_LABEL,
+    reasonOptions:SELF_REASON_OPTIONS[LANG],
+    onSelfExplanation:async ({familyId,reasonCode,statusEl})=>{
+      state.selfExplanation={schema:'2rasi.priolens.self-explanation-v0.1',familyId,scenario:'ATTENTION_DETAIL_V04',reasonCode,answeredAt:new Date().toISOString()};
+      await persistSelfExplanation(statusEl);
+    }
+  });
+  $('debug').textContent=JSON.stringify(state,null,2)
+}
+`;
+html=html.slice(0,oldRenderStart)+renderResultV04+html.slice(oldRenderEnd);
+
+
 write('index.html',html);
 for(const name of ['bank.json','p3_open14_planner_v02.mjs','open14_no_repeat_assigner_v03.mjs','stimulus-bank.html'])write(name,read(name));
+if(!fs.existsSync(path.join(outDir,'result_world_v04.mjs'))||!fs.existsSync(path.join(outDir,'result_renderer_v04.mjs')))throw new Error('v0.4 result modules missing');
 console.log('open14-v04 build: PASS');
