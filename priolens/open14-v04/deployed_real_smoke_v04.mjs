@@ -1,6 +1,7 @@
 import { chromium } from 'playwright';
 
 const BASE=process.env.PRIOLENS_V04_BASE||'https://omesg360.eu/priolens-open14-v04/';
+const RESULT='priolens.open14.v04.last-result.lt';
 const browser=await chromium.launch({headless:true});
 try{
   const context=await browser.newContext({viewport:{width:390,height:844}});
@@ -88,7 +89,19 @@ try{
   if(await page.locator('#result').evaluate(el=>el.classList.contains('detailMode'))) throw new Error('browser Back did not restore result scene');
   const draftKeys=await page.evaluate(()=>Object.keys(localStorage).filter(k=>k.includes('priolens.open14.v04.rank.draft')));
   if(draftKeys.length) throw new Error('v0.4 draft not cleared after successful live save');
-  console.log('PASS: deployed v0.4 compact scene + attention detail route + sufficiency bottom sheet + browser Back + isolated live API');
+  const storedResult=JSON.parse(await page.evaluate(k=>localStorage.getItem(k),RESULT));
+  if(!storedResult?.completedAt||storedResult?.submission?.ok!==true) throw new Error('completed result snapshot missing after successful live save');
+  const focusBeforeReload=((await page.locator('#shipFocus').textContent())||'').trim();
+  const routeBeforeReload=((await page.locator('#mapRoute').textContent())||'').trim();
+
+  await page.reload({waitUntil:'networkidle'});
+  await page.waitForSelector('#result.active');
+  if(((await page.locator('#shipFocus').textContent())||'').trim()!==focusBeforeReload) throw new Error('live restored focus changed after reload');
+  if(((await page.locator('#mapRoute').textContent())||'').trim()!==routeBeforeReload) throw new Error('live restored route changed after reload');
+  const restoredStatus=((await page.locator('#saveStatus').textContent())||'').trim();
+  if(!restoredStatus.includes('atkurta')) throw new Error('live result did not restore after reload: '+restoredStatus);
+
+  console.log('PASS: deployed v0.4 compact scene + details + browser Back + completed-result reload restore + isolated live API');
 } finally {
   await browser.close();
 }
