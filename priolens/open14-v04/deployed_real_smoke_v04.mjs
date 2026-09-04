@@ -47,9 +47,21 @@ try{
 
   await page.waitForSelector('#result.active');
   await page.waitForFunction(()=>document.querySelector('#saveStatus')?.classList.contains('ok'),null,{timeout:15000});
+  await page.waitForSelector('#shipCard');
+  await page.waitForSelector('#mapCard');
+  const shipFocus=((await page.locator('#shipFocus').textContent())||'').trim();
+  const mapRoute=((await page.locator('#mapRoute').textContent())||'').trim();
+  if(!shipFocus) throw new Error('ship focus summary is empty');
+  if(mapRoute!=='Aiškaus maršruto nėra') throw new Error('all-5 Channel B should render no route, got: '+mapRoute);
+  const resultText=((await page.locator('#result').textContent())||'');
+  if(resultText.includes('Ką matai, kai palygini abu?')) throw new Error('legacy automatic A/B comparison still visible');
+  await page.click('#shipCard');
+  if(await page.locator('#attentionDetail').evaluate(el=>el.classList.contains('hidden'))) throw new Error('ship detail did not open');
+  await page.click('#mapCard');
+  if(await page.locator('#suffDetail').evaluate(el=>el.classList.contains('hidden'))) throw new Error('map detail did not open');
   const draftKeys=await page.evaluate(()=>Object.keys(localStorage).filter(k=>k.includes('priolens.open14.v04.rank.draft')));
   if(draftKeys.length) throw new Error('v0.4 draft not cleared after successful live save');
-  console.log('PASS: deployed v0.4 owner preview completed and saved through isolated live API');
+  console.log('PASS: deployed v0.4 owner preview + ship/map/detail architecture + isolated live API');
 } finally {
   await browser.close();
 }
