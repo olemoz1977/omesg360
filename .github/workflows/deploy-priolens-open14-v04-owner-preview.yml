@@ -147,6 +147,11 @@ jobs:
             *javascript*|*ecmascript*) ;;
             *) echo "Unexpected result renderer MIME: $ctype" >&2; exit 1;;
           esac
+          cachectl=$(curl -fsSI "$BASE/result_renderer_v04.mjs?deploy=${GITHUB_SHA}" | tr -d '\r' | awk -F': ' 'tolower($1)=="cache-control"{print tolower($2)}' | tail -1)
+          case "$cachectl" in
+            *no-cache*|*must-revalidate*) ;;
+            *) echo "Unexpected result renderer Cache-Control: $cachectl" >&2; exit 1;;
+          esac
           grep -Fq "const API_PATH='/priolens-open14-v04-api/api.php'" /tmp/live-index.html
           grep -Fq 'id="aplus"' /tmp/live-index.html
           grep -Fq 'id="bplus"' /tmp/live-index.html
