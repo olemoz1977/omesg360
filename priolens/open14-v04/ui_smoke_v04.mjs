@@ -138,11 +138,32 @@ try{
   const routeNodes=await page.locator('#needsMapStage .needNode').count();
   if(routeContinents!==1)throw new Error('single B+ endpoint should render one route-relevant continent, got '+routeContinents);
   if(routeNodes!==1)throw new Error('single B+ endpoint should render one need node, got '+routeNodes);
+  if(!await page.locator('#mapRoute').evaluate(el=>el.classList.contains('hidden')))throw new Error('single route summary should be hidden to avoid duplicating the need label above the land');
+  if(((await page.locator('#mapRoute').textContent())||'').trim())throw new Error('single route summary should be empty when the land already carries the endpoint label');
 
   await page.click('#shipDetailsButton');
   await page.waitForFunction(()=>new URLSearchParams(location.search).get('detail')==='attention');
   const attentionText=(await page.locator('#attentionDetail').textContent())||'';
   if(/\bMOST\b|\bLEAST\b|\bA\+\b/.test(attentionText))throw new Error('technical A terminology leaked into participant detail: '+attentionText);
+  const reflectionQuestion='Kas, tavo manymu, galėjo traukti šiuose vaizduose?';
+  const reflectionQuestionCount=attentionText.split(reflectionQuestion).length-1;
+  if(reflectionQuestionCount!==1)throw new Error('reflection question must appear exactly once, got '+reflectionQuestionCount);
+  const reflectionBeforeBackground=await page.evaluate(()=>{
+    const a=document.getElementById('compareHeading'),b=document.getElementById('leastHeading');
+    return Boolean(a.compareDocumentPosition(b)&Node.DOCUMENT_POSITION_FOLLOWING);
+  });
+  if(!reflectionBeforeBackground)throw new Error('background 3/3 detail must come after the main reflection block');
+
+  const firstReason=page.locator('#compareRows .reasonOption').first();
+  const expectedReason=((await firstReason.textContent())||'').trim();
+  await firstReason.click();
+  await page.waitForSelector('#compareRows .reflectionAnswerValue');
+  const selectedReason=((await page.locator('#compareRows .reflectionAnswerValue').textContent())||'').trim();
+  if(!selectedReason||selectedReason!==expectedReason)throw new Error('selected reflection answer not shown after collapse: '+selectedReason);
+  const selectedColor=await page.locator('#compareRows .reflectionAnswerValue').evaluate(el=>getComputedStyle(el).color);
+  if(selectedColor==='rgb(255, 255, 255)'||selectedColor==='white')throw new Error('selected reflection answer is white on white: '+selectedColor);
+  if(await page.locator('#compareRows .reasonOption').count())throw new Error('reflection option list did not collapse after selection');
+
   await page.click('#attentionBack');
   await page.waitForFunction(()=>!new URLSearchParams(location.search).has('detail'));
 
@@ -177,7 +198,7 @@ try{
   const keys=await page.evaluate(()=>Object.keys(localStorage));
   if(keys.some(k=>k.includes('priolens.open14.v031.rank.draft')))throw new Error('v0.3.1 draft namespace leaked into v0.4');
 
-  console.log('PASS: v0.4 local 390x844 enlarged A+ runoff + adaptive resume + one-land result map + clean details + completed-result reload restore + restart clear + final payload');
+  console.log('PASS: v0.4 local 390x844 enlarged A+ runoff + adaptive resume + non-duplicated single-land map + reflection-before-background detail + visible collapsed answer + completed-result reload restore + restart clear + final payload');
 } finally {
   await browser.close();
 }
