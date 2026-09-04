@@ -23,7 +23,7 @@ const css=`
 .resultWorld{margin-top:8px}.resultScene{position:relative;overflow:hidden;border:1px solid var(--line);border-radius:26px;background:#fff;min-height:660px}.sceneZone{width:100%;border:0;color:#181818;text-align:left;cursor:pointer;display:block;position:relative}.sceneZone:focus-visible{outline:3px solid #181818;outline-offset:-5px}.shipZone{height:285px;padding:18px 18px 0;background:linear-gradient(#f9faf9 0%,#f5f7f6 58%,#eef4f5 100%)}.sceneEyebrow{font-size:11px;font-weight:850;letter-spacing:.15em;text-transform:uppercase;color:#72726e}.shipStage{position:absolute;left:15px;right:15px;bottom:12px;height:208px}.shipGhost{position:absolute;left:50%;bottom:18px;transform:translateX(-50%);width:min(82%,330px);height:132px}.shipHull{position:absolute;left:9%;right:7%;bottom:0;height:47px;border:1.5px dashed #9ea7a6;border-radius:9px 9px 52% 52% / 8px 8px 28px 28px;background:rgba(255,255,255,.54)}.shipMast{position:absolute;width:1.5px;height:116px;left:49%;bottom:40px;border-left:1.5px dashed #9ea7a6}.shipSail{position:absolute;left:50%;bottom:57px;width:44%;height:91px;border:1.5px dashed #9ea7a6;border-radius:50% 8px 8px 50%;background:rgba(255,255,255,.54);display:flex;align-items:center;justify-content:center;padding:12px}.shipFocus{font-size:clamp(18px,5.8vw,25px);font-weight:850;letter-spacing:-.03em;line-height:1.04;text-align:center}.shipHint{position:absolute;right:4px;bottom:1px;font-size:11px;color:#72726e}
 .waterBand{height:62px;position:relative;background:linear-gradient(#dcecef,#c4e0e5 48%,#eef2ee 49%,#f6f3eb 100%)}.waterBand:before,.waterBand:after{content:"";position:absolute;left:-5%;width:110%;border-top:1px solid rgba(70,115,125,.25);border-radius:50%}.waterBand:before{top:16px;height:18px}.waterBand:after{top:24px;height:20px}.waterlineLabel{position:absolute;left:18px;top:10px;font-size:10px;font-weight:800;letter-spacing:.13em;color:#5e7b80;text-transform:uppercase}
 .mapZone{min-height:313px;padding:20px 16px 18px;background:#f6f3eb}.mapTop{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:12px}.mapRouteSummary{max-width:70%;font-size:17px;font-weight:830;line-height:1.14;letter-spacing:-.02em;text-align:right}.mapStage{position:relative;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;min-height:214px}.continent{position:relative;min-height:93px;border:1px solid #d5d0c4;border-radius:46% 54% 50% 42% / 44% 44% 56% 56%;background:#fbfaf6;padding:12px 8px 9px;display:flex;flex-direction:column;justify-content:center;gap:5px;text-align:center}.continent:nth-child(2n){border-radius:54% 46% 42% 58% / 51% 39% 61% 49%}.continentTitle{font-size:9px;font-weight:840;line-height:1.2;letter-spacing:.07em;text-transform:uppercase;color:#8a8479}.needNode{font-size:10px;line-height:1.15;color:#4d4a45}.needNode.routeTarget{font-weight:850;color:#181818;text-decoration-line:underline;text-decoration-style:dotted;text-decoration-thickness:2px;text-underline-offset:3px}.needNode.routeTarget:before{content:"● ";font-size:8px}.mapHint{font-size:11px;color:#77726a;margin-top:8px;text-align:right}.routeKey{display:none}
-.worldDetail{border-left:2px solid #d7d7d1;padding:4px 0 2px 12px;margin:16px 2px 0}.worldDetail h3{font-size:20px;margin:10px 0}.worldDetailBlock{background:#fff;border:1px solid var(--line);border-radius:15px;padding:12px;margin:8px 0}.worldDetailName{font-size:17px;font-weight:800;line-height:1.3}.worldDetailText{font-size:14px;line-height:1.5;color:#5f5f5f;margin-top:5px}.worldDetailImages{display:grid;grid-template-columns:repeat(auto-fit,minmax(78px,1fr));gap:7px;margin-bottom:10px;max-width:360px}.worldDetailImages img{display:block;width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:11px;border:1px solid #e2e2dd}.worldSeparation{font-size:11px;line-height:1.45;color:#77736d;margin:11px 5px 0}.compactReflection{margin-top:8px}.compactReflection .reflectionQuestion{margin-top:8px}.worldDetail .perspectiveLabel{margin-top:18px}
+.worldDetail{border-left:2px solid #d7d7d1;padding:4px 0 2px 12px;margin:16px 2px 0}.worldDetail h3{font-size:20px;margin:10px 0}.worldDetailBlock{background:#fff;border:1px solid var(--line);border-radius:15px;padding:12px;margin:8px 0}.worldDetailName{font-size:17px;font-weight:800;line-height:1.3}.worldDetailText{font-size:14px;line-height:1.5;color:#5f5f5f;margin-top:5px}.worldDetailImages{display:grid;grid-template-columns:repeat(auto-fit,minmax(78px,1fr));gap:7px;margin-bottom:10px;max-width:360px}.worldDetailImages img{display:block;width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:11px;border:1px solid #e2e2dd}.worldSeparation{font-size:11px;line-height:1.45;color:#77736d;margin:11px 5px 0}.compactReflection{margin-top:8px}.compactReflection .reflectionQuestion{margin-top:8px}.worldDetail .perspectiveLabel{margin-top:18px}.worldRenderError{margin:18px 0;padding:16px;border:1px solid #c9c7c1;border-radius:16px;background:#fff7f2;font-size:14px;line-height:1.5;color:#4f433d}
 @media(max-width:420px){.resultScene{min-height:630px}.shipZone{height:270px}.shipStage{height:196px}.waterBand{height:58px}.mapZone{min-height:302px}.mapStage{gap:7px}.continent{min-height:88px;padding:9px 6px}.continentTitle{font-size:8px}.needNode{font-size:9.5px}}
 
 `;
@@ -218,17 +218,26 @@ const oldRenderStart=html.indexOf('function renderResult(){');
 const oldRenderEnd=html.indexOf("$('start').onclick=",oldRenderStart);
 if(oldRenderStart<0||oldRenderEnd<0)throw new Error('renderResult anchors missing');
 const renderResultV04=`function renderResult(){
-  renderResultWorldV04({
-    state,
-    lang:LANG,
-    familyLabels:FAMILY_LABEL,
-    itemLabels:ITEM_RESULT_LABEL,
-    reasonOptions:SELF_REASON_OPTIONS[LANG],
-    onSelfExplanation:async ({familyId,reasonCode,statusEl})=>{
-      state.selfExplanation={schema:'2rasi.priolens.self-explanation-v0.1',familyId,scenario:'ATTENTION_DETAIL_V04',reasonCode,answeredAt:new Date().toISOString()};
-      await persistSelfExplanation(statusEl);
-    }
-  });
+  try{
+    renderResultWorldV04({
+      state,
+      lang:LANG,
+      familyLabels:FAMILY_LABEL,
+      itemLabels:ITEM_RESULT_LABEL,
+      reasonOptions:SELF_REASON_OPTIONS[LANG],
+      onSelfExplanation:async ({familyId,reasonCode,statusEl})=>{
+        state.selfExplanation={schema:'2rasi.priolens.self-explanation-v0.1',familyId,scenario:'ATTENTION_DETAIL_V04',reasonCode,answeredAt:new Date().toISOString()};
+        await persistSelfExplanation(statusEl);
+      }
+    });
+  }catch(err){
+    console.error('PrioLens result render failed',err);
+    state.resultRenderError={message:String(err),at:new Date().toISOString()};
+    const lead=document.getElementById('resultLead');
+    if(lead)lead.textContent=LANG==='en'?'The result view did not load correctly. Your session data is still being saved.':'Rezultato vaizdas neužsikrovė teisingai. Sesijos duomenys vis tiek išsaugomi.';
+    const world=document.querySelector('#result .resultWorld');
+    if(world)world.innerHTML='<div class="worldRenderError" role="alert">'+(LANG==='en'?'Result display error. Refresh the page or run the session again.':'Rezultato pateikimo klaida. Atnaujink puslapį arba atlik sesiją dar kartą.')+'</div>';
+  }
   $('debug').textContent=JSON.stringify(state,null,2)
 }
 `;
