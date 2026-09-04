@@ -73,6 +73,7 @@ try{
   if(await page.locator('#attentionDetail').evaluate(el=>el.classList.contains('hidden'))) throw new Error('attention detail route hidden');
   if(!(await page.locator('.resultScene').evaluate(el=>getComputedStyle(el).display==='none'))) throw new Error('main scene still visible on attention detail route');
   const attentionText=((await page.locator('#attentionDetail').textContent())||'');
+  if(await page.locator('#repeatRows img').count()) throw new Error('live focus exemplars duplicated in summary block');
   const reflectionQuestion='Kas, tavo manymu, galėjo traukti šiuose vaizduose?';
   if(attentionText.split(reflectionQuestion).length-1!==1) throw new Error('live reflection question is duplicated');
   const reflectionBeforeBackground=await page.evaluate(()=>{
@@ -102,6 +103,8 @@ try{
   if(await page.locator('.resultScene').evaluate(el=>getComputedStyle(el).display==='none')) throw new Error('main result scene hidden behind sufficiency bottom sheet');
   const suffText=(await page.locator('#suffDetail').textContent())||'';
   if(/\bB\+\b|Channel B/.test(suffText)) throw new Error('technical B terminology leaked into participant detail');
+  if(!suffText.includes('Kaip ši poreikio sritis buvo išskirta?')) throw new Error('live need-area provenance heading missing');
+  if(suffText.includes('Kodėl ši kryptis?')) throw new Error('live old direction wording remains');
   await page.goBack();
   await page.waitForFunction(()=>!new URLSearchParams(location.search).has('detail'));
   if(await page.locator('#result').evaluate(el=>el.classList.contains('detailMode'))) throw new Error('browser Back did not restore result scene');
@@ -119,7 +122,7 @@ try{
   const restoredStatus=((await page.locator('#saveStatus').textContent())||'').trim();
   if(!restoredStatus.includes('atkurta')) throw new Error('live result did not restore after reload: '+restoredStatus);
 
-  console.log('PASS: deployed v0.4 compact scene + non-duplicated reflection hierarchy + visible collapsed answer + browser Back + completed-result reload restore + isolated live API');
+  console.log('PASS: deployed v0.4 final IA candidate + no duplicate focus images + need-area wording + reflection hierarchy + reload restore + isolated live API');
 } finally {
   await browser.close();
 }
