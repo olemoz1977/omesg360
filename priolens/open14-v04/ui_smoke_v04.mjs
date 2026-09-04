@@ -200,6 +200,30 @@ try{
   if(((await page.locator('#mapRoute').textContent())||'').trim()!==routeBeforeReload)throw new Error('restored route changed after reload');
   if(finalPayloads.length!==finalPostCountBeforeReload)throw new Error('restoring a completed result must not POST the final session again');
 
+  // Visual-only synthetic restore checks: preserve protocol-valid endpoint sets exactly.
+  await page.evaluate(k=>{
+    const x=JSON.parse(localStorage.getItem(k));
+    x.sufficiencyRoute={source:'B_PLUS_SIMILAR',itemIds:['MEANING_PURPOSE','CONTRIBUTION'],minimumValue:2};
+    localStorage.setItem(k,JSON.stringify(x));
+  },RESULT);
+  await page.reload({waitUntil:'networkidle'});
+  await page.waitForSelector('#result.active');
+  if(await page.locator('#needsMapStage .continent').count()!==1)throw new Error('two tied endpoints in one need group should share one land');
+  if(await page.locator('#needsMapStage .needNode').count()!==2)throw new Error('two tied endpoints in one group should render two need nodes');
+  await page.waitForFunction(()=>document.querySelectorAll('#needsMapStage .routePath').length===2);
+
+  await page.evaluate(k=>{
+    const x=JSON.parse(localStorage.getItem(k));
+    x.sufficiencyRoute={source:'B_PLUS_SIMILAR',itemIds:['RESTORATION_ENERGY','AUTONOMY_AGENCY','MEANING_PURPOSE'],minimumValue:2};
+    localStorage.setItem(k,JSON.stringify(x));
+  },RESULT);
+  await page.reload({waitUntil:'networkidle'});
+  await page.waitForSelector('#result.active');
+  if(await page.locator('#needsMapStage .continent').count()!==3)throw new Error('three valid tied endpoints across groups must render three lands without truncation');
+  if(await page.locator('#needsMapStage .needNode').count()!==3)throw new Error('three valid tied endpoints must render all three need nodes');
+  await page.waitForFunction(()=>document.querySelectorAll('#needsMapStage .routePath').length===3);
+  if(finalPayloads.length!==finalPostCountBeforeReload)throw new Error('visual restore-state checks must not POST final session again');
+
   await page.click('#restart');
   await page.waitForSelector('#intro.active');
   if(await page.evaluate(k=>localStorage.getItem(k),RESULT)!==null)throw new Error('Atlikti dar kartą did not clear completed result snapshot');
@@ -207,7 +231,7 @@ try{
   const keys=await page.evaluate(()=>Object.keys(localStorage));
   if(keys.some(k=>k.includes('priolens.open14.v031.rank.draft')))throw new Error('v0.3.1 draft namespace leaked into v0.4');
 
-  console.log('PASS: v0.4 local 390x844 frozen IA + minimalist ship SVG + lower-map-only dotted route + clean details + completed-result restore');
+  console.log('PASS: v0.4 local 390x844 frozen IA + minimalist ship + route geometry for single/same-land-2/cross-land-3 + clean details + completed-result restore');
 } finally {
   await browser.close();
 }
