@@ -20,7 +20,15 @@ try{
       const u=document.querySelector('#undoMost'),t=document.querySelector('#tieLeast');
       return u&&!u.disabled&&!u.classList.contains('hidden')&&t&&!t.disabled&&!t.classList.contains('hidden');
     });
-    if(!((await page.locator('#trialHint').textContent())||'').includes('Pažymėk vieną iš dviejų likusių nuotraukų')) throw new Error('LEAST instruction must explicitly ask to select one remaining photo');
+    const mostImg=page.locator('.stim.most img');
+    if(await mostImg.count()!==1) throw new Error('LEAST state must visually mark exactly one MOST image');
+    const mostOpacity=parseFloat(await mostImg.evaluate(el=>getComputedStyle(el).opacity));
+    if(!(mostOpacity<0.6)) throw new Error('MOST image must be visually de-emphasized during LEAST');
+    const undoColor=await page.locator('#undoMost').evaluate(el=>getComputedStyle(el).color);
+    const tieColor=await page.locator('#tieLeast').evaluate(el=>getComputedStyle(el).color);
+    if(undoColor===tieColor) throw new Error('undo action must be visually secondary to similar option');
+    const leastHint=(await page.locator('#trialHint').textContent())||'';
+    if(!leastHint.includes('Pažymėk vieną iš dviejų')||!leastHint.includes('Abu panašiai')) throw new Error('LEAST instruction must explain both direct image choice and similar fallback');
     await page.click('.stim[data-slot="1"]');
     if(i<13){
       const next=`${i+2} / 14`;
