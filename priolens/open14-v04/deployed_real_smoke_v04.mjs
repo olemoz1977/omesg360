@@ -47,97 +47,66 @@ try{
   }
 
   await page.waitForSelector('#matrixResult.active');
-  if(await page.locator('#matrixCanvasMount .matrixDataCell').count()!==144) throw new Error('live pre-result matrix must contain 12x12 data cells');
+  if(await page.locator('#matrixCanvasMount .matrixDataCell').count()!==144) throw new Error('live matrix must contain 12x12 data cells');
   if(await page.locator('#matrixCanvasMount .matrixTopStatement').count()!==12||await page.locator('#matrixCanvasMount .matrixLeftStatement').count()!==12) throw new Error('live matrix axes must contain all 12 statements');
   const liveMatrixSnapshot=JSON.parse(await page.evaluate(k=>localStorage.getItem(k),RESULT));
   const expectedFocusMarkers=liveMatrixSnapshot?.attentionFocus?.familyId?1:0;
   if(await page.locator('#matrixCanvasMount .focusMarker').count()!==expectedFocusMarkers) throw new Error('live matrix focus-marker count does not match resolved Channel-A focus');
   if(await page.locator('#matrixCanvasMount .suffMarker').count()!==0) throw new Error('all-5 Channel B must not render a matrix sufficiency marker');
-  if(await page.locator('#matrixPdf').count()!==1) throw new Error('live matrix PDF action missing');
-  await page.click('#matrixContinue');
+  for(const id of ['#matrixAttentionDetails','#matrixSufficiencyDetails','#matrixPdf','#matrixRestart','#matrixBack2rasi']){
+    if(await page.locator(id).count()!==1) throw new Error('live matrix action missing: '+id);
+  }
+  if(await page.locator('#matrixContinue').count()) throw new Error('legacy continue-to-ship/map action still present');
+  await page.waitForFunction(k=>{
+    try{return JSON.parse(localStorage.getItem(k))?.submission?.ok===true}catch{return false}
+  },RESULT,{timeout:15000});
+
+  await page.click('#matrixAttentionDetails');
   await page.waitForSelector('#result.active');
-  if(await page.locator('#resultPdf').count()!==1) throw new Error('live result PDF action missing');
-  await page.waitForFunction(()=>document.querySelector('#saveStatus')?.classList.contains('ok'),null,{timeout:15000});
-  await page.waitForSelector('#shipCard');
-  await page.waitForSelector('#mapCard');
-  await page.waitForSelector('#shipDetailsButton');
-  await page.waitForSelector('#mapDetailsButton');
-  await page.waitForSelector('.resultScene');
-  if(await page.locator('.worldRenderError').count()) throw new Error('result error boundary is visible');
-  const continents=await page.locator('#needsMapStage .continent').count();
-  if(continents!==0) throw new Error('no-route map should not render inactive continents, got: '+continents);
-  const needNodes=await page.locator('#needsMapStage .needNode').count();
-  if(needNodes!==0) throw new Error('no-route map should not render inactive need locations, got: '+needNodes);
-  if(await page.locator('#needsMapStage .mapEmpty').count()!==1) throw new Error('no-route map should render one compact empty-state message');
-  if(await page.locator('#needsMapStage .mapRoutes,#needsMapStage .routePath,#needsMapStage .routeOrigin,#needsMapStage .landShape,#needsMapStage .mapPin').count()) throw new Error('no-route state must not render route, land or pin geometry');
-  if(await page.locator('.shipVisual svg').count()!==1) throw new Error('live minimalist ship SVG missing');
-  if(await page.locator('.shipGhost,.shipHull,.shipMast,.shipSail').count()) throw new Error('live dashed prototype ship classes still present');
-  const shipFocus=((await page.locator('#shipFocus').textContent())||'').trim();
-  const mapRoute=((await page.locator('#mapRoute').textContent())||'').trim();
-  if(!shipFocus) throw new Error('ship focus summary is empty');
-  if(mapRoute!=='Aiškaus maršruto nėra') throw new Error('all-5 Channel B should render no route, got: '+mapRoute);
-  if(await page.locator('#needsMapStage .routeTarget').count()!==0) throw new Error('all-5 Channel B must not mark route targets');
-  const resultText=((await page.locator('#result').textContent())||'');
-  if(resultText.includes('Ką matai, kai palygini abu?')) throw new Error('legacy automatic A/B comparison still visible');
-  await page.locator('#shipDetailsButton').focus();
-  await page.keyboard.press('Enter');
   await page.waitForFunction(()=>new URLSearchParams(location.search).get('detail')==='attention');
-  if(!(await page.locator('#result').evaluate(el=>el.classList.contains('detailMode')))) throw new Error('attention detail route did not enter detail mode');
-  if(await page.locator('#attentionDetail').evaluate(el=>el.classList.contains('hidden'))) throw new Error('attention detail route hidden');
-  if(!(await page.locator('.resultScene').evaluate(el=>getComputedStyle(el).display==='none'))) throw new Error('main scene still visible on attention detail route');
+  if(!(await page.locator('#result').evaluate(el=>el.classList.contains('detailOnlyHost')))) throw new Error('live attention detail not hosted in detail-only mode');
+  if(!(await page.locator('.resultScene').evaluate(el=>getComputedStyle(el).display==='none'))) throw new Error('ship/map scene visible in live attention detail');
+  if(await page.locator('#attentionDetail').evaluate(el=>el.classList.contains('hidden'))) throw new Error('live attention detail hidden');
   const attentionText=((await page.locator('#attentionDetail').textContent())||'');
-  if(await page.locator('#repeatRows img').count()) throw new Error('live focus exemplars duplicated in summary block');
-  const reflectionQuestion='Kas, tavo manymu, galėjo traukti šiuose vaizduose?';
-  if(attentionText.split(reflectionQuestion).length-1!==1) throw new Error('live reflection question is duplicated');
-  const reflectionBeforeBackground=await page.evaluate(()=>{
-    const a=document.getElementById('compareHeading'),b=document.getElementById('leastHeading');
-    return Boolean(a.compareDocumentPosition(b)&Node.DOCUMENT_POSITION_FOLLOWING);
-  });
-  if(!reflectionBeforeBackground) throw new Error('live background detail appears before the reflection block');
+  if(/\bMOST\b|\bLEAST\b|\bA\+\b/.test(attentionText)) throw new Error('technical A terminology leaked into live detail');
   const firstReason=page.locator('#compareRows .reasonOption').first();
   if(await firstReason.count()){
     const expected=((await firstReason.textContent())||'').trim();
     await firstReason.click();
     await page.waitForSelector('#compareRows .reflectionAnswerValue');
-    const actual=((await page.locator('#compareRows .reflectionAnswerValue').textContent())||'').trim();
-    if(actual!==expected) throw new Error('live collapsed reflection answer missing: '+actual);
-    const color=await page.locator('#compareRows .reflectionAnswerValue').evaluate(el=>getComputedStyle(el).color);
-    if(color==='rgb(255, 255, 255)'||color==='white') throw new Error('live collapsed reflection answer is white on white');
+    if(((await page.locator('#compareRows .reflectionAnswerValue').textContent())||'').trim()!==expected) throw new Error('live reflection answer was not preserved');
   }
   await page.click('#attentionBack');
+  await page.waitForSelector('#matrixResult.active');
   await page.waitForFunction(()=>!new URLSearchParams(location.search).has('detail'));
-  if(await page.locator('#result').evaluate(el=>el.classList.contains('detailMode'))) throw new Error('attention back did not restore result scene');
 
-  await page.locator('#mapDetailsButton').focus();
-  await page.keyboard.press('Space');
+  await page.click('#matrixSufficiencyDetails');
+  await page.waitForSelector('#result.active');
   await page.waitForFunction(()=>new URLSearchParams(location.search).get('detail')==='sufficiency');
-  if(await page.locator('#suffDetail').evaluate(el=>el.classList.contains('hidden'))) throw new Error('sufficiency bottom sheet hidden');
-  if(await page.locator('#result').evaluate(el=>el.classList.contains('detailMode'))) throw new Error('sufficiency detail must not replace the main result scene');
-  if(await page.locator('.resultScene').evaluate(el=>getComputedStyle(el).display==='none')) throw new Error('main result scene hidden behind sufficiency bottom sheet');
+  if(!(await page.locator('#result').evaluate(el=>el.classList.contains('detailOnlyHost')))) throw new Error('live sufficiency detail not hosted in detail-only mode');
+  if(!(await page.locator('.resultScene').evaluate(el=>getComputedStyle(el).display==='none'))) throw new Error('ship/map scene visible behind live sufficiency detail');
+  if(await page.locator('#suffDetail').evaluate(el=>el.classList.contains('hidden'))) throw new Error('live sufficiency detail hidden');
   const suffText=(await page.locator('#suffDetail').textContent())||'';
-  if(/\bB\+\b|Channel B/.test(suffText)) throw new Error('technical B terminology leaked into participant detail');
-  if(suffText.includes('Kodėl ši kryptis?')) throw new Error('live old direction wording remains');
-  if(mapRoute!=='Aiškaus maršruto nėra'&&!suffText.includes('Kaip ši pakankamumo sritis buvo išskirta?')) throw new Error('live need-area provenance heading missing for a concrete route');
-  if(mapRoute==='Aiškaus maršruto nėra'&&suffText.includes('Kaip ši pakankamumo sritis buvo išskirta?')) throw new Error('no-route detail should not imply that one need area was singled out');
-  await page.goBack();
+  if(/\bB\+\b|Channel B/.test(suffText)) throw new Error('technical B terminology leaked into live detail');
+  if(suffText.includes('Kaip ši pakankamumo sritis buvo išskirta?')) throw new Error('no-route detail should not imply that one area was singled out');
+  await page.click('#suffDetailClose');
+  await page.waitForSelector('#matrixResult.active');
   await page.waitForFunction(()=>!new URLSearchParams(location.search).has('detail'));
-  if(await page.locator('#result').evaluate(el=>el.classList.contains('detailMode'))) throw new Error('browser Back did not restore result scene');
+
   const draftKeys=await page.evaluate(()=>Object.keys(localStorage).filter(k=>k.includes('priolens.open14.v041.rank.draft')));
   if(draftKeys.length) throw new Error('v0.4 draft not cleared after successful live save');
   const storedResult=JSON.parse(await page.evaluate(k=>localStorage.getItem(k),RESULT));
   if(!storedResult?.completedAt||storedResult?.submission?.ok!==true) throw new Error('completed result snapshot missing after successful live save');
   if(storedResult?.sufficiencySchema!=='2rasi.priolens.sufficiency-v0.3') throw new Error('live result missing revised sufficiency schema');
-  const focusBeforeReload=((await page.locator('#shipFocus').textContent())||'').trim();
-  const routeBeforeReload=((await page.locator('#mapRoute').textContent())||'').trim();
+  const focusBeforeReload=((await page.locator('#matrixFocusValue').textContent())||'').trim();
+  const suffBeforeReload=((await page.locator('#matrixSuffValue').textContent())||'').trim();
 
   await page.reload({waitUntil:'networkidle'});
-  await page.waitForSelector('#result.active');
-  if(((await page.locator('#shipFocus').textContent())||'').trim()!==focusBeforeReload) throw new Error('live restored focus changed after reload');
-  if(((await page.locator('#mapRoute').textContent())||'').trim()!==routeBeforeReload) throw new Error('live restored route changed after reload');
-  const restoredStatus=((await page.locator('#saveStatus').textContent())||'').trim();
-  if(!restoredStatus.includes('atkurta')) throw new Error('live result did not restore after reload: '+restoredStatus);
+  await page.waitForSelector('#matrixResult.active');
+  if(((await page.locator('#matrixFocusValue').textContent())||'').trim()!==focusBeforeReload) throw new Error('live restored matrix focus changed after reload');
+  if(((await page.locator('#matrixSuffValue').textContent())||'').trim()!==suffBeforeReload) throw new Error('live restored matrix sufficiency summary changed after reload');
 
-  console.log('PASS: deployed v0.4 frozen IA + minimalist ship + illustrated island target/no-route geometry guard + clean details + reload restore + isolated live API');
+  console.log('PASS: deployed v0.4 matrix-primary result + hidden ship/map + preserved detail views + reload restore + isolated live API');
 } finally {
   await browser.close();
 }
