@@ -98,7 +98,7 @@ function b_selected(array $items,int $min,string $selected): array {
 
 function base_body(array $choices,array $sufficiency): array {
     return [
-        'schema'=>'2rasi.priolens.open14.rank-session-v0.4','bankSchema'=>'2rasi.priolens.open14.bank-v0.3.1',
+        'schema'=>'2rasi.priolens.open14.rank-session-v0.4','bankSchema'=>'2rasi.priolens.open14.bank-v0.3.1','sufficiencySchema'=>'2rasi.priolens.sufficiency-v0.3',
         'choices'=>$choices,'sufficiency'=>$sufficiency,'rankProtocol'=>'most+least+a-plus+b-plus-v0.4',
         'attentionResolution'=>null,'attentionClarifier'=>null,'attentionFocus'=>null,
         'sufficiencyResolution'=>null,'sufficiencyClarifier'=>null,'sufficiencyRoute'=>null
