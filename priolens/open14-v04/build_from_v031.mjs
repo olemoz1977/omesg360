@@ -212,7 +212,7 @@ const renderResultV04=`let resultModulesPromise=null;
 function loadResultModules(){
   if(!resultModulesPromise){
     resultModulesPromise=Promise.all([
-      import('./result_renderer_v04.mjs?v=scene13'),
+      import('./result_renderer_v04.mjs?v=scene14'),
       import('./result_matrix_v04.mjs?v=matrix7')
     ]).then(([renderer,matrix])=>({renderer,matrix}));
   }
@@ -220,9 +220,17 @@ function loadResultModules(){
 }
 async function openMatrixDetail(kind){
   try{
+    const mods=await loadResultModules();
+    if(kind==='sufficiency'){
+      await renderResult(true);
+      const sheet=document.getElementById('suffDetail');
+      const matrix=document.getElementById('matrixResult');
+      if(sheet&&matrix&&sheet.parentElement!==matrix)matrix.appendChild(sheet);
+      mods.renderer.openResultDetailV04(kind);
+      return;
+    }
     show('result');
     await renderResult(true);
-    const mods=await loadResultModules();
     mods.renderer.openResultDetailV04(kind);
   }catch(err){
     console.error('PrioLens detail open failed',err);
@@ -311,5 +319,5 @@ for(const name of ['p3_open14_planner_v02.mjs','open14_no_repeat_assigner_v03.mj
 if(!fs.existsSync(path.join(outDir,'result_world_v04.mjs'))||!fs.existsSync(path.join(outDir,'result_renderer_v04.mjs'))||!fs.existsSync(path.join(outDir,'result_matrix_v04.mjs')))throw new Error('v0.4 result modules missing');
 if(!html.includes('id="needsMapStage"')||!html.includes('class="resultScene"'))throw new Error('unified result scene missing');
 if(!html.includes('id="matrixResult"')||!html.includes('id="matrixCanvasMount"')||!html.includes('id="matrixAttentionDetails"')||!html.includes('id="matrixSufficiencyDetails"')||!html.includes('id="matrixPdf"')||!html.includes('id="matrixRestart"')||!html.includes('id="matrixBack2rasi"')||!html.includes('id="matrixPrintStatementList"'))throw new Error('matrix result/action/print scene missing');
-if(!html.includes('id="shipDetailsButton"')||!html.includes('id="mapDetailsButton"')||!html.includes('id="attentionBack"')||!html.includes('id="suffDetailClose"'))throw new Error('result detail navigation missing');
+if(!html.includes('id="shipDetailsButton"')||!html.includes('id="mapDetailsButton"')||!html.includes('id="attentionBack"')||!html.includes('id="suffDetailClose"')||!html.includes('id="attentionResearch"')||!html.includes('id="suffResearch"'))throw new Error('result detail navigation/research mounts missing');
 console.log('open14-v04 build: PASS');
