@@ -129,8 +129,15 @@ try{
   const careStatement='Jaučiu, kad iš kitų sulaukiu pakankamai rūpesčio, paramos ir žmogiško dėmesio.';
   const matrixText=(await page.locator('#matrixResult').textContent())||'';
   if(matrixText.split(careStatement).length-1!==2)throw new Error('exact received-support statement must appear on both matrix axes');
-  if(await page.locator('#matrixCanvasMount .focusMarker').count()!==1)throw new Error('matrix must render one resolved first-glance focus marker');
-  if(await page.locator('#matrixCanvasMount .suffMarker').count()!==1)throw new Error('single B+ endpoint must render one matrix sufficiency marker');
+  if(await page.locator('#matrixCanvasMount .matrixFamily.focus2,#matrixCanvasMount .matrixFamily.focus3').count()!==1)throw new Error('matrix must color exactly one resolved first-glance direction');
+  if(await page.locator('#matrixCanvasMount .backgroundMarker').count()!==0)throw new Error('LEAST must not render in primary matrix');
+  if(await page.locator('#matrixCanvasMount .suffMarker').count()!==0)throw new Error('B result must use orange bands/outline, not a point marker');
+  if(await page.locator('#matrixCanvasMount .lowBandCell').count()===0)throw new Error('ratings of 3 or lower must create orange matrix bands');
+  if(await page.locator('#matrixCanvasMount .routeCell').count()!==1)throw new Error('single B+ endpoint must have one strong orange route cell');
+  if(await page.locator('#matrixBackgroundLabel').count()!==0)throw new Error('LEAST summary card must be removed from matrix');
+  const suffSummary=((await page.locator('#matrixSuffValue').textContent())||'').trim();
+  if(suffSummary.includes('Jaučiu, kad turiu pakankamai'))throw new Error('B result summary still uses affirmative sufficiency sentence');
+  if(!suffSummary)throw new Error('B insufficiency summary missing');
   for(const id of ['#matrixAttentionDetails','#matrixSufficiencyDetails','#matrixPdf','#matrixRestart','#matrixBack2rasi']){
     if(await page.locator(id).count()!==1)throw new Error('matrix result action missing: '+id);
   }
@@ -206,7 +213,7 @@ try{
   },RESULT);
   await page.reload({waitUntil:'networkidle'});
   await page.waitForSelector('#matrixResult.active');
-  if(await page.locator('#matrixCanvasMount .suffMarker').count()!==2)throw new Error('two valid tied B endpoints must both remain visible in matrix');
+  if(await page.locator('#matrixCanvasMount .routeCell').count()!==2)throw new Error('two valid tied B endpoints must both remain visible as orange route cells');
 
   await page.evaluate(k=>{
     const x=JSON.parse(localStorage.getItem(k));
@@ -215,7 +222,7 @@ try{
   },RESULT);
   await page.reload({waitUntil:'networkidle'});
   await page.waitForSelector('#matrixResult.active');
-  if(await page.locator('#matrixCanvasMount .suffMarker').count()!==3)throw new Error('three valid tied B endpoints must all remain visible in matrix');
+  if(await page.locator('#matrixCanvasMount .routeCell').count()!==3)throw new Error('three valid tied B endpoints must all remain visible as orange route cells');
   if(finalPayloads.length!==finalPostCountBeforeReload)throw new Error('visual restore-state checks must not POST final session again');
 
   await page.click('#matrixRestart');
