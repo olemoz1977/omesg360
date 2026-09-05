@@ -142,6 +142,18 @@ try{
     if(await page.locator(id).count()!==1)throw new Error('matrix result action missing: '+id);
   }
   if(await page.locator('#matrixContinue').count())throw new Error('legacy continue-to-ship/map action still present');
+
+  await page.emulateMedia({media:'print'});
+  if(await page.locator('.matrixPrintAppendix').evaluate(el=>getComputedStyle(el).display)==='none')throw new Error('PDF appendix must be visible in print media');
+  if(await page.locator('.matrixTopStatement span').first().evaluate(el=>getComputedStyle(el).display)!=='none')throw new Error('PDF matrix must use numbered compact axes instead of repeating full statements');
+  if(await page.locator('.matrixDetailActions').evaluate(el=>getComputedStyle(el).display)!=='none')throw new Error('interactive detail actions leaked into PDF');
+  const pdfBytes=await page.pdf({format:'A4',landscape:true,printBackground:true,preferCSSPageSize:true});
+  const pdfRaw=pdfBytes.toString('latin1');
+  const pdfPages=(pdfRaw.match(/\/Type\s*\/Page\b/g)||[]).length;
+  if(pdfPages!==2)throw new Error('result PDF must be exactly 2 intentional pages, got '+pdfPages);
+  if(pdfBytes.length<20000)throw new Error('result PDF unexpectedly small');
+  await page.emulateMedia({media:'screen'});
+
   await page.waitForTimeout(100);
   if(!finalPayloads.length)throw new Error('final POST not attempted');
   const final=finalPayloads.at(-1);
