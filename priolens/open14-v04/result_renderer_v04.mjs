@@ -31,7 +31,7 @@ const COPY={
     bHard:'Kelios sritys turėjo tą patį žemiausią įvertinimą, bet papildomame klausime vienos krypties neišskyrei. Todėl maršrutas nebrėžiamas.',
     bNoLow:'Pagal tavo atsakymus aiški mažesnio pakankamumo kryptis neišsiskyrė. Žemėlapis jos neforsuoja.',
     bNoNumeric:'Pakankamai aiškių skaitinių atsakymų maršrutui nėra.',
-    routePrefix:'Maršrutas',backToResult:'← Grįžti į rezultatą',close:'Uždaryti',why:'Kaip ši poreikio sritis buvo išskirta?',whyMany:'Kaip šios poreikio sritys buvo išskirtos?',suffMethodSingle:'Tai rodo, kuri poreikio sritis šiuose atsakymuose išsiskyrė kaip mažiausiai pakankama, ne poreikio stiprumą.',suffMethodMany:'Tai rodo santykinį šių poreikio sričių pakankamumą dabartiniuose atsakymuose, ne poreikių stiprumą.',answerLabel:'Tavo atsakymas',
+    routePrefix:'Maršrutas',backToResult:'← Grįžti į rezultatą',close:'Uždaryti',why:'Kaip ši pakankamumo sritis buvo išskirta?',whyMany:'Kaip šios pakankamumo sritys buvo išskirtos?',suffMethodSingle:'Tai rodo, kuri sritis šiuose atsakymuose išsiskyrė kaip mažiausiai pakankama, o ne tai, kiek ji tau svarbi.',suffMethodMany:'Tai rodo santykinį šių sričių pakankamumą dabartiniuose atsakymuose, o ne jų svarbumą.',answerLabel:'Tavo atsakymas',
     separate:'Laivas rodo pirmo žvilgsnio fokusą. Žemėlapis remiasi tik tavo pakankamumo atsakymais.'
   },
   en:{
@@ -60,7 +60,7 @@ const COPY={
     bHard:'Several areas had the same lowest rating, but in the additional question you did not single out one. No route is drawn.',
     bNoLow:'Your answers did not produce a clear lower-sufficiency direction. The map does not force one.',
     bNoNumeric:'There were not enough clear numeric answers to draw a route.',
-    routePrefix:'Route',backToResult:'← Back to result',close:'Close',why:'How was this need area singled out?',whyMany:'How were these need areas singled out?',suffMethodSingle:'This shows which need area stood out as least sufficient in these answers, not the strength of a need.',suffMethodMany:'This shows the relative sufficiency of these need areas in your current answers, not the strength of needs.',answerLabel:'Your answer',
+    routePrefix:'Route',backToResult:'← Back to result',close:'Close',why:'How was this sufficiency area singled out?',whyMany:'How were these sufficiency areas singled out?',suffMethodSingle:'This shows which area stood out as least sufficient in these answers, not how important it is to you.',suffMethodMany:'This shows the relative sufficiency of these areas in your current answers, not their importance.',answerLabel:'Your answer',
     separate:'The ship shows the first-glance focus. The map is based only on your sufficiency answers.'
   }
 };
