@@ -70,4 +70,13 @@ const noClear=buildHumanInterpretationV04({
 assert.ok(body(noClear).includes('nė viena kryptis tau nebuvo aiškiai artimesnė'));
 assert.ok(!body(noClear).includes('gana tiesioginis teminis persidengimas'));
 
+
+const weak=buildHumanInterpretationV04({
+  model:{repeatedMost:[{familyId:'AUTONOMY',count:2}],backgroundFamilyIds:[],sufficiencyItemIds:['MEANING_PURPOSE'],focusFamilyId:'AUTONOMY',attentionClarifierNoClear:false},
+  lang:'lt',familyLabels
+});
+assert.ok(body(weak).includes('nereikia sujungti per jėgą'));
+assert.ok(!body(weak).includes('Meistriškumas'));
+assert.ok(!body(weak).includes('Pripažinimas'));
+
 console.log('result_interpretation_v04: PASS');
