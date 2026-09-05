@@ -21,6 +21,8 @@ if (!is_file($configPath)) {
     exit('Backend not configured.');
 }
 require_once $configPath;
+$adminSecretPath = __DIR__ . '/admin-secret.php';
+if (is_file($adminSecretPath)) require_once $adminSecretPath;
 
 $adminPassword = null;
 if (defined('PRIOLENS_ADMIN_PASSWORD')) {
