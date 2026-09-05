@@ -12,8 +12,14 @@ try{
   await page.waitForSelector('#trial.active');
 
   for(let i=0;i<14;i++){
+    if(!(await page.locator('#undoMost').isDisabled())||!(await page.locator('#tieLeast').isDisabled())) throw new Error('assist actions must stay disabled before MOST');
+    if(!((await page.locator('#trialHint').textContent())||'').includes('Pažymėk vieną nuotrauką')) throw new Error('MOST instruction must explicitly ask to select a photo');
     await page.click('.stim[data-slot="0"]');
-    await page.waitForFunction(()=>document.querySelector('#tieLeast')&&!document.querySelector('#tieLeast').classList.contains('hidden'));
+    await page.waitForFunction(()=>{
+      const u=document.querySelector('#undoMost'),t=document.querySelector('#tieLeast');
+      return u&&!u.disabled&&t&&!t.disabled;
+    });
+    if(!((await page.locator('#trialHint').textContent())||'').includes('Pažymėk vieną iš dviejų likusių nuotraukų')) throw new Error('LEAST instruction must explicitly ask to select one remaining photo');
     await page.click('.stim[data-slot="1"]');
     if(i<13){
       const next=`${i+2} / 14`;
