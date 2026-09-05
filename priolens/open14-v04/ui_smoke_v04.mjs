@@ -130,7 +130,10 @@ try{
   const topCare=((await page.locator('#matrixCanvasMount .matrixTopStatement').nth(7).textContent())||'');
   const leftCare=((await page.locator('#matrixCanvasMount .matrixLeftStatement').nth(7).textContent())||'');
   if(!topCare.includes(careStatement)||!leftCare.includes(careStatement))throw new Error('exact received-support statement must appear on both matrix axes');
-  if(await page.locator('#matrixCanvasMount .matrixFamily.focus2,#matrixCanvasMount .matrixFamily.focus3').count()!==1)throw new Error('matrix must color exactly one resolved first-glance direction');
+  const matrixState=JSON.parse(await page.evaluate(k=>localStorage.getItem(k),RESULT));
+  const expectedMostRepeats=Object.values(matrixState?.familyStats||{}).filter(x=>x&&((x.chosen===2)||(x.chosen===3))).length;
+  if(await page.locator('#matrixCanvasMount .matrixFamily.focus2,#matrixCanvasMount .matrixFamily.focus3').count()!==expectedMostRepeats)throw new Error('matrix must color every raw MOST 3/3 and 2/3 direction');
+  if(await page.locator('#matrixFocusValue .matrixRepeatBadge').count()!==expectedMostRepeats)throw new Error('summary must list every raw MOST 3/3 and 2/3 direction');
   if(await page.locator('#matrixCanvasMount .backgroundMarker').count()!==0)throw new Error('LEAST must not render in primary matrix');
   if(await page.locator('#matrixCanvasMount .suffMarker').count()!==0)throw new Error('B result must use orange bands/outline, not a point marker');
   if(await page.locator('#matrixCanvasMount .lowBandCell').count()!==0)throw new Error('orange must not spill across other need cells');
@@ -145,7 +148,19 @@ try{
   }
   if(await page.locator('#matrixContinue').count())throw new Error('legacy continue-to-ship/map action still present');
 
-  await page.evaluate(()=>document.body.classList.add('priolensPrintMatrix'));
+  await page.evaluate(()=>{
+    document.documentElement.style.height='auto';
+    document.documentElement.style.minHeight='0';
+    document.documentElement.style.background='#fff';
+    document.documentElement.style.overflow='visible';
+    document.body.style.height='auto';
+    document.body.style.minHeight='0';
+    document.body.style.background='#fff';
+    document.body.style.overflow='visible';
+    const wrap=document.querySelector('.wrap');
+    if(wrap){wrap.style.height='auto';wrap.style.minHeight='0';wrap.style.margin='0'}
+    document.body.classList.add('priolensPrintMatrix');
+  });
   await page.emulateMedia({media:'print'});
   if(await page.locator('.matrixPrintAppendix').evaluate(el=>getComputedStyle(el).display)==='none')throw new Error('PDF appendix must be visible in print media');
   if(await page.locator('.matrixTopStatement span').first().evaluate(el=>getComputedStyle(el).display)!=='none')throw new Error('PDF matrix must use numbered compact axes instead of repeating full statements');
@@ -156,7 +171,12 @@ try{
   if(pdfPages!==1)throw new Error('result PDF must fit on exactly 1 A4 portrait page, got '+pdfPages);
   if(pdfBytes.length<20000)throw new Error('result PDF unexpectedly small');
   await page.emulateMedia({media:'screen'});
-  await page.evaluate(()=>document.body.classList.remove('priolensPrintMatrix'));
+  await page.evaluate(()=>{
+    document.body.classList.remove('priolensPrintMatrix');
+    document.documentElement.removeAttribute('style');
+    document.body.removeAttribute('style');
+    const wrap=document.querySelector('.wrap');if(wrap)wrap.removeAttribute('style');
+  });
 
   await page.waitForTimeout(100);
   if(!finalPayloads.length)throw new Error('final POST not attempted');
