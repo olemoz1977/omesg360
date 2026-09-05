@@ -92,8 +92,13 @@ try{
   await page.click('#matrixSufficiencyDetails');
   await page.waitForSelector('#matrixResult.active');
   await page.waitForFunction(()=>new URLSearchParams(location.search).get('detail')==='sufficiency');
-  if(!(await page.locator('#suffDetail').evaluate(el=>el.parentElement?.id==='matrixResult'))) throw new Error('live B detail must be mounted over the matrix');
+  if(!(await page.locator('#suffDetail').evaluate(el=>el.parentElement===document.body))) throw new Error('live B detail must be portaled to document.body outside transformed matrix');
   if(await page.locator('#suffDetail').evaluate(el=>el.classList.contains('hidden'))) throw new Error('live sufficiency detail hidden');
+  const liveOverlay=await page.locator('#suffDetail').evaluate(el=>{
+    const r=el.getBoundingClientRect(),cs=getComputedStyle(el);
+    return {top:r.top,bottom:r.bottom,left:r.left,right:r.right,viewportW:innerWidth,viewportH:innerHeight,position:cs.position,locked:document.body.classList.contains('suffSheetOpen')};
+  });
+  if(liveOverlay.position!=='fixed'||Math.abs(liveOverlay.top)>1||Math.abs(liveOverlay.bottom-liveOverlay.viewportH)>1||Math.abs(liveOverlay.left)>1||Math.abs(liveOverlay.right-liveOverlay.viewportW)>1||!liveOverlay.locked) throw new Error('live B detail is not a fixed visible viewport sheet: '+JSON.stringify(liveOverlay));
   if(!(await page.locator('#matrixCanvasMount').evaluate(el=>getComputedStyle(el).display!=='none'))) throw new Error('live matrix must remain visible behind B detail');
   const suffText=(await page.locator('#suffDetail').textContent())||'';
   if(/\bB\+\b|Channel B/.test(suffText)) throw new Error('technical B terminology leaked into live detail');
@@ -102,6 +107,15 @@ try{
   await page.click('#suffDetailClose');
   await page.waitForSelector('#matrixResult.active');
   await page.waitForFunction(()=>!new URLSearchParams(location.search).has('detail'));
+  if(await page.evaluate(()=>document.body.classList.contains('suffSheetOpen'))) throw new Error('live B detail Close left body scroll-locked');
+
+  await page.click('#matrixSufficiencyDetails');
+  await page.waitForFunction(()=>new URLSearchParams(location.search).get('detail')==='sufficiency');
+  await page.goBack();
+  await page.waitForFunction(()=>!new URLSearchParams(location.search).has('detail'));
+  await page.waitForSelector('#matrixResult.active');
+  if(!(await page.locator('#suffDetail').evaluate(el=>el.classList.contains('hidden')))) throw new Error('live browser Back left B detail visible');
+  if(await page.evaluate(()=>document.body.classList.contains('suffSheetOpen'))) throw new Error('live browser Back left body scroll-locked');
 
   const draftKeys=await page.evaluate(()=>Object.keys(localStorage).filter(k=>k.includes('priolens.open14.v041.rank.draft')));
   if(draftKeys.length) throw new Error('v0.4 draft not cleared after successful live save');
