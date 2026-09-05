@@ -206,4 +206,5 @@ jobs:
         run: node priolens/open14-v04/deployed_real_smoke_v04.mjs
 
 # Isolated owner preview only.
+# Interpretation module is deployed and byte-verified with the preview.
 # Does not touch /priolens-open14-v02/, /priolens-open14-v03/, or /priolens-open14-v03-api/.
