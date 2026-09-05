@@ -291,17 +291,41 @@ try{
   if(!(await page.locator('#suffDetail').evaluate(el=>el.classList.contains('hidden'))))throw new Error('browser Back left B detail visible');
   if(await page.evaluate(()=>document.body.classList.contains('suffSheetOpen')))throw new Error('browser Back left the page scroll-locked');
 
-  // An accidentally open detail must never leak into print/PDF.
+  // An accidentally open detail must be sanitized before print and must not freeze the page after returning.
   await page.click('#matrixSufficiencyDetails');
   await page.waitForFunction(()=>new URLSearchParams(location.search).get('detail')==='sufficiency');
   await page.emulateMedia({media:'print'});
-  await page.evaluate(()=>document.body.classList.add('priolensPrintMatrix'));
-  if(await page.locator('#suffDetail').evaluate(el=>getComputedStyle(el).display)!=='none')throw new Error('open B detail leaked into print media');
-  await page.evaluate(()=>document.body.classList.remove('priolensPrintMatrix'));
+  const printRegression=await page.evaluate(async()=>{
+    const originalPrint=window.print;
+    let during=null;
+    window.print=()=>{
+      const d=document.getElementById('suffDetail');
+      during={
+        locked:document.body.classList.contains('suffSheetOpen'),
+        detail:new URLSearchParams(location.search).get('detail'),
+        hidden:d?.classList.contains('hidden')??false,
+        display:d?getComputedStyle(d).display:null,
+        printClass:document.body.classList.contains('priolensPrintMatrix')
+      };
+    };
+    const mod=await import('./result_matrix_v04.mjs?print-regression=1');
+    mod.printResultReportV04();
+    await new Promise(r=>setTimeout(r,120));
+    if(typeof window.onafterprint==='function')window.onafterprint();
+    const d=document.getElementById('suffDetail');
+    const after={
+      locked:document.body.classList.contains('suffSheetOpen'),
+      detail:new URLSearchParams(location.search).get('detail'),
+      hidden:d?.classList.contains('hidden')??false,
+      printClass:document.body.classList.contains('priolensPrintMatrix')
+    };
+    window.print=originalPrint;
+    return {during,after};
+  });
+  if(!printRegression.during||printRegression.during.locked||printRegression.during.detail!==null||!printRegression.during.hidden||printRegression.during.display!=='none'||!printRegression.during.printClass)throw new Error('print did not sanitize open B detail before PDF: '+JSON.stringify(printRegression));
+  if(printRegression.after.locked||printRegression.after.detail!==null||!printRegression.after.hidden||printRegression.after.printClass)throw new Error('return from print left stale B detail or scroll lock: '+JSON.stringify(printRegression));
   await page.emulateMedia({media:'screen'});
-  await page.goBack();
-  await page.waitForFunction(()=>!new URLSearchParams(location.search).has('detail'));
-  if(await page.evaluate(()=>document.body.classList.contains('suffSheetOpen')))throw new Error('post-print browser Back left the page scroll-locked');
+  await page.waitForSelector('#matrixResult.active');
 
   if(await page.evaluate(k=>localStorage.getItem(k),DRAFT)!==null)throw new Error('v0.4 draft not cleared after successful final save');
   const storedResult=JSON.parse(await page.evaluate(k=>localStorage.getItem(k),RESULT));
