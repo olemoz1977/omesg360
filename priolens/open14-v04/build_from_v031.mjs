@@ -241,8 +241,7 @@ async function openMatrixDetail(kind){
     if(kind==='sufficiency'){
       await renderResult(true);
       const sheet=document.getElementById('suffDetail');
-      const matrix=document.getElementById('matrixResult');
-      if(sheet&&matrix&&sheet.parentElement!==matrix)matrix.appendChild(sheet);
+      if(sheet&&sheet.parentElement!==document.body)document.body.appendChild(sheet);
       mods.renderer.openResultDetailV04(kind);
       return;
     }
