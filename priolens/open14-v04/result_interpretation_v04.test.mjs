@@ -60,4 +60,13 @@ const multi=buildHumanInterpretationV04({
 assert.ok(multi.paragraphs.some(p=>p.includes('Kelioms sritims')));
 assert.ok(multi.paragraphs.some(p=>p.includes('nereikia sujungti per jėgą')));
 
+
+function body(v){return v.paragraphs.join(' ')}
+
+const noClear=buildHumanInterpretationV04({
+  model:{repeatedMost:[{familyId:'RECOGNITION',count:3}],backgroundFamilyIds:[],sufficiencyItemIds:['RECOGNITION_ESTEEM'],focusFamilyId:null,attentionClarifierNoClear:true},
+  lang:'lt',familyLabels
+});
+assert.ok(body(noClear).includes('nė viena kryptis tau nebuvo aiškiai artimesnė'));
+
 console.log('result_interpretation_v04: PASS');
