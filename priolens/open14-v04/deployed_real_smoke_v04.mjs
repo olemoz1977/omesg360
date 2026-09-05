@@ -50,8 +50,9 @@ try{
   if(await page.locator('#matrixCanvasMount .matrixDataCell').count()!==144) throw new Error('live matrix must contain 12x12 data cells');
   if(await page.locator('#matrixCanvasMount .matrixTopStatement').count()!==12||await page.locator('#matrixCanvasMount .matrixLeftStatement').count()!==12) throw new Error('live matrix axes must contain all 12 statements');
   const liveMatrixSnapshot=JSON.parse(await page.evaluate(k=>localStorage.getItem(k),RESULT));
-  const expectedFocusHighlights=liveMatrixSnapshot?.attentionFocus?.familyId?1:0;
-  if(await page.locator('#matrixCanvasMount .matrixFamily.focus2,#matrixCanvasMount .matrixFamily.focus3').count()!==expectedFocusHighlights) throw new Error('live matrix focus highlight count does not match resolved Channel-A focus');
+  const expectedMostRepeats=Object.values(liveMatrixSnapshot?.familyStats||{}).filter(x=>x&&((x.chosen===2)||(x.chosen===3))).length;
+  if(await page.locator('#matrixCanvasMount .matrixFamily.focus2,#matrixCanvasMount .matrixFamily.focus3').count()!==expectedMostRepeats) throw new Error('live matrix must highlight every raw MOST 3/3 and 2/3 direction');
+  if(await page.locator('#matrixFocusValue .matrixRepeatBadge').count()!==expectedMostRepeats) throw new Error('live matrix summary must list every raw MOST 3/3 and 2/3 direction');
   if(await page.locator('#matrixCanvasMount .backgroundMarker').count()!==0) throw new Error('live matrix must not render LEAST point markers');
   if(await page.locator('#matrixCanvasMount .suffMarker').count()!==0) throw new Error('live matrix must not render B point markers');
   if(await page.locator('#matrixCanvasMount .lowBandCell').count()!==0) throw new Error('orange must never spill across other need cells');
