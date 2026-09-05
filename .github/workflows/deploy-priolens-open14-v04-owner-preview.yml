@@ -43,6 +43,7 @@ jobs:
           set -euo pipefail
           node priolens/open14-v04/adaptive_clarifiers_v04.test.mjs
           node priolens/open14-v04/result_world_v04.test.mjs
+          node priolens/open14-v04/result_interpretation_v04.test.mjs
           node priolens/open14-v04/result_matrix_v04.test.mjs
           node priolens/open14-v04/build_from_v031.mjs
           node priolens/open14-v04/server/build_endpoints_v04.mjs
@@ -67,6 +68,8 @@ jobs:
           grep -Fq 'id="shipCard"' "$f"
           grep -Fq 'id="mapCard"' "$f"
           grep -Fq 'id="matrixResult"' "$f"
+          grep -Fq 'id="matrixInterpretation"' "$f"
+          grep -Fq 'Viena galima interpretacija' priolens/open14-v04/result_interpretation_v04.mjs
           grep -Fq 'id="matrixAttentionDetails"' "$f"
           grep -Fq 'id="matrixSufficiencyDetails"' "$f"
           grep -Fq 'id="matrixPdf"' "$f"
@@ -155,7 +158,7 @@ jobs:
         run: |
           set -euo pipefail
           BASE='https://omesg360.eu/priolens-open14-v04'
-          for f in index.html bank.json adaptive_clarifiers_v04.mjs result_world_v04.mjs result_renderer_v04.mjs result_matrix_v04.mjs p3_open14_planner_v02.mjs open14_no_repeat_assigner_v03.mjs stimulus-bank.html; do
+          for f in index.html bank.json adaptive_clarifiers_v04.mjs result_world_v04.mjs result_renderer_v04.mjs result_interpretation_v04.mjs result_matrix_v04.mjs p3_open14_planner_v02.mjs open14_no_repeat_assigner_v03.mjs stimulus-bank.html; do
             curl -fsS --retry 3 -H 'Cache-Control: no-cache' "$BASE/$f?deploy=${GITHUB_SHA}" -o "/tmp/live-${f//\//_}"
             cmp "priolens/open14-v04/$f" "/tmp/live-${f//\//_}"
             echo "BYTE PASS $f"
@@ -169,6 +172,11 @@ jobs:
           case "$ctype" in
             *javascript*|*ecmascript*) ;;
             *) echo "Unexpected result renderer MIME: $ctype" >&2; exit 1;;
+          esac
+          ctype=$(curl -fsSI "$BASE/result_interpretation_v04.mjs?deploy=${GITHUB_SHA}" | tr -d '\r' | awk -F': ' 'tolower($1)=="content-type"{print tolower($2)}' | tail -1)
+          case "$ctype" in
+            *javascript*|*ecmascript*) ;;
+            *) echo "Unexpected result interpretation MIME: $ctype" >&2; exit 1;;
           esac
           ctype=$(curl -fsSI "$BASE/result_matrix_v04.mjs?deploy=${GITHUB_SHA}" | tr -d '\r' | awk -F': ' 'tolower($1)=="content-type"{print tolower($2)}' | tail -1)
           case "$ctype" in
