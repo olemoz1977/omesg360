@@ -93,4 +93,12 @@ const noLowRoute=buildHumanInterpretationV04({
 });
 assert.equal(noLowRoute.paragraphs.length,2);
 
+
+const careRole=buildHumanInterpretationV04({
+  model:{repeatedMost:[{familyId:'CARE',count:3}],backgroundFamilyIds:[],sufficiencyItemIds:['CARE_SUPPORT_PRESENT'],focusFamilyId:'CARE',attentionClarifierNoClear:false},
+  lang:'lt',familyLabels
+});
+assert.ok(body(careRole).includes('vien iš jų negalima spręsti'));
+assert.ok(body(careRole).includes('rūpinimasis kitu'));
+
 console.log('result_interpretation_v04: PASS');
