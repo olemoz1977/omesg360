@@ -4,7 +4,16 @@ import { buildHumanInterpretationV04, RESULT_INTERPRETATION_SCHEMA_V04 } from '.
 const familyLabels={
   RECOGNITION:'Pripažinimas',
   BELONGING:'Priklausymas',
+  CONNECTION:'Ryšys',
   KNOWLEDGE:'Mokymasis / supratimas',
+  EXPLORATION:'Tyrinėjimas',
+  AUTONOMY:'Autonomija',
+  MASTERY:'Meistriškumas',
+  CARE:'Rūpestis / pagalba',
+  SAFETY:'Saugumas',
+  CONTROL:'Tiesioginis valdymas',
+  RESOURCE:'Resursų prieinamumas',
+  OPPORTUNITY:'Galimybė',
   ORDER:'Tvarka / struktūra',
   REST:'Poilsis / atsigavimas'
 };
