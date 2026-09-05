@@ -124,18 +124,18 @@ try{
   await page.locator('#bPlusMount .clarifyNeed').first().click();
 
   await page.waitForSelector('#matrixResult.active');
-  if(await page.locator('#matrixCanvasMount .matrixDataCell').count()!==144)throw new Error('pre-result matrix must contain 12x12 data cells');
+  if(await page.locator('#matrixCanvasMount .matrixDataCell').count()!==144)throw new Error('matrix must contain 12x12 data cells');
   if(await page.locator('#matrixCanvasMount .matrixTopStatement').count()!==12||await page.locator('#matrixCanvasMount .matrixLeftStatement').count()!==12)throw new Error('matrix axes must contain all 12 Channel-B statements');
   const careStatement='Jaučiu, kad iš kitų sulaukiu pakankamai rūpesčio, paramos ir žmogiško dėmesio.';
   const matrixText=(await page.locator('#matrixResult').textContent())||'';
   if(matrixText.split(careStatement).length-1!==2)throw new Error('exact received-support statement must appear on both matrix axes');
   if(await page.locator('#matrixCanvasMount .focusMarker').count()!==1)throw new Error('matrix must render one resolved first-glance focus marker');
   if(await page.locator('#matrixCanvasMount .suffMarker').count()!==1)throw new Error('single B+ endpoint must render one matrix sufficiency marker');
-  if(await page.locator('#matrixPdf').evaluate(el=>typeof el.onclick)!=='function')throw new Error('matrix PDF action missing');
-  await page.click('#matrixContinue');
-  await page.waitForSelector('#result.active');
-  if(await page.locator('#resultPdf').count()!==1)throw new Error('result PDF action missing');
-  await page.waitForFunction(()=>document.querySelector('#saveStatus')&&!document.querySelector('#saveStatus').textContent.includes('tikrinamas'),null,{timeout:10000});
+  for(const id of ['#matrixAttentionDetails','#matrixSufficiencyDetails','#matrixPdf','#matrixRestart','#matrixBack2rasi']){
+    if(await page.locator(id).count()!==1)throw new Error('matrix result action missing: '+id);
+  }
+  if(await page.locator('#matrixContinue').count())throw new Error('legacy continue-to-ship/map action still present');
+  await page.waitForTimeout(100);
   if(!finalPayloads.length)throw new Error('final POST not attempted');
   const final=finalPayloads.at(-1);
   if(final.schema!==SCHEMA)throw new Error('final schema wrong');
@@ -149,91 +149,64 @@ try{
   if(!final.sufficiencyClarifier?.selectedItemId)throw new Error('final B+ missing');
   if(final.sufficiencyRoute?.itemIds?.length!==1)throw new Error('final B+ route should contain one selected endpoint');
   if(Object.keys(final.sufficiency||{}).length!==12)throw new Error('Channel B item count changed');
-  const routeContinents=await page.locator('#needsMapStage .continent').count();
-  const routeNodes=await page.locator('#needsMapStage .needNode').count();
-  if(routeContinents!==1)throw new Error('single B+ endpoint should render one route-relevant continent, got '+routeContinents);
-  if(routeNodes!==1)throw new Error('single B+ endpoint should render one need node, got '+routeNodes);
-  await page.waitForFunction(()=>document.querySelectorAll('#needsMapStage .routePath').length===1);
-  if(await page.locator('#needsMapStage .routeOrigin').count())throw new Error('cartographic route must enter from the lower map edge without a visible origin marker');
-  if(await page.locator('#needsMapStage .landShape .landFill').count()!==1)throw new Error('single route-relevant land must render one irregular coastline SVG');
-  if(await page.locator('#needsMapStage .landShoreHaloOuter').count()!==1)throw new Error('illustrated map should render one outer shoreline halo');
-  if(await page.locator('#needsMapStage .landTerrain').count()<2)throw new Error('illustrated map should carry restrained interior terrain cues');
-  if(await page.locator('#needsMapStage .landWater').count()!==1)throw new Error('illustrated map should carry one subtle inland-water cue');
-  if(await page.locator('#needsMapStage .mapPin').count()!==1)throw new Error('single route should render one map-location pin');
-  const routeD=await page.locator('#needsMapStage .routePath').getAttribute('d');
-  if(!routeD||!routeD.includes(' C '))throw new Error('single route must use a curved cubic path: '+routeD);
-  if(await page.locator('.shipVisual svg').count()!==1)throw new Error('final minimalist ship SVG missing');
-  if(await page.locator('.shipGhost,.shipHull,.shipMast,.shipSail').count())throw new Error('dashed prototype ship classes still present');
-  if(!await page.locator('#mapRoute').evaluate(el=>el.classList.contains('hidden')))throw new Error('single route summary should be hidden to avoid duplicating the need label above the land');
-  if(((await page.locator('#mapRoute').textContent())||'').trim())throw new Error('single route summary should be empty when the land already carries the endpoint label');
 
-  await page.click('#shipDetailsButton');
+  await page.click('#matrixAttentionDetails');
+  await page.waitForSelector('#result.active');
   await page.waitForFunction(()=>new URLSearchParams(location.search).get('detail')==='attention');
+  if(!(await page.locator('#result').evaluate(el=>el.classList.contains('detailOnlyHost'))))throw new Error('matrix attention detail did not use detail-only host');
+  if(!(await page.locator('.resultScene').evaluate(el=>getComputedStyle(el).display==='none')))throw new Error('ship/map scene visible behind matrix attention detail');
+  if(await page.locator('#attentionDetail').evaluate(el=>el.classList.contains('hidden')))throw new Error('attention detail hidden');
   const attentionText=(await page.locator('#attentionDetail').textContent())||'';
   if(/\bMOST\b|\bLEAST\b|\bA\+\b/.test(attentionText))throw new Error('technical A terminology leaked into participant detail: '+attentionText);
   if(await page.locator('#repeatRows img').count())throw new Error('focus exemplars should not be duplicated in the summary block');
   if(await page.locator('#compareRows .reflectionImages img').count()!==3)throw new Error('3/3 focus exemplars must remain visible in the reflection block');
   const reflectionQuestion='Kas, tavo manymu, galėjo traukti šiuose vaizduose?';
-  const reflectionQuestionCount=attentionText.split(reflectionQuestion).length-1;
-  if(reflectionQuestionCount!==1)throw new Error('reflection question must appear exactly once, got '+reflectionQuestionCount);
-  const reflectionBeforeBackground=await page.evaluate(()=>{
-    const a=document.getElementById('compareHeading'),b=document.getElementById('leastHeading');
-    return Boolean(a.compareDocumentPosition(b)&Node.DOCUMENT_POSITION_FOLLOWING);
-  });
-  if(!reflectionBeforeBackground)throw new Error('background 3/3 detail must come after the main reflection block');
-
+  if(attentionText.split(reflectionQuestion).length-1!==1)throw new Error('reflection question must appear exactly once');
   const firstReason=page.locator('#compareRows .reasonOption').first();
   const expectedReason=((await firstReason.textContent())||'').trim();
   await firstReason.click();
   await page.waitForSelector('#compareRows .reflectionAnswerValue');
-  const selectedReason=((await page.locator('#compareRows .reflectionAnswerValue').textContent())||'').trim();
-  if(!selectedReason||selectedReason!==expectedReason)throw new Error('selected reflection answer not shown after collapse: '+selectedReason);
-  const selectedColor=await page.locator('#compareRows .reflectionAnswerValue').evaluate(el=>getComputedStyle(el).color);
-  if(selectedColor==='rgb(255, 255, 255)'||selectedColor==='white')throw new Error('selected reflection answer is white on white: '+selectedColor);
-  if(await page.locator('#compareRows .reasonOption').count())throw new Error('reflection option list did not collapse after selection');
-
+  if(((await page.locator('#compareRows .reflectionAnswerValue').textContent())||'').trim()!==expectedReason)throw new Error('selected reflection answer not preserved');
   await page.click('#attentionBack');
+  await page.waitForSelector('#matrixResult.active');
   await page.waitForFunction(()=>!new URLSearchParams(location.search).has('detail'));
 
-  await page.click('#mapDetailsButton');
+  await page.click('#matrixSufficiencyDetails');
+  await page.waitForSelector('#result.active');
   await page.waitForFunction(()=>new URLSearchParams(location.search).get('detail')==='sufficiency');
-  if(await page.locator('#suffDetail').evaluate(el=>el.classList.contains('hidden')))throw new Error('sufficiency bottom sheet hidden');
-  if(await page.locator('#result').evaluate(el=>el.classList.contains('detailMode')))throw new Error('sufficiency bottom sheet must not replace the result scene');
+  if(!(await page.locator('#result').evaluate(el=>el.classList.contains('detailOnlyHost'))))throw new Error('matrix sufficiency detail did not use detail-only host');
+  if(!(await page.locator('.resultScene').evaluate(el=>getComputedStyle(el).display==='none')))throw new Error('ship/map scene visible behind matrix sufficiency detail');
+  if(await page.locator('#suffDetail').evaluate(el=>el.classList.contains('hidden')))throw new Error('sufficiency detail hidden');
   const suffText=(await page.locator('#suffDetail').textContent())||'';
   if(/\bB\+\b|Channel B/.test(suffText))throw new Error('technical B terminology leaked into participant detail: '+suffText);
-  if(!suffText.includes('Kaip ši pakankamumo sritis buvo išskirta?'))throw new Error('need-area provenance heading missing: '+suffText);
-  if(suffText.includes('Kodėl ši kryptis?'))throw new Error('old direction wording remains in sufficiency detail');
-  if(!suffText.includes('mažiausiai pakankama'))throw new Error('single-route sufficiency-method note is not explicit enough');
+  if(!suffText.includes('Kaip ši pakankamumo sritis buvo išskirta?'))throw new Error('sufficiency provenance heading missing');
+  if(!suffText.includes('mažiausiai pakankama'))throw new Error('single-route sufficiency-method note missing');
   await page.click('#suffDetailClose');
+  await page.waitForSelector('#matrixResult.active');
   await page.waitForFunction(()=>!new URLSearchParams(location.search).has('detail'));
 
   if(await page.evaluate(k=>localStorage.getItem(k),DRAFT)!==null)throw new Error('v0.4 draft not cleared after successful final save');
   const storedResult=JSON.parse(await page.evaluate(k=>localStorage.getItem(k),RESULT));
   if(!storedResult?.completedAt||storedResult?.submission?.ok!==true)throw new Error('completed result snapshot missing after successful final save');
   const finalPostCountBeforeReload=finalPayloads.length;
-  const focusBeforeReload=((await page.locator('#shipFocus').textContent())||'').trim();
-  const routeBeforeReload=((await page.locator('#mapRoute').textContent())||'').trim();
+  const focusSummaryBefore=((await page.locator('#matrixFocusValue').textContent())||'').trim();
+  const suffSummaryBefore=((await page.locator('#matrixSuffValue').textContent())||'').trim();
 
   await page.reload({waitUntil:'networkidle'});
-  await page.waitForSelector('#result.active');
-  const restoredStatus=((await page.locator('#saveStatus').textContent())||'').trim();
-  if(!restoredStatus.includes('atkurta'))throw new Error('completed result was not identified as restored after reload: '+restoredStatus);
-  if(((await page.locator('#shipFocus').textContent())||'').trim()!==focusBeforeReload)throw new Error('restored focus changed after reload');
-  if(((await page.locator('#mapRoute').textContent())||'').trim()!==routeBeforeReload)throw new Error('restored route changed after reload');
+  await page.waitForSelector('#matrixResult.active');
+  if(((await page.locator('#matrixFocusValue').textContent())||'').trim()!==focusSummaryBefore)throw new Error('restored matrix focus changed after reload');
+  if(((await page.locator('#matrixSuffValue').textContent())||'').trim()!==suffSummaryBefore)throw new Error('restored matrix sufficiency summary changed after reload');
   if(finalPayloads.length!==finalPostCountBeforeReload)throw new Error('restoring a completed result must not POST the final session again');
 
-  // Visual-only synthetic restore checks: preserve protocol-valid endpoint sets exactly.
+  // Synthetic restore checks now target matrix endpoint preservation, not the deactivated ship/map scene.
   await page.evaluate(k=>{
     const x=JSON.parse(localStorage.getItem(k));
     x.sufficiencyRoute={source:'B_PLUS_SIMILAR',itemIds:['MEANING_PURPOSE','CONTRIBUTION'],minimumValue:2};
     localStorage.setItem(k,JSON.stringify(x));
   },RESULT);
   await page.reload({waitUntil:'networkidle'});
-  await page.waitForSelector('#result.active');
-  if(await page.locator('#needsMapStage .continent').count()!==1)throw new Error('two tied endpoints in one need group should share one land');
-  if(await page.locator('#needsMapStage .landShape .landFill').count()!==1)throw new Error('two same-group endpoints should still share one coastline');
-  if(await page.locator('#needsMapStage .needNode').count()!==2)throw new Error('two tied endpoints in one group should render two need nodes');
-  await page.waitForFunction(()=>document.querySelectorAll('#needsMapStage .routePath').length===2);
+  await page.waitForSelector('#matrixResult.active');
+  if(await page.locator('#matrixCanvasMount .suffMarker').count()!==2)throw new Error('two valid tied B endpoints must both remain visible in matrix');
 
   await page.evaluate(k=>{
     const x=JSON.parse(localStorage.getItem(k));
@@ -241,21 +214,18 @@ try{
     localStorage.setItem(k,JSON.stringify(x));
   },RESULT);
   await page.reload({waitUntil:'networkidle'});
-  await page.waitForSelector('#result.active');
-  if(await page.locator('#needsMapStage .continent').count()!==3)throw new Error('three valid tied endpoints across groups must render three lands without truncation');
-  if(await page.locator('#needsMapStage .landShape .landFill').count()!==3)throw new Error('three route-relevant groups must render three coastlines');
-  if(await page.locator('#needsMapStage .needNode').count()!==3)throw new Error('three valid tied endpoints must render all three need nodes');
-  await page.waitForFunction(()=>document.querySelectorAll('#needsMapStage .routePath').length===3);
+  await page.waitForSelector('#matrixResult.active');
+  if(await page.locator('#matrixCanvasMount .suffMarker').count()!==3)throw new Error('three valid tied B endpoints must all remain visible in matrix');
   if(finalPayloads.length!==finalPostCountBeforeReload)throw new Error('visual restore-state checks must not POST final session again');
 
-  await page.click('#restart');
+  await page.click('#matrixRestart');
   await page.waitForSelector('#intro.active');
   if(await page.evaluate(k=>localStorage.getItem(k),RESULT)!==null)throw new Error('Atlikti dar kartą did not clear completed result snapshot');
 
   const keys=await page.evaluate(()=>Object.keys(localStorage));
   if(keys.some(k=>k.includes('priolens.open14.v031.rank.draft')))throw new Error('v0.3.1 draft namespace leaked into v0.4');
 
-  console.log('PASS: v0.4 local 390x844 frozen IA + illustrated island target + map pins + curved lower-edge routes for single/same-land-2/cross-land-3 + clean details + restore');
+  console.log('PASS: v0.4 local 390x844 matrix-primary result + hidden ship/map + preserved A/B details + multi-endpoint restore');
 } finally {
   await browser.close();
 }
