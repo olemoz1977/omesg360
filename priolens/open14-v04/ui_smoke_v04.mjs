@@ -4,8 +4,9 @@ import { buildOpen14Plan, FAMILY_SET } from './p3_open14_planner_v02.mjs';
 const BASE=process.env.PRIOLENS_V04_BASE||'http://127.0.0.1:8765/';
 const SCHEMA='2rasi.priolens.open14.rank-session-v0.4';
 const BANK='2rasi.priolens.open14.bank-v0.3.1';
-const DRAFT='priolens.open14.v04.rank.draft.lt';
-const RESULT='priolens.open14.v04.last-result.lt';
+const SUFF='2rasi.priolens.sufficiency-v0.3';
+const DRAFT='priolens.open14.v041.rank.draft.lt';
+const RESULT='priolens.open14.v041.last-result.lt';
 const svg='<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><rect width="64" height="64" fill="#ddd"/></svg>';
 
 const browser=await chromium.launch({headless:true});
@@ -19,12 +20,14 @@ try{
   await page.route('**/priolens-open14-v04-api/progress.php',async route=>{
     const body=JSON.parse(route.request().postData()||'{}');
     if(body.schema!==SCHEMA)throw new Error('progress schema != v0.4');
+    if(body.sufficiencySchema!==SUFF)throw new Error('progress sufficiency schema != v0.3');
     progressPayloads.push(body);
     await route.fulfill({status:200,contentType:'application/json',body:'{"ok":true,"saved":true,"submissionId":"V04-LOCAL"}'});
   });
   await page.route('**/priolens-open14-v04-api/api.php',async route=>{
     const body=JSON.parse(route.request().postData()||'{}');
     if(body.schema!==SCHEMA)throw new Error('final schema != v0.4');
+    if(body.sufficiencySchema!==SUFF)throw new Error('final sufficiency schema != v0.3');
     finalPayloads.push(body);
     await route.fulfill({status:200,contentType:'application/json',body:'{"ok":true,"inserted":true,"submissionId":"V04-LOCAL"}'});
   });
@@ -37,6 +40,7 @@ try{
   const draft0=JSON.parse(await page.evaluate(k=>localStorage.getItem(k),DRAFT));
   if(!draft0||draft0.schema!==SCHEMA)throw new Error('v0.4 draft missing after start');
   if(draft0.bankSchema!==BANK)throw new Error('bank identity changed in v0.4 draft');
+  if(draft0.sufficiencySchema!==SUFF)throw new Error('revised sufficiency schema missing in v0.4 draft');
   const seed=draft0.seed;
   const plan=buildOpen14Plan(seed);
 
