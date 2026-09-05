@@ -190,7 +190,7 @@ try{
   if(await page.locator('#result').evaluate(el=>el.classList.contains('detailMode')))throw new Error('sufficiency bottom sheet must not replace the result scene');
   const suffText=(await page.locator('#suffDetail').textContent())||'';
   if(/\bB\+\b|Channel B/.test(suffText))throw new Error('technical B terminology leaked into participant detail: '+suffText);
-  if(!suffText.includes('Kaip ši poreikio sritis buvo išskirta?'))throw new Error('need-area provenance heading missing: '+suffText);
+  if(!suffText.includes('Kaip ši pakankamumo sritis buvo išskirta?'))throw new Error('need-area provenance heading missing: '+suffText);
   if(suffText.includes('Kodėl ši kryptis?'))throw new Error('old direction wording remains in sufficiency detail');
   if(!suffText.includes('mažiausiai pakankama'))throw new Error('single-route sufficiency-method note is not explicit enough');
   await page.click('#suffDetailClose');
