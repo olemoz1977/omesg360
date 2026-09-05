@@ -52,52 +52,52 @@ const COPY={
 const B_ANCHORS={
   lt:{
     MEANING_PURPOSE:{
-      paragraph:'Gali būti, kad tau šiuo metu neužtenka vien atlikti tai, ką reikia. Svarbiau gali būti jausti, kad tai, ką darai, turi prasmę ir yra verta tavo laiko bei pastangų.',
-      question:'Kur dabar daugiausia skiri laiko tam, kas veikia, bet nebūtinai atrodo prasminga?'
+      paragraph:'Šioje sesijoje prasmingumą tame, ką šiuo metu darai, įvertinai kaip nepakankamą. Tai nebūtinai reiškia, kad visa veikla atrodo beprasmė; verta pasižiūrėti, kur prasmės jauti pakankamai, o kur jos trūksta.',
+      question:'Kur dabar aiškiai jauti prasmę, o kur darai todėl, kad reikia, nors prasmės jauti mažiau?'
     },
     CONTRIBUTION:{
-      paragraph:'Gali būti, kad tau neužtenka tiesiog „daryti savo darbą“. Svarbu jausti, kad tai, ką darai, kažkam turi svorį ir prisideda prie kažko didesnio už tave patį.',
-      question:'Ar dabar tavo gyvenime yra vieta, kurioje daug darai, bet nebejauti, kad tavo indėlis iš tikrųjų kažkam svarbus?'
+      paragraph:'Šioje sesijoje galimybes prisidėti prie kažko svarbaus ne tik sau įvertinai kaip nepakankamas. Tai nebūtinai reiškia, kad tavo veikla neturi vertės; labiau verta pasižiūrėti, kur indėlio svorį jauti, o kur jo nepakanka.',
+      question:'Kur šiuo metu labiausiai jauti, kad tavo indėlis turi svorį, o kur kaip tik ne?'
     },
     LEARNING_GROWTH:{
-      paragraph:'Šiuo metu gali stigti ne informacijos apskritai, o jausmo, kad judi pirmyn: atrandi, mokaisi ir plečiasi tai, ką gali suprasti ar padaryti.',
-      question:'Kurioje srityje dabar labiausiai jauti, kad kartoji tai, ką jau moki, vietoje to, kad augtum?'
+      paragraph:'Šioje sesijoje mokymosi, atradimo ir augimo galimybes įvertinai kaip nepakankamas. Tai gali būti konkretus dabartinės situacijos signalas, bet ne išvada, kad apskritai „neaugi“.',
+      question:'Kur šiuo metu jauti realų augimą, o kur labiausiai atrodo, kad kartoji tai, ką jau moki?'
     },
     CAPABILITY_MASTERY:{
-      paragraph:'Gali būti, kad tau šiuo metu trūksta erdvės panaudoti tai, ką iš tikrųjų moki, ir matyti, kad tavo gebėjimai toliau auga, o ne tiesiog yra naudojami rutiniškai.',
-      question:'Kur dabar turi gebėjimų daugiau, negu realiai gali panaudoti?'
+      paragraph:'Šioje sesijoje galimybes naudoti ir tobulinti savo gebėjimus įvertinai kaip nepakankamas. Verta atskirti, ar riboja pati veikla, aplinka, ar tiesiog nėra pakankamai progų gebėjimus panaudoti.',
+      question:'Kur savo gebėjimus gali panaudoti pilnai, o kur jų panaudoji mažiau, negu norėtum?'
     },
     AUTONOMY_AGENCY:{
-      paragraph:'Šiuo metu gali trūkti ne pasirinkimų skaičiaus, o realios erdvės pačiam spręsti, kaip veikti ten, kur tau svarbu.',
-      question:'Kurioje svarbioje srityje dažniausiai darai ne taip, kaip pats rinktumeisi, o taip, kaip leidžia aplinkybės ar kiti žmonės?'
+      paragraph:'Šioje sesijoje laisvę pačiam spręsti ir veikti tau svarbiose srityse įvertinai kaip nepakankamą. Tai gali būti susiję su konkrečiais kontekstais, o ne su visa tavo gyvenimo situacija.',
+      question:'Kur dabar sprendimų laisvės turi pakankamai, o kur jos ribos labiausiai jaučiasi?'
     },
     RECOGNITION_ESTEEM:{
-      paragraph:'Gali būti, kad dalis tavo pastangų šiuo metu lieka per mažai pastebėtos. Ne vien pagyrimo prasme, bet kaip signalas, kad tavo nuomonė, darbas ar indėlis iš tikrųjų turi vietą.',
-      question:'Kur dabar daug investuoji, bet retai gauni aiškų ženklą, kad tavo indėlis buvo pastebėtas ar turėjo vertę?'
+      paragraph:'Šioje sesijoje savo pastangų, nuomonės ar indėlio pastebėjimą ir įvertinimą įvertinai kaip nepakankamą. Tai nėra teiginys, kad esi apskritai nevertinamas; svarbu, kur šis jausmas atsiranda.',
+      question:'Kur jautiesi pastebėtas ir įvertintas, o kur tavo pastangos dažniau lieka be aiškaus atgarsio?'
     },
     CONNECTION_BELONGING:{
-      paragraph:'Šiuo metu gali trūkti ne žmonių aplink, o artimesnio ryšio ir jausmo, kad kažkur iš tikrųjų esi „savas“, o ne tik dalyvauji šalia kitų.',
-      question:'Kur tarp žmonių dabar jautiesi labiau esantis šalia negu iš tikrųjų priklausantis?'
+      paragraph:'Šioje sesijoje artimo ryšio ir priklausymo jausmą įvertinai kaip nepakankamą. Tai nebūtinai susiję su žmonių kiekiu aplink; svarbiau, kur ryšys tau realiai jaučiasi artimas.',
+      question:'Kur tarp žmonių jautiesi iš tikrųjų savas, o kur labiau tik esi šalia?'
     },
     CARE_SUPPORT_PRESENT:{
-      paragraph:'Gali būti, kad šiuo metu daugiau duodi ar laikaisi pats, negu patiri, kad kažkas realiai pastebi ir palaiko tave.',
-      question:'Kurioje gyvenimo vietoje tau būtų lengviausia įvardyti, kokios paramos iš kitų dabar iš tikrųjų reikia?'
+      paragraph:'Šioje sesijoje rūpestį, paramą ir žmogišką dėmesį, kurį gauni iš kitų, įvertinai kaip nepakankamą. Tai kalba apie tavo dabartinį paramos patyrimą, ne apie tai, kiek pats duodi kitiems.',
+      question:'Kur iš kitų gauni pakankamai paramos, o kur jos labiausiai stinga?'
     },
     SAFETY_STABILITY:{
-      paragraph:'Šiuo metu gali trūkti ne absoliutaus saugumo, o pakankamai tvirto pagrindo, kad nereikėtų nuolat laikyti dalies dėmesio pasiruošus nenumatytam pokyčiui.',
-      question:'Kas dabar labiausiai verčia laikyti „atsarginį planą“ galvoje net tada, kai norėtum tiesiog veikti?'
+      paragraph:'Šioje sesijoje saugumo ir stabilumo jausmą įvertinai kaip nepakankamą. Verta tikrinti, ar tai viena konkreti sritis, ar platesnis dabartinės situacijos fonas.',
+      question:'Kur dabar jautiesi pakankamai stabiliai, o kur saugumo ar tvirto pagrindo labiausiai trūksta?'
     },
     CLARITY_PREDICTABILITY:{
-      paragraph:'Gali būti, kad didesnė įtampa kyla ne iš pačių užduočių, o iš neaiškumo: kas bus toliau, ko iš tavęs tikimasi ir nuo ko priklauso rezultatas.',
-      question:'Kurioje srityje vienas aiškus susitarimas ar sprendimas dabar sumažintų daugiausia bereikalingo neapibrėžtumo?'
+      paragraph:'Šioje sesijoje kasdienybės aiškumą ir nuspėjamumą įvertinai kaip nepakankamą. Tai gali būti susiję su konkrečiais neaiškiais susitarimais, lūkesčiais ar tuo, kas bus toliau.',
+      question:'Kur dabar aiškumo pakanka, o kur vienas aiškesnis susitarimas ar sprendimas pakeistų daugiausia?'
     },
     RESTORATION_ENERGY:{
-      paragraph:'Gali būti, kad šiuo metu problema nėra vien „pailsėti daugiau“. Gali trūkti tikro atsistatymo, po kurio grįžta energija, o ne tik trumpam sustoja veikla.',
-      question:'Kada paskutinį kartą po poilsio iš tikrųjų jauteisi atsistatęs, o ne tik mažiau pavargęs?'
+      paragraph:'Šioje sesijoje poilsį ir energiją kasdienybei įvertinai kaip nepakankamus. Tai nepasako, kodėl taip yra; tik pažymi sritį, kurią pats įvertinai žemai.',
+      question:'Kada ir kur dabar pavyksta realiai atsistatyti, o kur poilsio ar energijos vis dar nepakanka?'
     },
     MATERIAL_RESOURCES:{
-      paragraph:'Šiuo metu gali trūkti labai praktiško dalyko: pakankamų resursų, kad galėtum daryti tai, kas realiai reikalinga, be nuolatinio kompensavimo ar improvizavimo.',
-      question:'Kuris konkretus resursas dabar labiausiai riboja tai, ką galėtum padaryti kitaip?'
+      paragraph:'Šioje sesijoje kasdienių resursų tam, ko tau realiai reikia, pakankamumą įvertinai žemai. Tai gali būti labai konkretus praktinis apribojimas, kurį verta įvardyti be platesnių psichologinių išvadų.',
+      question:'Kurių resursų tau pakanka, o kuris konkretus trūkumas dabar labiausiai riboja?'
     }
   },
   en:{
