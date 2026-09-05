@@ -11,7 +11,7 @@ const COPY={
     aLabel:'Pirmas žvilgsnis',aHeading:'Kas iškilo?',ship:'LAIVAS',shipTap:'Detalės',
     noAFocus:'Viena kryptis aiškiai neišsiskyrė',
     bLabel:'Antras atsakymas',bHeading:'Kur dabar mažiausiai pakanka?',map:'ŽEMĖLAPIS',mapTap:'Detalės',
-    noRoute:'Aiškaus maršruto nėra',multiRoute:'Kelios kryptys',
+    noRoute:'Aiškiai nepakankama sritis neišsiskyrė',multiRoute:'Kelios sritys išsiskyrė',
     aDetail:'Pirmo žvilgsnio detalės',bDetail:'Antro atsakymo detalės',
     aDirect3:'Šią kryptį pasirinkai kiekvieną kartą, kai ji pasirodė: 3 iš 3.',
     aDirect2:'Ši kryptis kartojosi 2 iš 3 pasirodymų ir buvo vienintelė taip pasikartojusi.',
@@ -28,10 +28,10 @@ const COPY={
     bDirect:'Tai vienintelė sritis, kurią savo atsakymuose įvertinai žemiausiai pagal dabartinį pakankamumą.',
     bSelected:'Kelios sritys turėjo tą patį žemiausią įvertinimą. Papildomame klausime išskyrei šią.',
     bSimilar:'Kelios sritys turėjo tą patį žemiausią įvertinimą ir papildomame klausime pažymėjai, kad jos dabar panašios.',
-    bHard:'Kelios sritys turėjo tą patį žemiausią įvertinimą, bet papildomame klausime vienos krypties neišskyrei. Todėl maršrutas nebrėžiamas.',
-    bNoLow:'Pagal tavo atsakymus aiški mažesnio pakankamumo kryptis neišsiskyrė. Žemėlapis jos neforsuoja.',
-    bNoNumeric:'Pakankamai aiškių skaitinių atsakymų maršrutui nėra.',
-    routePrefix:'Maršrutas',backToResult:'← Grįžti į rezultatą',close:'Uždaryti',why:'Kaip ši pakankamumo sritis buvo išskirta?',whyMany:'Kaip šios pakankamumo sritys buvo išskirtos?',suffMethodSingle:'Tai rodo, kuri sritis šiuose atsakymuose išsiskyrė kaip mažiausiai pakankama, o ne tai, kiek ji tau svarbi.',suffMethodMany:'Tai rodo santykinį šių sričių pakankamumą dabartiniuose atsakymuose, o ne jų svarbumą.',answerLabel:'Tavo atsakymas',
+    bHard:'Kelios sritys turėjo tą patį žemiausią įvertinimą, bet papildomame klausime vienos srities neišskyrei. Todėl viena sritis nėra paskelbiama pagrindine.',
+    bNoLow:'Pagal tavo atsakymus nė viena sritis neišsiskyrė kaip aiškiai mažiau pakankama. Todėl viena sritis nėra dirbtinai išskiriama.',
+    bNoNumeric:'Pakankamai aiškių skaitinių atsakymų, kad būtų galima išskirti mažesnio pakankamumo sritį, nėra.',
+    routePrefix:'Išskirta sritis',backToResult:'← Grįžti į rezultatą',close:'Uždaryti',why:'Kaip ši pakankamumo sritis buvo išskirta?',whyMany:'Kaip šios pakankamumo sritys buvo išskirtos?',suffMethodSingle:'Tai rodo, kuri sritis šiuose atsakymuose išsiskyrė kaip mažiausiai pakankama, o ne tai, kiek ji tau svarbi.',suffMethodMany:'Tai rodo santykinį šių sričių pakankamumą dabartiniuose atsakymuose, o ne jų svarbumą.',answerLabel:'Tavo atsakymas',
     separate:'Laivas rodo pirmo žvilgsnio fokusą. Žemėlapis remiasi tik tavo pakankamumo atsakymais.'
   },
   en:{
@@ -40,7 +40,7 @@ const COPY={
     aLabel:'First glance',aHeading:'What surfaced?',ship:'SHIP',shipTap:'Details',
     noAFocus:'No single direction clearly stood out',
     bLabel:'Second answer',bHeading:'Where does sufficiency feel lowest now?',map:'MAP',mapTap:'Details',
-    noRoute:'No clear route',multiRoute:'Several directions',
+    noRoute:'No clearly insufficient area stood out',multiRoute:'Several areas stood out',
     aDetail:'First-glance details',bDetail:'Second-answer details',
     aDirect3:'You chose this direction every time it appeared: 3 out of 3.',
     aDirect2:'This direction repeated 2 out of 3 times and was the only direction to repeat that often.',
@@ -57,10 +57,10 @@ const COPY={
     bDirect:'This was the only area you rated lowest for current sufficiency.',
     bSelected:'Several areas had the same lowest rating. In the additional question, you singled out this one.',
     bSimilar:'Several areas had the same lowest rating and in the additional question you said they feel similar right now.',
-    bHard:'Several areas had the same lowest rating, but in the additional question you did not single out one. No route is drawn.',
-    bNoLow:'Your answers did not produce a clear lower-sufficiency direction. The map does not force one.',
-    bNoNumeric:'There were not enough clear numeric answers to draw a route.',
-    routePrefix:'Route',backToResult:'← Back to result',close:'Close',why:'How was this sufficiency area singled out?',whyMany:'How were these sufficiency areas singled out?',suffMethodSingle:'This shows which area stood out as least sufficient in these answers, not how important it is to you.',suffMethodMany:'This shows the relative sufficiency of these areas in your current answers, not their importance.',answerLabel:'Your answer',
+    bHard:'Several areas had the same lowest rating, but in the additional question you did not single out one area. No single area is therefore presented as the main one.',
+    bNoLow:'Your answers did not produce one clearly lower-sufficiency area. No single area is forced as the main one.',
+    bNoNumeric:'There were not enough clear numeric answers to single out a lower-sufficiency area.',
+    routePrefix:'Selected area',backToResult:'← Back to result',close:'Close',why:'How was this sufficiency area singled out?',whyMany:'How were these sufficiency areas singled out?',suffMethodSingle:'This shows which area stood out as least sufficient in these answers, not how important it is to you.',suffMethodMany:'This shows the relative sufficiency of these areas in your current answers, not their importance.',answerLabel:'Your answer',
     separate:'The ship shows the first-glance focus. The map is based only on your sufficiency answers.'
   }
 };
