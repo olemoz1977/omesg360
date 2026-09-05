@@ -268,6 +268,9 @@ function routeExplanation(b,C){
   if(b.source==='B_NO_LOW_ROUTE')return C.bNoLow;
   return C.bNoNumeric;
 }
+let detailCloseCallback=null;
+let detailOnlyHost=false;
+
 function detailRoute(){
   const x=new URLSearchParams(location.search).get('detail');
   return x==='attention'||x==='sufficiency'?x:null;
@@ -278,6 +281,7 @@ function applyDetailRoute(){
   const a=q('attentionDetail'),b=q('suffDetail');
   const aButton=q('shipDetailsButton'),bButton=q('mapDetailsButton');
   const attention=kind==='attention',sufficiency=kind==='sufficiency';
+  result.classList.toggle('detailOnlyHost',detailOnlyHost);
   result.classList.toggle('detailMode',attention);
   a.classList.toggle('hidden',!attention);
   b.classList.toggle('hidden',!sufficiency);
@@ -293,18 +297,31 @@ function openDetailRoute(kind){
   applyDetailRoute();
 }
 function closeDetailRoute(){
-  if(history.state?.priolensDetail){history.back();return}
   const url=new URL(location.href);
   url.searchParams.delete('detail');
   history.replaceState({priolensDetail:null},'',url);
   applyDetailRoute();
+  if(typeof detailCloseCallback==='function'){
+    const cb=detailCloseCallback;
+    detailCloseCallback=null;
+    detailOnlyHost=false;
+    q('result').classList.remove('detailOnlyHost','detailMode');
+    cb();
+  }
+}
+export function openResultDetailV04(kind){
+  if(kind!=='attention'&&kind!=='sufficiency')throw new Error('Unknown result detail kind: '+kind);
+  openDetailRoute(kind);
 }
 function imagesHtml(paths,klass='worldDetailImages'){
   if(!paths.length)return '';
   return '<div class="'+klass+'">'+paths.map(src=>'<img src="'+escapeHtml(src)+'" alt="">').join('')+'</div>';
 }
 
-export function renderResultWorldV04({state,lang='lt',familyLabels,itemLabels,reasonOptions=[],onSelfExplanation}){
+export function renderResultWorldV04({state,lang='lt',familyLabels,itemLabels,reasonOptions=[],onSelfExplanation,detailOnly=false,onDetailClose=null}){
+  detailOnlyHost=Boolean(detailOnly);
+  detailCloseCallback=typeof onDetailClose==='function'?onDetailClose:null;
+  q('result').classList.toggle('detailOnlyHost',detailOnlyHost);
   const C=COPY[lang]||COPY.lt;
   const model=buildResultWorldModel(state);
 
@@ -341,7 +358,16 @@ export function renderResultWorldV04({state,lang='lt',familyLabels,itemLabels,re
   q('attentionBack').onclick=closeDetailRoute;
   q('suffDetailClose').onclick=closeDetailRoute;
   q('suffDetail').onclick=e=>{if(e.target===q('suffDetail'))closeDetailRoute()};
-  window.onpopstate=applyDetailRoute;
+  window.onpopstate=()=>{
+    applyDetailRoute();
+    if(detailOnlyHost&&!detailRoute()&&typeof detailCloseCallback==='function'){
+      const cb=detailCloseCallback;
+      detailCloseCallback=null;
+      detailOnlyHost=false;
+      q('result').classList.remove('detailOnlyHost','detailMode');
+      cb();
+    }
+  };
   window.onkeydown=e=>{if(e.key==='Escape'&&detailRoute()==='sufficiency')closeDetailRoute()};
 
   q('attentionDetailTitle').textContent=C.aDetail;
