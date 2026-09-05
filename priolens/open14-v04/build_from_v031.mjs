@@ -105,7 +105,7 @@ const localDraftClearAnchor="function clearLocalDraft(){try{localStorage.removeI
 const completedResultHelpers=`function saveLocalResult(){if(!state?.completedAt)return;try{localStorage.setItem(RESULT_KEY,JSON.stringify(state))}catch(err){console.warn('local result save failed',err)}}
 function clearLocalResult(){try{localStorage.removeItem(RESULT_KEY)}catch(err){console.warn('local result clear failed',err)}}
 function loadLocalResult(){try{const raw=localStorage.getItem(RESULT_KEY);if(!raw)return null;const x=JSON.parse(raw);if(!x||x.schema!==SESSION_SCHEMA_V04||x.sufficiencySchema!==SUFFICIENCY_SCHEMA_V04||!x.completedAt||!Array.isArray(x.choices)||x.choices.length!==14||!x.sufficiency){clearLocalResult();return null}if(x.language&&x.language!==LANG)return null;if(bank&&x.bankSchema!==bank.schema){clearLocalResult();return null}const completedAt=Date.parse(x.completedAt);if(!Number.isFinite(completedAt)||Date.now()-completedAt>RESULT_MAX_AGE_MS){clearLocalResult();return null}return x}catch(err){console.warn('local result load failed',err);return null}}
-function restoreLastResultIfAvailable(){if(loadLocalDraft())return false;const x=loadLocalResult();if(!x)return false;state=x;ensureV04StateFields();show('result');renderResult();const el=$('saveStatus');if(state.submission?.ok===true){el.textContent=LANG==='en'?'Previous anonymous research session restored.':'Ankstesnė anoniminė tyrimo sesija atkurta.';el.className='note ok'}else if(state.submission?.ok===false){el.textContent=LANG==='en'?'Result restored. The previous automatic save failed.':'Rezultatas atkurtas. Ankstesnis automatinis išsaugojimas nepavyko.';el.className='note bad'}else{el.textContent=LANG==='en'?'Previous result restored on this device.':'Ankstesnis rezultatas atkurtas šiame įrenginyje.';el.className='note'}return true}`;
+function restoreLastResultIfAvailable(){if(loadLocalDraft())return false;const x=loadLocalResult();if(!x)return false;state=x;ensureV04StateFields();showPreResultMatrix();return true}`;
 html=replaceOnce(html,localDraftClearAnchor,localDraftClearAnchor+'\n'+completedResultHelpers,'completed result storage');
 html=replaceOnce(html,"$('start').disabled=false;$('bankCard').classList.add('ready');offerResumeIfAvailable()","$('start').disabled=false;$('bankCard').classList.add('ready');if(!restoreLastResultIfAvailable())offerResumeIfAvailable()",'restore completed result on init');
 html=replaceOnce(html,"state.submission={ok:true,inserted:Boolean(data.inserted),submissionId:data.submissionId||null};clearLocalDraft();","state.submission={ok:true,inserted:Boolean(data.inserted),submissionId:data.submissionId||null};saveLocalResult();clearLocalDraft();",'completed result after submit success');
@@ -212,11 +212,22 @@ const renderResultV04=`let resultModulesPromise=null;
 function loadResultModules(){
   if(!resultModulesPromise){
     resultModulesPromise=Promise.all([
-      import('./result_renderer_v04.mjs?v=scene12'),
-      import('./result_matrix_v04.mjs?v=matrix3')
+      import('./result_renderer_v04.mjs?v=scene13'),
+      import('./result_matrix_v04.mjs?v=matrix4')
     ]).then(([renderer,matrix])=>({renderer,matrix}));
   }
   return resultModulesPromise;
+}
+async function openMatrixDetail(kind){
+  try{
+    show('result');
+    await renderResult(true);
+    const mods=await loadResultModules();
+    mods.renderer.openResultDetailV04(kind);
+  }catch(err){
+    console.error('PrioLens detail open failed',err);
+    show('matrixResult');
+  }
 }
 async function renderMatrix(){
   const mods=await loadResultModules();
@@ -224,8 +235,11 @@ async function renderMatrix(){
     state,
     lang:LANG,
     familyLabels:FAMILY_LABEL,
-    onContinue:()=>{show('result');renderResult()},
-    onPrint:()=>mods.matrix.printResultReportV04()
+    onAttentionDetails:()=>openMatrixDetail('attention'),
+    onSufficiencyDetails:()=>openMatrixDetail('sufficiency'),
+    onPrint:()=>mods.matrix.printResultReportV04(),
+    onRestart:()=>$('restart').click(),
+    backHref:$('back2rasi').href
   });
 }
 async function showPreResultMatrix(){
@@ -236,10 +250,10 @@ async function showPreResultMatrix(){
     console.error('PrioLens matrix load/render failed; falling back to result world',err);
     state.matrixRenderError={message:String(err),at:new Date().toISOString()};
     show('result');
-    await renderResult();
+    await renderResult(false);
   }
 }
-async function renderResult(){
+async function renderResult(detailOnly=false){
   try{
     const mods=await loadResultModules();
     mods.renderer.renderResultWorldV04({
@@ -248,6 +262,8 @@ async function renderResult(){
       familyLabels:FAMILY_LABEL,
       itemLabels:ITEM_RESULT_LABEL,
       reasonOptions:SELF_REASON_OPTIONS[LANG],
+      detailOnly,
+      onDetailClose:()=>show('matrixResult'),
       onSelfExplanation:async ({familyId,reasonCode,statusEl})=>{
         state.selfExplanation={schema:'2rasi.priolens.self-explanation-v0.1',familyId,scenario:'ATTENTION_DETAIL_V04',reasonCode,answeredAt:new Date().toISOString()};
         saveLocalResult();
@@ -294,6 +310,6 @@ write('bank.json',JSON.stringify(bankV04,null,2)+'\n');
 for(const name of ['p3_open14_planner_v02.mjs','open14_no_repeat_assigner_v03.mjs','stimulus-bank.html'])write(name,read(name));
 if(!fs.existsSync(path.join(outDir,'result_world_v04.mjs'))||!fs.existsSync(path.join(outDir,'result_renderer_v04.mjs'))||!fs.existsSync(path.join(outDir,'result_matrix_v04.mjs')))throw new Error('v0.4 result modules missing');
 if(!html.includes('id="needsMapStage"')||!html.includes('class="resultScene"'))throw new Error('unified result scene missing');
-if(!html.includes('id="matrixResult"')||!html.includes('id="matrixCanvasMount"')||!html.includes('id="matrixContinue"')||!html.includes('id="matrixPdf"'))throw new Error('pre-result matrix scene missing');
+if(!html.includes('id="matrixResult"')||!html.includes('id="matrixCanvasMount"')||!html.includes('id="matrixAttentionDetails"')||!html.includes('id="matrixSufficiencyDetails"')||!html.includes('id="matrixPdf"')||!html.includes('id="matrixRestart"')||!html.includes('id="matrixBack2rasi"'))throw new Error('matrix result/action scene missing');
 if(!html.includes('id="shipDetailsButton"')||!html.includes('id="mapDetailsButton"')||!html.includes('id="attentionBack"')||!html.includes('id="suffDetailClose"'))throw new Error('result detail navigation missing');
 console.log('open14-v04 build: PASS');
