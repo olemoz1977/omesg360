@@ -87,14 +87,15 @@ try{
   await page.waitForFunction(()=>!new URLSearchParams(location.search).has('detail'));
 
   await page.click('#matrixSufficiencyDetails');
-  await page.waitForSelector('#result.active');
+  await page.waitForSelector('#matrixResult.active');
   await page.waitForFunction(()=>new URLSearchParams(location.search).get('detail')==='sufficiency');
-  if(!(await page.locator('#result').evaluate(el=>el.classList.contains('detailOnlyHost')))) throw new Error('live sufficiency detail not hosted in detail-only mode');
-  if(!(await page.locator('.resultScene').evaluate(el=>getComputedStyle(el).display==='none'))) throw new Error('ship/map scene visible behind live sufficiency detail');
+  if(!(await page.locator('#suffDetail').evaluate(el=>el.parentElement?.id==='matrixResult'))) throw new Error('live B detail must be mounted over the matrix');
   if(await page.locator('#suffDetail').evaluate(el=>el.classList.contains('hidden'))) throw new Error('live sufficiency detail hidden');
+  if(!(await page.locator('#matrixCanvasMount').evaluate(el=>getComputedStyle(el).display!=='none'))) throw new Error('live matrix must remain visible behind B detail');
   const suffText=(await page.locator('#suffDetail').textContent())||'';
   if(/\bB\+\b|Channel B/.test(suffText)) throw new Error('technical B terminology leaked into live detail');
   if(suffText.includes('Kaip ši pakankamumo sritis buvo išskirta?')) throw new Error('no-route detail should not imply that one area was singled out');
+  if(!(await page.locator('#suffResearch .researchParallel').count())) throw new Error('live B research parallels missing');
   await page.click('#suffDetailClose');
   await page.waitForSelector('#matrixResult.active');
   await page.waitForFunction(()=>!new URLSearchParams(location.search).has('detail'));
