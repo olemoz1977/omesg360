@@ -127,8 +127,9 @@ try{
   if(await page.locator('#matrixCanvasMount .matrixDataCell').count()!==144)throw new Error('matrix must contain 12x12 data cells');
   if(await page.locator('#matrixCanvasMount .matrixTopStatement').count()!==12||await page.locator('#matrixCanvasMount .matrixLeftStatement').count()!==12)throw new Error('matrix axes must contain all 12 Channel-B statements');
   const careStatement='Jaučiu, kad iš kitų sulaukiu pakankamai rūpesčio, paramos ir žmogiško dėmesio.';
-  const matrixText=(await page.locator('#matrixResult').textContent())||'';
-  if(matrixText.split(careStatement).length-1!==2)throw new Error('exact received-support statement must appear on both matrix axes');
+  const topCare=((await page.locator('#matrixCanvasMount .matrixTopStatement').nth(7).textContent())||'');
+  const leftCare=((await page.locator('#matrixCanvasMount .matrixLeftStatement').nth(7).textContent())||'');
+  if(!topCare.includes(careStatement)||!leftCare.includes(careStatement))throw new Error('exact received-support statement must appear on both matrix axes');
   if(await page.locator('#matrixCanvasMount .matrixFamily.focus2,#matrixCanvasMount .matrixFamily.focus3').count()!==1)throw new Error('matrix must color exactly one resolved first-glance direction');
   if(await page.locator('#matrixCanvasMount .backgroundMarker').count()!==0)throw new Error('LEAST must not render in primary matrix');
   if(await page.locator('#matrixCanvasMount .suffMarker').count()!==0)throw new Error('B result must use orange bands/outline, not a point marker');
