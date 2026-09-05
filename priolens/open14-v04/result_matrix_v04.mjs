@@ -205,7 +205,7 @@ export const RESULT_MATRIX_HTML=[
 '    <div class="actions matrixActions"><button id="matrixContinue" class="primary" type="button">Toliau į rezultatą</button><button id="matrixPdf" class="secondary" type="button">Išsaugoti PDF</button></div>',
 '  </section>',
 ''
-].join('\\n');
+].join('\n');
 
 export const RESULT_MATRIX_CSS=[
 '.matrixResult{--mx-ink:#071b2e;--mx-soft:#315166;--mx-mist:#eef6f8;--mx-mist2:#dfeef2;--mx-water:#7bb8c8;--mx-white:#fbfdfe;--mx-line:rgba(7,27,46,.14);width:min(1180px,calc(100vw - 24px));max-width:none;margin-left:50%;transform:translateX(-50%);padding:28px 0 48px;color:var(--mx-ink)}',
