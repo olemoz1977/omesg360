@@ -302,6 +302,7 @@ function v04_validate_sufficiency(array $body, bool $isProgress): void {
 function validate_v04_payload(array $body, bool $isProgress): void {
     v04_assert(($body['schema'] ?? null)==='2rasi.priolens.open14.rank-session-v0.4', 'v0.4 validator called with wrong schema');
     v04_assert(($body['bankSchema'] ?? null)==='2rasi.priolens.open14.bank-v0.3.1', 'v0.4 requires bank-v0.3.1');
+    v04_assert(($body['sufficiencySchema'] ?? null)==='2rasi.priolens.sufficiency-v0.3', 'v0.4 requires sufficiency-v0.3 received-support wording');
     foreach (['attentionResolution','attentionClarifier','attentionFocus','sufficiencyResolution','sufficiencyClarifier','sufficiencyRoute'] as $field) {
         v04_assert(array_key_exists($field,$body), 'v0.4 missing adaptive field: '.$field);
     }
