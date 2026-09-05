@@ -1,5 +1,5 @@
 import { buildResultWorldModel } from './result_world_v04.mjs?v=scene4';
-import { buildHumanInterpretationV04 } from './result_interpretation_v04.mjs?v=interpret1';
+import { buildHumanInterpretationV04 } from './result_interpretation_v04.mjs?v=interpret2';
 
 export const RESULT_MATRIX_SCHEMA_V04='2rasi.priolens.open14.result-matrix-v0.6';
 
@@ -159,6 +159,8 @@ export function buildResultMatrixModelV04(state,lang='lt'){
     groups:GROUPS[lang]||GROUPS.lt,
     focusFamilyId:focusFamilyId,
     focusRawMostCount:focusRawMostCount,
+    attentionSource:world.attention.source,
+    attentionClarifierNoClear:world.attention.clarifierNoClear,
     repeatedMost:repeatedMost,
     repeatCountByFamily:repeatCountByFamily,
     backgroundFamilyIds:backgroundFamilyIds,
