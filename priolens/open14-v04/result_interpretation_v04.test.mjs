@@ -101,4 +101,11 @@ const careRole=buildHumanInterpretationV04({
 assert.ok(body(careRole).includes('vien iš jų negalima spręsti'));
 assert.ok(body(careRole).includes('rūpinimasis kitu'));
 
+
+const safetyRest=buildHumanInterpretationV04({
+  model:{repeatedMost:[{familyId:'REST',count:2}],backgroundFamilyIds:[],sufficiencyItemIds:['SAFETY_STABILITY'],focusFamilyId:'REST',attentionClarifierNoClear:false},
+  lang:'lt',familyLabels
+});
+assert.ok(body(safetyRest).includes('nereikia sujungti per jėgą'));
+
 console.log('result_interpretation_v04: PASS');
