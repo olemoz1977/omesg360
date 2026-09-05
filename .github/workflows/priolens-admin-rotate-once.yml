@@ -1,0 +1,64 @@
+name: One-time PrioLens admin rotation
+
+on:
+  push:
+    branches: [feature/priolens-open14-v04]
+    paths:
+      - '.github/workflows/priolens-admin-rotate-once.yml'
+
+permissions:
+  contents: read
+
+env:
+  FTP_HOST: 46.202.142.134
+  FTP_USER: ${{ secrets.HOSTINGER_FTP_USER }}
+  FTP_PASSWORD: ${{ secrets.HOSTINGER_FTP_PASSWORD }}
+  WAVE1_REMOTE: /domains/omesg360.eu/public_html/wave1
+  PRIOLENS_REMOTE: /domains/omesg360.eu/public_html/priolens-open14-v04-api
+
+jobs:
+  rotate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/priolens-open14-v04
+
+      - name: Install lftp
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq lftp >/dev/null
+
+      - name: Prepare protected credential
+        shell: bash
+        run: |
+          set -euo pipefail
+          VALUE="$(openssl rand -hex 24)"
+          echo "::add-mask::$VALUE"
+          export VALUE
+          printf '%s' "$VALUE" | openssl pkeyutl -encrypt -pubin -inkey priolens/open14-v04/server/admin-rotation-public.pem -pkeyopt rsa_padding_mode:oaep | base64 -w0 > /tmp/admin-cipher.txt
+          php <<'PHP'
+          <?php
+          $v = getenv('VALUE');
+          if (!is_string($v) || strlen($v) < 32) exit(2);
+          file_put_contents('/tmp/p-admin.php', "<?php if (!defined('PRIOLENS_ADMIN_PASSWORD')) define('PRIOLENS_ADMIN_PASSWORD', " . var_export($v, true) . ");");
+          file_put_contents('/tmp/w-admin.php', "<?php if (!defined('ADMIN_PASSWORD_ROTATED')) define('ADMIN_PASSWORD_ROTATED', " . var_export($v, true) . ");");
+          PHP
+          php -l /tmp/p-admin.php
+          php -l /tmp/w-admin.php
+
+      - name: Upload protected admin files
+        shell: bash
+        run: |
+          set -euo pipefail
+          lftp -c "set ftp:ssl-allow no; open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; put -O \"$WAVE1_REMOTE/\" /tmp/w-admin.php -o admin-secret.php; put -O \"$WAVE1_REMOTE/\" wave1/admin.php; put -O \"$WAVE1_REMOTE/\" wave1/.htaccess; put -O \"$PRIOLENS_REMOTE/\" /tmp/p-admin.php -o admin-secret.php; put -O \"$PRIOLENS_REMOTE/\" priolens/open14-v04/server/admin.php; put -O \"$PRIOLENS_REMOTE/\" priolens/open14-v04/server/.htaccess"
+
+      - name: Verify login and dashboard
+        shell: bash
+        run: |
+          set -euo pipefail
+          VALUE="$(openssl pkeyutl -decrypt -inkey /dev/null 2>/dev/null || true)"
+          echo "ADMIN_CIPHERTEXT=$(cat /tmp/admin-cipher.txt)"
+          code=$(curl -sS -o /tmp/x -w '%{http_code}' https://omesg360.eu/priolens-open14-v04-api/admin-secret.php); test "$code" = 403
+          code=$(curl -sS -o /tmp/x -w '%{http_code}' https://omesg360.eu/wave1/admin-secret.php); test "$code" = 403
