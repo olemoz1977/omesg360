@@ -213,7 +213,7 @@ function loadResultModules(){
   if(!resultModulesPromise){
     resultModulesPromise=Promise.all([
       import('./result_renderer_v04.mjs?v=scene13'),
-      import('./result_matrix_v04.mjs?v=matrix5')
+      import('./result_matrix_v04.mjs?v=matrix6')
     ]).then(([renderer,matrix])=>({renderer,matrix}));
   }
   return resultModulesPromise;
