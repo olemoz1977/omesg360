@@ -123,7 +123,18 @@ try{
   await page.waitForSelector('#bplus.active');
   await page.locator('#bPlusMount .clarifyNeed').first().click();
 
+  await page.waitForSelector('#matrixResult.active');
+  if(await page.locator('#matrixCanvasMount .matrixDataCell').count()!==144)throw new Error('pre-result matrix must contain 12x12 data cells');
+  if(await page.locator('#matrixCanvasMount .matrixTopStatement').count()!==12||await page.locator('#matrixCanvasMount .matrixLeftStatement').count()!==12)throw new Error('matrix axes must contain all 12 Channel-B statements');
+  const careStatement='Jaučiu, kad iš kitų sulaukiu pakankamai rūpesčio, paramos ir žmogiško dėmesio.';
+  const matrixText=(await page.locator('#matrixResult').textContent())||'';
+  if(matrixText.split(careStatement).length-1!==2)throw new Error('exact received-support statement must appear on both matrix axes');
+  if(await page.locator('#matrixCanvasMount .focusMarker').count()!==1)throw new Error('matrix must render one resolved first-glance focus marker');
+  if(await page.locator('#matrixCanvasMount .suffMarker').count()!==1)throw new Error('single B+ endpoint must render one matrix sufficiency marker');
+  if(typeof await page.locator('#matrixPdf').evaluate(el=>typeof el.onclick)!=='string')throw new Error('matrix PDF action missing');
+  await page.click('#matrixContinue');
   await page.waitForSelector('#result.active');
+  if(await page.locator('#resultPdf').count()!==1)throw new Error('result PDF action missing');
   await page.waitForFunction(()=>document.querySelector('#saveStatus')&&!document.querySelector('#saveStatus').textContent.includes('tikrinamas'),null,{timeout:10000});
   if(!finalPayloads.length)throw new Error('final POST not attempted');
   const final=finalPayloads.at(-1);
