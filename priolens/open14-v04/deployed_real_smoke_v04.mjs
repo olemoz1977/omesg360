@@ -49,7 +49,9 @@ try{
   await page.waitForSelector('#matrixResult.active');
   if(await page.locator('#matrixCanvasMount .matrixDataCell').count()!==144) throw new Error('live pre-result matrix must contain 12x12 data cells');
   if(await page.locator('#matrixCanvasMount .matrixTopStatement').count()!==12||await page.locator('#matrixCanvasMount .matrixLeftStatement').count()!==12) throw new Error('live matrix axes must contain all 12 statements');
-  if(await page.locator('#matrixCanvasMount .focusMarker').count()!==1) throw new Error('live matrix must render one first-glance focus marker');
+  const liveMatrixSnapshot=JSON.parse(await page.evaluate(k=>localStorage.getItem(k),RESULT));
+  const expectedFocusMarkers=liveMatrixSnapshot?.attentionFocus?.familyId?1:0;
+  if(await page.locator('#matrixCanvasMount .focusMarker').count()!==expectedFocusMarkers) throw new Error('live matrix focus-marker count does not match resolved Channel-A focus');
   if(await page.locator('#matrixCanvasMount .suffMarker').count()!==0) throw new Error('all-5 Channel B must not render a matrix sufficiency marker');
   if(await page.locator('#matrixPdf').count()!==1) throw new Error('live matrix PDF action missing');
   await page.click('#matrixContinue');
