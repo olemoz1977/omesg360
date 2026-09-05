@@ -59,6 +59,9 @@ try{
   if(await page.locator('#matrixCanvasMount .lowOwnCell').count()!==0) throw new Error('all-5 Channel B must not render orange own-diagonal cells');
   if(await page.locator('#matrixCanvasMount .routeCell').count()!==0) throw new Error('all-5 Channel B must not render an insufficiency route cell');
   if(await page.locator('#matrixBackgroundLabel').count()!==0) throw new Error('LEAST summary card must be absent in live matrix');
+  const interpretationText=((await page.locator('#matrixInterpretation').textContent())||'').trim();
+  if(!interpretationText.includes('Viena galima interpretacija')) throw new Error('live human interpretation title missing');
+  if(!interpretationText.includes('Ne diagnozė')) throw new Error('live interpretation diagnostic boundary missing');
   for(const id of ['#matrixAttentionDetails','#matrixSufficiencyDetails','#matrixPdf','#matrixRestart','#matrixBack2rasi']){
     if(await page.locator(id).count()!==1) throw new Error('live matrix action missing: '+id);
   }
