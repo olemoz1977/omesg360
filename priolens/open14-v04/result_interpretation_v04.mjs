@@ -101,7 +101,7 @@ const B_ANCHORS={
     }
   },
   en:{
-    MEANING_PURPOSE:{paragraph:'Right now, simply getting things done may not feel sufficient. It may matter more that what you do feels meaningful and worth your time and effort.',question:'Where are you currently spending the most time on something that works but does not necessarily feel meaningful?'},
+    MEANING_PURPOSE:{paragraph:'In this session, you rated the meaningfulness of what you are currently doing as insufficient. That rating is limited to this session and should not be generalized to all of your activities.',question:'Where do you clearly feel meaning right now, and where does it feel weaker?'},
     CONTRIBUTION:{paragraph:'It may not be enough simply to “do your job”. It may matter that what you do carries weight for someone and contributes to something larger than yourself.',question:'Is there a part of your life where you do a lot but no longer feel that your contribution really matters to anyone?'},
     LEARNING_GROWTH:{paragraph:'What may be missing is not information in general, but a sense of moving forward: discovering, learning and expanding what you can understand or do.',question:'Where do you currently feel you are repeating what you already know instead of growing?'},
     CAPABILITY_MASTERY:{paragraph:'You may currently lack room to use what you really know how to do and to see your abilities continue to grow rather than being used only routinely.',question:'Where do you currently have more capability than you are able to use?'},
