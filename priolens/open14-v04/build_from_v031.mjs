@@ -48,20 +48,45 @@ html=html.slice(0,resultStart)+resultHtml+html.slice(resultEnd+'  </section>\n'.
 
 
 const importAnchor="import { assignOpen14ThreeExemplars, listThreeExemplarBankProblems } from './open14_no_repeat_assigner_v03.mjs';";
-html=replaceOnce(html,importAnchor,importAnchor+"\nimport { SESSION_SCHEMA_V04, DRAFT_KEY_BASE_V04, resolveAttentionFromChoices, applyAttentionClarifier, resolveSufficiencyRoute, applySufficiencyClarifier } from './adaptive_clarifiers_v04.mjs';\nimport { renderResultWorldV04 } from './result_renderer_v04.mjs?v=scene11';",'assigner import');
+html=replaceOnce(html,importAnchor,importAnchor+"\nimport { SESSION_SCHEMA_V04, DRAFT_KEY_BASE_V04, SUFFICIENCY_SCHEMA_V04, resolveAttentionFromChoices, applyAttentionClarifier, resolveSufficiencyRoute, applySufficiencyClarifier } from './adaptive_clarifiers_v04.mjs';\nimport { renderResultWorldV04 } from './result_renderer_v04.mjs?v=scene11';",'assigner import');
 html=replaceOnce(html,"const DRAFT_KEY_BASE='priolens.open14.v031.rank.draft';","const DRAFT_KEY_BASE=DRAFT_KEY_BASE_V04;",'draft key');
-html=replaceOnce(html,'const DRAFT_KEY=`${DRAFT_KEY_BASE}.${LANG}`;','const DRAFT_KEY=`${DRAFT_KEY_BASE}.${LANG}`;\nconst RESULT_KEY_BASE=\'priolens.open14.v04.last-result\';\nconst RESULT_KEY=`${RESULT_KEY_BASE}.${LANG}`;\nconst RESULT_MAX_AGE_MS=90*24*60*60*1000;','completed result key');
+html=replaceOnce(html,'const DRAFT_KEY=`${DRAFT_KEY_BASE}.${LANG}`;','const DRAFT_KEY=`${DRAFT_KEY_BASE}.${LANG}`;\nconst RESULT_KEY_BASE=\'priolens.open14.v041.last-result\';\nconst RESULT_KEY=`${RESULT_KEY_BASE}.${LANG}`;\nconst RESULT_MAX_AGE_MS=90*24*60*60*1000;','completed result key');
 html=html.replaceAll("'2rasi.priolens.open14.rank-session-v0.3'","SESSION_SCHEMA_V04");
 html=replaceOnce(html,"const API_PATH='/priolens-open14-v03-api/api.php';","const API_PATH='/priolens-open14-v04-api/api.php';",'v0.4 API path');
 html=replaceOnce(html,"const PROGRESS_PATH='/priolens-open14-v03-api/progress.php';","const PROGRESS_PATH='/priolens-open14-v04-api/progress.php';",'v0.4 progress path');
 
+html=replaceOnce(html,"['CARE_SUPPORT_PRESENT','Mano gyvenime pakanka rūpesčio, paramos ir žmogiško dėmesio.']","['CARE_SUPPORT_PRESENT','Jaučiu, kad iš kitų sulaukiu pakankamai rūpesčio, paramos ir žmogiško dėmesio.']",'received-support LT item');
+html=replaceOnce(html,"['CARE_SUPPORT_PRESENT','There is enough care, support and human attention in my life.']","['CARE_SUPPORT_PRESENT','I feel that I receive enough care, support and human attention from others.']",'received-support EN item');
+html=replaceOnce(html,"RESOURCE:'Resursai'","RESOURCE:'Resursų prieinamumas'",'RESOURCE LT family label');
+html=replaceOnce(html,"RESOURCE:'Resources'","RESOURCE:'Resource availability'",'RESOURCE EN family label');
+html=replaceOnce(html,"ORDER:'Tvarka / aiškumas'","ORDER:'Tvarka / struktūra'",'ORDER LT family label');
+html=replaceOnce(html,"ORDER:'Order / clarity'","ORDER:'Order / structure'",'ORDER EN family label');
+html=replaceOnce(html,"CARE:'Rūpinimasis kitu'","CARE:'Rūpestis / pagalba'",'CARE LT family label');
+html=replaceOnce(html,"CARE:'Caring for others'","CARE:'Care / helping'",'CARE EN family label');
+html=replaceOnce(html,"CONTROL:'Kontrolė / valdymas'","CONTROL:'Tiesioginis valdymas'",'CONTROL LT family label');
+html=replaceOnce(html,"CONTROL:'Control'","CONTROL:'Direct control'",'CONTROL EN family label');
+html=replaceOnce(html,"RESOURCE:'Gali būti susiję su tuo, kas tau atrodo vertinga, prieinama ir verta panaudoti.'","RESOURCE:'Gali būti susiję su prieinamų ir panaudojamų resursų pastebėjimu.'",'RESOURCE LT meaning');
+html=replaceOnce(html,"RESOURCE:'This may relate to what feels valuable, available and worth making use of.'","RESOURCE:'This may relate to noticing resources that are available and usable.'",'RESOURCE EN meaning');
+html=replaceOnce(html,"ORDER:'Gali būti susiję su aiškumu, tvarka ir noru žinoti, kur kas yra ir ko tikėtis.'","ORDER:'Gali būti susiję su matoma tvarka, struktūra ir aiškiu daiktų išdėstymu.'",'ORDER LT meaning');
+html=replaceOnce(html,"ORDER:'This may relate to clarity, order and wanting to know where things stand and what to expect.'","ORDER:'This may relate to visible order, structure and clearly arranged objects.'",'ORDER EN meaning');
+html=replaceOnce(html,"CARE:'Gali būti susiję su polinkiu pastebėti kitą ir pasirūpinti juo.'","CARE:'Gali būti susiję su tuo, kad dėmesį patraukė rūpesčio ar pagalbos situacija. Vien iš pasirinkimo neaišku, su kuria role ją siejai.'",'CARE LT meaning');
+html=replaceOnce(html,"CARE:'This may relate to noticing another person and wanting to care for them.'","CARE:'This may relate to a care or helping situation catching your attention. The choice alone does not show which role you identified with.'",'CARE EN meaning');
+html=replaceOnce(html,"CONTROL:'Gali būti susiję su noru pačiam veikti situaciją, valdyti ar keisti tai, kas vyksta.'","CONTROL:'Gali būti susiję su situacijomis, kuriose veiksmas tiesiogiai pakeičia sistemos ar aplinkos būseną.'",'CONTROL LT meaning');
+html=replaceOnce(html,"CONTROL:'This may relate to wanting to influence a situation directly, steer it or change what is happening.'","CONTROL:'This may relate to situations where an action directly changes the state of a system or environment.'",'CONTROL EN meaning');
+html=replaceOnce(html,"OPPORTUNITY:'Gali būti susiję su matoma galimybe, kurią norisi pastebėti ir išnaudoti.'","OPPORTUNITY:'Gali būti susiję su matoma ir prieinama galimybe veikti ar kažkuo pasinaudoti.'",'OPPORTUNITY LT meaning');
+html=replaceOnce(html,"OPPORTUNITY:'This may relate to noticing an opening or possibility that feels worth using.'","OPPORTUNITY:'This may relate to noticing an available possibility for action or use.'",'OPPORTUNITY EN meaning');
+html=replaceOnce(html,"CARE_SUPPORT_PRESENT:'rūpesčio, paramos ir žmogiško dėmesio'","CARE_SUPPORT_PRESENT:'rūpesčio, paramos ir žmogiško dėmesio iš kitų'",'CARE LT result label');
+html=replaceOnce(html,"CARE_SUPPORT_PRESENT:'care, support and human attention'","CARE_SUPPORT_PRESENT:'care, support and human attention from others'",'CARE EN result label');
+html=replaceOnce(html,"CARE_SUPPORT_PRESENT:'rūpestį, paramą ir žmogišką dėmesį'","CARE_SUPPORT_PRESENT:'tai, ar iš kitų sulauki pakankamai rūpesčio, paramos ir žmogiško dėmesio'",'CARE LT about text');
+html=replaceOnce(html,"CARE_SUPPORT_PRESENT:'care, support and human attention'","CARE_SUPPORT_PRESENT:'whether you receive enough care, support and human attention from others'",'CARE EN about text');
+
 const stateNeedle="sufficiencySchema:'2rasi.priolens.sufficiency-v0.2',sufficiency:{},selfExplanation:null,pendingMost:null,completedAt:null";
-const stateReplacement="sufficiencySchema:'2rasi.priolens.sufficiency-v0.2',sufficiency:{},attentionResolution:null,attentionClarifier:null,attentionFocus:null,sufficiencyResolution:null,sufficiencyClarifier:null,sufficiencyRoute:null,selfExplanation:null,pendingMost:null,systemSmoke:new URLSearchParams(location.search).get('systemSmoke')==='1',completedAt:null";
+const stateReplacement="sufficiencySchema:SUFFICIENCY_SCHEMA_V04,constructDefinitionVersion:bank.constructDefinitionVersion||null,sufficiency:{},attentionResolution:null,attentionClarifier:null,attentionFocus:null,sufficiencyResolution:null,sufficiencyClarifier:null,sufficiencyRoute:null,selfExplanation:null,pendingMost:null,systemSmoke:new URLSearchParams(location.search).get('systemSmoke')==='1',completedAt:null";
 html=replaceOnce(html,stateNeedle,stateReplacement,'startSession state fields');
 const localDraftClearAnchor="function clearLocalDraft(){try{localStorage.removeItem(DRAFT_KEY);if(LANG==='lt')localStorage.removeItem(DRAFT_KEY_BASE)}catch(err){console.warn('local draft clear failed',err)}}";
 const completedResultHelpers=`function saveLocalResult(){if(!state?.completedAt)return;try{localStorage.setItem(RESULT_KEY,JSON.stringify(state))}catch(err){console.warn('local result save failed',err)}}
 function clearLocalResult(){try{localStorage.removeItem(RESULT_KEY)}catch(err){console.warn('local result clear failed',err)}}
-function loadLocalResult(){try{const raw=localStorage.getItem(RESULT_KEY);if(!raw)return null;const x=JSON.parse(raw);if(!x||x.schema!==SESSION_SCHEMA_V04||!x.completedAt||!Array.isArray(x.choices)||x.choices.length!==14||!x.sufficiency){clearLocalResult();return null}if(x.language&&x.language!==LANG)return null;if(bank&&x.bankSchema!==bank.schema){clearLocalResult();return null}const completedAt=Date.parse(x.completedAt);if(!Number.isFinite(completedAt)||Date.now()-completedAt>RESULT_MAX_AGE_MS){clearLocalResult();return null}return x}catch(err){console.warn('local result load failed',err);return null}}
+function loadLocalResult(){try{const raw=localStorage.getItem(RESULT_KEY);if(!raw)return null;const x=JSON.parse(raw);if(!x||x.schema!==SESSION_SCHEMA_V04||x.sufficiencySchema!==SUFFICIENCY_SCHEMA_V04||!x.completedAt||!Array.isArray(x.choices)||x.choices.length!==14||!x.sufficiency){clearLocalResult();return null}if(x.language&&x.language!==LANG)return null;if(bank&&x.bankSchema!==bank.schema){clearLocalResult();return null}const completedAt=Date.parse(x.completedAt);if(!Number.isFinite(completedAt)||Date.now()-completedAt>RESULT_MAX_AGE_MS){clearLocalResult();return null}return x}catch(err){console.warn('local result load failed',err);return null}}
 function restoreLastResultIfAvailable(){if(loadLocalDraft())return false;const x=loadLocalResult();if(!x)return false;state=x;ensureV04StateFields();show('result');renderResult();const el=$('saveStatus');if(state.submission?.ok===true){el.textContent=LANG==='en'?'Previous anonymous research session restored.':'Ankstesnė anoniminė tyrimo sesija atkurta.';el.className='note ok'}else if(state.submission?.ok===false){el.textContent=LANG==='en'?'Result restored. The previous automatic save failed.':'Rezultatas atkurtas. Ankstesnis automatinis išsaugojimas nepavyko.';el.className='note bad'}else{el.textContent=LANG==='en'?'Previous result restored on this device.':'Ankstesnis rezultatas atkurtas šiame įrenginyje.';el.className='note'}return true}`;
 html=replaceOnce(html,localDraftClearAnchor,localDraftClearAnchor+'\n'+completedResultHelpers,'completed result storage');
 html=replaceOnce(html,"$('start').disabled=false;$('bankCard').classList.add('ready');offerResumeIfAvailable()","$('start').disabled=false;$('bankCard').classList.add('ready');if(!restoreLastResultIfAvailable())offerResumeIfAvailable()",'restore completed result on init');
@@ -194,7 +219,21 @@ html=html.slice(0,oldRenderStart)+renderResultV04+html.slice(oldRenderEnd);
 
 
 write('index.html',html);
-for(const name of ['bank.json','p3_open14_planner_v02.mjs','open14_no_repeat_assigner_v03.mjs','stimulus-bank.html'])write(name,read(name));
+const bankV04=JSON.parse(read('bank.json'));
+bankV04.constructDefinitionVersion='open14-construct-audit-2026-09-05';
+bankV04.constructAuditStatus='FORMATIVE_VISUAL_DIRECTIONS_NOT_VALIDATED_NEEDS';
+Object.assign(bankV04.families.RESOURCE,{display:'Resource access / availability',constructStatus:'PLAUSIBLE_RESOURCE_ACCESS_NOT_REWARD'});
+Object.assign(bankV04.families.ORDER,{display:'Order / structure',constructStatus:'RELATED_TO_CLARITY_PREDICTABILITY_NOT_DIRECT'});
+Object.assign(bankV04.families.CONNECTION,{constructStatus:'RELATEDNESS_VISUAL_SUBFAMILY'});
+Object.assign(bankV04.families.BELONGING,{constructStatus:'RELATEDNESS_VISUAL_SUBFAMILY'});
+Object.assign(bankV04.families.CARE,{display:'Care / helping interaction',constructStatus:'NO_DIRECT_B_MATCH_ROLE_AMBIGUITY'});
+Object.assign(bankV04.families.AUTONOMY,{constructStatus:'AUTONOMY_VOLITION_DIRECT_B_MATCH'});
+Object.assign(bankV04.families.CONTROL,{display:'Direct control / action-effect agency',constructStatus:'NO_DIRECT_B_MATCH_SENSE_OF_AGENCY'});
+Object.assign(bankV04.families.EXPLORATION,{constructStatus:'CURIOSITY_INFORMATION_SEEKING_VISUAL_SUBFAMILY'});
+Object.assign(bankV04.families.KNOWLEDGE,{constructStatus:'CURIOSITY_INFORMATION_SEEKING_VISUAL_SUBFAMILY'});
+Object.assign(bankV04.families.OPPORTUNITY,{display:'Opportunity / affordance',constructStatus:'FORMATIVE_AFFORDANCE_NO_DIRECT_B_MATCH'});
+write('bank.json',JSON.stringify(bankV04,null,2)+'\n');
+for(const name of ['p3_open14_planner_v02.mjs','open14_no_repeat_assigner_v03.mjs','stimulus-bank.html'])write(name,read(name));
 if(!fs.existsSync(path.join(outDir,'result_world_v04.mjs'))||!fs.existsSync(path.join(outDir,'result_renderer_v04.mjs')))throw new Error('v0.4 result modules missing');
 if(!html.includes('id="needsMapStage"')||!html.includes('class="resultScene"'))throw new Error('unified result scene missing');
 if(!html.includes('id="shipDetailsButton"')||!html.includes('id="mapDetailsButton"')||!html.includes('id="attentionBack"')||!html.includes('id="suffDetailClose"'))throw new Error('result detail navigation missing');
