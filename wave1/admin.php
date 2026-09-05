@@ -8,8 +8,11 @@ header('Referrer-Policy: no-referrer');
 header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 
 require_once 'config.php';
+$rotatedSecret = __DIR__ . '/admin-secret.php';
+if (is_file($rotatedSecret)) require_once $rotatedSecret;
+$adminPassword = defined('ADMIN_PASSWORD_ROTATED') ? (string)ADMIN_PASSWORD_ROTATED : (defined('ADMIN_PASSWORD') ? (string)ADMIN_PASSWORD : '');
 
-if (!defined('ADMIN_PASSWORD') || ADMIN_PASSWORD === '' || ADMIN_PASSWORD === 'CHANGE_ME') {
+if ($adminPassword === '' || $adminPassword === 'CHANGE_ME') {
     http_response_code(503);
     exit('Admin password is not configured.');
 }
@@ -23,7 +26,7 @@ if (isset($_GET['logout'])) {
 
 $loginError = null;
 if (isset($_POST['admin_password'])) {
-    if (hash_equals((string)ADMIN_PASSWORD, (string)$_POST['admin_password'])) {
+    if (hash_equals($adminPassword, (string)$_POST['admin_password'])) {
         $_SESSION['wave1_admin'] = true;
         header('Location: admin.php');
         exit;
