@@ -108,4 +108,12 @@ const safetyRest=buildHumanInterpretationV04({
 });
 assert.ok(body(safetyRest).includes('nereikia sujungti per jėgą'));
 
+
+const related=buildHumanInterpretationV04({
+  model:{repeatedMost:[{familyId:'ORDER',count:3}],backgroundFamilyIds:[],sufficiencyItemIds:['CLARITY_PREDICTABILITY'],focusFamilyId:'ORDER',attentionClarifierNoClear:false},
+  lang:'lt',familyLabels
+});
+assert.ok(body(related).includes('Galimas ryšys čia silpnesnis'));
+assert.ok(body(related).includes('Tvarka / struktūra'));
+
 console.log('result_interpretation_v04: PASS');
