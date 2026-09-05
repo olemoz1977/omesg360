@@ -133,7 +133,8 @@ try{
   if(await page.locator('#matrixCanvasMount .matrixFamily.focus2,#matrixCanvasMount .matrixFamily.focus3').count()!==1)throw new Error('matrix must color exactly one resolved first-glance direction');
   if(await page.locator('#matrixCanvasMount .backgroundMarker').count()!==0)throw new Error('LEAST must not render in primary matrix');
   if(await page.locator('#matrixCanvasMount .suffMarker').count()!==0)throw new Error('B result must use orange bands/outline, not a point marker');
-  if(await page.locator('#matrixCanvasMount .lowBandCell').count()===0)throw new Error('ratings of 3 or lower must create orange matrix bands');
+  if(await page.locator('#matrixCanvasMount .lowBandCell').count()!==0)throw new Error('orange must not spill across other need cells');
+  if(await page.locator('#matrixCanvasMount .lowOwnCell').count()===0)throw new Error('ratings of 3 or lower must mark their own diagonal cells');
   if(await page.locator('#matrixCanvasMount .routeCell').count()!==1)throw new Error('single B+ endpoint must have one strong orange route cell');
   if(await page.locator('#matrixBackgroundLabel').count()!==0)throw new Error('LEAST summary card must be removed from matrix');
   const suffSummary=((await page.locator('#matrixSuffValue').textContent())||'').trim();
@@ -149,10 +150,10 @@ try{
   if(await page.locator('.matrixPrintAppendix').evaluate(el=>getComputedStyle(el).display)==='none')throw new Error('PDF appendix must be visible in print media');
   if(await page.locator('.matrixTopStatement span').first().evaluate(el=>getComputedStyle(el).display)!=='none')throw new Error('PDF matrix must use numbered compact axes instead of repeating full statements');
   if(await page.locator('.matrixDetailActions').evaluate(el=>getComputedStyle(el).display)!=='none')throw new Error('interactive detail actions leaked into PDF');
-  const pdfBytes=await page.pdf({format:'A4',landscape:true,printBackground:true,preferCSSPageSize:true});
+  const pdfBytes=await page.pdf({format:'A4',landscape:false,printBackground:true,preferCSSPageSize:true});
   const pdfRaw=pdfBytes.toString('latin1');
   const pdfPages=(pdfRaw.match(/\/Type\s*\/Page\b/g)||[]).length;
-  if(pdfPages!==2)throw new Error('result PDF must be exactly 2 intentional pages, got '+pdfPages);
+  if(pdfPages!==1)throw new Error('result PDF must fit on exactly 1 A4 portrait page, got '+pdfPages);
   if(pdfBytes.length<20000)throw new Error('result PDF unexpectedly small');
   await page.emulateMedia({media:'screen'});
   await page.evaluate(()=>document.body.classList.remove('priolensPrintMatrix'));
