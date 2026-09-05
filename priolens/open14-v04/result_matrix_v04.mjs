@@ -1,6 +1,6 @@
 import { buildResultWorldModel } from './result_world_v04.mjs?v=scene4';
 
-export const RESULT_MATRIX_SCHEMA_V04='2rasi.priolens.open14.result-matrix-v0.5';
+export const RESULT_MATRIX_SCHEMA_V04='2rasi.priolens.open14.result-matrix-v0.6';
 
 const B_ITEMS={
   lt:[
@@ -88,7 +88,7 @@ const COPY={
     eyebrow:'Rezultato apžvalga',
     title:'Du žvilgsniai vienoje matricoje.',
     lead:'Matrica padeda sugretinti pirmo žvilgsnio kryptį ir tavo dabartinio pakankamumo atsakymus. Ji rodo santykį, ne priežastį ir ne srities svarbumą.',
-    focus:'Pirmo žvilgsnio kryptis',noFocus:'Viena kryptis aiškiai neišsiskyrė',
+    focus:'Pirmo žvilgsnio pasikartojimai',noFocus:'Nė viena kryptis nepasikartojo 2 ar 3 kartus',
     suff:'Šiuo metu nepakanka',noSuff:'Aiški nepakankamumo sritis neišsiskyrė',
     matrixTitle:'Santykių matrica',
     matrixHint:'Slink į šoną. Abiejose ašyse matai tuos pačius teiginius, į kuriuos atsakei.',
@@ -100,13 +100,13 @@ const COPY={
     routeLegend:'Išskirta nepakankamumo sritis',
     printStatementsTitle:'Tavo vertinti teiginiai',
     printLeastLabel:'Pirmo žvilgsnio detalė · nuosekliai liko antrame plane',
-    relationNote:'Oranžinė spalva žymi tik tas konkrečias sritis, kurias įvertinai 3 ar mažiau: jų ašis ir tos pačios srities diagonalę. Ji neperžengia į kitų sričių langelius. Žalia rodo, kiek kartų pasikartojo išskirta pirmo žvilgsnio kryptis. Abi perspektyvos lieka atskiros.'
+    relationNote:'Oranžinė spalva žymi tik tas konkrečias sritis, kurias įvertinai 3 ar mažiau: jų ašis ir tos pačios srities diagonalę. Ji neperžengia į kitų sričių langelius. Žalia rodo visas vizualines kryptis, kurios tavo pirmuose pasirinkimuose pasikartojo 3/3 arba 2/3. Detalėse nagrinėjama viena išskirta kryptis, jei ją reikėjo papildomai patikslinti. Abi perspektyvos lieka atskiros.'
   },
   en:{
     eyebrow:'Result overview',
     title:'Two perspectives in one matrix.',
     lead:'The matrix helps place your first-glance direction beside your current sufficiency answers. It shows relationships, not causes or importance.',
-    focus:'First-glance direction',noFocus:'No single direction clearly stood out',
+    focus:'First-glance repetitions',noFocus:'No direction repeated 2 or 3 times',
     suff:'Currently insufficient',noSuff:'No clear insufficiency area stood out',
     matrixTitle:'Relationship matrix',
     matrixHint:'Scroll sideways. Both axes use the same statements you answered.',
@@ -118,7 +118,7 @@ const COPY={
     routeLegend:'Selected insufficiency area',
     printStatementsTitle:'Statements you rated',
     printLeastLabel:'First-glance detail · consistently stayed in the background',
-    relationNote:'Orange marks only the specific areas you rated 3 or lower: their axes and the same-area diagonal cell. It does not spill into other areas. Green shows how often the selected first-glance direction repeated. The two perspectives remain separate.'
+    relationNote:'Orange marks only the specific areas you rated 3 or lower: their axes and the same-area diagonal cell. It does not spill into other areas. Green shows every visual direction that repeated 3/3 or 2/3 in your first choices. Details examine one singled-out direction when an extra clarification was needed. The two perspectives remain separate.'
   }
 };
 function esc(x){return String(x??'').replace(/[&<>"']/g,function(ch){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]})}
@@ -128,11 +128,24 @@ function least3Families(state){
   for(const c of state&&state.choices||[]){const f=c.leastChoice&&c.leastChoice.familyId;if(f)counts[f]=(counts[f]||0)+1}
   return Object.entries(counts).filter(function(x){return x[1]===3}).map(function(x){return x[0]}).sort()
 }
+function repeatedMostFamilies(state){
+  const counts={};
+  for(const c of state&&state.choices||[]){
+    const f=c.choice&&c.choice.familyId;
+    if(f)counts[f]=(counts[f]||0)+1;
+  }
+  return Object.entries(counts)
+    .filter(function(x){return x[1]===2||x[1]===3})
+    .map(function(x){return{familyId:x[0],count:x[1]}})
+    .sort(function(a,b){return b.count-a.count||a.familyId.localeCompare(b.familyId)});
+}
 function itemIndex(items,id){const i=items.findIndex(function(x){return x.id===id});return i<0?null:i+1}
 export function buildResultMatrixModelV04(state,lang='lt'){
   const items=itemsFor(lang),world=buildResultWorldModel(state);
   const focusFamilyId=world.attention.hasFocus?world.attention.familyId:null;
   const focusRawMostCount=world.attention.hasFocus?world.attention.rawMostCount:null;
+  const repeatedMost=repeatedMostFamilies(state);
+  const repeatCountByFamily=Object.fromEntries(repeatedMost.map(function(x){return[x.familyId,x.count]}));
   const backgroundFamilyIds=least3Families(state);
   const sufficiencyItemIds=world.sufficiency.itemIds.slice();
   const lowSufficiencyItemIds=items.filter(function(item){
@@ -145,6 +158,8 @@ export function buildResultMatrixModelV04(state,lang='lt'){
     groups:GROUPS[lang]||GROUPS.lt,
     focusFamilyId:focusFamilyId,
     focusRawMostCount:focusRawMostCount,
+    repeatedMost:repeatedMost,
+    repeatCountByFamily:repeatCountByFamily,
     backgroundFamilyIds:backgroundFamilyIds,
     sufficiencyItemIds:sufficiencyItemIds,
     lowSufficiencyItemIds:lowSufficiencyItemIds
@@ -152,11 +167,6 @@ export function buildResultMatrixModelV04(state,lang='lt'){
 }
 function summaryValue(kind,model,lang,familyLabels){
   const C=COPY[lang]||COPY.lt;
-  if(kind==='FOCUS'){
-    if(!model.focusFamilyId)return C.noFocus;
-    const label=familyLabels[model.focusFamilyId]||model.focusFamilyId;
-    return label+(model.focusRawMostCount?' · '+model.focusRawMostCount+'/3':'');
-  }
   if(kind==='SUFFICIENCY'){
     if(!model.sufficiencyItemIds.length)return C.noSuff;
     const labels=DEFICIENCY_LABELS[lang]||DEFICIENCY_LABELS.lt;
@@ -164,10 +174,20 @@ function summaryValue(kind,model,lang,familyLabels){
   }
   return ''
 }
+function repeatedMostHtml(model,lang,familyLabels){
+  const C=COPY[lang]||COPY.lt;
+  if(!model.repeatedMost.length)return esc(C.noFocus);
+  return '<div class="matrixRepeatList">'+model.repeatedMost.map(function(x){
+    const cls=x.count===3?' focus3':' focus2';
+    return '<span class="matrixRepeatBadge'+cls+'">'+esc(familyLabels[x.familyId]||x.familyId)+' · '+x.count+'/3</span>'
+  }).join('')+'</div>'
+}
 function chipHtml(familyId,familyLabels,model){
   const p=A_PLACEMENTS[familyId],label=familyLabels[familyId]||familyId;
   let cls=p.type==='DIRECT'?'matrixFamily direct':p.type==='RELATED'?'matrixFamily related':'matrixFamily bridge';
-  if(model.focusFamilyId===familyId)cls+=model.focusRawMostCount===3?' focus3':model.focusRawMostCount===2?' focus2':'';
+  const repeat=model.repeatCountByFamily[familyId];
+  if(repeat===3)cls+=' focus3';
+  else if(repeat===2)cls+=' focus2';
   return '<span class="'+cls+'" data-family-id="'+esc(familyId)+'">'+esc(label)+'</span>'
 }
 function buildMatrixCanvas(model,lang,familyLabels){
@@ -202,7 +222,7 @@ function buildMatrixCanvas(model,lang,familyLabels){
   return html+'</div>'
 }
 function bridgeNote(model,lang,familyLabels){
-  const C=COPY[lang]||COPY.lt,ids=[model.focusFamilyId].filter(function(id){return A_PLACEMENTS[id]&&A_PLACEMENTS[id].type==='BRIDGE'});
+  const C=COPY[lang]||COPY.lt,ids=model.repeatedMost.map(function(x){return x.familyId}).filter(function(id){return A_PLACEMENTS[id]&&A_PLACEMENTS[id].type==='BRIDGE'});
   const seen=Array.from(new Set(ids));if(!seen.length)return '';
   return '<div class="matrixBridgeNote">'+seen.map(function(id){const p=A_PLACEMENTS[id],name=familyLabels[id]||id;return '<div><strong>'+esc(name)+'</strong> · '+esc(C.bridge)+' · '+esc((p.related||[]).join(', '))+'</div>'}).join('')+'</div>'
 }
@@ -221,17 +241,13 @@ export function renderResultMatrixV04(args){
   const state=args.state,lang=args.lang||'lt',familyLabels=args.familyLabels||{},onAttentionDetails=args.onAttentionDetails,onSufficiencyDetails=args.onSufficiencyDetails,onPrint=args.onPrint,onRestart=args.onRestart,backHref=args.backHref||'https://2rasi.lt/#experiments',C=COPY[lang]||COPY.lt,model=buildResultMatrixModelV04(state,lang);
   const q=function(id){const el=document.getElementById(id);if(!el)throw new Error('PrioLens matrix DOM missing #'+id);return el};
   q('matrixEyebrow').textContent=C.eyebrow;q('matrixTitle').textContent=C.title;q('matrixLead').textContent=C.lead;
-  q('matrixFocusLabel').textContent=C.focus;q('matrixFocusValue').textContent=summaryValue('FOCUS',model,lang,familyLabels);
+  q('matrixFocusLabel').textContent=C.focus;q('matrixFocusValue').innerHTML=repeatedMostHtml(model,lang,familyLabels);
   q('matrixSuffLabel').textContent=C.suff;q('matrixSuffValue').textContent=summaryValue('SUFFICIENCY',model,lang,familyLabels);
-  const focusCard=q('matrixFocusCard');
-  focusCard.classList.toggle('focus3',model.focusRawMostCount===3);
-  focusCard.classList.toggle('focus2',model.focusRawMostCount===2);
   q('matrixSectionTitle').textContent=C.matrixTitle;q('matrixHint').textContent=C.matrixHint;
   q('matrixLegendFocus3').textContent=C.focus3Legend;q('matrixLegendFocus2').textContent=C.focus2Legend;q('matrixLegendLow').textContent=C.lowLegend;q('matrixLegendRoute').textContent=C.routeLegend;q('matrixRelationNote').textContent=C.relationNote;
   q('matrixCanvasMount').innerHTML=buildMatrixCanvas(model,lang,familyLabels);q('matrixBridgeNote').innerHTML=bridgeNote(model,lang,familyLabels);
   q('matrixPrintTitle').textContent=C.printStatementsTitle;
   q('matrixPrintStatementList').innerHTML=model.items.map(function(item,i){return '<div class="matrixPrintStatement"><b>'+(i+1)+'</b><span>'+esc(item.statement)+'</span></div>'}).join('');
-  q('matrixPrintLeast').innerHTML=model.backgroundFamilyIds.length?'<strong>'+esc(C.printLeastLabel)+':</strong> '+esc(model.backgroundFamilyIds.map(function(id){return familyLabels[id]||id}).join(' · ')):'';
   q('matrixAttentionDetails').textContent=C.attentionDetails;q('matrixSufficiencyDetails').textContent=C.sufficiencyDetails;
   q('matrixPdf').textContent=C.pdf;q('matrixRestart').textContent=C.restart;q('matrixBack2rasi').textContent=C.back;q('matrixBack2rasi').href=backHref;
   q('matrixAttentionDetails').onclick=function(){if(typeof onAttentionDetails==='function')onAttentionDetails()};
@@ -242,10 +258,26 @@ export function renderResultMatrixV04(args){
   return model
 }
 export function printResultReportV04(){
-  document.body.classList.add('priolensPrintMatrix');
-  const cleanup=function(){document.body.classList.remove('priolensPrintMatrix')},prev=window.onafterprint;
+  const html=document.documentElement,body=document.body,wrap=document.querySelector('.wrap');
+  const snapshot=[
+    [html,'height',html.style.height],[html,'minHeight',html.style.minHeight],[html,'background',html.style.background],[html,'overflow',html.style.overflow],
+    [body,'height',body.style.height],[body,'minHeight',body.style.minHeight],[body,'background',body.style.background],[body,'overflow',body.style.overflow],
+    [wrap,'height',wrap&&wrap.style.height],[wrap,'minHeight',wrap&&wrap.style.minHeight],[wrap,'margin',wrap&&wrap.style.margin]
+  ];
+  html.style.height='auto';html.style.minHeight='0';html.style.background='#fff';html.style.overflow='visible';
+  body.style.height='auto';body.style.minHeight='0';body.style.background='#fff';body.style.overflow='visible';
+  if(wrap){wrap.style.height='auto';wrap.style.minHeight='0';wrap.style.margin='0'}
+  body.classList.add('priolensPrintMatrix');
+  let cleaned=false;
+  const cleanup=function(){
+    if(cleaned)return;cleaned=true;
+    body.classList.remove('priolensPrintMatrix');
+    for(const row of snapshot){const el=row[0];if(el)el.style[row[1]]=row[2]||''}
+  };
+  const prev=window.onafterprint;
   window.onafterprint=function(){cleanup();window.onafterprint=prev||null;if(typeof prev==='function')prev()};
-  setTimeout(function(){try{window.print()}catch(err){cleanup();throw err}},40)
+  setTimeout(function(){try{window.print()}catch(err){cleanup();throw err}},60);
+  setTimeout(cleanup,120000)
 }
 
 export const RESULT_MATRIX_HTML=[
@@ -267,7 +299,7 @@ export const RESULT_MATRIX_HTML=[
 '      <span><i class="matrixLegendSwatch routeSwatch"></i><span id="matrixLegendRoute"></span></span>',
 '    </div>',
 '    <p id="matrixRelationNote" class="matrixRelationNote"></p>',
-'    <section class="matrixPrintAppendix"><h2 id="matrixPrintTitle"></h2><div id="matrixPrintStatementList" class="matrixPrintStatementList"></div><p id="matrixPrintLeast" class="matrixPrintLeast"></p></section>',
+'    <section class="matrixPrintAppendix"><h2 id="matrixPrintTitle"></h2><div id="matrixPrintStatementList" class="matrixPrintStatementList"></div></section>',
 '    <div class="matrixDetailActions"><button id="matrixAttentionDetails" class="primary" type="button">Pirmo žvilgsnio detalės</button><button id="matrixSufficiencyDetails" class="secondary" type="button">Antro atsakymo detalės</button></div>',
 '    <div class="actions matrixActions"><button id="matrixPdf" class="secondary" type="button">Išsaugoti PDF</button><button id="matrixRestart" class="secondary" type="button">Atlikti dar kartą</button><a id="matrixBack2rasi" class="secondary actionLink" href="https://2rasi.lt/#experiments">Grįžti į 2rasi</a></div>',
 '  </section>',
@@ -278,8 +310,8 @@ export const RESULT_MATRIX_CSS=[
 '.matrixResult{--mx-ink:#071b2e;--mx-soft:#315166;--mx-mist:#eef6f8;--mx-mist2:#dfeef2;--mx-white:#fbfdfe;--mx-line:rgba(7,27,46,.14);--mx-focus3:#2f7654;--mx-focus3-soft:#dceee4;--mx-focus2:#82b89b;--mx-focus2-soft:#edf7f1;--mx-low:#d9791f;--mx-low-soft:#fff0dc;--mx-low-strong:#c86716;width:min(1180px,calc(100vw - 24px));max-width:none;margin-left:50%;transform:translateX(-50%);padding:28px 0 48px;color:var(--mx-ink)}',
 '.matrixEyebrow{margin:0 0 8px;font-size:11px;font-weight:850;letter-spacing:.15em;text-transform:uppercase;color:var(--mx-soft)}',
 '.matrixResult h1{font-size:clamp(34px,7vw,58px);line-height:.98;letter-spacing:-.05em;margin:0 0 14px;max-width:900px}.matrixLead{max-width:820px;font-size:16px;line-height:1.55;color:var(--mx-soft);margin:0 0 22px}',
-'.matrixSummary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:18px 0 26px}.matrixSummaryCard{display:flex;align-items:flex-start;min-height:92px;padding:14px 16px;border:1px solid var(--mx-line);border-radius:17px;background:var(--mx-white)}.matrixSummaryCard.focus3{border:2px solid var(--mx-focus3);background:var(--mx-focus3-soft)}.matrixSummaryCard.focus2{border:2px solid var(--mx-focus2);background:var(--mx-focus2-soft)}.matrixSummaryCard.suffSummary{border:2px solid var(--mx-low);background:var(--mx-low-soft)}',
-'.matrixSummaryLabel{font-size:11px;font-weight:850;letter-spacing:.08em;text-transform:uppercase;color:var(--mx-soft);margin-bottom:5px}.matrixSummaryValue{font-size:15px;line-height:1.35;font-weight:760;color:var(--mx-ink)}',
+'.matrixSummary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:18px 0 26px}.matrixSummaryCard{display:flex;align-items:flex-start;min-height:92px;padding:14px 16px;border:1px solid var(--mx-line);border-radius:17px;background:var(--mx-white)}.matrixSummaryCard.suffSummary{border:2px solid var(--mx-low);background:var(--mx-low-soft)}',
+'.matrixSummaryLabel{font-size:11px;font-weight:850;letter-spacing:.08em;text-transform:uppercase;color:var(--mx-soft);margin-bottom:5px}.matrixSummaryValue{font-size:15px;line-height:1.35;font-weight:760;color:var(--mx-ink)}.matrixRepeatList{display:flex;flex-wrap:wrap;gap:6px}.matrixRepeatBadge{display:inline-flex;align-items:center;padding:6px 9px;border-radius:999px;font-size:13px;line-height:1.1;font-weight:820}.matrixRepeatBadge.focus3{background:var(--mx-focus3);color:#fff}.matrixRepeatBadge.focus2{background:#b9dec8;color:#173f2e}',
 '.matrixHeadRow{display:flex;align-items:end;justify-content:space-between;gap:18px;margin:4px 0 8px}.matrixHeadRow h2{font-size:24px;margin:0}.matrixHeadRow p{margin:0;max-width:520px;text-align:right;font-size:12px;line-height:1.4;color:var(--mx-soft)}',
 '.matrixViewport{width:100%;overflow-x:auto;overflow-y:visible;border:1px solid var(--mx-line);border-radius:18px;background:var(--mx-white);box-shadow:0 10px 30px rgba(7,27,46,.035);scrollbar-color:var(--mx-focus2) transparent}',
 '.matrixCanvas{display:grid;grid-template-columns:230px repeat(12,88px);grid-template-rows:46px 148px repeat(12,62px);width:max-content;min-width:1286px;position:relative;background:var(--mx-white)}',
@@ -287,11 +319,11 @@ export const RESULT_MATRIX_CSS=[
 '.matrixTopStatement,.matrixLeftStatement{position:relative;background:var(--mx-white);border-right:1px solid var(--mx-line);border-bottom:1px solid var(--mx-line);color:var(--mx-soft)}.matrixTopStatement.lowAxis,.matrixLeftStatement.lowAxis{background:var(--mx-low-soft)}.matrixTopStatement.routeAxis,.matrixLeftStatement.routeAxis{box-shadow:inset 0 0 0 2px var(--mx-low-strong)}',
 '.matrixTopStatement{padding:8px 6px;font-size:9px;line-height:1.22;overflow:hidden}.matrixTopStatement b{display:block;color:var(--mx-ink);font-size:11px;margin-bottom:4px}.matrixTopStatement span{display:block}.matrixLeftStatement{position:sticky;left:0;z-index:8;display:grid;grid-template-columns:28px minmax(0,1fr);gap:4px;align-items:center;padding:7px 8px 7px 6px;font-size:10px;line-height:1.25;box-shadow:5px 0 12px rgba(7,27,46,.025)}.matrixLeftStatement.routeAxis{box-shadow:inset 0 0 0 2px var(--mx-low-strong),5px 0 12px rgba(7,27,46,.025)}.matrixLeftStatement b{font-size:12px;text-align:center;color:var(--mx-ink)}',
 '.matrixDataCell{position:relative;border-right:1px solid var(--mx-line);border-bottom:1px solid var(--mx-line);background:#fff;min-width:0;overflow:visible}.matrixDataCell.mirrorCell{background:rgba(238,246,248,.38)}.matrixDataCell.diagonalCell{background:rgba(223,238,242,.5)}.matrixDataCell.bridgeCell{background:rgba(238,246,248,.72)}.matrixDataCell.lowOwnCell{background:var(--mx-low-soft)!important}.matrixDataCell.routeCell{box-shadow:inset 0 0 0 2px var(--mx-low-strong)}',
-'.matrixFamilyStack{position:absolute;inset:4px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;z-index:2}.matrixFamily{display:block;max-width:80px;padding:4px 5px;border-radius:8px;font-size:8px;line-height:1.05;text-align:center;font-weight:800;color:var(--mx-ink);background:rgba(223,238,242,.9);border:1px solid transparent}.matrixFamily.related{background:rgba(251,253,254,.9);border-color:rgba(7,27,46,.36)}.matrixFamily.bridge{background:rgba(238,246,248,.72);border:1px dashed rgba(7,27,46,.42)}.matrixFamily.focus3{background:var(--mx-focus3-soft)!important;border:2px solid var(--mx-focus3)!important;color:#173f2e}.matrixFamily.focus2{background:var(--mx-focus2-soft)!important;border:2px solid var(--mx-focus2)!important;color:#285e46}',
+'.matrixFamilyStack{position:absolute;inset:4px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;z-index:2}.matrixFamily{display:block;max-width:80px;padding:4px 5px;border-radius:8px;font-size:8px;line-height:1.05;text-align:center;font-weight:800;color:var(--mx-ink);background:rgba(223,238,242,.9);border:1px solid transparent}.matrixFamily.related{background:rgba(251,253,254,.9);border-color:rgba(7,27,46,.36)}.matrixFamily.bridge{background:rgba(238,246,248,.72);border:1px dashed rgba(7,27,46,.42)}.matrixFamily.focus3{background:var(--mx-focus3)!important;border:2px solid var(--mx-focus3)!important;color:#fff!important}.matrixFamily.focus2{background:#b9dec8!important;border:2px solid var(--mx-focus2)!important;color:#173f2e!important}',
 '.matrixNoDirect{position:absolute;inset:5px;display:flex;align-items:center;justify-content:center;text-align:center;font-size:7.5px;line-height:1.15;color:rgba(49,81,102,.68);border:1px dashed rgba(7,27,46,.2);border-radius:8px;padding:3px}',
 '.matrixBridgeNote{margin:9px 2px 0;font-size:11px;line-height:1.45;color:var(--mx-soft)}.matrixBridgeNote>div+div{margin-top:3px}',
-'.matrixLegend{display:flex;gap:14px;flex-wrap:wrap;margin:16px 0 8px;padding:12px 14px;border:1px solid var(--mx-line);border-radius:14px;background:rgba(238,246,248,.55);font-size:11px;color:var(--mx-soft)}.matrixLegend>span{display:inline-flex;align-items:center;gap:6px}.matrixLegendSwatch{display:inline-block;width:18px;height:12px;border-radius:4px;box-sizing:border-box}.focus3Swatch{background:var(--mx-focus3-soft);border:2px solid var(--mx-focus3)}.focus2Swatch{background:var(--mx-focus2-soft);border:2px solid var(--mx-focus2)}.lowSwatch{background:var(--mx-low-soft);border:1px solid rgba(217,121,31,.5)}.routeSwatch{background:var(--mx-low-soft);border:2px solid var(--mx-low-strong)}',
+'.matrixLegend{display:flex;gap:14px;flex-wrap:wrap;margin:16px 0 8px;padding:12px 14px;border:1px solid var(--mx-line);border-radius:14px;background:rgba(238,246,248,.55);font-size:11px;color:var(--mx-soft)}.matrixLegend>span{display:inline-flex;align-items:center;gap:6px}.matrixLegendSwatch{display:inline-block;width:18px;height:12px;border-radius:4px;box-sizing:border-box}.focus3Swatch{background:var(--mx-focus3);border:2px solid var(--mx-focus3)}.focus2Swatch{background:#b9dec8;border:2px solid var(--mx-focus2)}.lowSwatch{background:var(--mx-low-soft);border:1px solid rgba(217,121,31,.5)}.routeSwatch{background:var(--mx-low-soft);border:2px solid var(--mx-low-strong)}',
 '.matrixRelationNote{font-size:12px;line-height:1.5;color:var(--mx-soft);max-width:900px;margin:8px 2px 0}.matrixPrintAppendix{display:none}.matrixDetailActions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:20px}.matrixDetailActions button{min-height:48px}.matrixDetailActions .primary{background:var(--mx-ink);color:#fff}.matrixActions{margin-top:10px}.matrixActions .secondary{border-color:var(--mx-line);color:var(--mx-ink);background:var(--mx-white)}',
 '@media(max-width:760px){.matrixResult{padding-top:18px}.matrixSummary{grid-template-columns:1fr;gap:7px}.matrixSummaryCard{min-height:0;padding:12px}.matrixHeadRow{display:block}.matrixHeadRow p{text-align:left;margin-top:5px}.matrixCanvas{grid-template-columns:190px repeat(12,86px);grid-template-rows:44px 142px repeat(12,58px);min-width:1222px}.matrixLeftStatement{font-size:9.5px}.matrixTopStatement{font-size:8.5px}.matrixLegend{display:grid;gap:8px}.matrixDetailActions,.matrixActions{display:grid;grid-template-columns:1fr}.matrixDetailActions button,.matrixActions button,.matrixActions .actionLink{width:100%}}',
-'@media print{@page{size:210mm 297mm;margin:6mm}*{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}body.priolensPrintMatrix{background:#fff!important}body.priolensPrintMatrix .top,body.priolensPrintMatrix .screen:not(#matrixResult){display:none!important}body.priolensPrintMatrix .wrap{width:100%!important;max-width:none!important;padding:0!important}body.priolensPrintMatrix #matrixResult{display:block!important;width:100%!important;margin:0!important;transform:none!important;padding:0!important}body.priolensPrintMatrix .matrixResult h1{font-size:21px!important;margin-bottom:4px!important}body.priolensPrintMatrix .matrixEyebrow{font-size:7px!important;margin-bottom:2px!important}body.priolensPrintMatrix .matrixLead{font-size:7.5px!important;line-height:1.3!important;margin-bottom:5px!important}body.priolensPrintMatrix .matrixSummary{grid-template-columns:repeat(2,1fr)!important;gap:5px!important;margin:5px 0 6px!important}body.priolensPrintMatrix .matrixSummaryCard{padding:5px 7px!important;min-height:36px!important;border-radius:8px!important}.matrixSummaryLabel{font-size:5.8px!important;margin-bottom:2px!important}.matrixSummaryValue{font-size:7.2px!important;line-height:1.2!important}body.priolensPrintMatrix .matrixHeadRow{margin:1px 0 3px!important}.matrixHeadRow h2{font-size:11px!important}.matrixHeadRow p{display:none!important}body.priolensPrintMatrix .matrixViewport{overflow:visible!important;border:0!important;box-shadow:none!important}body.priolensPrintMatrix .matrixCanvas{width:100%!important;min-width:0!important;grid-template-columns:26px repeat(12,minmax(0,1fr))!important;grid-template-rows:19px 15px repeat(12,25px)!important}body.priolensPrintMatrix .matrixGroupHeader{font-size:5.3px!important;line-height:1.05!important;padding:1px!important}body.priolensPrintMatrix .matrixTopStatement{font-size:5px!important;padding:1px!important;display:flex!important;align-items:center!important;justify-content:center!important}body.priolensPrintMatrix .matrixTopStatement span{display:none!important}body.priolensPrintMatrix .matrixTopStatement b{font-size:6px!important;margin:0!important}body.priolensPrintMatrix .matrixLeftStatement{position:relative!important;left:auto!important;display:flex!important;align-items:center!important;justify-content:center!important;padding:1px!important;box-shadow:none!important}body.priolensPrintMatrix .matrixLeftStatement span{display:none!important}body.priolensPrintMatrix .matrixLeftStatement b{font-size:6px!important}body.priolensPrintMatrix .matrixFamily{font-size:4.4px!important;line-height:1!important;padding:1px 2px!important;max-width:52px!important;border-width:1px!important}.matrixNoDirect{font-size:4px!important;line-height:1!important;padding:1px!important}.matrixFamilyStack{inset:1px!important;gap:1px!important}body.priolensPrintMatrix .matrixBridgeNote{font-size:5.7px!important;margin-top:2px!important;line-height:1.2!important}body.priolensPrintMatrix .matrixLegend{font-size:5.7px!important;margin:3px 0 2px!important;padding:3px 4px!important;gap:6px!important;border-radius:6px!important}body.priolensPrintMatrix .matrixLegendSwatch{width:8px!important;height:6px!important;border-width:1px!important}body.priolensPrintMatrix .matrixRelationNote{font-size:5.6px!important;line-height:1.2!important;margin:2px 0 0!important}body.priolensPrintMatrix .matrixDetailActions,body.priolensPrintMatrix .matrixActions{display:none!important}body.priolensPrintMatrix .matrixPrintAppendix{display:block!important;margin-top:4px!important;padding-top:4px!important;border-top:1px solid var(--mx-line)!important;break-before:auto!important;page-break-before:auto!important}body.priolensPrintMatrix .matrixPrintAppendix h2{font-size:10px!important;margin:0 0 4px!important}body.priolensPrintMatrix .matrixPrintStatementList{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;column-gap:6mm!important;row-gap:2px!important}body.priolensPrintMatrix .matrixPrintStatement{display:grid!important;grid-template-columns:5mm 1fr!important;gap:1mm!important;break-inside:avoid!important;font-size:5.7px!important;line-height:1.2!important;color:var(--mx-ink)!important}body.priolensPrintMatrix .matrixPrintStatement b{font-size:6px!important}body.priolensPrintMatrix .matrixPrintLeast{margin:4px 0 0!important;padding-top:3px!important;border-top:1px solid var(--mx-line)!important;font-size:5.6px!important;line-height:1.2!important;color:var(--mx-soft)!important}}'
+'@media print{@page{size:210mm 297mm;margin:6mm}*{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}html{height:auto!important;min-height:0!important;background:#fff!important;overflow:visible!important}body.priolensPrintMatrix{height:auto!important;min-height:0!important;background:#fff!important;overflow:visible!important}body.priolensPrintMatrix .top,body.priolensPrintMatrix .screen:not(#matrixResult){display:none!important}body.priolensPrintMatrix .wrap{width:100%!important;max-width:none!important;height:auto!important;min-height:0!important;padding:0!important;margin:0!important;overflow:visible!important}body.priolensPrintMatrix #matrixResult{display:block!important;position:static!important;width:100%!important;height:auto!important;min-height:0!important;margin:0!important;transform:none!important;padding:0!important;overflow:visible!important;break-after:avoid!important;page-break-after:avoid!important}body.priolensPrintMatrix .matrixResult h1{font-size:21px!important;margin-bottom:4px!important}body.priolensPrintMatrix .matrixEyebrow{font-size:7px!important;margin-bottom:2px!important}body.priolensPrintMatrix .matrixLead{font-size:7.5px!important;line-height:1.3!important;margin-bottom:5px!important}body.priolensPrintMatrix .matrixSummary{grid-template-columns:repeat(2,1fr)!important;gap:5px!important;margin:5px 0 6px!important}body.priolensPrintMatrix .matrixSummaryCard{padding:5px 7px!important;min-height:36px!important;border-radius:8px!important}.matrixSummaryLabel{font-size:5.8px!important;margin-bottom:2px!important}.matrixSummaryValue{font-size:7.2px!important;line-height:1.2!important}body.priolensPrintMatrix .matrixHeadRow{margin:1px 0 3px!important}.matrixHeadRow h2{font-size:11px!important}.matrixHeadRow p{display:none!important}body.priolensPrintMatrix .matrixViewport{overflow:visible!important;border:0!important;box-shadow:none!important}body.priolensPrintMatrix .matrixCanvas{width:100%!important;min-width:0!important;grid-template-columns:26px repeat(12,minmax(0,1fr))!important;grid-template-rows:19px 15px repeat(12,25px)!important}body.priolensPrintMatrix .matrixGroupHeader{font-size:5.3px!important;line-height:1.05!important;padding:1px!important}body.priolensPrintMatrix .matrixTopStatement{font-size:5px!important;padding:1px!important;display:flex!important;align-items:center!important;justify-content:center!important}body.priolensPrintMatrix .matrixTopStatement span{display:none!important}body.priolensPrintMatrix .matrixTopStatement b{font-size:6px!important;margin:0!important}body.priolensPrintMatrix .matrixLeftStatement{position:relative!important;left:auto!important;display:flex!important;align-items:center!important;justify-content:center!important;padding:1px!important;box-shadow:none!important}body.priolensPrintMatrix .matrixLeftStatement span{display:none!important}body.priolensPrintMatrix .matrixLeftStatement b{font-size:6px!important}body.priolensPrintMatrix .matrixFamily{font-size:4.4px!important;line-height:1!important;padding:1px 2px!important;max-width:52px!important;border-width:1px!important}.matrixNoDirect{font-size:4px!important;line-height:1!important;padding:1px!important}.matrixFamilyStack{inset:1px!important;gap:1px!important}body.priolensPrintMatrix .matrixBridgeNote{font-size:5.7px!important;margin-top:2px!important;line-height:1.2!important}body.priolensPrintMatrix .matrixLegend{font-size:5.7px!important;margin:3px 0 2px!important;padding:3px 4px!important;gap:6px!important;border-radius:6px!important}body.priolensPrintMatrix .matrixLegendSwatch{width:8px!important;height:6px!important;border-width:1px!important}body.priolensPrintMatrix .matrixRelationNote{font-size:5.6px!important;line-height:1.2!important;margin:2px 0 0!important}body.priolensPrintMatrix .matrixDetailActions,body.priolensPrintMatrix .matrixActions{display:none!important}body.priolensPrintMatrix .matrixPrintAppendix{display:block!important;margin-top:4px!important;padding-top:4px!important;border-top:1px solid var(--mx-line)!important;break-before:auto!important;page-break-before:auto!important}body.priolensPrintMatrix .matrixPrintAppendix h2{font-size:10px!important;margin:0 0 4px!important}body.priolensPrintMatrix .matrixPrintStatementList{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;column-gap:6mm!important;row-gap:2px!important}body.priolensPrintMatrix .matrixPrintStatement{display:grid!important;grid-template-columns:5mm 1fr!important;gap:1mm!important;break-inside:avoid!important;font-size:5.7px!important;line-height:1.2!important;color:var(--mx-ink)!important}body.priolensPrintMatrix .matrixPrintStatement b{font-size:6px!important}}'
 ].join('\n');
