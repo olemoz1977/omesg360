@@ -133,14 +133,14 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          lftp -c "set ftp:ssl-allow no; set net:max-retries 4; set net:timeout 30; open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; mkdir -p \"$API_REMOTE\"; put -O \"$API_REMOTE/\" priolens/open14-v04/server/api.php; put -O \"$API_REMOTE/\" priolens/open14-v04/server/progress.php; put -O \"$API_REMOTE/\" priolens/open14-v04/server/admin.php; put -O \"$API_REMOTE/\" priolens/open14-v04/server/validation_v04.php; put -O \"$API_REMOTE/\" priolens/open14-v04/server/config.php; put -O \"$API_REMOTE/\" priolens/open14-v02/server/.htaccess"
+          lftp -c "set ftp:ssl-allow no; set net:max-retries 4; set net:timeout 30; open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; mkdir -p \"$API_REMOTE\"; put -O \"$API_REMOTE/\" priolens/open14-v04/server/api.php; put -O \"$API_REMOTE/\" priolens/open14-v04/server/progress.php; put -O \"$API_REMOTE/\" priolens/open14-v04/server/admin.php; put -O \"$API_REMOTE/\" priolens/open14-v04/server/validation_v04.php; put -O \"$API_REMOTE/\" priolens/open14-v04/server/config.php; put -O \"$API_REMOTE/\" priolens/open14-v04/server/admin-secret.php; put -O \"$API_REMOTE/\" priolens/open14-v04/server/.htaccess"
 
       - name: Verify isolated API remote bytes and route boundaries
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p /tmp/v04-remote
-          lftp -c "set ftp:ssl-allow no; set net:max-retries 4; set net:timeout 30; open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; get \"$API_REMOTE/api.php\" -o /tmp/v04-remote/api.php; get \"$API_REMOTE/progress.php\" -o /tmp/v04-remote/progress.php; get \"$API_REMOTE/admin.php\" -o /tmp/v04-remote/admin.php; get \"$API_REMOTE/validation_v04.php\" -o /tmp/v04-remote/validation_v04.php; get \"$API_REMOTE/config.php\" -o /tmp/v04-remote/config.php"
+          lftp -c "set ftp:ssl-allow no; set net:max-retries 4; set net:timeout 30; open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; get \"$API_REMOTE/api.php\" -o /tmp/v04-remote/api.php; get \"$API_REMOTE/progress.php\" -o /tmp/v04-remote/progress.php; get \"$API_REMOTE/admin.php\" -o /tmp/v04-remote/admin.php; get \"$API_REMOTE/validation_v04.php\" -o /tmp/v04-remote/validation_v04.php; get \"$API_REMOTE/config.php\" -o /tmp/v04-remote/config.php; get \"$API_REMOTE/admin-secret.php\" -o /tmp/v04-remote/admin-secret.php; get \"$API_REMOTE/.htaccess\" -o /tmp/v04-remote/.htaccess"
           cmp priolens/open14-v04/server/api.php /tmp/v04-remote/api.php
           cmp priolens/open14-v04/server/progress.php /tmp/v04-remote/progress.php
           cmp priolens/open14-v04/server/admin.php /tmp/v04-remote/admin.php
