@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { buildResultMatrixModelV04, RESULT_MATRIX_SCHEMA_V04 } from './result_matrix_v04.mjs';
+import { buildResultMatrixModelV04, RESULT_MATRIX_SCHEMA_V04, RESULT_MATRIX_HTML } from './result_matrix_v04.mjs';
 
 const state={
   attentionResolution:{source:'A_DIRECT_UNIQUE_2_OF_3'},
@@ -17,6 +17,7 @@ const state={
 
 const m=buildResultMatrixModelV04(state,'lt');
 assert.equal(m.schema,RESULT_MATRIX_SCHEMA_V04);
+assert.equal(RESULT_MATRIX_HTML.includes('\\n'),false,'matrix HTML must not leak literal \\n text nodes');
 assert.equal(m.items.length,12);
 assert.equal(m.groups.length,6);
 assert.equal(m.items[0].statement,'Tai, ką šiuo metu darau, man atrodo pakankamai prasminga.');
