@@ -125,7 +125,13 @@ jobs:
           rm -f /tmp/v04-api/wave1-config.php
           lftp -c "set ftp:ssl-allow no; set net:max-retries 4; set net:timeout 30; open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; get \"$WAVE1_REMOTE/config.php\" -o /tmp/v04-api/wave1-config.php"
           test -s /tmp/v04-api/wave1-config.php
-          php -r 'require $argv[1]; if (!defined("ADMIN_PASSWORD") || (string)ADMIN_PASSWORD === "" || (string)ADMIN_PASSWORD === "CHANGE_ME") exit(3); $body="<?php\nif (!defined(\\"PRIOLENS_ADMIN_PASSWORD\\")) define(\\"PRIOLENS_ADMIN_PASSWORD\\", ".var_export((string)ADMIN_PASSWORD,true).");\n"; file_put_contents($argv[2],$body);' /tmp/v04-api/wave1-config.php priolens/open14-v04/server/admin-secret.php
+          php <<'PHP'
+          <?php
+          require '/tmp/v04-api/wave1-config.php';
+          if (!defined('ADMIN_PASSWORD') || (string)ADMIN_PASSWORD === '' || (string)ADMIN_PASSWORD === 'CHANGE_ME') exit(3);
+          $body = "<?php\\nif (!defined('PRIOLENS_ADMIN_PASSWORD')) define('PRIOLENS_ADMIN_PASSWORD', " . var_export((string)ADMIN_PASSWORD, true) . ");\\n";
+          file_put_contents('priolens/open14-v04/server/admin-secret.php', $body);
+          PHP
           php -l priolens/open14-v04/server/admin-secret.php
           echo 'PASS: protected DB config and admin secret prepared without printing contents'
 
