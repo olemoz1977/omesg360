@@ -50,5 +50,6 @@ assert.equal(m2.lowSufficiencyItemIds.length,0);
 assert.equal(RESULT_MATRIX_HTML.includes('matrixBackgroundLabel'),false,'LEAST must not appear in primary matrix summary');
 assert.equal(RESULT_MATRIX_HTML.includes('matrixLegendBackground'),false,'LEAST must not appear in matrix legend');
 assert.equal(RESULT_MATRIX_HTML.includes('matrixPrintStatementList'),true,'PDF statement appendix must be present');
+assert.equal(RESULT_MATRIX_HTML.includes('lowBandCell'),false,'legacy orange row/column band class must stay removed');
 
 console.log('result_matrix_v04: PASS');
