@@ -107,8 +107,8 @@ try{
   const suffText=(await page.locator('#suffDetail').textContent())||'';
   if(/\bB\+\b|Channel B/.test(suffText)) throw new Error('technical B terminology leaked into participant detail');
   if(suffText.includes('Kodėl ši kryptis?')) throw new Error('live old direction wording remains');
-  if(mapRoute!=='Aiškaus maršruto nėra'&&!suffText.includes('Kaip ši poreikio sritis buvo išskirta?')) throw new Error('live need-area provenance heading missing for a concrete route');
-  if(mapRoute==='Aiškaus maršruto nėra'&&suffText.includes('Kaip ši poreikio sritis buvo išskirta?')) throw new Error('no-route detail should not imply that one need area was singled out');
+  if(mapRoute!=='Aiškaus maršruto nėra'&&!suffText.includes('Kaip ši pakankamumo sritis buvo išskirta?')) throw new Error('live need-area provenance heading missing for a concrete route');
+  if(mapRoute==='Aiškaus maršruto nėra'&&suffText.includes('Kaip ši pakankamumo sritis buvo išskirta?')) throw new Error('no-route detail should not imply that one need area was singled out');
   await page.goBack();
   await page.waitForFunction(()=>!new URLSearchParams(location.search).has('detail'));
   if(await page.locator('#result').evaluate(el=>el.classList.contains('detailMode'))) throw new Error('browser Back did not restore result scene');
