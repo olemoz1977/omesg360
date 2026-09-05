@@ -230,6 +230,22 @@ try{
   if(!suffText.includes('Kaip ši pakankamumo sritis buvo išskirta?'))throw new Error('sufficiency provenance heading missing');
   if(!suffText.includes('mažiausiai pakankama'))throw new Error('single-route sufficiency-method note missing');
   if(!(await page.locator('#suffResearch .researchParallel').count()))throw new Error('B research parallels missing');
+  const sheetMetrics=await page.locator('#suffDetail .suffSheet').evaluate(el=>{
+    const r=el.getBoundingClientRect(),cs=getComputedStyle(el);
+    return {bottom:r.bottom,viewport:window.innerHeight,clientHeight:el.clientHeight,scrollHeight:el.scrollHeight,overflowY:cs.overflowY,paddingBottom:parseFloat(cs.paddingBottom)||0};
+  });
+  if(sheetMetrics.bottom>sheetMetrics.viewport+1)throw new Error('B detail sheet extends below the visible viewport: '+JSON.stringify(sheetMetrics));
+  if(!['auto','scroll'].includes(sheetMetrics.overflowY))throw new Error('B detail sheet must scroll internally when content grows');
+  await page.locator('#suffResearch .researchParallel summary').click();
+  await page.locator('#suffDetail .suffSheet').evaluate(el=>el.scrollTo(0,el.scrollHeight));
+  await page.waitForTimeout(80);
+  const bottomReach=await page.locator('#suffDetail .suffSheet').evaluate(el=>{
+    const sheet=el.getBoundingClientRect();
+    const last=el.querySelector('#suffResearch');
+    const target=last?.getBoundingClientRect();
+    return {sheetBottom:sheet.bottom,targetBottom:target?.bottom??sheet.bottom,paddingBottom:parseFloat(getComputedStyle(el).paddingBottom)||0};
+  });
+  if(bottomReach.targetBottom>bottomReach.sheetBottom-bottomReach.paddingBottom+2)throw new Error('B detail bottom content is not fully reachable above the sheet safe padding: '+JSON.stringify(bottomReach));
   await page.click('#suffDetailClose');
   await page.waitForSelector('#matrixResult.active');
   await page.waitForFunction(()=>!new URLSearchParams(location.search).has('detail'));
