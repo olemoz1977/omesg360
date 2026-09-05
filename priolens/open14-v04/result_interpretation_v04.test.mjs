@@ -68,5 +68,6 @@ const noClear=buildHumanInterpretationV04({
   lang:'lt',familyLabels
 });
 assert.ok(body(noClear).includes('nė viena kryptis tau nebuvo aiškiai artimesnė'));
+assert.ok(!body(noClear).includes('gana tiesioginis teminis persidengimas'));
 
 console.log('result_interpretation_v04: PASS');
