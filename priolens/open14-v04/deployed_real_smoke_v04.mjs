@@ -1,7 +1,7 @@
 import { chromium } from 'playwright';
 
 const BASE=process.env.PRIOLENS_V04_BASE||'https://omesg360.eu/priolens-open14-v04/';
-const RESULT='priolens.open14.v04.last-result.lt';
+const RESULT='priolens.open14.v041.last-result.lt';
 const browser=await chromium.launch({headless:true});
 try{
   const context=await browser.newContext({viewport:{width:390,height:844}});
@@ -112,10 +112,11 @@ try{
   await page.goBack();
   await page.waitForFunction(()=>!new URLSearchParams(location.search).has('detail'));
   if(await page.locator('#result').evaluate(el=>el.classList.contains('detailMode'))) throw new Error('browser Back did not restore result scene');
-  const draftKeys=await page.evaluate(()=>Object.keys(localStorage).filter(k=>k.includes('priolens.open14.v04.rank.draft')));
+  const draftKeys=await page.evaluate(()=>Object.keys(localStorage).filter(k=>k.includes('priolens.open14.v041.rank.draft')));
   if(draftKeys.length) throw new Error('v0.4 draft not cleared after successful live save');
   const storedResult=JSON.parse(await page.evaluate(k=>localStorage.getItem(k),RESULT));
   if(!storedResult?.completedAt||storedResult?.submission?.ok!==true) throw new Error('completed result snapshot missing after successful live save');
+  if(storedResult?.sufficiencySchema!=='2rasi.priolens.sufficiency-v0.3') throw new Error('live result missing revised sufficiency schema');
   const focusBeforeReload=((await page.locator('#shipFocus').textContent())||'').trim();
   const routeBeforeReload=((await page.locator('#mapRoute').textContent())||'').trim();
 
