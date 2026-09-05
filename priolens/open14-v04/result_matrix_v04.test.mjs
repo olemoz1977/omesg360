@@ -18,6 +18,10 @@ const state={
 const m=buildResultMatrixModelV04(state,'lt');
 assert.equal(m.schema,RESULT_MATRIX_SCHEMA_V04);
 assert.equal(RESULT_MATRIX_HTML.includes('\\n'),false,'matrix HTML must not leak literal \\n text nodes');
+for(const id of ['matrixAttentionDetails','matrixSufficiencyDetails','matrixPdf','matrixRestart','matrixBack2rasi']){
+  assert.equal(RESULT_MATRIX_HTML.includes('id="'+id+'"'),true,'matrix action missing: '+id);
+}
+assert.equal(RESULT_MATRIX_HTML.includes('matrixContinue'),false,'legacy continue-to-ship/map action must stay removed');
 assert.equal(m.items.length,12);
 assert.equal(m.groups.length,6);
 assert.equal(m.items[0].statement,'Tai, ką šiuo metu darau, man atrodo pakankamai prasminga.');
