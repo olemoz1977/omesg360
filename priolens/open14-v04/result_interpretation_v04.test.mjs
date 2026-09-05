@@ -79,4 +79,11 @@ assert.ok(body(weak).includes('nereikia sujungti per jėgą'));
 assert.ok(!body(weak).includes('Meistriškumas'));
 assert.ok(!body(weak).includes('Pripažinimas'));
 
+
+const noParallel=buildHumanInterpretationV04({
+  model:{repeatedMost:[{familyId:'BELONGING',count:3},{familyId:'RECOGNITION',count:2}],backgroundFamilyIds:[],sufficiencyItemIds:['MATERIAL_RESOURCES'],focusFamilyId:'BELONGING',attentionClarifierNoClear:false},
+  lang:'lt',familyLabels
+});
+assert.ok(body(noParallel).includes('nereikia sujungti per jėgą'));
+
 console.log('result_interpretation_v04: PASS');
