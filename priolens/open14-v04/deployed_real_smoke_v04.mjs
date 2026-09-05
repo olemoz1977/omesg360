@@ -50,9 +50,13 @@ try{
   if(await page.locator('#matrixCanvasMount .matrixDataCell').count()!==144) throw new Error('live matrix must contain 12x12 data cells');
   if(await page.locator('#matrixCanvasMount .matrixTopStatement').count()!==12||await page.locator('#matrixCanvasMount .matrixLeftStatement').count()!==12) throw new Error('live matrix axes must contain all 12 statements');
   const liveMatrixSnapshot=JSON.parse(await page.evaluate(k=>localStorage.getItem(k),RESULT));
-  const expectedFocusMarkers=liveMatrixSnapshot?.attentionFocus?.familyId?1:0;
-  if(await page.locator('#matrixCanvasMount .focusMarker').count()!==expectedFocusMarkers) throw new Error('live matrix focus-marker count does not match resolved Channel-A focus');
-  if(await page.locator('#matrixCanvasMount .suffMarker').count()!==0) throw new Error('all-5 Channel B must not render a matrix sufficiency marker');
+  const expectedFocusHighlights=liveMatrixSnapshot?.attentionFocus?.familyId?1:0;
+  if(await page.locator('#matrixCanvasMount .matrixFamily.focus2,#matrixCanvasMount .matrixFamily.focus3').count()!==expectedFocusHighlights) throw new Error('live matrix focus highlight count does not match resolved Channel-A focus');
+  if(await page.locator('#matrixCanvasMount .backgroundMarker').count()!==0) throw new Error('live matrix must not render LEAST point markers');
+  if(await page.locator('#matrixCanvasMount .suffMarker').count()!==0) throw new Error('live matrix must not render B point markers');
+  if(await page.locator('#matrixCanvasMount .lowBandCell').count()!==0) throw new Error('all-5 Channel B must not render orange low-sufficiency bands');
+  if(await page.locator('#matrixCanvasMount .routeCell').count()!==0) throw new Error('all-5 Channel B must not render an insufficiency route cell');
+  if(await page.locator('#matrixBackgroundLabel').count()!==0) throw new Error('LEAST summary card must be absent in live matrix');
   for(const id of ['#matrixAttentionDetails','#matrixSufficiencyDetails','#matrixPdf','#matrixRestart','#matrixBack2rasi']){
     if(await page.locator(id).count()!==1) throw new Error('live matrix action missing: '+id);
   }
