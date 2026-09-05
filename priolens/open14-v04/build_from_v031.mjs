@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import { RESULT_WORLD_CSS, RESULT_WORLD_HTML } from './result_shell_v04.mjs';
+import { RESULT_MATRIX_CSS, RESULT_MATRIX_HTML } from './result_matrix_v04.mjs';
 
 const here=path.dirname(fileURLToPath(import.meta.url));
 const srcDir=path.resolve(here,'../open14-v03');
@@ -21,7 +22,7 @@ let html=read('index.html');
 const clarifierCss=`
 .clarify{padding:18px 4px 42px;max-width:620px;margin:0 auto}.clarifyHead h2{font-size:28px;margin:0 0 8px}.clarifyGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:18px 0}.clarifyCard{border:1px solid var(--line);background:#fff;border-radius:16px;padding:8px;min-height:44px}.clarifyCard.on{outline:3px solid #181818}.clarifyPics{display:grid;gap:5px}.clarifyPics.two{grid-template-columns:repeat(2,minmax(0,1fr))}.clarifyPics.three{grid-template-columns:repeat(3,minmax(0,1fr))}.clarifyPics img{display:block;width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:10px;background:#eee}.clarifyNeed{width:100%;text-align:left;border:1px solid var(--line);background:#fff;border-radius:14px;padding:13px 14px;min-height:48px;font-weight:720;line-height:1.35}.clarifyActions{display:grid;gap:8px;margin-top:14px}.clarifyMeta{font-size:13px;color:#666;line-height:1.5}@media(max-width:620px){.clarifyGrid{grid-template-columns:1fr;gap:12px}.clarifyCard{padding:9px}}
 `;
-html=replaceOnce(html,'</style>',clarifierCss+RESULT_WORLD_CSS+'</style>','style close');
+html=replaceOnce(html,'</style>',clarifierCss+RESULT_WORLD_CSS+RESULT_MATRIX_CSS+'</style>','style close');
 
 const aPlusHtml=`  <section id="aplus" class="screen clarify">
     <div class="clarifyHead"><h2 id="aPlusTitle">Dar vienas žvilgsnis.</h2><p id="aPlusLead" class="note">Pažiūrėk į tas vaizdų grupes, kurios tavo pasirinkimuose kartojosi. Kuri grupė dabar pirmiausia patraukia dėmesį?</p></div>
@@ -37,7 +38,7 @@ const bPlusHtml=`  <section id="bplus" class="screen clarify">
     <div class="clarifyActions"><button id="bPlusSimilar" class="secondary">Jos dabar panašiai</button><button id="bPlusHard" class="secondary">Sunku pasakyti</button></div>
   </section>
 `;
-html=replaceOnce(html,'  <section id="result" class="screen result">',bPlusHtml+'  <section id="result" class="screen result">','result section');
+html=replaceOnce(html,'  <section id="result" class="screen result">',bPlusHtml+RESULT_MATRIX_HTML+'  <section id="result" class="screen result">','result section');
 
 const resultHtml=RESULT_WORLD_HTML;
 const resultStart=html.indexOf('  <section id="result" class="screen result">');
@@ -48,7 +49,7 @@ html=html.slice(0,resultStart)+resultHtml+html.slice(resultEnd+'  </section>\n'.
 
 
 const importAnchor="import { assignOpen14ThreeExemplars, listThreeExemplarBankProblems } from './open14_no_repeat_assigner_v03.mjs';";
-html=replaceOnce(html,importAnchor,importAnchor+"\nimport { SESSION_SCHEMA_V04, DRAFT_KEY_BASE_V04, SUFFICIENCY_SCHEMA_V04, resolveAttentionFromChoices, applyAttentionClarifier, resolveSufficiencyRoute, applySufficiencyClarifier } from './adaptive_clarifiers_v04.mjs';\nimport { renderResultWorldV04 } from './result_renderer_v04.mjs?v=scene11';",'assigner import');
+html=replaceOnce(html,importAnchor,importAnchor+"\nimport { SESSION_SCHEMA_V04, DRAFT_KEY_BASE_V04, SUFFICIENCY_SCHEMA_V04, resolveAttentionFromChoices, applyAttentionClarifier, resolveSufficiencyRoute, applySufficiencyClarifier } from './adaptive_clarifiers_v04.mjs';\nimport { renderResultWorldV04 } from './result_renderer_v04.mjs?v=scene11';\nimport { renderResultMatrixV04, printResultReportV04 } from './result_matrix_v04.mjs?v=matrix1';",'assigner import');
 html=replaceOnce(html,"const DRAFT_KEY_BASE='priolens.open14.v031.rank.draft';","const DRAFT_KEY_BASE=DRAFT_KEY_BASE_V04;",'draft key');
 html=replaceOnce(html,'const DRAFT_KEY=`${DRAFT_KEY_BASE}.${LANG}`;','const DRAFT_KEY=`${DRAFT_KEY_BASE}.${LANG}`;\nconst RESULT_KEY_BASE=\'priolens.open14.v041.last-result\';\nconst RESULT_KEY=`${RESULT_KEY_BASE}.${LANG}`;\nconst RESULT_MAX_AGE_MS=90*24*60*60*1000;','completed result key');
 html=html.replaceAll("'2rasi.priolens.open14.rank-session-v0.3'","SESSION_SCHEMA_V04");
@@ -102,7 +103,7 @@ html=replaceOnce(html,"$('restart').onclick=()=>{clearLocalDraft();location.relo
 html=replaceOnce(html,"if(state.choices.length<14)renderTrial();else{show('suff');renderSuff()}","if(state.choices.length<14)renderTrial();else afterChannelA()",'post Channel-A transition');
 html=replaceOnce(html,"if(suffIndex<5){suffIndex++;renderSuff()}else finish()","if(suffIndex<5){suffIndex++;renderSuff()}else afterChannelB()",'post Channel-B transition');
 html=replaceOnce(html,"state.rankProtocol='most+least-v0.3';","state.rankProtocol='most+least+a-plus+b-plus-v0.4';",'rank protocol');
-html=replaceOnce(html,"state.rankProtocol='most+least+a-plus+b-plus-v0.4';show('result');renderResult();finalSubmitPromise=submitSession()","state.rankProtocol='most+least+a-plus+b-plus-v0.4';saveLocalResult();show('result');renderResult();finalSubmitPromise=submitSession()",'snapshot completed result before submit');
+html=replaceOnce(html,"state.rankProtocol='most+least+a-plus+b-plus-v0.4';show('result');renderResult();finalSubmitPromise=submitSession()","state.rankProtocol='most+least+a-plus+b-plus-v0.4';saveLocalResult();renderResult();renderMatrix();show('matrixResult');finalSubmitPromise=submitSession()",'snapshot completed result before submit');
 
 const resumeStart=html.indexOf('async function resumeSession(){');
 const resumeEnd=html.indexOf('function show(id){',resumeStart);
@@ -192,7 +193,16 @@ html=replaceOnce(html,helperAnchor,helperCode+helperAnchor,'renderSuff helper in
 const oldRenderStart=html.indexOf('function renderResult(){');
 const oldRenderEnd=html.indexOf("$('start').onclick=",oldRenderStart);
 if(oldRenderStart<0||oldRenderEnd<0)throw new Error('renderResult anchors missing');
-const renderResultV04=`function renderResult(){
+const renderResultV04=`function renderMatrix(){
+  renderResultMatrixV04({
+    state,
+    lang:LANG,
+    familyLabels:FAMILY_LABEL,
+    onContinue:()=>{show('result');renderResult()},
+    onPrint:()=>printResultReportV04()
+  });
+}
+function renderResult(){
   try{
     renderResultWorldV04({
       state,
@@ -206,6 +216,8 @@ const renderResultV04=`function renderResult(){
         await persistSelfExplanation(statusEl);
       }
     });
+    const pdf=document.getElementById('resultPdf');
+    if(pdf){pdf.textContent=LANG==='en'?'Save PDF':'Išsaugoti PDF';pdf.onclick=()=>printResultReportV04()}
   }catch(err){
     console.error('PrioLens result render failed',err);
     state.resultRenderError={message:String(err),at:new Date().toISOString()};
@@ -236,7 +248,8 @@ Object.assign(bankV04.families.KNOWLEDGE,{constructStatus:'CURIOSITY_INFORMATION
 Object.assign(bankV04.families.OPPORTUNITY,{display:'Opportunity / affordance',constructStatus:'FORMATIVE_AFFORDANCE_NO_DIRECT_B_MATCH'});
 write('bank.json',JSON.stringify(bankV04,null,2)+'\n');
 for(const name of ['p3_open14_planner_v02.mjs','open14_no_repeat_assigner_v03.mjs','stimulus-bank.html'])write(name,read(name));
-if(!fs.existsSync(path.join(outDir,'result_world_v04.mjs'))||!fs.existsSync(path.join(outDir,'result_renderer_v04.mjs')))throw new Error('v0.4 result modules missing');
+if(!fs.existsSync(path.join(outDir,'result_world_v04.mjs'))||!fs.existsSync(path.join(outDir,'result_renderer_v04.mjs'))||!fs.existsSync(path.join(outDir,'result_matrix_v04.mjs')))throw new Error('v0.4 result modules missing');
 if(!html.includes('id="needsMapStage"')||!html.includes('class="resultScene"'))throw new Error('unified result scene missing');
+if(!html.includes('id="matrixResult"')||!html.includes('id="matrixCanvasMount"')||!html.includes('id="matrixContinue"')||!html.includes('id="matrixPdf"'))throw new Error('pre-result matrix scene missing');
 if(!html.includes('id="shipDetailsButton"')||!html.includes('id="mapDetailsButton"')||!html.includes('id="attentionBack"')||!html.includes('id="suffDetailClose"'))throw new Error('result detail navigation missing');
 console.log('open14-v04 build: PASS');
