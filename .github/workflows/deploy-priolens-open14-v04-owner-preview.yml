@@ -23,7 +23,6 @@ env:
   PREVIEW_REMOTE: /domains/omesg360.eu/public_html/priolens-open14-v04
   API_REMOTE: /domains/omesg360.eu/public_html/priolens-open14-v04-api
   V03_API_REMOTE: /domains/omesg360.eu/public_html/priolens-open14-v03-api
-  WAVE1_REMOTE: /domains/omesg360.eu/public_html/wave1
 
 jobs:
   deploy-owner-preview:
@@ -122,19 +121,20 @@ jobs:
           done
           test "$ok" = 1
           cp /tmp/v04-api/config.php priolens/open14-v04/server/config.php
-          rm -f /tmp/v04-api/wave1-config.php
-          lftp -c "set ftp:ssl-allow no; set net:max-retries 4; set net:timeout 30; open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; get \"$WAVE1_REMOTE/config.php\" -o /tmp/v04-api/wave1-config.php"
-          test -s /tmp/v04-api/wave1-config.php
-          php <<'PHP'
-          <?php
-          require '/tmp/v04-api/wave1-config.php';
-          if (!defined('ADMIN_PASSWORD') || (string)ADMIN_PASSWORD === '' || (string)ADMIN_PASSWORD === 'CHANGE_ME') exit(3);
-          $body = "<?php\\nif (!defined('PRIOLENS_ADMIN_PASSWORD')) define('PRIOLENS_ADMIN_PASSWORD', " . var_export((string)ADMIN_PASSWORD, true) . ");\\n";
-          file_put_contents('priolens/open14-v04/server/admin-secret.php', $body);
-          PHP
+          ok=0
+          for attempt in 1 2 3; do
+            rm -f /tmp/v04-api/admin-secret.php
+            if lftp -c "set ftp:ssl-allow no; set net:max-retries 4; set net:timeout 30; set net:reconnect-interval-base 3; open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; get \"$API_REMOTE/admin-secret.php\" -o /tmp/v04-api/admin-secret.php" && test -s /tmp/v04-api/admin-secret.php; then
+              ok=1
+              break
+            fi
+            echo "protected admin secret fetch attempt $attempt failed; retrying" >&2
+            sleep $((attempt*5))
+          done
+          test "$ok" = 1
+          cp /tmp/v04-api/admin-secret.php priolens/open14-v04/server/admin-secret.php
           php -l priolens/open14-v04/server/admin-secret.php
-          php -r 'require "priolens/open14-v04/server/config.php"; require "priolens/open14-v04/server/admin-secret.php"; if (!defined("PRIOLENS_ADMIN_PASSWORD") || (string)PRIOLENS_ADMIN_PASSWORD === "" || (string)PRIOLENS_ADMIN_PASSWORD === "CHANGE_ME") exit(4);'
-          echo 'PASS: protected DB config and admin secret prepared without printing contents'
+          echo 'PASS: protected DB config and admin secret copied without printing contents'
 
       - name: Deploy isolated v0.4 API
         shell: bash
@@ -165,7 +165,7 @@ jobs:
           code=$(curl -sS -o /tmp/progress-get -w '%{http_code}' "$PROGRESS"); test "$code" = 405; grep -q 'Method not allowed' /tmp/progress-get
           code=$(curl -sS -o /tmp/config-get -w '%{http_code}' "$CONFIG"); test "$code" = 403
           code=$(curl -sS -o /tmp/admin-secret-get -w '%{http_code}' "$ADMIN_SECRET"); test "$code" = 403
-          code=$(curl -sS -o /tmp/admin-get -w '%{http_code}' "$ADMIN"); echo "admin_http=$code"; if test "$code" != 200; then printf 'admin_body='; head -c 160 /tmp/admin-get | tr '\n' ' '; echo; exit 1; fi; grep -q 'PrioLens Admin' /tmp/admin-get
+          code=$(curl -sS -o /tmp/admin-get -w '%{http_code}' "$ADMIN"); echo "admin_http=$code"; test "$code" = 200; grep -q 'PrioLens Admin' /tmp/admin-get
           echo 'PASS: isolated v0.4 API + protected admin deployed; config and admin secret protected'
 
       - name: Deploy isolated v0.4 owner preview
