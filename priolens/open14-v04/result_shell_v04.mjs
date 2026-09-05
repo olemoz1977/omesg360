@@ -79,7 +79,7 @@ export const RESULT_WORLD_HTML=`  <section id="result" class="screen result">
       <p id="worldSeparationNote" class="worldSeparation"></p>
     </div>
 
-    <div class="actions resultActions"><button id="restart" class="primary">Atlikti dar kartą</button><a id="back2rasi" class="secondary actionLink" href="https://2rasi.lt/#experiments">Grįžti į 2rasi</a><button id="export" class="secondary hidden">Eksportuoti JSON</button></div>
+    <div class="actions resultActions"><button id="restart" class="primary">Atlikti dar kartą</button><button id="resultPdf" class="secondary">Išsaugoti PDF</button><a id="back2rasi" class="secondary actionLink" href="https://2rasi.lt/#experiments">Grįžti į 2rasi</a><button id="export" class="secondary hidden">Eksportuoti JSON</button></div>
     <p id="exportStatus" class="note hidden"></p>
     <details id="debugDetails" class="perspective hidden"><summary>Tyrimo diagnostika</summary><pre id="debug" class="debug"></pre></details>
   </section>
