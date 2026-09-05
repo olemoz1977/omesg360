@@ -49,6 +49,7 @@ jobs:
           node priolens/open14-v04/server/build_endpoints_v04.mjs
           php -l priolens/open14-v04/server/api.php
           php -l priolens/open14-v04/server/progress.php
+          php -l priolens/open14-v04/server/admin.php
           php -l priolens/open14-v04/server/validation_v04.php
           php priolens/open14-v04/server/validation_v04.test.php
 
@@ -126,26 +127,29 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          lftp -c "set ftp:ssl-allow no; set net:max-retries 4; set net:timeout 30; open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; mkdir -p \"$API_REMOTE\"; put -O \"$API_REMOTE/\" priolens/open14-v04/server/api.php; put -O \"$API_REMOTE/\" priolens/open14-v04/server/progress.php; put -O \"$API_REMOTE/\" priolens/open14-v04/server/validation_v04.php; put -O \"$API_REMOTE/\" priolens/open14-v04/server/config.php; put -O \"$API_REMOTE/\" priolens/open14-v02/server/.htaccess"
+          lftp -c "set ftp:ssl-allow no; set net:max-retries 4; set net:timeout 30; open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; mkdir -p \"$API_REMOTE\"; put -O \"$API_REMOTE/\" priolens/open14-v04/server/api.php; put -O \"$API_REMOTE/\" priolens/open14-v04/server/progress.php; put -O \"$API_REMOTE/\" priolens/open14-v04/server/admin.php; put -O \"$API_REMOTE/\" priolens/open14-v04/server/validation_v04.php; put -O \"$API_REMOTE/\" priolens/open14-v04/server/config.php; put -O \"$API_REMOTE/\" priolens/open14-v02/server/.htaccess"
 
       - name: Verify isolated API remote bytes and route boundaries
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p /tmp/v04-remote
-          lftp -c "set ftp:ssl-allow no; set net:max-retries 4; set net:timeout 30; open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; get \"$API_REMOTE/api.php\" -o /tmp/v04-remote/api.php; get \"$API_REMOTE/progress.php\" -o /tmp/v04-remote/progress.php; get \"$API_REMOTE/validation_v04.php\" -o /tmp/v04-remote/validation_v04.php; get \"$API_REMOTE/config.php\" -o /tmp/v04-remote/config.php"
+          lftp -c "set ftp:ssl-allow no; set net:max-retries 4; set net:timeout 30; open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; get \"$API_REMOTE/api.php\" -o /tmp/v04-remote/api.php; get \"$API_REMOTE/progress.php\" -o /tmp/v04-remote/progress.php; get \"$API_REMOTE/admin.php\" -o /tmp/v04-remote/admin.php; get \"$API_REMOTE/validation_v04.php\" -o /tmp/v04-remote/validation_v04.php; get \"$API_REMOTE/config.php\" -o /tmp/v04-remote/config.php"
           cmp priolens/open14-v04/server/api.php /tmp/v04-remote/api.php
           cmp priolens/open14-v04/server/progress.php /tmp/v04-remote/progress.php
+          cmp priolens/open14-v04/server/admin.php /tmp/v04-remote/admin.php
           cmp priolens/open14-v04/server/validation_v04.php /tmp/v04-remote/validation_v04.php
           cmp /tmp/v04-api/config.php /tmp/v04-remote/config.php
 
           API='https://omesg360.eu/priolens-open14-v04-api/api.php'
           PROGRESS='https://omesg360.eu/priolens-open14-v04-api/progress.php'
           CONFIG='https://omesg360.eu/priolens-open14-v04-api/config.php'
+          ADMIN='https://omesg360.eu/priolens-open14-v04-api/admin.php'
           code=$(curl -sS -o /tmp/api-get -w '%{http_code}' "$API"); test "$code" = 405; grep -q 'Method not allowed' /tmp/api-get
           code=$(curl -sS -o /tmp/progress-get -w '%{http_code}' "$PROGRESS"); test "$code" = 405; grep -q 'Method not allowed' /tmp/progress-get
           code=$(curl -sS -o /tmp/config-get -w '%{http_code}' "$CONFIG"); test "$code" = 403
-          echo 'PASS: isolated v0.4 API deployed; config protected'
+          code=$(curl -sS -o /tmp/admin-get -w '%{http_code}' "$ADMIN"); test "$code" = 200; grep -q 'PrioLens Admin' /tmp/admin-get
+          echo 'PASS: isolated v0.4 API + protected admin deployed; config protected'
 
       - name: Deploy isolated v0.4 owner preview
         shell: bash
