@@ -213,7 +213,7 @@ function loadResultModules(){
   if(!resultModulesPromise){
     resultModulesPromise=Promise.all([
       import('./result_renderer_v04.mjs?v=scene13'),
-      import('./result_matrix_v04.mjs?v=matrix4')
+      import('./result_matrix_v04.mjs?v=matrix5')
     ]).then(([renderer,matrix])=>({renderer,matrix}));
   }
   return resultModulesPromise;
@@ -310,6 +310,6 @@ write('bank.json',JSON.stringify(bankV04,null,2)+'\n');
 for(const name of ['p3_open14_planner_v02.mjs','open14_no_repeat_assigner_v03.mjs','stimulus-bank.html'])write(name,read(name));
 if(!fs.existsSync(path.join(outDir,'result_world_v04.mjs'))||!fs.existsSync(path.join(outDir,'result_renderer_v04.mjs'))||!fs.existsSync(path.join(outDir,'result_matrix_v04.mjs')))throw new Error('v0.4 result modules missing');
 if(!html.includes('id="needsMapStage"')||!html.includes('class="resultScene"'))throw new Error('unified result scene missing');
-if(!html.includes('id="matrixResult"')||!html.includes('id="matrixCanvasMount"')||!html.includes('id="matrixAttentionDetails"')||!html.includes('id="matrixSufficiencyDetails"')||!html.includes('id="matrixPdf"')||!html.includes('id="matrixRestart"')||!html.includes('id="matrixBack2rasi"'))throw new Error('matrix result/action scene missing');
+if(!html.includes('id="matrixResult"')||!html.includes('id="matrixCanvasMount"')||!html.includes('id="matrixAttentionDetails"')||!html.includes('id="matrixSufficiencyDetails"')||!html.includes('id="matrixPdf"')||!html.includes('id="matrixRestart"')||!html.includes('id="matrixBack2rasi"')||!html.includes('id="matrixPrintStatementList"'))throw new Error('matrix result/action/print scene missing');
 if(!html.includes('id="shipDetailsButton"')||!html.includes('id="mapDetailsButton"')||!html.includes('id="attentionBack"')||!html.includes('id="suffDetailClose"'))throw new Error('result detail navigation missing');
 console.log('open14-v04 build: PASS');
