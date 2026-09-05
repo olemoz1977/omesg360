@@ -52,7 +52,8 @@ jobs:
 
           f='priolens/open14-v04/index.html'
           grep -Fq "2rasi.priolens.open14.rank-session-v0.4" priolens/open14-v04/adaptive_clarifiers_v04.mjs
-          grep -Fq "priolens.open14.v04.rank.draft" priolens/open14-v04/adaptive_clarifiers_v04.mjs
+          grep -Fq "priolens.open14.v041.rank.draft" priolens/open14-v04/adaptive_clarifiers_v04.mjs
+          grep -Fq "2rasi.priolens.sufficiency-v0.3" priolens/open14-v04/adaptive_clarifiers_v04.mjs
           grep -Fq "const API_PATH='/priolens-open14-v04-api/api.php'" "$f"
           grep -Fq "const PROGRESS_PATH='/priolens-open14-v04-api/progress.php'" "$f"
           grep -Fq "most+least+a-plus+b-plus-v0.4" "$f"
