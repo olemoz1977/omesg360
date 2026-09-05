@@ -55,6 +55,8 @@ html=replaceOnce(html,'const DRAFT_KEY=`${DRAFT_KEY_BASE}.${LANG}`;','const DRAF
 html=html.replaceAll("'2rasi.priolens.open14.rank-session-v0.3'","SESSION_SCHEMA_V04");
 html=replaceOnce(html,"const API_PATH='/priolens-open14-v03-api/api.php';","const API_PATH='/priolens-open14-v04-api/api.php';",'v0.4 API path');
 html=replaceOnce(html,"const PROGRESS_PATH='/priolens-open14-v03-api/progress.php';","const PROGRESS_PATH='/priolens-open14-v04-api/progress.php';",'v0.4 progress path');
+html=replaceOnce(html,'<p class="lead">Trys vaizdai vienu metu. Nesvarstyk, kuris „geresnis“. Pasirink tą, į kurį pirmiausia krypsta dėmesys.</p>','<p class="lead">Trys vaizdai vienu metu. Pirmiausia pasirink, kuris patraukia. Tada iš likusių dviejų pažymėk, kuris traukia mažiausiai.</p>','static LT MOST-LEAST lead');
+html=replaceOnce(html,'<p class="note">14 trumpų pasirinkimų · apie 2 min. Po jų į tą pačią situaciją pažvelgsi iš kitos perspektyvos.</p>','<p class="note">14 trumpų trijulių · apie 3 min. Po jų į tą pačią situaciją pažvelgsi iš kitos perspektyvos.</p>','static LT duration note');
 
 html=replaceOnce(html,"['CARE_SUPPORT_PRESENT','Mano gyvenime pakanka rūpesčio, paramos ir žmogiško dėmesio.']","['CARE_SUPPORT_PRESENT','Jaučiu, kad iš kitų sulaukiu pakankamai rūpesčio, paramos ir žmogiško dėmesio.']",'received-support LT item');
 html=replaceOnce(html,"['CARE_SUPPORT_PRESENT','There is enough care, support and human attention in my life.']","['CARE_SUPPORT_PRESENT','I feel that I receive enough care, support and human attention from others.']",'received-support EN item');
