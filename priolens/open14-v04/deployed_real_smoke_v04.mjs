@@ -13,11 +13,12 @@ try{
 
   for(let i=0;i<14;i++){
     if(!(await page.locator('#undoMost').isDisabled())||!(await page.locator('#tieLeast').isDisabled())) throw new Error('assist actions must stay disabled before MOST');
+    if(!(await page.locator('#undoMost').evaluate(el=>el.classList.contains('hidden')))||!(await page.locator('#tieLeast').evaluate(el=>el.classList.contains('hidden')))) throw new Error('assist actions must stay hidden before MOST');
     if(!((await page.locator('#trialHint').textContent())||'').includes('Pažymėk vieną nuotrauką')) throw new Error('MOST instruction must explicitly ask to select a photo');
     await page.click('.stim[data-slot="0"]');
     await page.waitForFunction(()=>{
       const u=document.querySelector('#undoMost'),t=document.querySelector('#tieLeast');
-      return u&&!u.disabled&&t&&!t.disabled;
+      return u&&!u.disabled&&!u.classList.contains('hidden')&&t&&!t.disabled&&!t.classList.contains('hidden');
     });
     if(!((await page.locator('#trialHint').textContent())||'').includes('Pažymėk vieną iš dviejų likusių nuotraukų')) throw new Error('LEAST instruction must explicitly ask to select one remaining photo');
     await page.click('.stim[data-slot="1"]');
