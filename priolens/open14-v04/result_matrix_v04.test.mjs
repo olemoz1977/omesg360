@@ -6,6 +6,7 @@ const state={
   attentionFocus:{familyId:'AUTONOMY',rawMostCount:2,source:'A_DIRECT_UNIQUE_2_OF_3'},
   sufficiencyResolution:{source:'B_PLUS_SIMILAR'},
   sufficiencyRoute:{itemIds:['CLARITY_PREDICTABILITY','RESTORATION_ENERGY'],source:'B_PLUS_SIMILAR',minimumValue:2},
+  sufficiency:{MEANING_PURPOSE:5,CONTRIBUTION:3,LEARNING_GROWTH:4,CAPABILITY_MASTERY:5,AUTONOMY_AGENCY:4,RECOGNITION_ESTEEM:5,CONNECTION_BELONGING:4,CARE_SUPPORT_PRESENT:5,SAFETY_STABILITY:4,CLARITY_PREDICTABILITY:2,RESTORATION_ENERGY:2,MATERIAL_RESOURCES:5},
   choices:[
     {leastChoice:{familyId:'CARE'}},
     {leastChoice:{familyId:'CARE'}},
@@ -28,24 +29,26 @@ assert.equal(m.items[0].statement,'Tai, ką šiuo metu darau, man atrodo pakanka
 assert.equal(m.items[7].statement,'Jaučiu, kad iš kitų sulaukiu pakankamai rūpesčio, paramos ir žmogiško dėmesio.');
 assert.deepEqual(m.backgroundFamilyIds,['CARE']);
 assert.deepEqual(m.sufficiencyItemIds,['CLARITY_PREDICTABILITY','RESTORATION_ENERGY']);
-
-const focus=m.markers.find(x=>x.kind==='FOCUS');
-assert.deepEqual({row:focus.row,col:focus.col,type:focus.type},{row:5,col:5,type:'DIRECT'});
-const bg=m.markers.find(x=>x.kind==='BACKGROUND');
-assert.deepEqual({row:bg.row,col:bg.col,type:bg.type},{row:2,col:8,type:'BRIDGE'});
-const suff=m.markers.filter(x=>x.kind==='SUFFICIENCY').map(x=>[x.itemId,x.row,x.col]);
-assert.deepEqual(suff,[['CLARITY_PREDICTABILITY',10,10],['RESTORATION_ENERGY',11,11]]);
+assert.deepEqual(m.lowSufficiencyItemIds,['CONTRIBUTION','CLARITY_PREDICTABILITY','RESTORATION_ENERGY']);
+assert.equal(m.focusFamilyId,'AUTONOMY');
+assert.equal(m.focusRawMostCount,2);
+assert.equal('markers' in m,false,'matrix must not expose point-marker model after signal redesign');
 
 const state2={
   attentionResolution:{source:'A_PLUS_RUNOFF_2_OF_3'},
   attentionFocus:{familyId:'OPPORTUNITY',rawMostCount:2,source:'A_PLUS_RUNOFF_2_OF_3'},
   sufficiencyResolution:{source:'B_NO_LOW_ROUTE'},
   sufficiencyRoute:{itemIds:[],source:'B_NO_LOW_ROUTE',minimumValue:4},
+  sufficiency:{MEANING_PURPOSE:4,CONTRIBUTION:5,LEARNING_GROWTH:4,CAPABILITY_MASTERY:5,AUTONOMY_AGENCY:4,RECOGNITION_ESTEEM:5,CONNECTION_BELONGING:4,CARE_SUPPORT_PRESENT:5,SAFETY_STABILITY:4,CLARITY_PREDICTABILITY:5,RESTORATION_ENERGY:4,MATERIAL_RESOURCES:5},
   choices:[]
 };
 const m2=buildResultMatrixModelV04(state2,'en');
-const focus2=m2.markers.find(x=>x.kind==='FOCUS');
-assert.deepEqual({row:focus2.row,col:focus2.col,type:focus2.type},{row:3,col:5,type:'BRIDGE'});
+assert.equal(m2.focusFamilyId,'OPPORTUNITY');
+assert.equal(m2.focusRawMostCount,2);
 assert.equal(m2.sufficiencyItemIds.length,0);
+assert.equal(m2.lowSufficiencyItemIds.length,0);
+assert.equal(RESULT_MATRIX_HTML.includes('matrixBackgroundLabel'),false,'LEAST must not appear in primary matrix summary');
+assert.equal(RESULT_MATRIX_HTML.includes('matrixLegendBackground'),false,'LEAST must not appear in matrix legend');
+assert.equal(RESULT_MATRIX_HTML.includes('matrixPrintStatementList'),true,'PDF statement appendix must be present');
 
 console.log('result_matrix_v04: PASS');
