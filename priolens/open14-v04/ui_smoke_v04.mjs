@@ -131,7 +131,7 @@ try{
   if(matrixText.split(careStatement).length-1!==2)throw new Error('exact received-support statement must appear on both matrix axes');
   if(await page.locator('#matrixCanvasMount .focusMarker').count()!==1)throw new Error('matrix must render one resolved first-glance focus marker');
   if(await page.locator('#matrixCanvasMount .suffMarker').count()!==1)throw new Error('single B+ endpoint must render one matrix sufficiency marker');
-  if(typeof await page.locator('#matrixPdf').evaluate(el=>typeof el.onclick)!=='string')throw new Error('matrix PDF action missing');
+  if(await page.locator('#matrixPdf').evaluate(el=>typeof el.onclick)!=='function')throw new Error('matrix PDF action missing');
   await page.click('#matrixContinue');
   await page.waitForSelector('#result.active');
   if(await page.locator('#resultPdf').count()!==1)throw new Error('result PDF action missing');
