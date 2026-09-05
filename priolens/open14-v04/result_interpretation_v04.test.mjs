@@ -25,7 +25,9 @@ const model={
     {familyId:'KNOWLEDGE',count:2}
   ],
   backgroundFamilyIds:['ORDER','REST'],
-  sufficiencyItemIds:['CONTRIBUTION']
+  sufficiencyItemIds:['CONTRIBUTION'],
+  focusFamilyId:'RECOGNITION',
+  attentionClarifierNoClear:false
 };
 
 const x=buildHumanInterpretationV04({model,lang:'lt',familyLabels});
