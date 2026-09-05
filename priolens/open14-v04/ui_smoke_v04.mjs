@@ -205,6 +205,7 @@ try{
   if(await page.locator('#compareRows .reflectionImages img').count()!==3)throw new Error('3/3 focus exemplars must remain visible in the reflection block');
   const reflectionQuestion='Kas, tavo manymu, galėjo traukti šiuose vaizduose?';
   if(attentionText.split(reflectionQuestion).length-1!==1)throw new Error('reflection question must appear exactly once');
+  if(!(await page.locator('#attentionResearch .researchParallel').count()))throw new Error('A research parallels missing');
   const firstReason=page.locator('#compareRows .reasonOption').first();
   const expectedReason=((await firstReason.textContent())||'').trim();
   await firstReason.click();
@@ -215,15 +216,16 @@ try{
   await page.waitForFunction(()=>!new URLSearchParams(location.search).has('detail'));
 
   await page.click('#matrixSufficiencyDetails');
-  await page.waitForSelector('#result.active');
+  await page.waitForSelector('#matrixResult.active');
   await page.waitForFunction(()=>new URLSearchParams(location.search).get('detail')==='sufficiency');
-  if(!(await page.locator('#result').evaluate(el=>el.classList.contains('detailOnlyHost'))))throw new Error('matrix sufficiency detail did not use detail-only host');
-  if(!(await page.locator('.resultScene').evaluate(el=>getComputedStyle(el).display==='none')))throw new Error('ship/map scene visible behind matrix sufficiency detail');
+  if(!(await page.locator('#suffDetail').evaluate(el=>el.parentElement?.id==='matrixResult')))throw new Error('B detail must be mounted over the matrix result');
   if(await page.locator('#suffDetail').evaluate(el=>el.classList.contains('hidden')))throw new Error('sufficiency detail hidden');
+  if(!(await page.locator('#matrixCanvasMount').evaluate(el=>getComputedStyle(el).display!=='none')))throw new Error('matrix must remain visible behind B detail');
   const suffText=(await page.locator('#suffDetail').textContent())||'';
   if(/\bB\+\b|Channel B/.test(suffText))throw new Error('technical B terminology leaked into participant detail: '+suffText);
   if(!suffText.includes('Kaip ši pakankamumo sritis buvo išskirta?'))throw new Error('sufficiency provenance heading missing');
   if(!suffText.includes('mažiausiai pakankama'))throw new Error('single-route sufficiency-method note missing');
+  if(!(await page.locator('#suffResearch .researchParallel').count()))throw new Error('B research parallels missing');
   await page.click('#suffDetailClose');
   await page.waitForSelector('#matrixResult.active');
   await page.waitForFunction(()=>!new URLSearchParams(location.search).has('detail'));
@@ -240,6 +242,25 @@ try{
   if(((await page.locator('#matrixFocusValue').textContent())||'').trim()!==focusSummaryBefore)throw new Error('restored matrix focus changed after reload');
   if(((await page.locator('#matrixSuffValue').textContent())||'').trim()!==suffSummaryBefore)throw new Error('restored matrix sufficiency summary changed after reload');
   if(finalPayloads.length!==finalPostCountBeforeReload)throw new Error('restoring a completed result must not POST the final session again');
+
+  // Synthetic A+ no-clear: repeated MOST must remain visible in A detail.
+  await page.evaluate(k=>{
+    const x=JSON.parse(localStorage.getItem(k));
+    x.attentionResolution={...(x.attentionResolution||{}),source:'A_PLUS_NO_CLEAR',focus:null,clarifierRequired:false,clarifier:{...(x.attentionResolution?.clarifier||{}),selectedFamilyId:null,noClear:true}};
+    x.attentionFocus=null;
+    x.attentionClarifier={...(x.attentionClarifier||{}),selectedFamilyId:null,noClear:true};
+    localStorage.setItem(k,JSON.stringify(x));
+  },RESULT);
+  await page.reload({waitUntil:'networkidle'});
+  await page.waitForSelector('#matrixResult.active');
+  const noClearRepeats=await page.locator('#matrixCanvasMount .matrixFamily.focus2,#matrixCanvasMount .matrixFamily.focus3').count();
+  if(noClearRepeats<2)throw new Error('synthetic no-clear state must retain multiple repeated MOST directions in matrix');
+  await page.click('#matrixAttentionDetails');
+  await page.waitForSelector('#result.active');
+  if(await page.locator('#repeatRows .repeatedMostDetail').count()!==noClearRepeats)throw new Error('A no-clear detail must preserve every 3/3 and 2/3 repeated MOST direction');
+  if(await page.locator('#compareLabel').evaluate(el=>!el.classList.contains('hidden')))throw new Error('self-explanation prompt must stay hidden when A+ did not single out one direction');
+  await page.click('#attentionBack');
+  await page.waitForSelector('#matrixResult.active');
 
   // Synthetic restore checks now target matrix endpoint preservation, not the deactivated ship/map scene.
   await page.evaluate(k=>{
