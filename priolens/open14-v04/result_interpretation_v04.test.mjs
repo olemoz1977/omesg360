@@ -86,4 +86,11 @@ const noParallel=buildHumanInterpretationV04({
 });
 assert.ok(body(noParallel).includes('nereikia sujungti per jėgą'));
 
+
+const noLowRoute=buildHumanInterpretationV04({
+  model:{repeatedMost:[{familyId:'RECOGNITION',count:2}],backgroundFamilyIds:[],sufficiencyItemIds:[],focusFamilyId:'RECOGNITION',attentionClarifierNoClear:false},
+  lang:'lt',familyLabels
+});
+assert.equal(noLowRoute.paragraphs.length,2);
+
 console.log('result_interpretation_v04: PASS');
