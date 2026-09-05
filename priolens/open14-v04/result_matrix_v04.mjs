@@ -151,6 +151,15 @@ function bridgeNote(model,lang,familyLabels){
   const seen=Array.from(new Set(ids));if(!seen.length)return '';
   return '<div class="matrixBridgeNote">'+seen.map(function(id){const p=A_PLACEMENTS[id],name=familyLabels[id]||id;return '<div><strong>'+esc(name)+'</strong> · '+esc(C.bridge)+' · '+esc((p.related||[]).join(', '))+'</div>'}).join('')+'</div>'
 }
+function centerMatrixOnResult(){
+  const viewport=document.querySelector('.matrixViewport');
+  if(!viewport)return;
+  const cells=Array.from(viewport.querySelectorAll('.matrixDataCell')).filter(function(cell){return cell.querySelector('.matrixMarker')});
+  if(!cells.length){viewport.scrollLeft=0;return}
+  const centers=cells.map(function(cell){return cell.offsetLeft+cell.offsetWidth/2});
+  const target=centers.reduce(function(a,b){return a+b},0)/centers.length;
+  viewport.scrollLeft=Math.max(0,target-viewport.clientWidth/2);
+}
 export function renderResultMatrixV04(args){
   const state=args.state,lang=args.lang||'lt',familyLabels=args.familyLabels||{},onContinue=args.onContinue,onPrint=args.onPrint,C=COPY[lang]||COPY.lt,model=buildResultMatrixModelV04(state,lang);
   const q=function(id){const el=document.getElementById(id);if(!el)throw new Error('PrioLens matrix DOM missing #'+id);return el};
@@ -164,6 +173,7 @@ export function renderResultMatrixV04(args){
   q('matrixContinue').textContent=C.continue;q('matrixPdf').textContent=C.pdf;
   q('matrixContinue').onclick=function(){if(typeof onContinue==='function')onContinue()};
   q('matrixPdf').onclick=function(){if(typeof onPrint==='function')onPrint()};
+  if(typeof requestAnimationFrame==='function')requestAnimationFrame(centerMatrixOnResult);else centerMatrixOnResult();
   return model
 }
 export function printResultReportV04(){
