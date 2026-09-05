@@ -140,6 +140,10 @@ try{
   if(await page.locator('#matrixCanvasMount .lowOwnCell').count()===0)throw new Error('ratings of 3 or lower must mark their own diagonal cells');
   if(await page.locator('#matrixCanvasMount .routeCell').count()!==1)throw new Error('single B+ endpoint must have one strong orange route cell');
   if(await page.locator('#matrixBackgroundLabel').count()!==0)throw new Error('LEAST summary card must be removed from matrix');
+  const interpretationText=((await page.locator('#matrixInterpretation').textContent())||'').trim();
+  if(!interpretationText.includes('Viena galima interpretacija'))throw new Error('human interpretation title missing');
+  if(!interpretationText.includes('Ne diagnozė'))throw new Error('interpretation diagnostic boundary missing');
+  if(/tikrasis poreikis|pasąmon/.test(interpretationText.toLowerCase()))throw new Error('forbidden certainty leaked into interpretation');
   const suffSummary=((await page.locator('#matrixSuffValue').textContent())||'').trim();
   if(suffSummary.includes('Jaučiu, kad turiu pakankamai'))throw new Error('B result summary still uses affirmative sufficiency sentence');
   if(!suffSummary)throw new Error('B insufficiency summary missing');
