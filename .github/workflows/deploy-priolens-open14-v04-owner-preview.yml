@@ -134,6 +134,7 @@ jobs:
           test "$ok" = 1
           cp /tmp/v04-api/admin-secret.php priolens/open14-v04/server/admin-secret.php
           php -l priolens/open14-v04/server/admin-secret.php
+          php -r 'ob_start(); require "priolens/open14-v04/server/admin-secret.php"; ob_end_clean(); if (!defined("PRIOLENS_ADMIN_PASSWORD") || (string)PRIOLENS_ADMIN_PASSWORD === "" || (string)PRIOLENS_ADMIN_PASSWORD === "CHANGE_ME") exit(5);'
           echo 'PASS: protected DB config and admin secret copied without printing contents'
 
       - name: Deploy isolated v0.4 API
