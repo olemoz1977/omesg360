@@ -133,6 +133,7 @@ jobs:
           file_put_contents('priolens/open14-v04/server/admin-secret.php', $body);
           PHP
           php -l priolens/open14-v04/server/admin-secret.php
+          php -r 'require "priolens/open14-v04/server/config.php"; require "priolens/open14-v04/server/admin-secret.php"; if (!defined("PRIOLENS_ADMIN_PASSWORD") || (string)PRIOLENS_ADMIN_PASSWORD === "" || (string)PRIOLENS_ADMIN_PASSWORD === "CHANGE_ME") exit(4);'
           echo 'PASS: protected DB config and admin secret prepared without printing contents'
 
       - name: Deploy isolated v0.4 API
@@ -164,7 +165,7 @@ jobs:
           code=$(curl -sS -o /tmp/progress-get -w '%{http_code}' "$PROGRESS"); test "$code" = 405; grep -q 'Method not allowed' /tmp/progress-get
           code=$(curl -sS -o /tmp/config-get -w '%{http_code}' "$CONFIG"); test "$code" = 403
           code=$(curl -sS -o /tmp/admin-secret-get -w '%{http_code}' "$ADMIN_SECRET"); test "$code" = 403
-          code=$(curl -sS -o /tmp/admin-get -w '%{http_code}' "$ADMIN"); echo "admin_http=$code"; test "$code" = 200; grep -q 'PrioLens Admin' /tmp/admin-get
+          code=$(curl -sS -o /tmp/admin-get -w '%{http_code}' "$ADMIN"); echo "admin_http=$code"; if test "$code" != 200; then printf 'admin_body='; head -c 160 /tmp/admin-get | tr '\n' ' '; echo; exit 1; fi; grep -q 'PrioLens Admin' /tmp/admin-get
           echo 'PASS: isolated v0.4 API + protected admin deployed; config and admin secret protected'
 
       - name: Deploy isolated v0.4 owner preview
