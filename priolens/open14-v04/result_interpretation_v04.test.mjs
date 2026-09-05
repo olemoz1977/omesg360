@@ -34,11 +34,11 @@ const x=buildHumanInterpretationV04({model,lang:'lt',familyLabels});
 assert.equal(x.schema,RESULT_INTERPRETATION_SCHEMA_V04);
 assert.equal(x.title,'Viena galima interpretacija');
 assert.match(x.disclaimer,/Ne diagnozė/);
-assert.ok(x.paragraphs.some(p=>p.includes('neužtenka tiesiog „daryti savo darbą“')));
-assert.ok(x.paragraphs.some(p=>p.includes('indėlis matomas bei turi vietą tarp kitų')));
-assert.ok(x.paragraphs.some(p=>p.includes('Mokymasis ir supratimas')));
+assert.ok(x.paragraphs.some(p=>p.includes('galimybes prisidėti prie kažko svarbaus')));
+assert.ok(x.paragraphs.some(p=>p.includes('indėlis ne tik egzistuoja, bet yra matomas')));
+assert.ok(x.paragraphs.some(p=>p.includes('Mokymasis / supratimas')));
 assert.ok(x.paragraphs.some(p=>p.includes('Tvarka / struktūra')&&p.includes('Poilsis / atsigavimas')));
-assert.match(x.question,/daug darai/);
+assert.match(x.question,/Kur šiuo metu labiausiai jauti/);
 
 const noStory=buildHumanInterpretationV04({
   model:{repeatedMost:[],backgroundFamilyIds:[],sufficiencyItemIds:[]},
