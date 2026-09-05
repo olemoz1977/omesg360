@@ -19,7 +19,17 @@ function replaceOnce(text,needle,replacement,label=needle.slice(0,60)){
 
 let html=read('index.html');
 
+html=replaceOnce(
+  html,
+  '<div id="stage" class="stage"><button class="stim" data-slot="0"><img alt=""></button><button class="stim" data-slot="1"><img alt=""></button><button class="stim" data-slot="2"><img alt=""></button><button id="noneMost" class="none">Nė vienas aiškiai</button><button id="tieLeast" class="none hidden">Abu likę panašiai</button></div>',
+  '<div id="stage" class="stage"><button class="stim" data-slot="0"><img alt=""></button><button class="stim" data-slot="1"><img alt=""></button><button class="stim" data-slot="2"><img alt=""></button><button id="noneMost" class="none">Nė vienas aiškiai</button><button id="undoMost" class="none hidden">Atšaukti pirmą</button><button id="tieLeast" class="none hidden">Abu likę panašiai</button></div>',
+  'same-trial undo button'
+);
+html=replaceOnce(html,"leastHint:'Pirmo pasirinkimo nebekeičiame. Žiūrėk tik į kitus du.'","leastHint:'Jei paspaudei per greitai, gali atšaukti pirmą pasirinkimą. Kitu atveju rinkis iš likusių dviejų.'",'LT undo hint');
+html=replaceOnce(html,"leastHint:'Your first choice is fixed. Look only at the other two.'","leastHint:'If you tapped too quickly, you can undo the first choice. Otherwise choose from the other two.'",'EN undo hint');
+
 const clarifierCss=`
+.stage{grid-template-columns:repeat(2,minmax(0,1fr))}.stim{grid-column:1/-1}.none{grid-column:1/-1}#undoMost:not(.hidden){grid-column:1;grid-row:4;font-size:13px;padding:8px 10px}#tieLeast:not(.hidden){grid-column:2;grid-row:4;font-size:13px;padding:8px 10px}
 .clarify{padding:18px 4px 42px;max-width:620px;margin:0 auto}.clarifyHead h2{font-size:28px;margin:0 0 8px}.clarifyGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:18px 0}.clarifyCard{border:1px solid var(--line);background:#fff;border-radius:16px;padding:8px;min-height:44px}.clarifyCard.on{outline:3px solid #181818}.clarifyPics{display:grid;gap:5px}.clarifyPics.two{grid-template-columns:repeat(2,minmax(0,1fr))}.clarifyPics.three{grid-template-columns:repeat(3,minmax(0,1fr))}.clarifyPics img{display:block;width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:10px;background:#eee}.clarifyNeed{width:100%;text-align:left;border:1px solid var(--line);background:#fff;border-radius:14px;padding:13px 14px;min-height:48px;font-weight:720;line-height:1.35}.clarifyActions{display:grid;gap:8px;margin-top:14px}.clarifyMeta{font-size:13px;color:#666;line-height:1.5}@media(max-width:620px){.clarifyGrid{grid-template-columns:1fr;gap:12px}.clarifyCard{padding:9px}}
 `;
 html=replaceOnce(html,'</style>',clarifierCss+RESULT_WORLD_CSS+RESULT_MATRIX_CSS+'</style>','style close');
@@ -99,7 +109,7 @@ html=replaceOnce(html,"CARE_SUPPORT_PRESENT:'rūpestį, paramą ir žmogišką d
 html=html.replace(careEnNeedle,"CARE_SUPPORT_PRESENT:'whether you receive enough care, support and human attention from others'");
 
 const stateNeedle="sufficiencySchema:'2rasi.priolens.sufficiency-v0.2',sufficiency:{},selfExplanation:null,pendingMost:null,completedAt:null";
-const stateReplacement="sufficiencySchema:SUFFICIENCY_SCHEMA_V04,constructDefinitionVersion:bank.constructDefinitionVersion||null,sufficiency:{},attentionResolution:null,attentionClarifier:null,attentionFocus:null,sufficiencyResolution:null,sufficiencyClarifier:null,sufficiencyRoute:null,selfExplanation:null,pendingMost:null,systemSmoke:new URLSearchParams(location.search).get('systemSmoke')==='1',completedAt:null";
+const stateReplacement="sufficiencySchema:SUFFICIENCY_SCHEMA_V04,constructDefinitionVersion:bank.constructDefinitionVersion||null,sufficiency:{},attentionResolution:null,attentionClarifier:null,attentionFocus:null,sufficiencyResolution:null,sufficiencyClarifier:null,sufficiencyRoute:null,selfExplanation:null,pendingMost:null,attentionRevisions:[],systemSmoke:new URLSearchParams(location.search).get('systemSmoke')==='1',completedAt:null";
 html=replaceOnce(html,stateNeedle,stateReplacement,'startSession state fields');
 const localDraftClearAnchor="function clearLocalDraft(){try{localStorage.removeItem(DRAFT_KEY);if(LANG==='lt')localStorage.removeItem(DRAFT_KEY_BASE)}catch(err){console.warn('local draft clear failed',err)}}";
 const completedResultHelpers=`function saveLocalResult(){if(!state?.completedAt)return;try{localStorage.setItem(RESULT_KEY,JSON.stringify(state))}catch(err){console.warn('local result save failed',err)}}
@@ -114,6 +124,12 @@ html=replaceOnce(html,"state.selfExplanationSave={ok:true,at:new Date().toISOStr
 html=replaceOnce(html,"state.selfExplanationSave={ok:false,error:String(err)};","state.selfExplanationSave={ok:false,error:String(err)};saveLocalResult();",'persist restored self explanation failure');
 html=replaceOnce(html,"$('restart').onclick=()=>{clearLocalDraft();location.reload()}","$('restart').onclick=()=>{clearLocalDraft();clearLocalResult();location.reload()}",'restart clears completed result');
 
+
+html=replaceOnce(html,"$('noneMost').classList.toggle('hidden',leastPhase);$('tieLeast').classList.toggle('hidden',!leastPhase);","$('noneMost').classList.toggle('hidden',leastPhase);$('undoMost').classList.toggle('hidden',!leastPhase);$('tieLeast').classList.toggle('hidden',!leastPhase);",'show same-trial undo only before LEAST');
+html=replaceOnce(html,"rtMs:pm?.rtMs??null,pointerType:pm?.pointerType??null,leastChoice:","rtMs:pm?.rtMs??null,pointerType:pm?.pointerType??null,mostRevised:Array.isArray(state.attentionRevisions)&&state.attentionRevisions.some(x=>x.trialIndex===i+1),leastChoice:",'mark revised MOST trial');
+html=replaceOnce(html,"function chooseLeast(slot){if(locked||!state.pendingMost||state.pendingMost.slot===slot)return;finishVisualTrial(slot,false)}","function chooseLeast(slot){if(locked||!state.pendingMost||state.pendingMost.slot===slot)return;finishVisualTrial(slot,false)}\\nfunction undoMost(){if(locked||!state.pendingMost)return;ensureV04StateFields();const i=state.choices.length,trial=assignment.trials[i],pm=state.pendingMost;state.attentionRevisions.push({trialId:trial.trialId,trialIndex:i+1,originalChoice:{familyId:pm.familyId,exemplarId:pm.exemplarId,slot:pm.slot},originalRtMs:pm.rtMs??null,originalPointerType:pm.pointerType??null,undoneAfterMs:Math.max(0,Math.round(performance.now()-t0)),undoneAt:new Date().toISOString()});state.pendingMost=null;checkpointProgress();renderTrial()}",'same-trial undo logic');
+html=replaceOnce(html,"$('tieLeast').addEventListener('pointerdown',e=>lastPointerType=e.pointerType);$('tieLeast').addEventListener('click',()=>{if(!state.pendingMost)return;finishVisualTrial(null,true)});","$('undoMost').addEventListener('click',undoMost);$('tieLeast').addEventListener('pointerdown',e=>lastPointerType=e.pointerType);$('tieLeast').addEventListener('click',()=>{if(!state.pendingMost)return;finishVisualTrial(null,true)});",'same-trial undo handler');
+html=replaceOnce(html,"state.rtMedianMs=median(state.choices.map(x=>x.rtMs));state.leastRtMedianMs=median(state.choices.map(x=>x.leastRtMs));","state.rtMedianMs=median(state.choices.filter(x=>!x.mostRevised).map(x=>x.rtMs));state.revisedMostCount=state.choices.filter(x=>x.mostRevised).length;state.leastRtMedianMs=median(state.choices.map(x=>x.leastRtMs));",'exclude revised trials from spontaneous RT aggregate');
 
 html=replaceOnce(html,"if(state.choices.length<14)renderTrial();else{show('suff');renderSuff()}","if(state.choices.length<14)renderTrial();else afterChannelA()",'post Channel-A transition');
 html=replaceOnce(html,"if(suffIndex<5){suffIndex++;renderSuff()}else finish()","if(suffIndex<5){suffIndex++;renderSuff()}else afterChannelB()",'post Channel-B transition');
@@ -145,6 +161,7 @@ const helperCode=`function ensureV04StateFields(){
   if(!Object.prototype.hasOwnProperty.call(state,'sufficiencyResolution'))state.sufficiencyResolution=null;
   if(!Object.prototype.hasOwnProperty.call(state,'sufficiencyClarifier'))state.sufficiencyClarifier=null;
   if(!Object.prototype.hasOwnProperty.call(state,'sufficiencyRoute'))state.sufficiencyRoute=null;
+  if(!Array.isArray(state.attentionRevisions))state.attentionRevisions=[];
 }
 function hash32(text){let h=2166136261;for(let i=0;i<text.length;i++){h^=text.charCodeAt(i);h=Math.imul(h,16777619)}return h>>>0}
 function stableOrder(xs,salt,keyFn){return [...xs].sort((a,b)=>hash32(state.seed+'|'+salt+'|'+keyFn(a))-hash32(state.seed+'|'+salt+'|'+keyFn(b)))}
