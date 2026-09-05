@@ -12,6 +12,12 @@ const COPY={
     repeatIntro2:'Šiek tiek silpniau, bet vis dar pakartotinai dėmesį traukė ',
     repeatBoundary:'Tai nereiškia, kad šios temos tau apskritai yra svarbiausios ar kad jų trūksta. Tai tik šios vaizdų imties dėmesio pasikartojimai.',
     genericBridge:'Pirmo žvilgsnio ir pakankamumo rezultatai nebūtinai kalba apie tą patį dalyką. Jei tarp jų atpažįsti ryšį savo gyvenime, tai gali būti naudinga hipotezė savistabai; jei neatpažįsti, jų nereikia sujungti per jėgą.',
+    noClearBridge:'Papildomame pirmo žvilgsnio patikslinime nė viena kryptis tau nebuvo aiškiai artimesnė. Todėl pasikartojančius motyvus čia paliekame matomus, bet iš jų nekuriame konkretesnės bendros istorijos su pakankamumo rezultatu.',
+    directBridgePrefix:'Čia matyti gana tiesioginis teminis persidengimas: pirmo žvilgsnio pasirinkimuose kartojosi ',
+    directBridgeSuffix:'. Tai neįrodo priežasties ir neparodo „tikro poreikio“, bet verta patikrinti, ar abi perspektyvos tavo situacijoje kalba apie panašų dalyką.',
+    relatedBridgePrefix:'Galimas ryšys čia silpnesnis: pirmo žvilgsnio pasirinkimuose kartojosi ',
+    relatedBridgeSuffix:', tačiau šios kryptys yra artimos, o ne tapačios pakankamumo sričiai. Jei tavo situacijoje ryšio neatpažįsti, jų jungti nereikia.',
+    careBridge:'Rūpesčio / pagalbos vaizdai pirmuose pasirinkimuose kartojosi, tačiau vien iš jų negalima spręsti, ar dėmesį traukė paramos gavimas, rūpinimasis kitu, pats santykis ar scena. Todėl tai nėra tiesioginis paramos iš kitų trūkumo patvirtinimas.',
     leastPrefix:'Tuo tarpu ',
     leastSuffix:' šioje vaizdų imtyje dažniau liko antrame plane. Tai nereiškia, kad šios temos tau nesvarbios; jos tiesiog mažiau konkuravo dėl spontaniško dėmesio.',
     and:' ir ',
@@ -29,6 +35,12 @@ const COPY={
     repeatIntro2:'A little less strongly, but still repeatedly, your attention was drawn to ',
     repeatBoundary:'This does not mean these themes are generally the most important to you or that you lack them. They are only repeated attention patterns in this image set.',
     genericBridge:'The first-glance and sufficiency results do not have to describe the same thing. If you recognize a connection between them in your life, it can be a useful hypothesis for reflection; if you do not, there is no need to force one.',
+    noClearBridge:'In the additional first-glance clarification, no direction felt clearly closer to you. The repeated motifs therefore remain visible, but we do not use them to build a more specific combined story with the sufficiency result.',
+    directBridgePrefix:'There is a fairly direct thematic overlap here: your first-glance choices repeatedly included ',
+    directBridgeSuffix:'. This does not prove causality or reveal a “true need”, but it may be worth checking whether the two perspectives describe something similar in your situation.',
+    relatedBridgePrefix:'The possible link is weaker here: your first-glance choices repeatedly included ',
+    relatedBridgeSuffix:', but these directions are related to, not identical with, the sufficiency area. If you do not recognize the link in your situation, there is no need to connect them.',
+    careBridge:'Care / helping scenes repeated in your first choices, but those images alone cannot show whether your attention was drawn to receiving support, caring for someone else, the relationship itself, or the scene. They are therefore not direct evidence of insufficient support from others.',
     leastPrefix:'Meanwhile, ',
     leastSuffix:' more often stayed in the background in this image set. This does not mean these themes are unimportant to you; they simply competed less for spontaneous attention.',
     and:' and ',
@@ -114,82 +126,54 @@ function joinNatural(values,lang){
 function names(rows,familyLabels){
   return rows.map(function(x){return familyLabels[x.familyId]||x.familyId});
 }
-function hasAny(set,ids){return ids.some(function(id){return set.has(id)})}
-
-function specificBridgeLt(routeId,repeats){
-  const ids=new Set(repeats.map(function(x){return x.familyId}));
-  if(routeId==='CONTRIBUTION'){
-    const social=hasAny(ids,['BELONGING','CONNECTION']);
-    const recognition=ids.has('RECOGNITION');
-    const learning=hasAny(ids,['KNOWLEDGE','EXPLORATION']);
-    const mastery=ids.has('MASTERY');
-    if(recognition&&social){
-      let s='Viena galima interpretacija: tau gali būti svarbus ne pats pripažinimas ar priklausymas atskirai, o situacija, kurioje gali prasmingai prisidėti ir kartu jausti, kad tavo indėlis matomas bei turi vietą tarp kitų.';
-      if(learning)s+=' Mokymasis ir supratimas tada gali būti ne atskiras tikslas, o būdas daugiau suprasti, daugiau gebėti ir turėti daugiau galimybių prisidėti.';
-      else if(mastery)s+=' Gebėjimų panaudojimas tada gali būti ne tik meistriškumo klausimas, o būdas turėti didesnį realų poveikį.';
-      return s;
+const BRIDGE_MAP={
+  LEARNING_GROWTH:{direct:['KNOWLEDGE'],related:['EXPLORATION','OPPORTUNITY']},
+  CAPABILITY_MASTERY:{direct:['MASTERY'],related:['OPPORTUNITY']},
+  AUTONOMY_AGENCY:{direct:['AUTONOMY'],related:['CONTROL','OPPORTUNITY']},
+  RECOGNITION_ESTEEM:{direct:['RECOGNITION'],related:[]},
+  CONNECTION_BELONGING:{direct:['BELONGING'],related:['CONNECTION']},
+  SAFETY_STABILITY:{direct:['SAFETY'],related:['CONTROL']},
+  CLARITY_PREDICTABILITY:{direct:[],related:['ORDER','CONTROL']},
+  RESTORATION_ENERGY:{direct:['REST'],related:[]},
+  MATERIAL_RESOURCES:{direct:['RESOURCE'],related:['OPPORTUNITY']}
+};
+function presentNames(ids,present,familyLabels){return ids.filter(function(id){return present.has(id)}).map(function(id){return familyLabels[id]||id})}
+function contributionBridge(repeats,lang,familyLabels){
+  const present=new Set(repeats.map(function(x){return x.familyId}));
+  const recognition=present.has('RECOGNITION');
+  const social=['BELONGING','CONNECTION'].filter(function(id){return present.has(id)});
+  const learning=['KNOWLEDGE','EXPLORATION'].filter(function(id){return present.has(id)});
+  if(!recognition&&!social.length&&!learning.length)return '';
+  if(lang==='en'){
+    if(recognition&&social.length){
+      let out='One possible reading is that contributing may feel more meaningful when the contribution is not only made, but also visible and connected with having a place among others.';
+      if(learning.length)out+=' Because '+joinNatural(learning.map(function(id){return familyLabels[id]||id}),lang)+' also repeated, learning or understanding may be another part of this picture: a possible way to expand what you can contribute.';
+      return out;
     }
-    if(recognition)return 'Viena galima interpretacija: tau gali būti svarbu ne vien prisidėti, bet ir matyti, kad tas indėlis buvo pastebėtas ir turėjo realų svorį.';
-    if(social)return 'Viena galima interpretacija: prasmingas indėlis tau gali būti stipriau susijęs su vieta tarp kitų žmonių nei su individualiu pasiekimu.';
-    if(learning||mastery)return 'Viena galima interpretacija: noras daugiau mokėti ar suprasti gali būti susijęs ne vien su augimu pačiu savaime, o su noru turėti daugiau kuo prasmingai prisidėti.';
+    if(recognition)return 'One possible reading is that contributing may matter more when you can also see that the contribution was noticed or carried weight.';
+    if(social.length)return 'One possible reading is that contributing may feel more meaningful when it is connected with a real place among other people.';
+    return 'One possible reading is that learning or understanding may matter here as one way to expand what you are able to contribute.';
   }
-  if(routeId==='MEANING_PURPOSE'){
-    if(hasAny(ids,['AUTONOMY','MASTERY','RECOGNITION']))return 'Viena galima interpretacija: prasmingumas tau gali atsirasti ne iš abstraktaus „tikslo“, o tada, kai gali veikti savaip, panaudoti gebėjimus ir matyti savo darbo svorį.';
-    if(hasAny(ids,['BELONGING','CONNECTION','CARE']))return 'Viena galima interpretacija: prasmė tau gali būti labiau susijusi su santykiu ir poveikiu žmonėms nei su pačia veikla atskirai.';
+  if(recognition&&social.length){
+    let out='Viena galima interpretacija: prisidėjimas gali būti patiriamas stipriau tada, kai indėlis ne tik egzistuoja, bet yra matomas ir susijęs su realia vieta tarp kitų.';
+    if(learning.length)out+=' Kadangi kartojosi ir '+joinNatural(learning.map(function(id){return familyLabels[id]||id}),lang)+', mokymasis ar supratimas gali būti dar viena šio vaizdo dalis: galimas būdas plėsti tai, kuo gali prisidėti.';
+    return out;
   }
-  if(routeId==='LEARNING_GROWTH'&&hasAny(ids,['KNOWLEDGE','EXPLORATION','MASTERY','OPPORTUNITY'])){
-    return 'Viena galima interpretacija: čia pirmas žvilgsnis ir tavo dabartinis įvertinimas priartėja prie tos pačios temos. Tai ne patvirtinimas, kad viena sukėlė kitą, bet gali būti ženklas pasižiūrėti, ar šiuo metu turi pakankamai erdvės smalsumui, mokymuisi ir realiam gebėjimų augimui.';
-  }
-  if(routeId==='CAPABILITY_MASTERY'&&hasAny(ids,['MASTERY','KNOWLEDGE','AUTONOMY'])){
-    return 'Viena galima interpretacija: tau gali būti svarbu ne tik turėti gebėjimų, bet turėti progą juos realiai panaudoti, tobulinti ir veikti ne vien pagal jau išmoktą rutiną.';
-  }
-  if(routeId==='AUTONOMY_AGENCY'&&hasAny(ids,['AUTONOMY','CONTROL','OPPORTUNITY'])){
-    return 'Viena galima interpretacija: čia gali būti svarbi ne „laisvė apskritai“, o labai konkreti patirtis, kad tavo sprendimas iš tikrųjų keičia tai, kas vyksta.';
-  }
-  if(routeId==='RECOGNITION_ESTEEM'){
-    if(hasAny(ids,['RECOGNITION']))return 'Viena galima interpretacija: tai, kas spontaniškai traukė dėmesį, ir tai, ko šiuo metu nepakanka, priartėja prie tos pačios temos: būti pastebėtam ne dėl statuso, o dėl realaus indėlio.';
-    if(hasAny(ids,['MASTERY','KNOWLEDGE']))return 'Viena galima interpretacija: gali būti svarbu ne tik gerai padaryti ar daug žinoti, bet jausti, kad tai yra matoma ir turi vertę kitiems.';
-  }
-  if(routeId==='CONNECTION_BELONGING'&&hasAny(ids,['BELONGING','CONNECTION','CARE','RECOGNITION'])){
-    return 'Viena galima interpretacija: tau gali būti svarbus ne tiesiog kontaktų kiekis, o patirtis, kad esi matomas, priimtas ir turi tikrą vietą tarp kitų.';
-  }
-  if(routeId==='CARE_SUPPORT_PRESENT'&&hasAny(ids,['CARE','CONNECTION','BELONGING','SAFETY'])){
-    return 'Viena galima interpretacija: šiuo metu gali būti svarbu ne vien būti tarp žmonių, o patirti, kad ryšys veikia ir į tavo pusę: kad paramą galima ne tik duoti, bet ir gauti.';
-  }
-  if(routeId==='SAFETY_STABILITY'&&hasAny(ids,['SAFETY','ORDER','CONTROL','REST'])){
-    return 'Viena galima interpretacija: saugumo jausmas tau gali būti susijęs ne tik su apsauga nuo grėsmės, bet ir su aiškesniu pagrindu, nuspėjamumu bei galimybe bent dalį situacijos valdyti.';
-  }
-  if(routeId==='CLARITY_PREDICTABILITY'&&hasAny(ids,['ORDER','CONTROL','SAFETY'])){
-    return 'Viena galima interpretacija: neaiškumas gali varginti ne todėl, kad tau reikia viską kontroliuoti, o todėl, kad aiškesnis veiksmo ir pasekmės ryšys leidžia ramiau veikti.';
-  }
-  if(routeId==='RESTORATION_ENERGY'&&hasAny(ids,['REST','RESOURCE'])){
-    return 'Viena galima interpretacija: poilsio klausimas gali būti ne apie pasyvumą, o apie realų resurso atstatymą, kad vėl turėtum iš ko veikti.';
-  }
-  if(routeId==='MATERIAL_RESOURCES'&&hasAny(ids,['RESOURCE','OPPORTUNITY','CONTROL'])){
-    return 'Viena galima interpretacija: šiuo metu galimybės gali būti ribojamos ne motyvacijos, o labai praktiško prieinamumo: ar turi tai, ko reikia, kad galėtum veikti.';
-  }
-  return '';
+  if(recognition)return 'Viena galima interpretacija: prisidėjimas gali būti svarbesnis tada, kai kartu matai, kad indėlis buvo pastebėtas ar turėjo svorį.';
+  if(social.length)return 'Viena galima interpretacija: prisidėjimas gali būti prasmingesnis tada, kai jis susijęs su realia vieta tarp kitų žmonių.';
+  return 'Viena galima interpretacija: mokymasis ar supratimas čia gali būti svarbus kaip vienas iš būdų plėsti tai, kuo gali prisidėti.';
 }
-function specificBridgeEn(routeId,repeats){
-  const ids=new Set(repeats.map(function(x){return x.familyId}));
-  if(routeId==='CONTRIBUTION'){
-    const social=hasAny(ids,['BELONGING','CONNECTION']);
-    const recognition=ids.has('RECOGNITION');
-    const learning=hasAny(ids,['KNOWLEDGE','EXPLORATION']);
-    const mastery=ids.has('MASTERY');
-    if(recognition&&social){
-      let s='One possible reading is that recognition or belonging may not matter separately as much as being able to contribute meaningfully while feeling that your contribution is visible and has a place among others.';
-      if(learning)s+=' Learning and understanding may then matter not as an isolated goal, but as a way to understand more, be able to do more and have more to contribute.';
-      else if(mastery)s+=' Using your abilities may then matter not only as mastery, but as a way to have more real impact.';
-      return s;
-    }
-    if(recognition)return 'One possible reading is that it may matter not only to contribute, but to see that the contribution was noticed and carried real weight.';
-    if(social)return 'One possible reading is that meaningful contribution may be tied more strongly to having a place among other people than to individual achievement.';
-    if(learning||mastery)return 'One possible reading is that wanting to know or do more may connect not only to growth itself, but to having more with which to contribute meaningfully.';
-  }
-  if(routeId==='LEARNING_GROWTH'&&hasAny(ids,['KNOWLEDGE','EXPLORATION','MASTERY','OPPORTUNITY']))return 'The first-glance and current sufficiency views come close to the same theme here. That does not prove one caused the other, but it may be useful to ask whether you currently have enough room for curiosity, learning and real growth in capability.';
-  if(routeId==='AUTONOMY_AGENCY'&&hasAny(ids,['AUTONOMY','CONTROL','OPPORTUNITY']))return 'One possible reading is that what matters may not be “freedom” in the abstract, but the concrete experience that your own decision actually changes what happens.';
-  if(routeId==='CONNECTION_BELONGING'&&hasAny(ids,['BELONGING','CONNECTION','CARE','RECOGNITION']))return 'One possible reading is that what matters may not be the number of contacts, but the experience of being seen, accepted and having a real place among others.';
+function mappedBridge(routeId,repeats,lang,familyLabels){
+  const C=COPY[lang]||COPY.lt;
+  const present=new Set(repeats.map(function(x){return x.familyId}));
+  if(routeId==='CONTRIBUTION')return contributionBridge(repeats,lang,familyLabels);
+  if(routeId==='CARE_SUPPORT_PRESENT'&&present.has('CARE'))return C.careBridge;
+  const map=BRIDGE_MAP[routeId];
+  if(!map)return '';
+  const direct=presentNames(map.direct,present,familyLabels);
+  const related=presentNames(map.related,present,familyLabels);
+  if(direct.length)return C.directBridgePrefix+'**'+joinNatural(direct,lang)+'**'+C.directBridgeSuffix;
+  if(related.length)return C.relatedBridgePrefix+'**'+joinNatural(related,lang)+'**'+C.relatedBridgeSuffix;
   return '';
 }
 
@@ -204,6 +188,7 @@ export function buildHumanInterpretationV04(args={}){
   const secondary=repeats.filter(function(x){return x.count===2});
   const routeIds=Array.isArray(model.sufficiencyItemIds)?model.sufficiencyItemIds:[];
   const backgrounds=Array.isArray(model.backgroundFamilyIds)?model.backgroundFamilyIds:[];
+  const clarifierNoClear=model.attentionClarifierNoClear===true||(model.focusFamilyId==null&&repeats.length>0);
 
   const paragraphs=[];
   let question=C.defaultQuestion;
@@ -228,8 +213,8 @@ export function buildHumanInterpretationV04(args={}){
   }
 
   if(routeIds.length===1&&repeats.length){
-    const bridge=lang==='en'?specificBridgeEn(routeIds[0],repeats):specificBridgeLt(routeIds[0],repeats);
-    paragraphs.push(bridge||C.genericBridge);
+    if(clarifierNoClear)paragraphs.push(C.noClearBridge);
+    else paragraphs.push(mappedBridge(routeIds[0],repeats,lang,familyLabels)||C.genericBridge);
   }else if(routeIds.length&&repeats.length){
     paragraphs.push(C.genericBridge);
   }
