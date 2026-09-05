@@ -54,7 +54,8 @@ try{
   if(await page.locator('#matrixCanvasMount .matrixFamily.focus2,#matrixCanvasMount .matrixFamily.focus3').count()!==expectedFocusHighlights) throw new Error('live matrix focus highlight count does not match resolved Channel-A focus');
   if(await page.locator('#matrixCanvasMount .backgroundMarker').count()!==0) throw new Error('live matrix must not render LEAST point markers');
   if(await page.locator('#matrixCanvasMount .suffMarker').count()!==0) throw new Error('live matrix must not render B point markers');
-  if(await page.locator('#matrixCanvasMount .lowBandCell').count()!==0) throw new Error('all-5 Channel B must not render orange low-sufficiency bands');
+  if(await page.locator('#matrixCanvasMount .lowBandCell').count()!==0) throw new Error('orange must never spill across other need cells');
+  if(await page.locator('#matrixCanvasMount .lowOwnCell').count()!==0) throw new Error('all-5 Channel B must not render orange own-diagonal cells');
   if(await page.locator('#matrixCanvasMount .routeCell').count()!==0) throw new Error('all-5 Channel B must not render an insufficiency route cell');
   if(await page.locator('#matrixBackgroundLabel').count()!==0) throw new Error('LEAST summary card must be absent in live matrix');
   for(const id of ['#matrixAttentionDetails','#matrixSufficiencyDetails','#matrixPdf','#matrixRestart','#matrixBack2rasi']){
