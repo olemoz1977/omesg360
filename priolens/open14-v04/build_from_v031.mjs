@@ -76,9 +76,11 @@ html=replaceOnce(html,"CONTROL:'This may relate to wanting to influence a situat
 html=replaceOnce(html,"OPPORTUNITY:'Gali būti susiję su matoma galimybe, kurią norisi pastebėti ir išnaudoti.'","OPPORTUNITY:'Gali būti susiję su matoma ir prieinama galimybe veikti ar kažkuo pasinaudoti.'",'OPPORTUNITY LT meaning');
 html=replaceOnce(html,"OPPORTUNITY:'This may relate to noticing an opening or possibility that feels worth using.'","OPPORTUNITY:'This may relate to noticing an available possibility for action or use.'",'OPPORTUNITY EN meaning');
 html=replaceOnce(html,"CARE_SUPPORT_PRESENT:'rūpesčio, paramos ir žmogiško dėmesio'","CARE_SUPPORT_PRESENT:'rūpesčio, paramos ir žmogiško dėmesio iš kitų'",'CARE LT result label');
-html=replaceOnce(html,"CARE_SUPPORT_PRESENT:'care, support and human attention'","CARE_SUPPORT_PRESENT:'care, support and human attention from others'",'CARE EN result label');
+const careEnNeedle="CARE_SUPPORT_PRESENT:'care, support and human attention'";
+if(html.split(careEnNeedle).length-1!==2)throw new Error('Expected exactly two CARE EN label/about anchors');
+html=html.replace(careEnNeedle,"CARE_SUPPORT_PRESENT:'care, support and human attention from others'");
 html=replaceOnce(html,"CARE_SUPPORT_PRESENT:'rūpestį, paramą ir žmogišką dėmesį'","CARE_SUPPORT_PRESENT:'tai, ar iš kitų sulauki pakankamai rūpesčio, paramos ir žmogiško dėmesio'",'CARE LT about text');
-html=replaceOnce(html,"CARE_SUPPORT_PRESENT:'care, support and human attention'","CARE_SUPPORT_PRESENT:'whether you receive enough care, support and human attention from others'",'CARE EN about text');
+html=html.replace(careEnNeedle,"CARE_SUPPORT_PRESENT:'whether you receive enough care, support and human attention from others'");
 
 const stateNeedle="sufficiencySchema:'2rasi.priolens.sufficiency-v0.2',sufficiency:{},selfExplanation:null,pendingMost:null,completedAt:null";
 const stateReplacement="sufficiencySchema:SUFFICIENCY_SCHEMA_V04,constructDefinitionVersion:bank.constructDefinitionVersion||null,sufficiency:{},attentionResolution:null,attentionClarifier:null,attentionFocus:null,sufficiencyResolution:null,sufficiencyClarifier:null,sufficiencyRoute:null,selfExplanation:null,pendingMost:null,systemSmoke:new URLSearchParams(location.search).get('systemSmoke')==='1',completedAt:null";
