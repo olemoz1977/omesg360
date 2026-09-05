@@ -274,7 +274,16 @@ export function renderResultMatrixV04(args){
 }
 export function printResultReportV04(){
   const html=document.documentElement,body=document.body,wrap=document.querySelector('.wrap');
-  const hadSuffSheetOpen=body.classList.contains('suffSheetOpen');
+  const suffDetail=document.getElementById('suffDetail');
+  if(suffDetail)suffDetail.classList.add('hidden');
+  body.classList.remove('suffSheetOpen');
+  try{
+    const url=new URL(location.href);
+    if(url.searchParams.has('detail')){
+      url.searchParams.delete('detail');
+      history.replaceState({priolensDetail:null},'',url);
+    }
+  }catch{}
   const snapshot=[
     [html,'height',html.style.height],[html,'minHeight',html.style.minHeight],[html,'background',html.style.background],[html,'overflow',html.style.overflow],
     [body,'height',body.style.height],[body,'minHeight',body.style.minHeight],[body,'background',body.style.background],[body,'overflow',body.style.overflow],
@@ -283,13 +292,12 @@ export function printResultReportV04(){
   html.style.height='auto';html.style.minHeight='0';html.style.background='#fff';html.style.overflow='visible';
   body.style.height='auto';body.style.minHeight='0';body.style.background='#fff';body.style.overflow='visible';
   if(wrap){wrap.style.height='auto';wrap.style.minHeight='0';wrap.style.margin='0'}
-  body.classList.remove('suffSheetOpen');
   body.classList.add('priolensPrintMatrix');
   let cleaned=false;
   const cleanup=function(){
     if(cleaned)return;cleaned=true;
     body.classList.remove('priolensPrintMatrix');
-    if(hadSuffSheetOpen)body.classList.add('suffSheetOpen');
+    body.classList.remove('suffSheetOpen');
     for(const row of snapshot){const el=row[0];if(el)el.style[row[1]]=row[2]||''}
   };
   const prev=window.onafterprint;
