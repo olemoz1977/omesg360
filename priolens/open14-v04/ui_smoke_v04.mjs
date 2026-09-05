@@ -244,8 +244,15 @@ try{
   await page.click('#matrixSufficiencyDetails');
   await page.waitForSelector('#matrixResult.active');
   await page.waitForFunction(()=>new URLSearchParams(location.search).get('detail')==='sufficiency');
-  if(!(await page.locator('#suffDetail').evaluate(el=>el.parentElement?.id==='matrixResult')))throw new Error('B detail must be mounted over the matrix result');
+  if(!(await page.locator('#suffDetail').evaluate(el=>el.parentElement===document.body)))throw new Error('B detail must be portaled to document.body, outside the transformed matrix');
   if(await page.locator('#suffDetail').evaluate(el=>el.classList.contains('hidden')))throw new Error('sufficiency detail hidden');
+  const overlayMetrics=await page.locator('#suffDetail').evaluate(el=>{
+    const r=el.getBoundingClientRect(),cs=getComputedStyle(el);
+    return {top:r.top,bottom:r.bottom,left:r.left,right:r.right,width:r.width,height:r.height,viewportW:innerWidth,viewportH:innerHeight,position:cs.position,display:cs.display,bodyLocked:document.body.classList.contains('suffSheetOpen')};
+  });
+  if(overlayMetrics.position!=='fixed'||overlayMetrics.display==='none')throw new Error('B detail overlay is not a visible fixed viewport layer: '+JSON.stringify(overlayMetrics));
+  if(Math.abs(overlayMetrics.top)>1||Math.abs(overlayMetrics.bottom-overlayMetrics.viewportH)>1||Math.abs(overlayMetrics.left)>1||Math.abs(overlayMetrics.right-overlayMetrics.viewportW)>1)throw new Error('B detail overlay does not cover the visible viewport: '+JSON.stringify(overlayMetrics));
+  if(!overlayMetrics.bodyLocked)throw new Error('B detail must lock background scroll while open');
   if(!(await page.locator('#matrixCanvasMount').evaluate(el=>getComputedStyle(el).display!=='none')))throw new Error('matrix must remain visible behind B detail');
   const suffText=(await page.locator('#suffDetail').textContent())||'';
   if(/\bB\+\b|Channel B/.test(suffText))throw new Error('technical B terminology leaked into participant detail: '+suffText);
@@ -271,6 +278,30 @@ try{
   await page.click('#suffDetailClose');
   await page.waitForSelector('#matrixResult.active');
   await page.waitForFunction(()=>!new URLSearchParams(location.search).has('detail'));
+  if(!(await page.locator('#suffDetail').evaluate(el=>el.classList.contains('hidden'))))throw new Error('B detail remained visible after Close');
+  if(await page.evaluate(()=>document.body.classList.contains('suffSheetOpen')))throw new Error('B detail Close left the page scroll-locked');
+
+  // Android/browser Back must close the sheet and unlock the matrix, not freeze the page.
+  await page.click('#matrixSufficiencyDetails');
+  await page.waitForFunction(()=>new URLSearchParams(location.search).get('detail')==='sufficiency');
+  if(!(await page.evaluate(()=>document.body.classList.contains('suffSheetOpen'))))throw new Error('B detail did not lock before browser-back regression check');
+  await page.goBack();
+  await page.waitForFunction(()=>!new URLSearchParams(location.search).has('detail'));
+  await page.waitForSelector('#matrixResult.active');
+  if(!(await page.locator('#suffDetail').evaluate(el=>el.classList.contains('hidden'))))throw new Error('browser Back left B detail visible');
+  if(await page.evaluate(()=>document.body.classList.contains('suffSheetOpen')))throw new Error('browser Back left the page scroll-locked');
+
+  // An accidentally open detail must never leak into print/PDF.
+  await page.click('#matrixSufficiencyDetails');
+  await page.waitForFunction(()=>new URLSearchParams(location.search).get('detail')==='sufficiency');
+  await page.emulateMedia({media:'print'});
+  await page.evaluate(()=>document.body.classList.add('priolensPrintMatrix'));
+  if(await page.locator('#suffDetail').evaluate(el=>getComputedStyle(el).display)!=='none')throw new Error('open B detail leaked into print media');
+  await page.evaluate(()=>document.body.classList.remove('priolensPrintMatrix'));
+  await page.emulateMedia({media:'screen'});
+  await page.goBack();
+  await page.waitForFunction(()=>!new URLSearchParams(location.search).has('detail'));
+  if(await page.evaluate(()=>document.body.classList.contains('suffSheetOpen')))throw new Error('post-print browser Back left the page scroll-locked');
 
   if(await page.evaluate(k=>localStorage.getItem(k),DRAFT)!==null)throw new Error('v0.4 draft not cleared after successful final save');
   const storedResult=JSON.parse(await page.evaluate(k=>localStorage.getItem(k),RESULT));
