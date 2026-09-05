@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {
-  SESSION_SCHEMA_V04,DRAFT_KEY_BASE_V04,FAMILY_IDS,CHANNEL_B_ITEM_IDS,
+  SESSION_SCHEMA_V04,DRAFT_KEY_BASE_V04,SUFFICIENCY_SCHEMA_V04,FAMILY_IDS,CHANNEL_B_ITEM_IDS,
   resolveAttentionFromChoices,applyAttentionClarifier,
   resolveSufficiencyRoute,applySufficiencyClarifier,validateCompleteChannelB
 } from './adaptive_clarifiers_v04.mjs';
@@ -14,7 +14,8 @@ const choicesFor=(spec)=>{
 };
 
 assert.equal(SESSION_SCHEMA_V04,'2rasi.priolens.open14.rank-session-v0.4');
-assert.equal(DRAFT_KEY_BASE_V04,'priolens.open14.v04.rank.draft');
+assert.equal(DRAFT_KEY_BASE_V04,'priolens.open14.v041.rank.draft');
+assert.equal(SUFFICIENCY_SCHEMA_V04,'2rasi.priolens.sufficiency-v0.3');
 assert.equal(FAMILY_IDS.length,14);
 assert.equal(CHANNEL_B_ITEM_IDS.length,12);
 
