@@ -1,5 +1,6 @@
 export const SESSION_SCHEMA_V04='2rasi.priolens.open14.rank-session-v0.4';
-export const DRAFT_KEY_BASE_V04='priolens.open14.v04.rank.draft';
+export const DRAFT_KEY_BASE_V04='priolens.open14.v041.rank.draft';
+export const SUFFICIENCY_SCHEMA_V04='2rasi.priolens.sufficiency-v0.3';
 export const ATTENTION_RESOLUTION_SCHEMA_V04='2rasi.priolens.open14.attention-resolution-v0.4';
 export const SUFFICIENCY_RESOLUTION_SCHEMA_V04='2rasi.priolens.open14.sufficiency-resolution-v0.4';
 
