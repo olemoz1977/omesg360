@@ -116,4 +116,16 @@ const related=buildHumanInterpretationV04({
 assert.ok(body(related).includes('Galimas ryšys čia silpnesnis'));
 assert.ok(body(related).includes('Tvarka / struktūra'));
 
+
+const directLt=buildHumanInterpretationV04({
+  model:{repeatedMost:[{familyId:'KNOWLEDGE',count:3}],backgroundFamilyIds:[],sufficiencyItemIds:['LEARNING_GROWTH'],focusFamilyId:'KNOWLEDGE',attentionClarifierNoClear:false},
+  lang:'lt',familyLabels
+});
+const directEn=buildHumanInterpretationV04({
+  model:{repeatedMost:[{familyId:'KNOWLEDGE',count:3}],backgroundFamilyIds:[],sufficiencyItemIds:['LEARNING_GROWTH'],focusFamilyId:'KNOWLEDGE',attentionClarifierNoClear:false},
+  lang:'en',familyLabels:{...familyLabels,KNOWLEDGE:'Learning / understanding'}
+});
+assert.ok(body(directLt).includes('gana tiesioginis teminis persidengimas'));
+assert.ok(body(directEn).includes('fairly direct thematic overlap'));
+
 console.log('result_interpretation_v04: PASS');
