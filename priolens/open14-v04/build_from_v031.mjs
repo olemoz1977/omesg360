@@ -217,7 +217,7 @@ function renderResult(){
       }
     });
     const pdf=document.getElementById('resultPdf');
-    if(pdf){pdf.textContent=LANG==='en'?'Save PDF':'Išsaugoti PDF';pdf.onclick=()=>printResultReportV04()}
+    if(pdf){pdf.textContent=LANG==='en'?'Save PDF':'Išsaugoti PDF';pdf.onclick=()=>{renderMatrix();printResultReportV04()}}
   }catch(err){
     console.error('PrioLens result render failed',err);
     state.resultRenderError={message:String(err),at:new Date().toISOString()};
