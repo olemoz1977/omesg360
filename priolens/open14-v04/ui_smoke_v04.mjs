@@ -144,6 +144,7 @@ try{
   }
   if(await page.locator('#matrixContinue').count())throw new Error('legacy continue-to-ship/map action still present');
 
+  await page.evaluate(()=>document.body.classList.add('priolensPrintMatrix'));
   await page.emulateMedia({media:'print'});
   if(await page.locator('.matrixPrintAppendix').evaluate(el=>getComputedStyle(el).display)==='none')throw new Error('PDF appendix must be visible in print media');
   if(await page.locator('.matrixTopStatement span').first().evaluate(el=>getComputedStyle(el).display)!=='none')throw new Error('PDF matrix must use numbered compact axes instead of repeating full statements');
@@ -154,6 +155,7 @@ try{
   if(pdfPages!==2)throw new Error('result PDF must be exactly 2 intentional pages, got '+pdfPages);
   if(pdfBytes.length<20000)throw new Error('result PDF unexpectedly small');
   await page.emulateMedia({media:'screen'});
+  await page.evaluate(()=>document.body.classList.remove('priolensPrintMatrix'));
 
   await page.waitForTimeout(100);
   if(!finalPayloads.length)throw new Error('final POST not attempted');
