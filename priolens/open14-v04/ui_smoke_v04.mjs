@@ -59,6 +59,24 @@ try{
     if(mostSlot<0){
       mostSlot=[0,1,2].sort((a,b)=>counts[positions[a]]-counts[positions[b]])[0];
     }
+    if(i===0){
+      const accidentalSlot=[0,1,2].find(x=>x!==mostSlot);
+      await page.click(`.stim[data-slot="${accidentalSlot}"]`);
+      await page.waitForFunction(()=>document.querySelector('#undoMost')&&!document.querySelector('#undoMost').classList.contains('hidden'));
+      const actionBoxes=await page.evaluate(()=>({
+        undo:document.querySelector('#undoMost').getBoundingClientRect().toJSON(),
+        tie:document.querySelector('#tieLeast').getBoundingClientRect().toJSON(),
+        viewport:innerWidth
+      }));
+      if(actionBoxes.undo.right>actionBoxes.tie.left+1)throw new Error('undo and LEAST-tie actions overlap on mobile');
+      if(actionBoxes.tie.right>actionBoxes.viewport+1)throw new Error('LEAST actions overflow mobile viewport');
+      await page.click('#undoMost');
+      await page.waitForFunction(()=>document.querySelector('#noneMost')&&!document.querySelector('#noneMost').classList.contains('hidden'));
+      const undoDraft=JSON.parse(await page.evaluate(k=>localStorage.getItem(k),DRAFT));
+      if(undoDraft.pendingMost!==null)throw new Error('undo must clear pending MOST before LEAST');
+      if(!Array.isArray(undoDraft.attentionRevisions)||undoDraft.attentionRevisions.length!==1)throw new Error('undo must preserve the original first-choice revision record');
+      if(undoDraft.attentionRevisions[0]?.originalChoice?.slot!==accidentalSlot)throw new Error('undo revision record lost original first choice');
+    }
     counts[positions[mostSlot]]++;
     await page.click(`.stim[data-slot="${mostSlot}"]`);
     await page.waitForFunction(()=>document.querySelector('#tieLeast')&&!document.querySelector('#tieLeast').classList.contains('hidden'));
@@ -131,6 +149,10 @@ try{
   const leftCare=((await page.locator('#matrixCanvasMount .matrixLeftStatement').nth(7).textContent())||'');
   if(!topCare.includes(careStatement)||!leftCare.includes(careStatement))throw new Error('exact received-support statement must appear on both matrix axes');
   const matrixState=JSON.parse(await page.evaluate(k=>localStorage.getItem(k),RESULT));
+  if(matrixState.revisedMostCount!==1)throw new Error('completed session must count the revised MOST trial');
+  if(matrixState.choices?.[0]?.mostRevised!==true)throw new Error('revised trial marker missing from completed choice');
+  if(!Array.isArray(matrixState.attentionRevisions)||matrixState.attentionRevisions.length!==1)throw new Error('completed result lost first-choice revision history');
+  if(matrixState.attentionRevisions[0].originalChoice.slot===matrixState.choices[0].choice.slot)throw new Error('undo smoke did not actually change the first choice');
   const expectedMostRepeats=Object.values(matrixState?.familyStats||{}).filter(x=>x&&((x.chosen===2)||(x.chosen===3))).length;
   if(await page.locator('#matrixCanvasMount .matrixFamily.focus2,#matrixCanvasMount .matrixFamily.focus3').count()!==expectedMostRepeats)throw new Error('matrix must color every raw MOST 3/3 and 2/3 direction');
   if(await page.locator('#matrixFocusValue .matrixRepeatBadge').count()!==expectedMostRepeats)throw new Error('summary must list every raw MOST 3/3 and 2/3 direction');
