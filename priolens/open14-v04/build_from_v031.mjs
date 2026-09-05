@@ -49,7 +49,7 @@ html=html.slice(0,resultStart)+resultHtml+html.slice(resultEnd+'  </section>\n'.
 
 
 const importAnchor="import { assignOpen14ThreeExemplars, listThreeExemplarBankProblems } from './open14_no_repeat_assigner_v03.mjs';";
-html=replaceOnce(html,importAnchor,importAnchor+"\nimport { SESSION_SCHEMA_V04, DRAFT_KEY_BASE_V04, SUFFICIENCY_SCHEMA_V04, resolveAttentionFromChoices, applyAttentionClarifier, resolveSufficiencyRoute, applySufficiencyClarifier } from './adaptive_clarifiers_v04.mjs';\nimport { renderResultWorldV04 } from './result_renderer_v04.mjs?v=scene11';\nimport { renderResultMatrixV04, printResultReportV04 } from './result_matrix_v04.mjs?v=matrix1';",'assigner import');
+html=replaceOnce(html,importAnchor,importAnchor+"\nimport { SESSION_SCHEMA_V04, DRAFT_KEY_BASE_V04, SUFFICIENCY_SCHEMA_V04, resolveAttentionFromChoices, applyAttentionClarifier, resolveSufficiencyRoute, applySufficiencyClarifier } from './adaptive_clarifiers_v04.mjs';",'assigner import');
 html=replaceOnce(html,"const DRAFT_KEY_BASE='priolens.open14.v031.rank.draft';","const DRAFT_KEY_BASE=DRAFT_KEY_BASE_V04;",'draft key');
 html=replaceOnce(html,'const DRAFT_KEY=`${DRAFT_KEY_BASE}.${LANG}`;','const DRAFT_KEY=`${DRAFT_KEY_BASE}.${LANG}`;\nconst RESULT_KEY_BASE=\'priolens.open14.v041.last-result\';\nconst RESULT_KEY=`${RESULT_KEY_BASE}.${LANG}`;\nconst RESULT_MAX_AGE_MS=90*24*60*60*1000;','completed result key');
 html=html.replaceAll("'2rasi.priolens.open14.rank-session-v0.3'","SESSION_SCHEMA_V04");
@@ -57,6 +57,18 @@ html=replaceOnce(html,"const API_PATH='/priolens-open14-v03-api/api.php';","cons
 html=replaceOnce(html,"const PROGRESS_PATH='/priolens-open14-v03-api/progress.php';","const PROGRESS_PATH='/priolens-open14-v04-api/progress.php';",'v0.4 progress path');
 html=replaceOnce(html,'<p class="lead">Trys vaizdai vienu metu. Nesvarstyk, kuris „geresnis“. Pasirink tą, į kurį pirmiausia krypsta dėmesys.</p>','<p class="lead">Trys vaizdai vienu metu. Pirmiausia pasirink, kuris patraukia. Tada iš likusių dviejų pažymėk, kuris traukia mažiausiai.</p>','static LT MOST-LEAST lead');
 html=replaceOnce(html,'<p class="note">14 trumpų pasirinkimų · apie 2 min. Po jų į tą pačią situaciją pažvelgsi iš kitos perspektyvos.</p>','<p class="note">14 trumpų trijulių · apie 3 min. Po jų į tą pačią situaciją pažvelgsi iš kitos perspektyvos.</p>','static LT duration note');
+html=replaceOnce(html,"async function init(){try{bank=await fetch('./bank.json',{cache:'no-store'})","async function init(){window.__priolensBootReady=true;try{bank=await fetch('./bank.json',{cache:'no-store'})",'boot ready flag');
+const bootWatchdogHtml=`<script>
+window.__priolensBootReady=false;
+setTimeout(function(){
+  if(window.__priolensBootReady)return;
+  var title=document.getElementById('bankTitle'),status=document.getElementById('bankStatus');
+  if(title)title.textContent='Nepavyko paleisti PrioLens';
+  if(status)status.innerHTML='Puslapio logika neužsikrovė. <button type="button" onclick="location.reload()">Bandyti dar kartą</button>';
+},8000);
+<\/script>
+`;
+html=replaceOnce(html,'<script type="module">',bootWatchdogHtml+'<script type="module">','boot watchdog');
 
 html=replaceOnce(html,"['CARE_SUPPORT_PRESENT','Mano gyvenime pakanka rūpesčio, paramos ir žmogiško dėmesio.']","['CARE_SUPPORT_PRESENT','Jaučiu, kad iš kitų sulaukiu pakankamai rūpesčio, paramos ir žmogiško dėmesio.']",'received-support LT item');
 html=replaceOnce(html,"['CARE_SUPPORT_PRESENT','There is enough care, support and human attention in my life.']","['CARE_SUPPORT_PRESENT','I feel that I receive enough care, support and human attention from others.']",'received-support EN item');
@@ -105,7 +117,7 @@ html=replaceOnce(html,"$('restart').onclick=()=>{clearLocalDraft();location.relo
 html=replaceOnce(html,"if(state.choices.length<14)renderTrial();else{show('suff');renderSuff()}","if(state.choices.length<14)renderTrial();else afterChannelA()",'post Channel-A transition');
 html=replaceOnce(html,"if(suffIndex<5){suffIndex++;renderSuff()}else finish()","if(suffIndex<5){suffIndex++;renderSuff()}else afterChannelB()",'post Channel-B transition');
 html=replaceOnce(html,"state.rankProtocol='most+least-v0.3';","state.rankProtocol='most+least+a-plus+b-plus-v0.4';",'rank protocol');
-html=replaceOnce(html,"state.rankProtocol='most+least+a-plus+b-plus-v0.4';show('result');renderResult();finalSubmitPromise=submitSession()","state.rankProtocol='most+least+a-plus+b-plus-v0.4';saveLocalResult();renderResult();renderMatrix();show('matrixResult');finalSubmitPromise=submitSession()",'snapshot completed result before submit');
+html=replaceOnce(html,"state.rankProtocol='most+least+a-plus+b-plus-v0.4';show('result');renderResult();finalSubmitPromise=submitSession()","state.rankProtocol='most+least+a-plus+b-plus-v0.4';saveLocalResult();finalSubmitPromise=submitSession();showPreResultMatrix()",'snapshot completed result before submit');
 
 const resumeStart=html.indexOf('async function resumeSession(){');
 const resumeEnd=html.indexOf('function show(id){',resumeStart);
@@ -195,18 +207,41 @@ html=replaceOnce(html,helperAnchor,helperCode+helperAnchor,'renderSuff helper in
 const oldRenderStart=html.indexOf('function renderResult(){');
 const oldRenderEnd=html.indexOf("$('start').onclick=",oldRenderStart);
 if(oldRenderStart<0||oldRenderEnd<0)throw new Error('renderResult anchors missing');
-const renderResultV04=`function renderMatrix(){
-  renderResultMatrixV04({
+const renderResultV04=`let resultModulesPromise=null;
+function loadResultModules(){
+  if(!resultModulesPromise){
+    resultModulesPromise=Promise.all([
+      import('./result_renderer_v04.mjs?v=scene12'),
+      import('./result_matrix_v04.mjs?v=matrix3')
+    ]).then(([renderer,matrix])=>({renderer,matrix}));
+  }
+  return resultModulesPromise;
+}
+async function renderMatrix(){
+  const mods=await loadResultModules();
+  return mods.matrix.renderResultMatrixV04({
     state,
     lang:LANG,
     familyLabels:FAMILY_LABEL,
     onContinue:()=>{show('result');renderResult()},
-    onPrint:()=>printResultReportV04()
+    onPrint:()=>mods.matrix.printResultReportV04()
   });
 }
-function renderResult(){
+async function showPreResultMatrix(){
   try{
-    renderResultWorldV04({
+    await renderMatrix();
+    show('matrixResult');
+  }catch(err){
+    console.error('PrioLens matrix load/render failed; falling back to result world',err);
+    state.matrixRenderError={message:String(err),at:new Date().toISOString()};
+    show('result');
+    await renderResult();
+  }
+}
+async function renderResult(){
+  try{
+    const mods=await loadResultModules();
+    mods.renderer.renderResultWorldV04({
       state,
       lang:LANG,
       familyLabels:FAMILY_LABEL,
@@ -219,7 +254,13 @@ function renderResult(){
       }
     });
     const pdf=document.getElementById('resultPdf');
-    if(pdf){pdf.textContent=LANG==='en'?'Save PDF':'Išsaugoti PDF';pdf.onclick=()=>{renderMatrix();printResultReportV04()}}
+    if(pdf){
+      pdf.textContent=LANG==='en'?'Save PDF':'Išsaugoti PDF';
+      pdf.onclick=async()=>{
+        try{await renderMatrix();mods.matrix.printResultReportV04()}
+        catch(err){console.error('PDF matrix render failed',err);window.print()}
+      };
+    }
   }catch(err){
     console.error('PrioLens result render failed',err);
     state.resultRenderError={message:String(err),at:new Date().toISOString()};
