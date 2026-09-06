@@ -66,8 +66,14 @@ jobs:
           grep -Fq "most+least+a-plus+b-plus-v0.4" "$f"
           grep -Fq 'id="aplus"' "$f"
           grep -Fq 'id="bplus"' "$f"
-          grep -Fq 'id="shipCard"' "$f"
-          grep -Fq 'id="mapCard"' "$f"
+          ! grep -Fq 'id="shipCard"' "$f"
+          ! grep -Fq 'id="mapCard"' "$f"
+          ! grep -Fq 'id="shipPlaceholder"' "$f"
+          ! grep -Fq 'id="mapPlaceholder"' "$f"
+          ! grep -Fq 'id="needsMapStage"' "$f"
+          ! grep -Fq 'class="resultScene"' "$f"
+          ! grep -Fq 'LAIVAS' "$f"
+          ! grep -Fq 'ŽEMĖLAPIS' "$f"
           grep -Fq 'id="matrixResult"' "$f"
           grep -Fq 'id="matrixInterpretation"' "$f"
           grep -Fq 'Viena galima interpretacija' priolens/open14-v04/result_interpretation_v04.mjs
@@ -79,6 +85,13 @@ jobs:
           ! grep -Fq 'id="matrixContinue"' "$f"
           grep -Fq "renderResultWorldV04" "$f"
           grep -Fq "renderResultMatrixV04" "$f"
+          ! grep -Fq 'shipCard' priolens/open14-v04/result_renderer_v04.mjs
+          ! grep -Fq 'mapCard' priolens/open14-v04/result_renderer_v04.mjs
+          ! grep -Fq 'needsMapStage' priolens/open14-v04/result_renderer_v04.mjs
+          ! grep -Fq 'LAIVAS' priolens/open14-v04/result_renderer_v04.mjs
+          ! grep -Fq 'ŽEMĖLAPIS' priolens/open14-v04/result_renderer_v04.mjs
+          ! grep -Fq 'NEED_MAP' priolens/open14-v04/result_renderer_v04.mjs
+          ! grep -Fq 'LAND_SHAPES' priolens/open14-v04/result_renderer_v04.mjs
           ! grep -Fq 'Ką matai, kai palygini abu?' "$f"
           ! grep -Fq "const API_PATH='/priolens-open14-v03-api/api.php'" "$f"
           ! grep -Fq "priolens.open14.v031.rank.draft" "$f"
