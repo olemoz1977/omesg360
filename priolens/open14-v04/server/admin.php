@@ -167,6 +167,11 @@ $mode = $_GET['schema'] ?? 'v04';
 $allowedModes = ['v04','v03','all'];
 if (!in_array($mode, $allowedModes, true)) $mode = 'v04';
 
+$bankMode = $_GET['bank'] ?? ($mode === 'v04' ? 'v04' : 'all');
+$allowedBankModes = ['v04','v031','all'];
+if (!in_array($bankMode, $allowedBankModes, true)) $bankMode = ($mode === 'v04' ? 'v04' : 'all');
+if ($mode !== 'v04') $bankMode = 'all';
+
 $showSmoke = isset($_GET['show_smoke']) && $_GET['show_smoke'] === '1';
 $sql = "SELECT id, submission_id, session_uuid, session_schema, bank_schema, planner_schema, assigner_schema,
                seed, started_at_client, completed_at_client, payload_json, created_at
@@ -175,6 +180,13 @@ $params = [];
 if ($mode === 'v04') {
     $sql .= " WHERE session_schema = ?";
     $params[] = '2rasi.priolens.open14.rank-session-v0.4';
+    if ($bankMode === 'v04') {
+        $sql .= " AND bank_schema = ?";
+        $params[] = '2rasi.priolens.open14.bank-v0.4';
+    } elseif ($bankMode === 'v031') {
+        $sql .= " AND bank_schema = ?";
+        $params[] = '2rasi.priolens.open14.bank-v0.3.1';
+    }
 } elseif ($mode === 'v03') {
     $sql .= " WHERE session_schema = ?";
     $params[] = '2rasi.priolens.open14.rank-session-v0.3';
@@ -211,6 +223,7 @@ if (isset($_GET['export']) && $_GET['export'] === 'jsonl') {
             'submission_id'=>$s['submission_id'],
             'session_uuid'=>$s['session_uuid'],
             'session_schema'=>$s['session_schema'],
+            'bank_schema'=>$s['bank_schema'],
             'created_at'=>$s['created_at'],
             'payload'=>$s['payload'],
         ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) . "\n";
@@ -343,6 +356,7 @@ foreach ($sessions as $s) {
         'session_uuid'=>(string)$s['session_uuid'],
         'submission_id'=>(string)$s['submission_id'],
         'created_at'=>(string)$s['created_at'],
+        'bank_schema'=>(string)$s['bank_schema'],
         'complete'=>$isComplete,
         'language'=>$language,
         'system_smoke'=>$s['is_smoke'],
@@ -361,10 +375,10 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv') {
     header('Content-Disposition: attachment; filename="priolens_' . $mode . '_sessions.csv"');
     $out = fopen('php://output', 'w');
     fwrite($out, "\xEF\xBB\xBF");
-    fputcsv($out, ['session_uuid','submission_id','created_at','complete','language','system_smoke','trials','ncc','median_most_rt_ms','attention_focus','attention_source','sufficiency_route','sufficiency_source']);
+    fputcsv($out, ['session_uuid','submission_id','created_at','bank_schema','complete','language','system_smoke','trials','ncc','median_most_rt_ms','attention_focus','attention_source','sufficiency_route','sufficiency_source']);
     foreach ($sessionSummaries as $x) {
         fputcsv($out, [
-            $x['session_uuid'],$x['submission_id'],$x['created_at'],$x['complete']?1:0,$x['language'],$x['system_smoke']?1:0,
+            $x['session_uuid'],$x['submission_id'],$x['created_at'],$x['bank_schema'],$x['complete']?1:0,$x['language'],$x['system_smoke']?1:0,
             $x['trials'],$x['ncc'],$x['median_most_rt_ms'],$x['focus'],$x['a_source'],implode('|',$x['b_route']),$x['b_source']
         ]);
     }
@@ -400,12 +414,17 @@ function queryWith(array $changes = []): string {
 <body>
 <div class="wrap">
 <h1>PrioLens statistika</h1>
-<div class="muted">Read-only · <?=h($mode)?> · techniniai smoke testai <?= $showSmoke ? 'rodomi' : 'neįtraukti' ?></div>
+<div class="muted">Read-only · <?=h($mode)?><?= $mode==='v04' ? ' · bank '.h($bankMode==='v031'?'v0.3.1':($bankMode==='v04'?'v0.4':'visi')) : '' ?> · techniniai smoke testai <?= $showSmoke ? 'rodomi' : 'neįtraukti' ?></div>
 
 <div class="toolbar">
-<a class="btn <?= $mode==='v04'?'active':'secondary' ?>" href="?<?=h(queryWith(['schema'=>'v04']))?>">v0.4</a>
-<a class="btn <?= $mode==='v03'?'active':'secondary' ?>" href="?<?=h(queryWith(['schema'=>'v03']))?>">v0.3</a>
-<a class="btn <?= $mode==='all'?'active':'secondary' ?>" href="?<?=h(queryWith(['schema'=>'all']))?>">Visos</a>
+<a class="btn <?= $mode==='v04'?'active':'secondary' ?>" href="?<?=h(queryWith(['schema'=>'v04','bank'=>'v04']))?>">v0.4</a>
+<a class="btn <?= $mode==='v03'?'active':'secondary' ?>" href="?<?=h(queryWith(['schema'=>'v03','bank'=>null]))?>">v0.3</a>
+<a class="btn <?= $mode==='all'?'active':'secondary' ?>" href="?<?=h(queryWith(['schema'=>'all','bank'=>null]))?>">Visos</a>
+<?php if ($mode==='v04'): ?>
+<a class="btn <?= $bankMode==='v04'?'active':'secondary' ?>" href="?<?=h(queryWith(['bank'=>'v04']))?>">Bank v0.4</a>
+<a class="btn <?= $bankMode==='v031'?'active':'secondary' ?>" href="?<?=h(queryWith(['bank'=>'v031']))?>">Bank v0.3.1</a>
+<a class="btn <?= $bankMode==='all'?'active':'secondary' ?>" href="?<?=h(queryWith(['bank'=>'all']))?>">Visi bankai</a>
+<?php endif; ?>
 <a class="btn secondary" href="?<?=h(queryWith(['show_smoke'=>$showSmoke?null:'1']))?>"><?= $showSmoke ? 'Slėpti smoke' : 'Rodyti smoke' ?></a>
 <a class="btn" href="?<?=h(queryWith())?>&export=csv">CSV</a>
 <a class="btn secondary" href="?<?=h(queryWith())?>&export=jsonl">Raw JSONL</a>
@@ -507,12 +526,13 @@ function queryWith(array $changes = []): string {
 <div class="card">
 <div class="cardHead"><h2>Naujausios sesijos</h2><div class="muted tiny">Rodoma iki 100. Pilnas eksportas per CSV arba Raw JSONL.</div></div>
 <div class="scroll"><table>
-<thead><tr><th>Laikas</th><th>Sesija</th><th>Būsena</th><th>Kalba</th><th>Trijulės</th><th>NCC</th><th>RT med.</th><th>A fokusas</th><th>A šaltinis</th><th>B maršrutas</th><th>B šaltinis</th></tr></thead>
+<thead><tr><th>Laikas</th><th>Sesija</th><th>Bankas</th><th>Būsena</th><th>Kalba</th><th>Trijulės</th><th>NCC</th><th>RT med.</th><th>A fokusas</th><th>A šaltinis</th><th>B maršrutas</th><th>B šaltinis</th></tr></thead>
 <tbody>
 <?php foreach (array_slice($sessionSummaries,0,100) as $x): ?>
 <tr>
 <td class="nowrap"><?=h($x['created_at'])?></td>
 <td><span class="tag"><?=h(shortId($x['session_uuid']))?></span><?php if($x['system_smoke']): ?> <span class="tag warn">SMOKE</span><?php endif; ?></td>
+<td><span class="tag"><?=h($x['bank_schema']==='2rasi.priolens.open14.bank-v0.4'?'v0.4':($x['bank_schema']==='2rasi.priolens.open14.bank-v0.3.1'?'v0.3.1':$x['bank_schema']))?></span></td>
 <td><span class="tag <?=$x['complete']?'good':'warn'?>"><?=$x['complete']?'BAIGTA':'NEBAIGTA'?></span></td>
 <td><?=h(strtoupper((string)$x['language']))?></td>
 <td><?=$x['trials']?>/14</td>
