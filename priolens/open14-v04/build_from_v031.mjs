@@ -32,6 +32,7 @@ html=replaceOnce(html,"leastQ:'And which of the other two pulls you least?',leas
 html=replaceOnce(html,"noneMost:'Nė vienas aiškiai',tieLeast:'Abu likę panašiai'","noneMost:'Nė vienas aiškiai',undoMost:'Keisti pirmą',tieLeast:'Abu panašiai'",'LT undo label');
 html=replaceOnce(html,"noneMost:'None clearly',tieLeast:'The other two feel similar'","noneMost:'None clearly',undoMost:'Change first',tieLeast:'Both feel similar'",'EN undo label');
 html=replaceOnce(html,"$('noneMost').textContent=R.noneMost;$('tieLeast').textContent=R.tieLeast;","$('noneMost').textContent=R.noneMost;$('undoMost').textContent=R.undoMost;$('tieLeast').textContent=R.tieLeast;",'undo locale');
+html=replaceOnce(html,"  $('firstLabel').textContent=T.firstLabel;$('firstHeading').textContent=T.firstHeading;$('secondLabel').textContent=T.secondLabel;$('secondHeading').textContent=T.secondHeading;$('compareLabel').textContent=T.compareLabel;$('compareHeading').textContent=T.compareHeading;","  const compareLabel=document.getElementById('compareLabel'),compareHeading=document.getElementById('compareHeading');if(compareLabel)compareLabel.textContent=T.compareLabel;if(compareHeading)compareHeading.textContent=T.compareHeading;",'decouple static language from legacy scene ids');
 
 const clarifierCss=`
 .trialhead{height:auto;min-height:62px;align-items:flex-start;gap:12px;padding:2px 0 7px}.trialhead>div:first-child{min-width:0;flex:1}.trialhead .count{flex:0 0 auto;padding-top:2px}.q{line-height:1.18}.rankHint{line-height:1.3}.progress{flex:0 0 3px;margin-top:2px}.stage{grid-template-columns:repeat(2,minmax(0,1fr))}.stim{grid-column:1/-1}.stim.most img{opacity:.38;filter:grayscale(.32) saturate(.7);transform:scale(.9)}.stim.most::after{opacity:1}.none{grid-column:1/-1}#undoMost{grid-column:1;font-size:13px;padding:8px 10px;white-space:nowrap;background:transparent;border-color:#d6d6d0;color:#77776f;font-weight:550}#tieLeast{grid-column:2;font-size:13px;padding:8px 10px;white-space:nowrap;border-color:#8f8f88;color:#242424}.rankAssist{font-weight:600}
@@ -258,6 +259,23 @@ async function openMatrixDetail(kind){
     show('matrixResult');
   }
 }
+function matrixBackHref(){
+  return (FROM_2RASI==='com'||(FROM_2RASI!=='lt'&&LANG==='en'))?'https://2rasi.com/#experiments':'https://2rasi.lt/#experiments';
+}
+function restartFromMatrix(){
+  clearLocalDraft();
+  clearLocalResult();
+  location.reload();
+}
+function showMatrixFallback(err){
+  console.error('PrioLens matrix load/render failed',err);
+  state.matrixRenderError={message:String(err),at:new Date().toISOString()};
+  const result=document.getElementById('result'),lead=document.getElementById('resultLead'),world=result?.querySelector('.resultWorld');
+  show('result');
+  if(result?.querySelector('h1'))result.querySelector('h1').textContent=LANG==='en'?'Result display error':'Rezultato pateikimo klaida';
+  if(lead)lead.textContent=LANG==='en'?'Your session data is preserved. Refresh the page or run the session again.':'Sesijos duomenys išsaugoti. Atnaujink puslapį arba atlik sesiją dar kartą.';
+  if(world)world.innerHTML='<div class="worldRenderError" role="alert">'+(LANG==='en'?'The matrix could not be displayed. Your saved session was not replaced by another result view.':'Matricos nepavyko parodyti. Išsaugota sesija nepakeista kitu rezultato vaizdu.')+'</div>';
+}
 async function renderMatrix(){
   const mods=await loadResultModules();
   return mods.matrix.renderResultMatrixV04({
@@ -267,8 +285,8 @@ async function renderMatrix(){
     onAttentionDetails:()=>openMatrixDetail('attention'),
     onSufficiencyDetails:()=>openMatrixDetail('sufficiency'),
     onPrint:()=>mods.matrix.printResultReportV04(),
-    onRestart:()=>$('restart').click(),
-    backHref:$('back2rasi').href
+    onRestart:restartFromMatrix,
+    backHref:matrixBackHref()
   });
 }
 async function showPreResultMatrix(){
@@ -276,10 +294,7 @@ async function showPreResultMatrix(){
     await renderMatrix();
     show('matrixResult');
   }catch(err){
-    console.error('PrioLens matrix load/render failed; falling back to result world',err);
-    state.matrixRenderError={message:String(err),at:new Date().toISOString()};
-    show('result');
-    await renderResult(false);
+    showMatrixFallback(err);
   }
 }
 async function renderResult(detailOnly=false){
