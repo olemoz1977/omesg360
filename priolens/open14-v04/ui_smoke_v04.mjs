@@ -172,7 +172,10 @@ try{
   for(const id of ['#matrixAttentionDetails','#matrixSufficiencyDetails','#matrixPdf','#matrixRestart','#matrixBack2rasi']){
     if(await page.locator(id).count()!==1)throw new Error('matrix result action missing: '+id);
   }
-  if(await page.locator('#matrixContinue').count())throw new Error('legacy continue-to-ship/map action still present');
+  if(await page.locator('#matrixContinue').count())throw new Error('obsolete matrix continue action still present');
+  for(const selector of ['#shipCard','#mapCard','#shipPlaceholder','#mapPlaceholder','#needsMapStage','.resultScene']){
+    if(await page.locator(selector).count())throw new Error('obsolete result visual DOM remains: '+selector);
+  }
 
   await page.evaluate(()=>{
     document.documentElement.style.height='auto';
@@ -223,7 +226,7 @@ try{
   await page.waitForSelector('#result.active');
   await page.waitForFunction(()=>new URLSearchParams(location.search).get('detail')==='attention');
   if(!(await page.locator('#result').evaluate(el=>el.classList.contains('detailOnlyHost'))))throw new Error('matrix attention detail did not use detail-only host');
-  if(!(await page.locator('.resultScene').evaluate(el=>getComputedStyle(el).display==='none')))throw new Error('ship/map scene visible behind matrix attention detail');
+  if(await page.locator('.resultScene').count())throw new Error('obsolete result scene reappeared in attention detail flow');
   if(await page.locator('#attentionDetail').evaluate(el=>el.classList.contains('hidden')))throw new Error('attention detail hidden');
   const attentionText=(await page.locator('#attentionDetail').textContent())||'';
   if(/\bMOST\b|\bLEAST\b|\bA\+\b/.test(attentionText))throw new Error('technical A terminology leaked into participant detail: '+attentionText);
@@ -386,7 +389,7 @@ try{
   const keys=await page.evaluate(()=>Object.keys(localStorage));
   if(keys.some(k=>k.includes('priolens.open14.v031.rank.draft')))throw new Error('v0.3.1 draft namespace leaked into v0.4');
 
-  console.log('PASS: v0.4 local 390x844 matrix-primary result + hidden ship/map + preserved A/B details + multi-endpoint restore');
+  console.log('PASS: v0.4 local 390x844 matrix-primary result + no obsolete result scene + preserved A/B details + multi-endpoint restore');
 } finally {
   await browser.close();
 }
