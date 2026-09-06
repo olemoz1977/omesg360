@@ -251,9 +251,12 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          curl -fsSL --retry 4 "$REVIEW_PUBLIC/index.html?sha=$GITHUB_SHA" | grep -Fq 'bank v0.4 candidate'
-          curl -fsSI --retry 4 "$REVIEW_PUBLIC/contact-sheet-42.jpg?sha=$GITHUB_SHA" | grep -qi '^HTTP/.* 200'
-          curl -fsSL --retry 4 "$REVIEW_PUBLIC/BANK_V04_CANDIDATE.json?sha=$GITHUB_SHA" | grep -Fq '2rasi.priolens.open14.bank-v0.4'
+          curl -fsSL --retry 4 "$REVIEW_PUBLIC/index.html?sha=$GITHUB_SHA" -o /tmp/review-index.html
+          grep -Fq 'bank v0.4 candidate' /tmp/review-index.html
+          curl -fsSL --retry 4 "$REVIEW_PUBLIC/contact-sheet-42.jpg?sha=$GITHUB_SHA" -o /tmp/review-contact-sheet-42.jpg
+          test -s /tmp/review-contact-sheet-42.jpg
+          curl -fsSL --retry 4 "$REVIEW_PUBLIC/BANK_V04_CANDIDATE.json?sha=$GITHUB_SHA" -o /tmp/review-bank-v04.json
+          grep -Fq '2rasi.priolens.open14.bank-v0.4' /tmp/review-bank-v04.json
           echo "REVIEW_URL=$REVIEW_PUBLIC/"
           echo 'PASS: isolated v0.4 bank assets and owner review deployed; active participant runtime untouched'
 
