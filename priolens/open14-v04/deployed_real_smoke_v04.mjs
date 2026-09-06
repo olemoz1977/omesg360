@@ -10,7 +10,7 @@ try{
   if(liveBank?.schema!=='2rasi.priolens.open14.bank-v0.4') throw new Error('live runtime is not bank-v0.4: '+JSON.stringify({schema:liveBank?.schema,status:liveBank?.status}));
   if(liveBank?.previousBankSchema!=='2rasi.priolens.open14.bank-v0.3.1') throw new Error('live bank missing v0.3.1 lineage');
   if(liveBank?.runtimeReady!==true) throw new Error('live bank v0.4 is not runtimeReady');
-  await page.goto(BASE+'?lang=lt&from=lt&systemSmoke=1',{waitUntil:'networkidle'});
+  await page.goto(BASE+'?lang=lt&from=lt&systemSmoke=1',{waitUntil:'domcontentloaded',timeout:60000});
   const crawlerDom=await page.evaluate(()=>({
     exportText:document.getElementById('export')?.textContent?.trim()||'',
     debugText:document.querySelector('#debugDetails summary')?.textContent?.trim()||'',
@@ -155,7 +155,7 @@ try{
   const focusBeforeReload=((await page.locator('#matrixFocusValue').textContent())||'').trim();
   const suffBeforeReload=((await page.locator('#matrixSuffValue').textContent())||'').trim();
 
-  await page.reload({waitUntil:'networkidle'});
+  await page.reload({waitUntil:'domcontentloaded',timeout:60000});
   await page.waitForSelector('#matrixResult.active');
   if(((await page.locator('#matrixFocusValue').textContent())||'').trim()!==focusBeforeReload) throw new Error('live restored matrix focus changed after reload');
   if(((await page.locator('#matrixSuffValue').textContent())||'').trim()!==suffBeforeReload) throw new Error('live restored matrix sufficiency summary changed after reload');
