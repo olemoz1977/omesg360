@@ -98,7 +98,7 @@ function b_selected(array $items,int $min,string $selected): array {
 
 function base_body(array $choices,array $sufficiency): array {
     return [
-        'schema'=>'2rasi.priolens.open14.rank-session-v0.4','bankSchema'=>'2rasi.priolens.open14.bank-v0.3.1','sufficiencySchema'=>'2rasi.priolens.sufficiency-v0.3',
+        'schema'=>'2rasi.priolens.open14.rank-session-v0.4','bankSchema'=>'2rasi.priolens.open14.bank-v0.4','sufficiencySchema'=>'2rasi.priolens.sufficiency-v0.3',
         'choices'=>$choices,'sufficiency'=>$sufficiency,'rankProtocol'=>'most+least+a-plus+b-plus-v0.4',
         'attentionResolution'=>null,'attentionClarifier'=>null,'attentionFocus'=>null,
         'sufficiencyResolution'=>null,'sufficiencyClarifier'=>null,'sufficiencyRoute'=>null
@@ -145,8 +145,11 @@ validate_v04_payload($bodyNoLow,false);
 $partial=base_body(array_slice($directChoices,0,7),['RESTORATION_ENERGY'=>2]);
 validate_v04_payload($partial,true);
 
+$legacyBank=$bodyNoLow;$legacyBank['bankSchema']='2rasi.priolens.open14.bank-v0.3.1';
+validate_v04_payload($legacyBank,false);
+
 $badBank=$bodyNoLow;$badBank['bankSchema']='2rasi.priolens.open14.bank-v0.3';
-t_throws(fn()=>validate_v04_payload($badBank,false),'requires bank-v0.3.1');
+t_throws(fn()=>validate_v04_payload($badBank,false),'requires bank-v0.3.1 or bank-v0.4');
 
 $badProtocol=$bodyNoLow;$badProtocol['rankProtocol']='most+least-v0.3';
 t_throws(fn()=>validate_v04_payload($badProtocol,false),'rankProtocol mismatch');
