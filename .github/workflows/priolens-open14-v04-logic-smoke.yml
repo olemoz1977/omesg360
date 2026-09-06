@@ -5,7 +5,6 @@ on:
   push:
     branches:
       - feature/priolens-open14-v04
-      - cleanup/priolens-v04-remove-ship-map
     paths:
       - 'priolens/open14-v04/adaptive_clarifiers_v04.mjs'
       - 'priolens/open14-v04/adaptive_clarifiers_v04.test.mjs'
