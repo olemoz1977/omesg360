@@ -106,7 +106,16 @@ jobs:
               im=ImageOps.fit(im,(640,640),method=R,centering=(0.5,0.5))
               im.save(out/name,'WEBP',quality=92,method=6)
 
+          expected_raw={
+            'safety_02_protective_case_640.webp':'92ec9f938208923d535d1b8d2217852cf4c904c04ab9454ee0ad8ad367291ed9',
+            'exploration_01_drawer_search_640.webp':'9137ff2414d909e5c69470d0a5377a42b9886ca7d6e397dd3062c710cf65051d',
+            'opportunity_01_parking_640.webp':'ff9eda0e5af4cc09b1001e72195a590e390bbae618dbc62e1b6bf6f7d8f19298',
+            'opportunity_03_meeting_seat_640.webp':'d0793f7a88bfbd43375c7f4c59dce6bd63d622952777c50b6c794fe32e8f92c6',
+            'autonomy_02_backpack_clean_640.webp':'29cf9f4a42268ab99a308b68a2ced47031b3d5f51441da676b03881430a36fad',
+          }
           expected_pixels={
+            'safety_02_protective_case_640.webp':'f3339c0d6f03dfc38557f1f8beee4aac7ecde85ee84b09abc3fe187760496832',
+            'exploration_01_drawer_search_640.webp':'411457a99f87ca4c8dedbe96d062e34125b1bfa6425c3f8754fd42f20ad32adb',
             'opportunity_01_parking_640.webp':'e793a5c62039bafe2bb4a13cc4ee018804928da62ac7ecb801e03e21b13bcef8',
             'opportunity_03_meeting_seat_640.webp':'6089531a4737636253992d7fe4173013be35a714f3eb209052478c4f3ebe4865',
             'autonomy_02_backpack_clean_640.webp':'387d422372cc4f796de23b5fc6846a358d1f92af7ef8e52c865f3bcf0d67d43c',
@@ -119,6 +128,8 @@ jobs:
               im=Image.open(p).convert('RGB')
               assert im.size==(640,640), (p.name,im.size)
               pixel_sha=hashlib.sha256(im.tobytes()).hexdigest()
+              if p.name in expected_raw:
+                  assert sha==expected_raw[p.name], (p.name,sha,expected_raw[p.name])
               if p.name in expected_pixels:
                   assert pixel_sha==expected_pixels[p.name], (p.name,pixel_sha,expected_pixels[p.name])
               manifest[p.name]={
@@ -165,6 +176,24 @@ jobs:
           print('BYTE/SIZE PASS',sys.argv[1])
           PY
           done
+
+      - name: Mark candidate technical QC pass
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, os
+          p='priolens/open14-v04/bank.json'
+          b=json.load(open(p,encoding='utf-8'))
+          b['status']='V04_BANK_CANDIDATE_TECHNICAL_QC_PASS_OWNER_REVIEW_PENDING'
+          b['runtimeReady']=False
+          gate=b.setdefault('deploymentGate',{})
+          gate['bankV04ChangedAssetTechnicalQcPassed']=True
+          gate['bankV04ChangedAssetTechnicalQcRunId']=int(os.environ['GITHUB_RUN_ID'])
+          gate['bankV04ChangedAssetTechnicalQcCommit']=os.environ['GITHUB_SHA']
+          open(p,'w',encoding='utf-8').write(json.dumps(b,indent=2,ensure_ascii=False)+'\n')
+          print('PASS candidate marked technical QC pass; runtimeReady remains false')
+          PY
 
       - name: Build exact 42-image owner review
         shell: bash
@@ -257,6 +286,7 @@ jobs:
           test -s /tmp/review-contact-sheet-42.jpg
           curl -fsSL --retry 4 "$REVIEW_PUBLIC/BANK_V04_CANDIDATE.json?sha=$GITHUB_SHA" -o /tmp/review-bank-v04.json
           grep -Fq '2rasi.priolens.open14.bank-v0.4' /tmp/review-bank-v04.json
+          grep -Fq 'V04_BANK_CANDIDATE_TECHNICAL_QC_PASS_OWNER_REVIEW_PENDING' /tmp/review-bank-v04.json
           echo "REVIEW_URL=$REVIEW_PUBLIC/"
           echo 'PASS: isolated v0.4 bank assets and owner review deployed; active participant runtime untouched'
 
