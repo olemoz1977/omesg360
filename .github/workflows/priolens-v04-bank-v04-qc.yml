@@ -81,7 +81,7 @@ jobs:
             local stem="$1"
             local out="$2"
             cat priolens/open14-v04/assets-v04-source-b64/"$stem".b64.part* \
-              | tr -d '\\n\\r ' \
+              | tr -d '[:space:]' \
               | base64 -d > "/tmp/v04-assets/$out"
           }
           decode_parts opportunity_01_parking_640.webp opportunity_01_parking_640.webp
