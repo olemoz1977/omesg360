@@ -227,7 +227,9 @@ try{
 
   await page.click('#matrixAttentionDetails');
   await page.waitForTimeout(250);
+  const detailOpenState=await page.evaluate(()=>{const r=document.getElementById('result'),a=document.getElementById('attentionDetail'),rs=r?.getBoundingClientRect(),as=a?.getBoundingClientRect();return{url:location.href,resultClass:r?.className,resultDisplay:r?getComputedStyle(r).display:null,resultRect:rs?{w:rs.width,h:rs.height,top:rs.top,left:rs.left}:null,attentionClass:a?.className,attentionDisplay:a?getComputedStyle(a).display:null,attentionRect:as?{w:as.width,h:as.height,top:as.top,left:as.left}:null}}); 
   if(!new URL(page.url()).searchParams.has('detail')&&runtimeErrors.length)throw new Error('attention detail open failed: '+runtimeErrors.join(' | '));
+  if(!detailOpenState.resultClass?.includes('active')||detailOpenState.resultDisplay==='none'||!detailOpenState.resultRect?.h||detailOpenState.attentionDisplay==='none'||!detailOpenState.attentionRect?.h)throw new Error('attention detail host not visibly active: '+JSON.stringify(detailOpenState)+' errors='+runtimeErrors.join(' | '));
   await page.waitForSelector('#result.active');
   await page.waitForFunction(()=>new URLSearchParams(location.search).get('detail')==='attention');
   if(!(await page.locator('#result').evaluate(el=>el.classList.contains('detailOnlyHost'))))throw new Error('matrix attention detail did not use detail-only host');
