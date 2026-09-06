@@ -59,6 +59,9 @@ jobs:
           grep -Fq "2rasi.priolens.sufficiency-v0.3" priolens/open14-v04/adaptive_clarifiers_v04.mjs
           grep -Fq "2rasi.priolens.sufficiency-v0.3" priolens/open14-v04/server/api.php
           grep -Fq "2rasi.priolens.sufficiency-v0.3" priolens/open14-v04/server/progress.php
+          grep -Fq "2rasi.priolens.open14.bank-v0.4" priolens/open14-v04/server/api.php
+          grep -Fq "2rasi.priolens.open14.bank-v0.4" priolens/open14-v04/server/progress.php
+          grep -Fq "bank-v0.3.1 or bank-v0.4" priolens/open14-v04/server/validation_v04.php
           ! grep -Fq "2rasi.priolens.sufficiency-v0.2" priolens/open14-v04/server/api.php
           ! grep -Fq "2rasi.priolens.sufficiency-v0.2" priolens/open14-v04/server/progress.php
           grep -Fq "const API_PATH='/priolens-open14-v04-api/api.php'" "$f"
@@ -99,8 +102,11 @@ jobs:
           python <<'PY'
           import json
           b=json.load(open('priolens/open14-v04/bank.json'))
-          assert b['schema']=='2rasi.priolens.open14.bank-v0.3.1'
+          assert b['schema']=='2rasi.priolens.open14.bank-v0.4'
+          assert b['previousBankSchema']=='2rasi.priolens.open14.bank-v0.3.1'
           assert b['runtimeReady'] is True
+          assert b['status']=='V04_BANK_READY_FOR_PROMOTION'
+          assert b.get('ownerVisualReview',{}).get('status')=='PASS'
           rows=[x for fam in b['families'].values() for x in fam['exemplars']]
           assert len(rows)==42
           assert len({x['id'] for x in rows})==42
