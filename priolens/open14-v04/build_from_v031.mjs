@@ -373,27 +373,34 @@ const replaceExemplar=(family,id,patch)=>{
 };
 replaceExemplar('SAFETY','SAFETY-02',{
   runtimePath:'/priolens-research-assets/Open14-v04/safety_02_protective_case_640.webp',
+  runtimeSha256Expected:'92ec9f938208923d535d1b8d2217852cf4c904c04ab9454ee0ad8ad367291ed9',
+  runtimePixelSha256Expected:'f3339c0d6f03dfc38557f1f8beee4aac7ecde85ee84b09abc3fe187760496832',
   source:'Pexels 14526291',
   remediationReason:'replace_visible_generator_watermark'
 });
 replaceExemplar('EXPLORATION','EXPLORATION-01',{
   runtimePath:'/priolens-research-assets/Open14-v04/exploration_01_drawer_search_640.webp',
+  runtimeSha256Expected:'9137ff2414d909e5c69470d0a5377a42b9886ca7d6e397dd3062c710cf65051d',
+  runtimePixelSha256Expected:'411457a99f87ca4c8dedbe96d062e34125b1bfa6425c3f8754fd42f20ad32adb',
   source:'Pexels 12912014',
   remediationReason:'replace_visible_generator_watermark'
 });
 replaceExemplar('AUTONOMY','AUTONOMY-02',{
   runtimePath:'/priolens-research-assets/Open14-v04/autonomy_02_backpack_clean_640.webp',
+  runtimeSha256Expected:'29cf9f4a42268ab99a308b68a2ced47031b3d5f51441da676b03881430a36fad',
   runtimePixelSha256Expected:'387d422372cc4f796de23b5fc6846a358d1f92af7ef8e52c865f3bcf0d67d43c',
   remediationReason:'replace_suspected_generator_artifact'
 });
 replaceExemplar('OPPORTUNITY','OPPORTUNITY-01',{
   runtimePath:'/priolens-research-assets/Open14-v04/opportunity_01_parking_640.webp',
+  runtimeSha256Expected:'ff9eda0e5af4cc09b1001e72195a590e390bbae618dbc62e1b6bf6f7d8f19298',
   runtimePixelSha256Expected:'e793a5c62039bafe2bb4a13cc4ee018804928da62ac7ecb801e03e21b13bcef8',
   remediationReason:'family_rebuild',
   mechanismRole:'OCCUPY_OPENING'
 });
 replaceExemplar('OPPORTUNITY','OPPORTUNITY-03',{
   runtimePath:'/priolens-research-assets/Open14-v04/opportunity_03_meeting_seat_640.webp',
+  runtimeSha256Expected:'d0793f7a88bfbd43375c7f4c59dce6bd63d622952777c50b6c794fe32e8f92c6',
   runtimePixelSha256Expected:'6089531a4737636253992d7fe4173013be35a714f3eb209052478c4f3ebe4865',
   remediationReason:'family_rebuild',
   mechanismRole:'JOIN_AVAILABLE_PLACE',
