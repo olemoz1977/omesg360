@@ -383,18 +383,18 @@ replaceExemplar('EXPLORATION','EXPLORATION-01',{
 });
 replaceExemplar('AUTONOMY','AUTONOMY-02',{
   runtimePath:'/priolens-research-assets/Open14-v04/autonomy_02_backpack_clean_640.webp',
-  runtimeSha256Expected:'29cf9f4a42268ab99a308b68a2ced47031b3d5f51441da676b03881430a36fad',
+  runtimePixelSha256Expected:'387d422372cc4f796de23b5fc6846a358d1f92af7ef8e52c865f3bcf0d67d43c',
   remediationReason:'replace_suspected_generator_artifact'
 });
 replaceExemplar('OPPORTUNITY','OPPORTUNITY-01',{
   runtimePath:'/priolens-research-assets/Open14-v04/opportunity_01_parking_640.webp',
-  runtimeSha256Expected:'ff9eda0e5af4cc09b1001e72195a590e390bbae618dbc62e1b6bf6f7d8f19298',
+  runtimePixelSha256Expected:'e793a5c62039bafe2bb4a13cc4ee018804928da62ac7ecb801e03e21b13bcef8',
   remediationReason:'family_rebuild',
   mechanismRole:'OCCUPY_OPENING'
 });
 replaceExemplar('OPPORTUNITY','OPPORTUNITY-03',{
   runtimePath:'/priolens-research-assets/Open14-v04/opportunity_03_meeting_seat_640.webp',
-  runtimeSha256Expected:'d0793f7a88bfbd43375c7f4c59dce6bd63d622952777c50b6c794fe32e8f92c6',
+  runtimePixelSha256Expected:'6089531a4737636253992d7fe4173013be35a714f3eb209052478c4f3ebe4865',
   remediationReason:'family_rebuild',
   mechanismRole:'JOIN_AVAILABLE_PLACE',
   crossLoadWatch:['BELONGING','CONNECTION']
