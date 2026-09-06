@@ -57,8 +57,8 @@ jobs:
           p='priolens/open14-v04/bank.json'
           b=json.load(open(p,encoding='utf-8'))
           assert b['schema']=='2rasi.priolens.open14.bank-v0.4'
-          assert b['runtimeReady'] is False
-          assert b['status']=='V04_BANK_CANDIDATE_ASSET_QC_PENDING'
+          assert b['runtimeReady'] is True
+          assert b['status']=='V04_BANK_READY_FOR_PROMOTION'
           rows=[x for fam in b['families'].values() for x in fam['exemplars']]
           assert len(rows)==42
           assert len({x['id'] for x in rows})==42
@@ -177,7 +177,7 @@ jobs:
           PY
           done
 
-      - name: Mark candidate technical QC pass
+      - name: Record technical QC evidence
         shell: bash
         run: |
           set -euo pipefail
@@ -185,14 +185,16 @@ jobs:
           import json, os
           p='priolens/open14-v04/bank.json'
           b=json.load(open(p,encoding='utf-8'))
-          b['status']='V04_BANK_CANDIDATE_TECHNICAL_QC_PASS_OWNER_REVIEW_PENDING'
-          b['runtimeReady']=False
+          assert b['status']=='V04_BANK_READY_FOR_PROMOTION'
+          assert b['runtimeReady'] is True
+          assert b.get('ownerVisualReview',{}).get('status')=='PASS'
           gate=b.setdefault('deploymentGate',{})
           gate['bankV04ChangedAssetTechnicalQcPassed']=True
           gate['bankV04ChangedAssetTechnicalQcRunId']=int(os.environ['GITHUB_RUN_ID'])
           gate['bankV04ChangedAssetTechnicalQcCommit']=os.environ['GITHUB_SHA']
+          gate['owner42VisualReviewPassed']=True
           open(p,'w',encoding='utf-8').write(json.dumps(b,indent=2,ensure_ascii=False)+'\n')
-          print('PASS candidate marked technical QC pass; runtimeReady remains false')
+          print('PASS bank v0.4 promotion-ready; active participant runtime still untouched')
           PY
 
       - name: Build exact 42-image owner review
@@ -286,9 +288,9 @@ jobs:
           test -s /tmp/review-contact-sheet-42.jpg
           curl -fsSL --retry 4 "$REVIEW_PUBLIC/BANK_V04_CANDIDATE.json?sha=$GITHUB_SHA" -o /tmp/review-bank-v04.json
           grep -Fq '2rasi.priolens.open14.bank-v0.4' /tmp/review-bank-v04.json
-          grep -Fq 'V04_BANK_CANDIDATE_TECHNICAL_QC_PASS_OWNER_REVIEW_PENDING' /tmp/review-bank-v04.json
+          grep -Fq 'V04_BANK_READY_FOR_PROMOTION' /tmp/review-bank-v04.json
           echo "REVIEW_URL=$REVIEW_PUBLIC/"
-          echo 'PASS: isolated v0.4 bank assets and owner review deployed; active participant runtime untouched'
+          echo 'PASS: bank v0.4 promotion-ready after owner review; active participant runtime untouched'
 
       - uses: actions/upload-artifact@v4
         with:
