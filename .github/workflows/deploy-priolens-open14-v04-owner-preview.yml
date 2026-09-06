@@ -226,7 +226,13 @@ jobs:
           grep -Fq "const API_PATH='/priolens-open14-v04-api/api.php'" /tmp/live-index.html
           grep -Fq 'id="aplus"' /tmp/live-index.html
           grep -Fq 'id="bplus"' /tmp/live-index.html
-          echo 'PASS: v0.4 owner preview live and byte-identical'
+          for token in 'id="shipCard"' 'id="mapCard"' 'id="shipPlaceholder"' 'id="mapPlaceholder"' 'id="needsMapStage"' 'class="resultScene"' 'LAIVAS' 'ŽEMĖLAPIS'; do
+            ! grep -Fq "$token" /tmp/live-index.html
+          done
+          for token in shipCard mapCard shipPlaceholder mapPlaceholder needsMapStage LAIVAS ŽEMĖLAPIS NEED_MAP LAND_SHAPES; do
+            ! grep -Fq "$token" /tmp/live-result_renderer_v04.mjs
+          done
+          echo 'PASS: v0.4 owner preview live, byte-identical and obsolete result visuals absent from crawler-facing source'
 
       - name: Install Playwright Chromium
         shell: bash
