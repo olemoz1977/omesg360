@@ -19,6 +19,10 @@ function replaceOnce(text,needle,replacement,label=needle.slice(0,60)){
 
 let html=read('index.html');
 
+for(const token of ['Channel A detalė','>Eksportuoti JSON<','>Tyrimo diagnostika<']){
+  if(RESULT_WORLD_HTML.includes(token))throw new Error('hidden technical label remains in static result host: '+token);
+}
+
 html=replaceOnce(
   html,
   '<div id="stage" class="stage"><button class="stim" data-slot="0"><img alt=""></button><button class="stim" data-slot="1"><img alt=""></button><button class="stim" data-slot="2"><img alt=""></button><button id="noneMost" class="none">Nė vienas aiškiai</button><button id="tieLeast" class="none hidden">Abu likę panašiai</button></div>',
