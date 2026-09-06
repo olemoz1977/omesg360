@@ -7,6 +7,13 @@ try{
   const context=await browser.newContext({viewport:{width:390,height:844}});
   const page=await context.newPage();
   await page.goto(BASE+'?lang=lt&from=lt&systemSmoke=1',{waitUntil:'networkidle'});
+  const crawlerDom=await page.evaluate(()=>({
+    exportText:document.getElementById('export')?.textContent?.trim()||'',
+    debugText:document.querySelector('#debugDetails summary')?.textContent?.trim()||'',
+    exportHidden:document.getElementById('export')?.classList.contains('hidden')??false,
+    debugHidden:document.getElementById('debugDetails')?.classList.contains('hidden')??false
+  }));
+  if(crawlerDom.exportText||crawlerDom.debugText||!crawlerDom.exportHidden||!crawlerDom.debugHidden)throw new Error('live normal-session hidden technical DOM is not crawler-clean: '+JSON.stringify(crawlerDom));
   await page.waitForFunction(()=>document.querySelector('#start')&&!document.querySelector('#start').disabled);
   await page.click('#start');
   await page.waitForSelector('#trial.active');
