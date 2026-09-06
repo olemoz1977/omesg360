@@ -13,6 +13,9 @@ const browser=await chromium.launch({headless:true});
 try{
   const context=await browser.newContext({viewport:{width:390,height:844}});
   const page=await context.newPage();
+  const runtimeErrors=[];
+  page.on('pageerror',err=>runtimeErrors.push('pageerror: '+String(err)));
+  page.on('console',msg=>{if(msg.type()==='error')runtimeErrors.push('console: '+msg.text())});
   const finalPayloads=[];
   const progressPayloads=[];
 
@@ -223,6 +226,8 @@ try{
   if(Object.keys(final.sufficiency||{}).length!==12)throw new Error('Channel B item count changed');
 
   await page.click('#matrixAttentionDetails');
+  await page.waitForTimeout(250);
+  if(!new URL(page.url()).searchParams.has('detail')&&runtimeErrors.length)throw new Error('attention detail open failed: '+runtimeErrors.join(' | '));
   await page.waitForSelector('#result.active');
   await page.waitForFunction(()=>new URLSearchParams(location.search).get('detail')==='attention');
   if(!(await page.locator('#result').evaluate(el=>el.classList.contains('detailOnlyHost'))))throw new Error('matrix attention detail did not use detail-only host');
