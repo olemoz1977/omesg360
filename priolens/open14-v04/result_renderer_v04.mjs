@@ -59,6 +59,37 @@ const COPY={
   }
 };
 
+const ITEM_DETAIL={
+  lt:{
+    RESTORATION_ENERGY:'Poilsio ir energijos kasdienybei.',
+    MATERIAL_RESOURCES:'Kasdienių resursų tam, ko realiai reikia.',
+    SAFETY_STABILITY:'Saugumo ir stabilumo.',
+    CLARITY_PREDICTABILITY:'Aiškumo ir nuspėjamumo kasdienybėje.',
+    CONNECTION_BELONGING:'Artimo ryšio ir priklausymo.',
+    CARE_SUPPORT_PRESENT:'Rūpesčio, paramos ir žmogiško dėmesio, kurio sulauki iš kitų.',
+    AUTONOMY_AGENCY:'Laisvės pačiam spręsti ir veikti.',
+    RECOGNITION_ESTEEM:'Jausmo, kad tavo pastangos, nuomonė ar indėlis pastebimi ir vertinami.',
+    LEARNING_GROWTH:'Galimybių mokytis, atrasti ir augti.',
+    CAPABILITY_MASTERY:'Galimybių naudoti ir tobulinti savo gebėjimus.',
+    MEANING_PURPOSE:'Prasmės tame, ką darai.',
+    CONTRIBUTION:'Galimybių prisidėti prie kažko svarbaus ne tik sau.'
+  },
+  en:{
+    RESTORATION_ENERGY:'Rest and energy for everyday life.',
+    MATERIAL_RESOURCES:'Everyday resources for what you realistically need.',
+    SAFETY_STABILITY:'Safety and stability.',
+    CLARITY_PREDICTABILITY:'Clarity and predictability in everyday life.',
+    CONNECTION_BELONGING:'Close connection and a sense of belonging.',
+    CARE_SUPPORT_PRESENT:'Care, support and human attention you receive from others.',
+    AUTONOMY_AGENCY:'Freedom to decide and act for yourself.',
+    RECOGNITION_ESTEEM:'A sense that your efforts, opinions or contribution are noticed and valued.',
+    LEARNING_GROWTH:'Opportunities to learn, discover and grow.',
+    CAPABILITY_MASTERY:'Opportunities to use and develop your abilities.',
+    MEANING_PURPOSE:'Meaning in what you do.',
+    CONTRIBUTION:'Opportunities to contribute to something important beyond yourself.'
+  }
+};
+
 function chosenPaths(state,familyId){
   const seen=new Set(),out=[];
   for(const c of state.choices||[]){
