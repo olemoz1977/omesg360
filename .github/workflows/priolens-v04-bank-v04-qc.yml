@@ -8,6 +8,7 @@ on:
     paths:
       - '.github/workflows/priolens-v04-bank-v04-qc.yml'
       - 'priolens/open14-v04/build_from_v031.mjs'
+      - 'priolens/open14-v04/assets-v04-source-b64/**'
       - 'priolens-research-assets/Open14-v04/**'
 
 permissions:
