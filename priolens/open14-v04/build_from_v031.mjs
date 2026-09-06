@@ -338,8 +338,15 @@ html=html.slice(0,oldRenderStart)+renderResultV04+html.slice(oldRenderEnd);
 
 write('index.html',html);
 const bankV04=JSON.parse(read('bank.json'));
+bankV04.schema='2rasi.priolens.open14.bank-v0.4';
+bankV04.status='V04_BANK_CANDIDATE_ASSET_QC_PENDING';
+bankV04.runtimeReady=false;
+bankV04.bankRevision='open14-bank-v0.4';
+bankV04.previousBankSchema='2rasi.priolens.open14.bank-v0.3.1';
 bankV04.constructDefinitionVersion='open14-construct-audit-2026-09-05';
 bankV04.constructAuditStatus='FORMATIVE_VISUAL_DIRECTIONS_NOT_VALIDATED_NEEDS';
+bankV04.newAssetDirectory='/priolens-research-assets/Open14-v04/';
+bankV04.dataBoundaryNote='Pre-switch v0.4 pilot sessions used bank-v0.3.1; post-promotion sessions must record bank-v0.4 and remain analytically separable.';
 Object.assign(bankV04.families.RESOURCE,{display:'Resource access / availability',constructStatus:'PLAUSIBLE_RESOURCE_ACCESS_NOT_REWARD'});
 Object.assign(bankV04.families.ORDER,{display:'Order / structure',constructStatus:'RELATED_TO_CLARITY_PREDICTABILITY_NOT_DIRECT'});
 Object.assign(bankV04.families.CONNECTION,{constructStatus:'RELATEDNESS_VISUAL_SUBFAMILY'});
@@ -349,7 +356,49 @@ Object.assign(bankV04.families.AUTONOMY,{constructStatus:'AUTONOMY_VOLITION_DIRE
 Object.assign(bankV04.families.CONTROL,{display:'Direct control / action-effect agency',constructStatus:'NO_DIRECT_B_MATCH_SENSE_OF_AGENCY'});
 Object.assign(bankV04.families.EXPLORATION,{constructStatus:'CURIOSITY_INFORMATION_SEEKING_VISUAL_SUBFAMILY'});
 Object.assign(bankV04.families.KNOWLEDGE,{constructStatus:'CURIOSITY_INFORMATION_SEEKING_VISUAL_SUBFAMILY'});
-Object.assign(bankV04.families.OPPORTUNITY,{display:'Opportunity / affordance',constructStatus:'FORMATIVE_AFFORDANCE_NO_DIRECT_B_MATCH'});
+Object.assign(bankV04.families.OPPORTUNITY,{
+  display:'Opportunity / affordance',
+  constructStatus:'FORMATIVE_AFFORDANCE_NO_DIRECT_B_MATCH',
+  workingDefinition:'A real, currently accessible but not yet realized possibility to act, use an opening, create, or join.',
+  exemplarMechanisms:{
+    'OPPORTUNITY-01':'OCCUPY_OPENING',
+    'OPPORTUNITY-02':'CREATE_FROM_AVAILABLE_START',
+    'OPPORTUNITY-03':'JOIN_AVAILABLE_PLACE'
+  }
+});
+const replaceExemplar=(family,id,patch)=>{
+  const x=bankV04.families[family].exemplars.find((row)=>row.id===id);
+  if(!x)throw new Error('Missing exemplar '+id);
+  Object.assign(x,patch);
+};
+replaceExemplar('SAFETY','SAFETY-02',{
+  runtimePath:'/priolens-research-assets/Open14-v04/safety_02_protective_case_640.webp',
+  source:'Pexels 14526291',
+  remediationReason:'replace_visible_generator_watermark'
+});
+replaceExemplar('EXPLORATION','EXPLORATION-01',{
+  runtimePath:'/priolens-research-assets/Open14-v04/exploration_01_drawer_search_640.webp',
+  source:'Pexels 12912014',
+  remediationReason:'replace_visible_generator_watermark'
+});
+replaceExemplar('AUTONOMY','AUTONOMY-02',{
+  runtimePath:'/priolens-research-assets/Open14-v04/autonomy_02_backpack_clean_640.webp',
+  runtimeSha256Expected:'013787df7d8a8916985e28f17430bb23c9e8eb49a319dc668d8be278ec5ffe53',
+  remediationReason:'replace_suspected_generator_artifact'
+});
+replaceExemplar('OPPORTUNITY','OPPORTUNITY-01',{
+  runtimePath:'/priolens-research-assets/Open14-v04/opportunity_01_parking_640.webp',
+  runtimeSha256Expected:'b982de482fff3b84a51cc7b40f29aed9b63fd2ffc37df9bc1767a9b88b9d8eba',
+  remediationReason:'family_rebuild',
+  mechanismRole:'OCCUPY_OPENING'
+});
+replaceExemplar('OPPORTUNITY','OPPORTUNITY-03',{
+  runtimePath:'/priolens-research-assets/Open14-v04/opportunity_03_meeting_seat_640.webp',
+  runtimeSha256Expected:'9987b2cd840c41a2fb08f5b5e6c19b124b4541a1740eb16796f258df32f635ce',
+  remediationReason:'family_rebuild',
+  mechanismRole:'JOIN_AVAILABLE_PLACE',
+  crossLoadWatch:['BELONGING','CONNECTION']
+});
 write('bank.json',JSON.stringify(bankV04,null,2)+'\n');
 for(const name of ['p3_open14_planner_v02.mjs','open14_no_repeat_assigner_v03.mjs','stimulus-bank.html'])write(name,read(name));
 if(!fs.existsSync(path.join(outDir,'result_world_v04.mjs'))||!fs.existsSync(path.join(outDir,'result_renderer_v04.mjs'))||!fs.existsSync(path.join(outDir,'result_matrix_v04.mjs'))||!fs.existsSync(path.join(outDir,'result_interpretation_v04.mjs')))throw new Error('v0.4 result modules missing');
