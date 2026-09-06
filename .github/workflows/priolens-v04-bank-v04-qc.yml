@@ -76,9 +76,16 @@ jobs:
           set -euo pipefail
           mkdir -p /tmp/v04-src /tmp/v04-assets
 
-          cp priolens-research-assets/Open14-v04/opportunity_01_parking_640.webp /tmp/v04-assets/
-          cp priolens-research-assets/Open14-v04/opportunity_03_meeting_seat_640.webp /tmp/v04-assets/
-          cp priolens-research-assets/Open14-v04/autonomy_02_backpack_clean_640.webp /tmp/v04-assets/
+          decode_parts() {
+            local stem="$1"
+            local out="$2"
+            cat priolens/open14-v04/assets-v04-source-b64/"$stem".b64.part* \
+              | tr -d '\\n\\r ' \
+              | base64 -d > "/tmp/v04-assets/$out"
+          }
+          decode_parts opportunity_01_parking_640.webp opportunity_01_parking_640.webp
+          decode_parts opportunity_03_meeting_seat_640.webp opportunity_03_meeting_seat_640.webp
+          decode_parts autonomy_02_backpack_clean_640.webp autonomy_02_backpack_clean_640.webp
 
           curl -fsSL --retry 4 --retry-delay 2             "https://images.pexels.com/photos/14526291/pexels-photo-14526291.jpeg"             -o /tmp/v04-src/safety_14526291.jpg
           curl -fsSL --retry 4 --retry-delay 2             "https://images.pexels.com/photos/12912014/pexels-photo-12912014.jpeg"             -o /tmp/v04-src/exploration_12912014.jpg
@@ -99,13 +106,14 @@ jobs:
               im.save(out/name,'WEBP',quality=92,method=6)
 
           expected={
-            'opportunity_01_parking_640.webp':'b982de482fff3b84a51cc7b40f29aed9b63fd2ffc37df9bc1767a9b88b9d8eba',
-            'opportunity_03_meeting_seat_640.webp':'9987b2cd840c41a2fb08f5b5e6c19b124b4541a1740eb16796f258df32f635ce',
-            'autonomy_02_backpack_clean_640.webp':'013787df7d8a8916985e28f17430bb23c9e8eb49a319dc668d8be278ec5ffe53',
+            'opportunity_01_parking_640.webp':'ff9eda0e5af4cc09b1001e72195a590e390bbae618dbc62e1b6bf6f7d8f19298',
+            'opportunity_03_meeting_seat_640.webp':'d0793f7a88bfbd43375c7f4c59dce6bd63d622952777c50b6c794fe32e8f92c6',
+            'autonomy_02_backpack_clean_640.webp':'29cf9f4a42268ab99a308b68a2ced47031b3d5f51441da676b03881430a36fad',
           }
           manifest={}
           for p in sorted(out.iterdir()):
               data=p.read_bytes()
+              assert data[:4] == b'RIFF' and data[8:12] == b'WEBP', (p.name, data[:12])
               sha=hashlib.sha256(data).hexdigest()
               im=Image.open(p)
               assert im.size==(640,640), (p.name,im.size)
