@@ -157,7 +157,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          lftp -c "set ftp:ssl-allow no; set net:max-retries 4; set net:timeout 30; open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; mkdir -p \"$ASSET_REMOTE\"; mirror -R --delete --parallel=2 /tmp/v04-assets/ \"$ASSET_REMOTE/\"; put -O \"$ASSET_REMOTE/\" /tmp/v04-asset-manifest.json"
+          timeout 180s lftp -c "set ftp:ssl-allow no; set net:max-retries 4; set net:timeout 30; open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; mkdir -p \"$ASSET_REMOTE\"; mirror -R --delete --parallel=1 /tmp/v04-assets/ \"$ASSET_REMOTE/\"; put -O \"$ASSET_REMOTE/\" /tmp/v04-asset-manifest.json"
 
       - name: Verify changed remote assets byte-for-byte
         shell: bash
@@ -274,7 +274,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          lftp -c "set ftp:ssl-allow no; set net:max-retries 4; set net:timeout 30; open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; mkdir -p \"$REVIEW_REMOTE\"; mirror -R --delete --parallel=2 /tmp/v04-review/ \"$REVIEW_REMOTE/\""
+          timeout 180s lftp -c "set ftp:ssl-allow no; set net:max-retries 4; set net:timeout 30; open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"ftp://$FTP_HOST\"; mkdir -p \"$REVIEW_REMOTE\"; mirror -R --delete --parallel=1 /tmp/v04-review/ \"$REVIEW_REMOTE/\""
 
       - name: Verify review
         shell: bash
