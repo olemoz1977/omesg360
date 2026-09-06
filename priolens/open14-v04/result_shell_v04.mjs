@@ -21,7 +21,7 @@ export const RESULT_WORLD_HTML=`  <section id="result" class="screen result">
         <div id="compareRows" class="rows"></div>
         <div id="attentionResearch"></div>
         <div class="backgroundDetail">
-          <p id="leastLabel" class="perspectiveLabel">Channel A detalė</p>
+          <p id="leastLabel" class="perspectiveLabel"></p>
           <h3 id="leastHeading">Kas liko antrame plane?</h3>
           <div id="leastRows" class="rows"></div>
           <p id="leastNote" class="rankLeastNote"></p>
@@ -38,8 +38,8 @@ export const RESULT_WORLD_HTML=`  <section id="result" class="screen result">
       </div>
     </div>
 
-    <div class="actions resultActions"><button id="restart" class="primary">Atlikti dar kartą</button><button id="resultPdf" class="secondary">Išsaugoti PDF</button><a id="back2rasi" class="secondary actionLink" href="https://2rasi.lt/#experiments">Grįžti į 2rasi</a><button id="export" class="secondary hidden">Eksportuoti JSON</button></div>
+    <div class="actions resultActions"><button id="restart" class="primary">Atlikti dar kartą</button><button id="resultPdf" class="secondary">Išsaugoti PDF</button><a id="back2rasi" class="secondary actionLink" href="https://2rasi.lt/#experiments">Grįžti į 2rasi</a><button id="export" class="secondary hidden"></button></div>
     <p id="exportStatus" class="note hidden"></p>
-    <details id="debugDetails" class="perspective hidden"><summary>Tyrimo diagnostika</summary><pre id="debug" class="debug"></pre></details>
+    <details id="debugDetails" class="perspective hidden"><summary></summary><pre id="debug" class="debug"></pre></details>
   </section>
 `;
