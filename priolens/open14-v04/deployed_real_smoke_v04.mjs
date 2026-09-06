@@ -6,6 +6,10 @@ const browser=await chromium.launch({headless:true});
 try{
   const context=await browser.newContext({viewport:{width:390,height:844}});
   const page=await context.newPage();
+  const liveBank=await (await page.request.get(BASE+'bank.json?smoke='+Date.now())).json();
+  if(liveBank?.schema!=='2rasi.priolens.open14.bank-v0.4') throw new Error('live runtime is not bank-v0.4: '+JSON.stringify({schema:liveBank?.schema,status:liveBank?.status}));
+  if(liveBank?.previousBankSchema!=='2rasi.priolens.open14.bank-v0.3.1') throw new Error('live bank missing v0.3.1 lineage');
+  if(liveBank?.runtimeReady!==true) throw new Error('live bank v0.4 is not runtimeReady');
   await page.goto(BASE+'?lang=lt&from=lt&systemSmoke=1',{waitUntil:'networkidle'});
   const crawlerDom=await page.evaluate(()=>({
     exportText:document.getElementById('export')?.textContent?.trim()||'',
@@ -147,6 +151,7 @@ try{
   const storedResult=JSON.parse(await page.evaluate(k=>localStorage.getItem(k),RESULT));
   if(!storedResult?.completedAt||storedResult?.submission?.ok!==true) throw new Error('completed result snapshot missing after successful live save');
   if(storedResult?.sufficiencySchema!=='2rasi.priolens.sufficiency-v0.3') throw new Error('live result missing revised sufficiency schema');
+  if(storedResult?.bankSchema!=='2rasi.priolens.open14.bank-v0.4') throw new Error('live saved result is not tagged bank-v0.4: '+storedResult?.bankSchema);
   const focusBeforeReload=((await page.locator('#matrixFocusValue').textContent())||'').trim();
   const suffBeforeReload=((await page.locator('#matrixSuffValue').textContent())||'').trim();
 
@@ -155,7 +160,7 @@ try{
   if(((await page.locator('#matrixFocusValue').textContent())||'').trim()!==focusBeforeReload) throw new Error('live restored matrix focus changed after reload');
   if(((await page.locator('#matrixSuffValue').textContent())||'').trim()!==suffBeforeReload) throw new Error('live restored matrix sufficiency summary changed after reload');
 
-  console.log('PASS: deployed v0.4 matrix-primary result + no obsolete result scene + preserved detail views + reload restore + isolated live API');
+  console.log('PASS: deployed v0.4 runtime bank-v0.4 + saved bankSchema tag + matrix-primary result + reload restore + isolated live API');
 } finally {
   await browser.close();
 }
