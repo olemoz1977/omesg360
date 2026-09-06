@@ -80,7 +80,10 @@ try{
   for(const id of ['#matrixAttentionDetails','#matrixSufficiencyDetails','#matrixPdf','#matrixRestart','#matrixBack2rasi']){
     if(await page.locator(id).count()!==1) throw new Error('live matrix action missing: '+id);
   }
-  if(await page.locator('#matrixContinue').count()) throw new Error('legacy continue-to-ship/map action still present');
+  if(await page.locator('#matrixContinue').count()) throw new Error('obsolete matrix continue action still present');
+  for(const selector of ['#shipCard','#mapCard','#shipPlaceholder','#mapPlaceholder','#needsMapStage','.resultScene']){
+    if(await page.locator(selector).count()) throw new Error('obsolete live result visual DOM remains: '+selector);
+  }
   await page.waitForFunction(k=>{
     try{return JSON.parse(localStorage.getItem(k))?.submission?.ok===true}catch{return false}
   },RESULT,{timeout:15000});
@@ -89,7 +92,7 @@ try{
   await page.waitForSelector('#result.active');
   await page.waitForFunction(()=>new URLSearchParams(location.search).get('detail')==='attention');
   if(!(await page.locator('#result').evaluate(el=>el.classList.contains('detailOnlyHost')))) throw new Error('live attention detail not hosted in detail-only mode');
-  if(!(await page.locator('.resultScene').evaluate(el=>getComputedStyle(el).display==='none'))) throw new Error('ship/map scene visible in live attention detail');
+  if(await page.locator('.resultScene').count()) throw new Error('obsolete live result scene reappeared in attention detail flow');
   if(await page.locator('#attentionDetail').evaluate(el=>el.classList.contains('hidden'))) throw new Error('live attention detail hidden');
   const attentionText=((await page.locator('#attentionDetail').textContent())||'');
   if(/\bMOST\b|\bLEAST\b|\bA\+\b/.test(attentionText)) throw new Error('technical A terminology leaked into live detail');
@@ -145,7 +148,7 @@ try{
   if(((await page.locator('#matrixFocusValue').textContent())||'').trim()!==focusBeforeReload) throw new Error('live restored matrix focus changed after reload');
   if(((await page.locator('#matrixSuffValue').textContent())||'').trim()!==suffBeforeReload) throw new Error('live restored matrix sufficiency summary changed after reload');
 
-  console.log('PASS: deployed v0.4 matrix-primary result + hidden ship/map + preserved detail views + reload restore + isolated live API');
+  console.log('PASS: deployed v0.4 matrix-primary result + no obsolete result scene + preserved detail views + reload restore + isolated live API');
 } finally {
   await browser.close();
 }
